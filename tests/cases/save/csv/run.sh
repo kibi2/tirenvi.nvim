@@ -6,4 +6,4 @@ set -eu
 # Prepare the input data
 cp $TIRENVI_ROOT/tests/data/complex.csv ./gen.csv
 # Load gen.csv, make no changes, and save it as is
-nvim --headless -u NONE -n -S read-and-save.vim > stdout.txt 2> stderr.txt
+NVIM_TIRENVI_DEV=1 nvim nvim --headless -u NONE -n -S read-and-save.vim > stdout.txt 2> stderr.txt

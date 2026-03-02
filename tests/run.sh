@@ -66,7 +66,7 @@ while IFS= read -r -d '' d; do
     if [ -f run.sh ]; then
       sh run.sh > stdout.txt 2> stderr.txt
     else
-      nvim --headless -u NONE -n -S run.vim \
+      NVIM_TIRENVI_DEV=1 nvim --headless -u NONE -n -S run.vim \
         > stdout.txt 2> stderr.txt
     fi
 
