@@ -11,8 +11,8 @@ local config = require("tirenvi.config")
 local log = require("tirenvi.log")
 local helper = require("tirenvi.helper")
 local vimHelper = require("tirenvi.vimHelper")
-local flat = require("tirenvi.flat")
 local ndjsons = require("tir.ndjsons")
+local parser = require("tirenvi.parser")
 -- module
 local M = {}
 
@@ -226,8 +226,7 @@ end
 ---@return string[]
 function M.from_flat(fl_lines, opts)
 	vimHelper.init_marks(fl_lines)
-	local js_lines = flat.to_ndjsons(fl_lines, opts.parser)
-	local js_records = vimHelper.strings_to_ndjsons(js_lines)
+	local js_records = parser.parse(fl_lines, opts.parser)
 	local js_blocks = ndjsons.to_blocks(js_records)
 	local replace = helper.get_replace_pair()
 	ndjsons.replace(js_blocks, replace)
@@ -244,13 +243,7 @@ function M.to_flat(vi_lines, opts)
 		return nil
 	end
 	local js_records = tir_vim_to_ndjson(vi_lines, true)
-	---@type Record_file_attr
-	local file_attr = { kind = ndjsons.FILE_ATTR, version = ndjsons.VERSION, file_path = opts.file_path }
-	table.insert(js_records, 1, file_attr)
-	log.debug({ #js_records, js_records[1], js_records[#js_records] })
-	local js_lines = vimHelper.ndjsons_to_strings(js_records)
-	log.debug({ #js_lines, js_lines[1], js_lines[#js_lines] })
-	return flat.to_flat(js_lines, opts.parser)
+	return parser.unparse(js_records, opts.parser, opts.file_path)
 end
 
 --- Recalculate padding for a buffer

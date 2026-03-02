@@ -43,7 +43,7 @@
 ---@field [string] any
 
 ---@class Parser
----@field command string  Parser executable name
+---@field executable string  Parser executable name
 ---@field options string[]  Command-line arguments passed to the parser
 
 ---@class Marks
@@ -53,15 +53,11 @@
 ---@field lf string
 ---@field tab string
 
----@class Vim_system
----@field code integer
----@field signal? integer
----@field stdout? string
----@field stderr? string
-
 ---@class Check_options
 ---@field unsupported? any
 ---@field ensure_tir_vim? any
 ---@field is_tir_vim? any
 ---@field has_parser? any
 ---@field already_invalid? any
+
+---@alias Cell string

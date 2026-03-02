@@ -38,7 +38,7 @@ end
 
 --- Get parser configuration for a file.
 ---@param filename string
----@return {command:string, options:string[]} | nil
+---@return Parser | nil
 function M.get_parser_for_file(filename)
 	local ext = M.get_ext(filename)
 	if not ext then
