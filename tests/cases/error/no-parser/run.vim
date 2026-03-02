@@ -6,7 +6,7 @@ lua << EOF
 local M = require("tirenvi")
 M.setup({
   parser_map = {
-    csv = { command = "tir-my-csv" },
+    csv = { executable = "tir-my-csv" },
   },
   log = { level = vim.log.levels.WARN }
 })

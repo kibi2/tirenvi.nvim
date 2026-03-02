@@ -27,8 +27,8 @@ local defaults = {
 	},
 	---@type {[string]: Parser}
 	parser_map = {
-		csv = { command = "tir-csv", options = {} },
-		tsv = { command = "tir-csv", options = { "--delimiter", "\t" } },
+		csv = { executable = "tir-csv", options = {}, required_version = { 0, 1, 1 } },
+		tsv = { executable = "tir-csv", options = { "--delimiter", "\t" }, required_version = { 0, 1, 1 } },
 		-- md  = "tir-gfm",
 	},
 	log = {

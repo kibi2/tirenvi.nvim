@@ -103,46 +103,6 @@ function M.init_marks(fl_lines)
 	end
 end
 
----@param js_lines  string[]
----@return Record
-function M.strings_to_ndjsons(js_lines)
-	local js_records = {}
-	for _, js_line in ipairs(js_lines) do
-		if js_line ~= nil and js_line ~= "" then
-			local js_record = vim.json.decode(js_line)
-			table.insert(js_records, js_record)
-		end
-	end
-	return js_records
-end
-
----@param records Block
----@return string[]
-function M.ndjsons_to_strings(records)
-	local lines = {}
-	for _, record in ipairs(records) do
-		if record ~= nil then
-			local ok, encoded = pcall(vim.json.encode, record)
-			if ok then
-				table.insert(lines, encoded)
-			else
-				assert(false, "tirenvi: failed to encode record to JSON\n" .. vim.inspect(record) .. "\nerror: ")
-			end
-		end
-	end
-	return lines
-end
-
----@param command string[]
----@param input string[]
----@return Vim_system
-function M.vim_system(command, input)
-	log.debug("=== === === [exec] %s === === ===", table.concat(command, " "))
-	local result = vim.system(command, { stdin = input }):wait()
-	log.debug(helper.to_hex(result.stdout):sub(1, 80) .. " ")
-	return result
-end
-
 function M.starts_with(str, start_string)
 	return vim.startswith(str, start_string)
 end
@@ -155,7 +115,7 @@ function M.has_parser(bufnr)
 	if parser == nil then
 		return false
 	end
-	if vim.fn.executable(parser.command) ~= 1 then
+	if vim.fn.executable(parser.executable) ~= 1 then
 		error(errors.new_domain_error(errors.not_found_parser_error(parser)))
 	end
 	return true
@@ -180,7 +140,7 @@ function M.get_parser_name(bufnr, new_path, old_path)
 		-- error(errors.new_domain_error(errors.no_parser_error(ext)))
 		error(errors.new_domain_error(""))
 	end
-	if vim.fn.executable(parser.command) ~= 1 then
+	if vim.fn.executable(parser.executable) ~= 1 then
 		error(errors.new_domain_error(errors.not_found_parser_error(parser)))
 	end
 	return parser

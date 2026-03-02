@@ -88,12 +88,12 @@ function M.no_parser_error(ext)
 end
 
 --- Parser command not found in PATH.
----@param parser { command: string, options: string[] }
+---@param parser Parser
 ---@return string
 function M.not_found_parser_error(parser)
 	return string.format(
 		PREFIX .. "Required command '%s' not found in PATH.\n\n" .. "Use :checkhealth tirenvi for details.",
-		parser.command
+		parser.executable
 	)
 end
 
