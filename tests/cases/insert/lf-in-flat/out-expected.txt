@@ -1,6 +1,12 @@
 === MESSAGE ===
 
 === DISPLAY ===
-a,b
+1a,2 a, 3a
 [CI] key = 0D
-c,d
+"1
+",2b,"3
+b	"
+"
+
+
+",,	c

@@ -10,8 +10,8 @@
 -- Dependencies
 -----------------------------------------------------------------------
 
-local errors = require("tirenvi.errors")
-local notify = require("tirenvi.notify")
+local errors = require("tirenvi.util.errors")
+local notify = require("tirenvi.util.notify")
 
 -----------------------------------------------------------------------
 -- Module

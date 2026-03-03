@@ -4,10 +4,9 @@ edit $TIRENVI_ROOT/tests/data/simple.csv
 Tir toggle
 
 lua << EOF
-local log = require("tirenvi.log")
-local vimHelper = require("tirenvi.vimHelper")
+local log = require("tirenvi.util.log")
 vim.api.nvim_win_set_cursor(0, {2, 1})
-local key = require("tirenvi.commands").keymap_lf()
+local key = require("tirenvi.editor.commands").keymap_lf(0)
 local line = {"[CI] key = "}
 for i = 1, #key do
   table.insert(line, string.format("%02X", string.byte(key, i)))

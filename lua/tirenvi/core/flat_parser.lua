@@ -8,16 +8,12 @@
 --- Notes:
 ---   - Errors from parser commands throw domain-specific errors (handled by guard.lua).
 ---   - Logging at debug level is only active in development mode.
----   - Variable naming convention:
----       fl_: flat format
----       js_: NDJSON format
----       suffix indicates type (string, lines, records, blocks)
 
 ----- dependencies
-local log = require("tirenvi.log")
-local helper = require("tirenvi.helper")
-local errors = require("tirenvi.errors")
-local ndjsons = require("tir.ndjsons")
+local log = require("tirenvi.util.log")
+local util = require("tirenvi.util.util")
+local errors = require("tirenvi.util.errors")
+local Blocks = require("tirenvi.core.blocks")
 
 -- module
 local M = {}
@@ -39,7 +35,7 @@ local function vim_system(command, input)
 	log.debug("=== === === [exec] %s === === ===", table.concat(command, " "))
 	local result = vim.system(command, { stdin = input }):wait()
 	if result.stdout and #result.stdout > 0 then
-		log.debug(helper.to_hex(result.stdout):sub(1, 80) .. " ")
+		log.debug(util.to_hex(result.stdout):sub(1, 80) .. " ")
 	end
 	return result
 end
@@ -70,30 +66,40 @@ local function flat_to_js_lines(fl_lines, parser)
 end
 
 ---@param js_lines  string[]
----@return Record[]
-local function js_lines_to_records(js_lines)
-	local js_records = {}
+---@return Ndjson[]
+local function js_lines_to_ndjsons(js_lines)
+	local ndjsons = {}
 	for _, js_line in ipairs(js_lines) do
 		if js_line ~= nil and js_line ~= "" then
-			local ok, js_record = pcall(vim.json.decode, js_line)
+			local ok, ndjson = pcall(vim.json.decode, js_line)
 			if not ok then
-				error(errors.new_domain_error(errors.invalid_json_error(js_line, js_record)))
+				error(errors.new_domain_error(errors.invalid_json_error(js_line, ndjson)))
 			end
-			table.insert(js_records, js_record)
+			ndjsons[#ndjsons + 1] = ndjson
 		end
 	end
-	return js_records
+	return ndjsons
 end
 
----@param records Record[]
+---@param ndjson Ndjson
+---@return string | nil
+local function ndjson_to_line(ndjson)
+	if ndjson == nil then
+		return nil
+	end
+	local ok, line = pcall(vim.json.encode, ndjson)
+	assert(ok, ("tirenvi: internal JSON encode failure\n%s\nerror: %s"):format(vim.inspect(ndjson), line))
+	return line
+end
+
+---@param ndjsons Ndjson[]
 ---@return string[]
-local function js_records_to_lines(records)
+local function ndjsons_to_lines(ndjsons)
 	local lines = {}
-	for _, record in ipairs(records) do
-		if record ~= nil then
-			local ok, encoded = pcall(vim.json.encode, record)
-			assert(ok, ("tirenvi: internal JSON encode failure\n%s\nerror: %s"):format(vim.inspect(record), encoded))
-			table.insert(lines, encoded)
+	for _, record in ipairs(ndjsons) do
+		local line = ndjson_to_line(record)
+		if line ~= nil then
+			lines[#lines + 1] = line
 		end
 	end
 	return lines
@@ -106,7 +112,7 @@ end
 local function js_lines_to_flat(js_lines, parser)
 	local fl_string = run_parser(parser.executable, "unparse", parser.options, js_lines)
 	local fl_lines = vim.split(fl_string, "\n")
-	log.debug(helper.to_hex(table.concat(fl_lines, "\n")):sub(1, 80) .. " ")
+	log.debug(util.to_hex(table.concat(fl_lines, "\n")):sub(1, 80) .. " ")
 	return fl_lines
 end
 
@@ -114,23 +120,21 @@ end
 
 ---@param fl_lines string[]
 ---@param parser Parser
----@return Record[]
+---@return Blocks
 function M.parse(fl_lines, parser)
 	local js_lines = flat_to_js_lines(fl_lines, parser)
-	return js_lines_to_records(js_lines)
+	local ndjsons = js_lines_to_ndjsons(js_lines)
+	local blocks = Blocks.new_from_flat(ndjsons)
+	return blocks
 end
 
 --- Convert display lines back to TSV format
----@param js_records Record[]
+---@param blocks Blocks
 ---@param parser Parser
----@param file_path string
 ---@return string[]
-function M.unparse(js_records, parser, file_path)
-	---@type Record_file_attr
-	local file_attr = { kind = ndjsons.FILE_ATTR, version = ndjsons.VERSION, file_path = file_path }
-	table.insert(js_records, 1, file_attr)
-	log.debug({ #js_records, js_records[1], js_records[#js_records] })
-	local js_lines = js_records_to_lines(js_records)
+function M.unparse(blocks, parser)
+	local ndjsons = Blocks.serialize_to_flat(blocks)
+	local js_lines = ndjsons_to_lines(ndjsons)
 	log.debug({ #js_lines, js_lines[1], js_lines[#js_lines] })
 	return js_lines_to_flat(js_lines, parser)
 end

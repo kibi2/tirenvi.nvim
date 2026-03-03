@@ -105,9 +105,10 @@ while IFS= read -r -d '' d; do
 done
 
 if [ -s "$FAILED_FILE" ]; then
+  count=$(grep -c '^' "$FAILED_FILE")
   echo
-  echo "${BOLD}${RED_BG}${WHITE} FAILED CASES ${RESET}"
-  sed 's/^/  - /' "$FAILED_FILE"
+  echo "${BOLD}${RED_BG}${WHITE} FAILED CASES ($count) ${RESET}"
+  awk '{printf("%3d. %s\n", NR, $0)}' "$FAILED_FILE"
   exit 1
 fi
 

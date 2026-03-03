@@ -1,9 +1,4 @@
 --- Configuration management for tirenvi.
----
-
------------------------------------------------------------------------
--- Dependencies
------------------------------------------------------------------------
 
 local levels = vim.log.levels
 
@@ -22,13 +17,13 @@ local defaults = {
 		pipe = "│", -- │┆┊┇┃┋▏▕
 		padding = " ", --    ·∙⸱␣␠⠀░
 		trim = "⇢", -- ⇢⋯⋮︙›↠▶¬…
-		lf = "⤶", -- ⤶⏎↵↲⤷␤¶—↩️
+		lf = "↲", -- ⤶⏎↵↲⤷␤¶—↩️
 		tab = "»", -- »⇥→⇨▹▸▻►⇤␉》
 	},
 	---@type {[string]: Parser}
 	parser_map = {
-		csv = { executable = "tir-csv", options = {}, required_version = { 0, 1, 1 } },
-		tsv = { executable = "tir-csv", options = { "--delimiter", "\t" }, required_version = { 0, 1, 1 } },
+		csv = { executable = "tir-csv", options = {}, required_version = { 0, 1, 2 } },
+		tsv = { executable = "tir-csv", options = { "--delimiter", "\t" }, required_version = { 0, 1, 2 } },
 		-- md  = "tir-gfm",
 	},
 	log = {
