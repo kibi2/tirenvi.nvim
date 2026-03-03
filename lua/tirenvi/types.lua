@@ -1,50 +1,62 @@
 ---@meta
 
+---@alias Ndjson Attr_file | Attr | Record
+
 ---@alias Blocks Block[]
 
 ---@alias Block
----| Block_file_attr
 ---| Block_plain
 ---| Block_grid
 
----@alias BlockElement_plain Record_plain|Record_block_start
----@alias BlockElement_grid  Record_grid|Record_block_start
+---@alias BlockKind
+---| "plain"
+---| "grid"
 
--- TODO: structure
----@alias Block_file_attr Record_file_attr[]
----@alias Block_plain BlockElement_plain[]
----@alias Block_grid  BlockElement_grid[]
+---@class Block_plain
+---@field kind "plain"
+---@field attr Attr_plain
+---@field records Record_plain[]
 
----@alias Record
----| Record_file_attr
----| Record_block_start
----| Record_plain
----| Record_grid
+---@class Block_grid
+---@field kind "grid"
+---@field attr Attr_grid
+---@field records Record_grid[]
 
----@class Record_file_attr
----@field kind "file_attr"
+---@class Attr_file
+---@field kind "attr_file"
 ---@field version string
----@field file_path string
----@field [string] any
 
----@class Record_block_start
----@field kind "block_start"
----@field attr? any
----@field [string] any
+---@alias Attr Attr_plain | Attr_grid
+
+---@class Attr_plain
+---@field kind "attr_plain"
+
+---@class Attr_grid
+---@field kind "attr_grid"
+---@field columns? Attr_column[]
+
+---@class Attr_column
+---@field width? integer  -- display width (logical column width)
+---@field align? Align
+
+---@alias Align "left" | "center" | "right" | "default"
+
+---@alias Record Record_plain | Record_grid
 
 ---@class Record_plain
 ---@field kind "plain"
 ---@field line string
----@field [string] any
 
 ---@class Record_grid
 ---@field kind "grid"
----@field row string[]
----@field [string] any
+---@field row Cell[]
+
+---@alias Cell string
 
 ---@class Parser
----@field executable string  Parser executable name
----@field options string[]  Command-line arguments passed to the parser
+---@field executable string      Parser executable name
+---@field options string[]       Command-line arguments passed to the parser
+---@field allow_plain? boolean   Whether plain blocks are allowed (GFM). If false, only a single table is permitted.
 
 ---@class Marks
 ---@field pipe string
@@ -54,10 +66,8 @@
 ---@field tab string
 
 ---@class Check_options
----@field unsupported? any
----@field ensure_tir_vim? any
----@field is_tir_vim? any
----@field has_parser? any
----@field already_invalid? any
-
----@alias Cell string
+---@field unsupported? boolean
+---@field ensure_tir_vim? boolean
+---@field is_tir_vim? boolean
+---@field has_parser? boolean
+---@field already_invalid? boolean

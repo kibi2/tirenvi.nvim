@@ -15,8 +15,10 @@ local M = require("tirenvi")
 M.setup({
   log = {
 		level = vim.log.levels.WARN,
+		-- level = vim.log.levels.DEBUG,
 		use_timestamp = false,
 		probe = false,
+		-- probe = true,
 		output = "print",
 	},
 

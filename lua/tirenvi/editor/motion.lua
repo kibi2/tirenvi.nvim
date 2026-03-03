@@ -1,12 +1,11 @@
 local config = require("tirenvi.config")
-local buf_state = require("tirenvi.buf_state")
+local buf_state = require("tirenvi.state.buf_state")
 
 local M = {}
 
 local function build_motion(op)
 	return function()
-		local bufnr = vim.api.nvim_get_current_buf()
-		if not buf_state.is_tir_vim(bufnr) then
+		if not buf_state.is_tir_vim(0) then
 			return op
 		end
 

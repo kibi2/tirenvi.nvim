@@ -8,8 +8,8 @@
 │                  │         │          │        │         │       │
 │x1                │         │y22       │        │z333     │       │
 │===               │ - next -│ line     │  has   │linefeed │       │
-│⤶"1"2h", 34567890a│abc      │DEF123    │⤶⤶⤶     │gh       │9      │
-│a                 │         │b⤶        │        │c        │       │
+│↲"1"2h", 34567890a│abc      │DEF123    │↲↲↲     │gh       │9      │
+│a                 │         │b↲        │        │c        │       │
 │ ===              │- next - │ lines    │  has   │tab      │       │
 │» l»ongtext01     │mi»»d2   │s         │tt      │uuu      │vvvv   │
 │                  │         │»»»»»»»   │»»»»»»» │         │       │
@@ -18,7 +18,7 @@
 │aaあい            │いろ2    │ぼんさんが│へを    │こいた   │.！... │
 │g1                │h22      │i333      │j4444   │k55555   │l6     │
 │ ===              │- next - │ lines    │  has   │linefeed+│tab    │
-│»»                │⤶»       │n»        │»» o333 │         │       │
+│»»                │↲»       │n»        │»» o333 │         │       │
 │pqrst             │uv       │wx1       │yz22    │         │345    │
 │                  │         │          │        │         │       │
 │a1b2c3            │         │XYZ       │7777    │         │k9     │

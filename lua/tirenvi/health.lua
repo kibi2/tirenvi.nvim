@@ -5,6 +5,7 @@ local health = vim.health or require("health")
 
 local M = {}
 
+local fn = vim.fn
 local REQUIRED_VERSION_FMT = "%d.%d.%d"
 
 local function parse_version(str)
@@ -27,7 +28,7 @@ local function version_lt(a, b)
 end
 
 local function check_command(exe, required_version)
-	if vim.fn.executable(exe) ~= 1 then
+	if fn.executable(exe) ~= 1 then
 		health.error(exe .. " not found in PATH.", {
 			"Install it and ensure it is in your PATH.",
 			"Check with: which " .. exe,
@@ -37,12 +38,11 @@ local function check_command(exe, required_version)
 
 	health.ok(exe .. " found")
 
-	-- required_version が無ければここで終了
 	if not required_version then
 		return
 	end
 
-	local output = vim.fn.system({ exe, "--version" })
+	local output = fn.system({ exe, "--version" })
 
 	if vim.v.shell_error ~= 0 then
 		health.warn("Failed to get " .. exe .. " version.")

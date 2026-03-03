@@ -3,5 +3,11 @@ tirenvi: No usable characters found for marks: [pipe].
 Please configure alternative characters in tirenvi.setup().
 
 === DISPLAY ===
-a,b
-c,d
+1a,2 a, 3a
+"1
+",2b,"3
+b	"
+"
+
+
+",,	c

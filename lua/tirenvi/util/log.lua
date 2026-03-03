@@ -1,13 +1,16 @@
 local config = require("tirenvi.config")
-local notify = require("tirenvi.notify")
+local notify = require("tirenvi.util.notify")
 
 local M = {}
+
+local api = vim.api
+local bo = vim.bo
+
 local levels = vim.log.levels
 
 local level_names = {}
 local PREFIX = "[TIR]"
 local uv = vim.loop
-local last_time = nil
 local queue = {}
 local scheduled = false
 local log_bufnr = nil
@@ -22,7 +25,7 @@ local last_time = vim.loop.now()
 local monitoring = false
 
 local function get_tick()
-	return vim.api.nvim_buf_get_changedtick(0)
+	return api.nvim_buf_get_changedtick(0)
 end
 
 local function get_mem_mb()
@@ -103,16 +106,16 @@ local function get_timestamp()
 end
 
 local function ensure_log_buf()
-	if log_bufnr and vim.api.nvim_buf_is_valid(log_bufnr) then
+	if log_bufnr and api.nvim_buf_is_valid(log_bufnr) then
 		return log_bufnr
 	end
 
-	log_bufnr = vim.api.nvim_create_buf(false, true)
-	vim.api.nvim_buf_set_name(log_bufnr, config.log.buffer_name)
+	log_bufnr = api.nvim_create_buf(false, true)
+	api.nvim_buf_set_name(log_bufnr, config.log.buffer_name)
 
-	vim.bo[log_bufnr].buftype = "nofile"
-	vim.bo[log_bufnr].bufhidden = "hide"
-	vim.bo[log_bufnr].swapfile = false
+	bo[log_bufnr].buftype = "nofile"
+	bo[log_bufnr].bufhidden = "hide"
+	bo[log_bufnr].swapfile = false
 
 	return log_bufnr
 end
@@ -126,7 +129,7 @@ local function flush()
 	local bufnr = ensure_log_buf()
 	local buf_string = table.concat(queue, "\n")
 	buf_string = buf_string:gsub("\r", "")
-	vim.api.nvim_buf_set_lines(bufnr, 0, 0, false, vim.split(buf_string, "\n"))
+	api.nvim_buf_set_lines(bufnr, 0, 0, false, vim.split(buf_string, "\n"))
 	queue = {}
 end
 

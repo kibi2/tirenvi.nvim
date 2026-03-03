@@ -1,12 +1,11 @@
 -- dependencies
-local CONST = require("tirenvi.constants")
-local guard = require("tirenvi.guard")
+local guard = require("tirenvi.util.guard")
+local buffer = require("tirenvi.state.buffer")
+local init = require("tirenvi.init")
+local buf_state = require("tirenvi.state.buf_state")
 local config = require("tirenvi.config")
-local api = require("tirenvi.init")
-local buf_state = require("tirenvi.buf_state")
-local vimHelper = require("tirenvi.vimHelper")
-local log = require("tirenvi.log")
-local validity = require("tirenvi.validity")
+local log = require("tirenvi.util.log")
+local validator = require("tirenvi.core.validator")
 
 -- module
 local M = {}
@@ -14,9 +13,15 @@ local M = {}
 -- constants / defaults
 local GROUP_NAME = "tirenvi"
 
+local api = vim.api
+
 ----------------------------------------------------------------------
 -- Event handlers (private)
 ----------------------------------------------------------------------
+
+local function on_lines(_, bufnr, tick, first, last, new_last, bytecount)
+	init.on_lines(bufnr, first, last, new_last)
+end
 
 ---@param bufnr number
 local function attach_on_lines(bufnr)
@@ -25,42 +30,43 @@ local function attach_on_lines(bufnr)
 		has_parser = true,
 		already_invalid = true,
 	}
-	if buf_state.is_not_executable(bufnr, check_items) then
+	if buf_state.should_skip(bufnr, check_items) then
 		return
 	end
-	api.attach_on_lines(bufnr)
+	buffer.attach_on_lines(bufnr, on_lines)
 end
+
 
 ---@param args table
 local function on_buf_read_post(args)
-	api.import_flat(args.buf)
+	init.import_flat(args.buf)
 	attach_on_lines(args.buf)
 end
 
 ---@param args table
 local function on_buf_write_pre(args)
-	local old_path = vimHelper.get_file_path(args.buf)
-	local new_path = vimHelper.to_file_path(args.file)
-	api.export_flat(args.buf, new_path, old_path)
+	local old_path = buffer.get_file_path(args.buf)
+	local new_path = buffer.to_file_path(args.file)
+	init.export_flat(args.buf, new_path, old_path)
 end
 
 ---@param args table
 local function on_buf_write_post(args)
-	local old_path = vimHelper.get_file_path(args.buf)
-	local new_path = vimHelper.to_file_path(args.file)
-	api.restore_tir_vim(args.buf, new_path, old_path)
+	local old_path = buffer.get_file_path(args.buf)
+	local new_path = buffer.to_file_path(args.file)
+	init.restore_tir_vim(args.buf, new_path, old_path)
 end
 
 local function on_buf_file_post(args, old_path)
-	local new_path = vimHelper.to_file_path(args.file)
-	api.export_flat(args.buf, new_path, old_path)
-	api.enable(args.buf)
+	local new_path = buffer.to_file_path(args.file)
+	init.export_flat(args.buf, new_path, old_path)
+	init.enable(args.buf)
 	attach_on_lines(args.buf)
 end
 
 ---@param args table
 local function on_insert_char_pre(args)
-	api.insert_char_in_newline(args.buf)
+	init.insert_char_in_newline(args.buf)
 end
 
 ---@param args table
@@ -71,22 +77,30 @@ end
 ---@param args table
 local function on_vim_leave(args) end
 
+---@return string[]
+local function get_tirenvi_patterns()
+	local tirenvi_patterns = {}
+	for ext, _ in pairs(config.parser_map) do
+		table.insert(tirenvi_patterns, "*." .. ext)
+	end
+	return tirenvi_patterns
+end
+
 ----------------------------------------------------------------------
 -- Autocmd registration (private)
 ----------------------------------------------------------------------
 
 local function register_autocmds()
-	local augroup = vim.api.nvim_create_augroup(GROUP_NAME, { clear = true })
-	vim.api.nvim_create_autocmd("BufReadPost", {
+	local augroup = api.nvim_create_augroup(GROUP_NAME, { clear = true })
+	api.nvim_create_autocmd("BufReadPost", {
 		group = augroup,
 		-- Process only items for which a parser has been specified
-		pattern = api.get_tirenvi_patterns(),
+		pattern = get_tirenvi_patterns(),
 		callback = guard.guarded(function(args)
-			local check_items = {
-				unsupported = true,
-				has_parser = true,
-			}
-			if buf_state.is_not_executable(args.buf, check_items) then
+			if buf_state.should_skip(args.buf, {
+					unsupported = true,
+					has_parser = true,
+				}) then
 				return
 			end
 			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
@@ -98,78 +112,75 @@ local function register_autocmds()
 		}),
 	})
 
-	vim.api.nvim_create_autocmd("BufWritePre", {
+	api.nvim_create_autocmd("BufWritePre", {
 		group = augroup,
 		callback = guard.guarded(function(args)
-			local check_items = {
-				unsupported = true,
-				is_tir_vim = true,
-			}
-			if buf_state.is_not_executable(args.buf, check_items) then
+			if buf_state.should_skip(args.buf, {
+					unsupported = true,
+					is_tir_vim = true,
+				}) then
 				return
 			end
 			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
-			local old_path = vimHelper.get_file_path(args.buf)
-			vim.b[args.buf][CONST.BUF_KEY.OLD_PATH] = old_path
+			local old_path = buffer.get_file_path(args.buf)
+			buffer.set(args.buf, buffer.IKEY.OLD_PATH, old_path)
 			on_buf_write_pre(args)
 		end),
 	})
 
-	vim.api.nvim_create_autocmd("BufWritePost", {
+	api.nvim_create_autocmd("BufWritePost", {
 		group = augroup,
 		callback = guard.guarded(function(args)
-			local old_path = vim.b[args.buf][CONST.BUF_KEY.OLD_PATH]
+			local old_path = buffer.get(args.buf, buffer.IKEY.OLD_PATH)
 			if not old_path then
 				log.debug("===+===+===+===+=== %s %s skip", args.event, args.buf)
 				return
 			end
 			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
-			vim.b[args.buf][CONST.BUF_KEY.OLD_PATH] = nil
+			buffer.set(args.buf, buffer.IKEY.OLD_PATH, nil)
 			on_buf_write_post(args)
 		end),
 	})
 
-	vim.api.nvim_create_autocmd("BufFilePre", {
+	api.nvim_create_autocmd("BufFilePre", {
 		group = augroup,
 		callback = guard.guarded(function(args)
-			local check_items = {
-				unsupported = true,
-				already_invalid = true,
-			}
-			if buf_state.is_not_executable(args.buf, check_items) then
+			if buf_state.should_skip(args.buf, {
+					unsupported = true,
+					already_invalid = true,
+				}) then
 				return
 			end
 			log.debug("===+===+===+===+=== BufFilePre %s ===+===+===+===+===", args.buf)
-			local old_path = vimHelper.get_file_path(args.buf)
-			vim.b[args.buf][CONST.BUF_KEY.OLD_PATH] = old_path
-			log.debug(vim.b[args.buf][CONST.BUF_KEY.OLD_PATH])
+			local old_path = buffer.get_file_path(args.buf)
+			buffer.set(args.buf, buffer.IKEY.OLD_PATH, old_path)
+			log.debug(buffer.get(args.buf, buffer.IKEY.OLD_PATH))
 		end),
 	})
 
-	vim.api.nvim_create_autocmd("BufFilePost", {
+	api.nvim_create_autocmd("BufFilePost", {
 		group = augroup,
 		callback = guard.guarded(function(args)
-			local old_path = vim.b[args.buf][CONST.BUF_KEY.OLD_PATH]
+			local old_path = buffer.get(args.buf, buffer.IKEY.OLD_PATH)
 			if not old_path then
 				return
 			end
 			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
-			vim.b[args.buf][CONST.BUF_KEY.OLD_PATH] = nil
+			buffer.set(args.buf, buffer.IKEY.OLD_PATH, nil)
 			on_buf_file_post(args, old_path)
 		end),
 	})
 
-	vim.api.nvim_create_autocmd("CursorHold", {
+	api.nvim_create_autocmd("CursorHold", {
 		group = augroup,
-		pattern = api.get_tirenvi_patterns(),
+		pattern = get_tirenvi_patterns(),
 		callback = guard.guarded(function(args)
 			log.debug()
-			local check_items = {
-				unsupported = true,
-				already_invalid = true,
-				has_parser = true,
-			}
-			if buf_state.is_not_executable(args.buf, check_items) then
+			if buf_state.should_skip(args.buf, {
+					unsupported = true,
+					already_invalid = true,
+					has_parser = true,
+				}) then
 				return
 			end
 			-- log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
@@ -177,60 +188,57 @@ local function register_autocmds()
 		end),
 	})
 
-	vim.api.nvim_create_autocmd("InsertEnter", {
+	api.nvim_create_autocmd("InsertEnter", {
 		group = augroup,
-		pattern = api.get_tirenvi_patterns(),
+		pattern = get_tirenvi_patterns(),
 		callback = function(args)
 			log.debug()
-			local check_items = {
-				unsupported = true,
-				already_invalid = true,
-				has_parser = true,
-			}
-			if buf_state.is_not_executable(args.buf, check_items) then
+			if buf_state.should_skip(args.buf, {
+					unsupported = true,
+					already_invalid = true,
+					has_parser = true,
+				}) then
 				return
 			end
 			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
-			assert(not vim.b[args.buf][CONST.BUF_KEY.INSERT_MODE])
-			vim.b[args.buf][CONST.BUF_KEY.INSERT_MODE] = true
+			assert(not buffer.get(args.buf, buffer.IKEY.INSERT_MODE))
+			buffer.set(args.buf, buffer.IKEY.INSERT_MODE, true)
 		end,
 	})
 
-	vim.api.nvim_create_autocmd("InsertLeave", {
+	api.nvim_create_autocmd("InsertLeave", {
 		group = augroup,
-		pattern = api.get_tirenvi_patterns(),
+		pattern = get_tirenvi_patterns(),
 		callback = function(args)
-			local check_items = {
-				unsupported = true,
-				already_invalid = true,
-				has_parser = true,
-			}
-			if buf_state.is_not_executable(args.buf, check_items) then
+			if buf_state.should_skip(args.buf, {
+					unsupported = true,
+					already_invalid = true,
+					has_parser = true,
+				}) then
 				return
 			end
 			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
 			-- InsertLeave may be triggered without a preceding InsertEnter
 			-- due to the behavior of other plugins (e.g., Telescope).
-			-- Do not assert INSERT_MODE here.
-			-- assert(vim.b[args.buf][CONST.BUF_KEY.INSERT_MODE])
-			vim.b[args.buf][CONST.BUF_KEY.INSERT_MODE] = false
-			if vim.b[args.buf][CONST.BUF_KEY.PENDING_REPAIR_ROWS] then
-				validity.repair_invalid_tir_vim(args.buf, 0, -1, -1, true)
-				vim.b[args.buf][CONST.BUF_KEY.PENDING_REPAIR_ROWS] = nil
+			-- Do not assert insert_mode here.
+			buffer.set(args.buf, buffer.IKEY.INSERT_MODE, false)
+			log.debug(buffer.get(args.buf, buffer.IKEY.REPAIR_PENDING))
+			if buffer.get(args.buf, buffer.IKEY.REPAIR_PENDING) then
+				validator.repair(args.buf, 0, -1, -1)
+				buffer.set(args.buf, buffer.IKEY.REPAIR_PENDING, false)
 			end
 		end,
 	})
 
-	vim.api.nvim_create_autocmd("InsertCharPre", {
+	api.nvim_create_autocmd("InsertCharPre", {
 		group = augroup,
-		pattern = api.get_tirenvi_patterns(),
+		pattern = get_tirenvi_patterns(),
 		callback = function(args)
-			local check_items = {
-				unsupported = true,
-				already_invalid = true,
-				is_tir_vim = true,
-			}
-			if buf_state.is_not_executable(args.buf, check_items) then
+			if buf_state.should_skip(args.buf, {
+					unsupported = true,
+					already_invalid = true,
+					is_tir_vim = true,
+				}) then
 				return
 			end
 			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
@@ -238,7 +246,7 @@ local function register_autocmds()
 		end,
 	})
 
-	vim.api.nvim_create_autocmd("VimLeave", {
+	api.nvim_create_autocmd("VimLeave", {
 		group = augroup,
 		callback = guard.guarded(function(args)
 			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)

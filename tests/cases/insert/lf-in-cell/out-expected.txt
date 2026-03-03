@@ -1,8 +1,9 @@
 === MESSAGE ===
-[TIR][5:0(+0)MB][ERROR][[string ":lua"]:6] [CI] key = E2
-[TIR][5:0(+0)MB][ERROR][[string ":lua"]:6] [CI] key = A4
-[TIR][5:0(+0)MB][ERROR][[string ":lua"]:6] [CI] key = B6
+[TIR][5:0(+0)MB][ERROR][[string ":lua"]:5] [CI] key = E2
+[TIR][5:0(+0)MB][ERROR][[string ":lua"]:5] [CI] key = 86
+[TIR][5:0(+0)MB][ERROR][[string ":lua"]:5] [CI] key = B2
 
 === DISPLAY ===
-│a│b│
-│⤶c│d│
+│1a │2 a│ 3a │
+│↲1↲│2b │3↲b»│
+│↲↲↲│   │»c  │
