@@ -22,9 +22,9 @@ M.motion = require("tirenvi.motion")
 ---@param opts {[string]: any}
 ---@return string[] | nil
 local function run(func, bufnr, opts)
-	local ul
-	if opts.undo == false then
-		ul = vim.bo[bufnr].undolevels
+	local undolevels
+	if not vim.b[bufnr][CONST.BUF_KEY.INITIALIZED] then
+		undolevels = vim.bo[bufnr].undolevels
 		vim.bo[bufnr].undolevels = -1
 	end
 
@@ -36,8 +36,9 @@ local function run(func, bufnr, opts)
 		log.debug("===[api call]after=== [1] %s, [%d] %s", new_lines[1], #new_lines, new_lines[#new_lines])
 		vimHelper.set_lines(bufnr, 0, -1, false, new_lines)
 	end
-	if opts.undo == false then
-		vim.bo[bufnr].undolevels = ul
+	if not vim.b[bufnr][CONST.BUF_KEY.INITIALIZED] then
+		vim.b[bufnr][CONST.BUF_KEY.INITIALIZED] = true
+		vim.bo[bufnr].undolevels = undolevels
 	end
 	return new_lines
 end
@@ -63,18 +64,13 @@ local function to_flat(bufnr, old_path, new_path)
 end
 
 ---@param bufnr number Buffer number.
----@param undo_mode boolean|nil
 ---@param new_path string|nil
 ---@param old_path string|nil
 ---@return nil
-local function from_flat(bufnr, undo_mode, new_path, old_path)
-	if undo_mode == nil then
-		undo_mode = true
-	end
+local function from_flat(bufnr, new_path, old_path)
 	local parser = vimHelper.get_parser_name(bufnr, new_path, old_path)
 	local opts = {
 		parser = parser,
-		undo = undo_mode,
 	}
 	run(tir_vim.from_flat, bufnr, opts)
 end
@@ -99,10 +95,10 @@ end
 
 --- Convert current buffer (or specified buffer) from plain format to tir-vim format
 ---@param bufnr number Buffer number.
----@param undo_mode boolean
 ---@return nil
-function M.import_flat(bufnr, undo_mode)
-	from_flat(bufnr, undo_mode)
+function M.import_flat(bufnr)
+	pcall(vim.cmd, "undojoin")
+	from_flat(bufnr)
 end
 
 ---@param bufnr number Buffer number.
@@ -145,7 +141,7 @@ end
 ---@return nil
 function M.restore_tir_vim(bufnr, new_path, old_path)
 	pcall(vim.cmd, "undojoin")
-	from_flat(bufnr, true, new_path, old_path)
+	from_flat(bufnr, new_path, old_path)
 end
 
 ---@param bufnr number Buffer number.
