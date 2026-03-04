@@ -2,7 +2,7 @@
 local CONST = require("tirenvi.constants")
 local guard = require("tirenvi.guard")
 local config = require("tirenvi.config")
-local api = require("tirenvi")
+local api = require("tirenvi.init")
 local buf_state = require("tirenvi.buf_state")
 local vimHelper = require("tirenvi.vimHelper")
 local log = require("tirenvi.log")
@@ -33,7 +33,7 @@ end
 
 ---@param args table
 local function on_buf_read_post(args)
-	api.import_flat(args.buf, false)
+	api.import_flat(args.buf)
 	attach_on_lines(args.buf)
 end
 
