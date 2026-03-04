@@ -209,7 +209,10 @@ local function register_autocmds()
 				return
 			end
 			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
-			assert(vim.b[args.buf][CONST.BUF_KEY.INSERT_MODE])
+			-- InsertLeave may be triggered without a preceding InsertEnter
+			-- due to the behavior of other plugins (e.g., Telescope).
+			-- Do not assert INSERT_MODE here.
+			-- assert(vim.b[args.buf][CONST.BUF_KEY.INSERT_MODE])
 			vim.b[args.buf][CONST.BUF_KEY.INSERT_MODE] = false
 			if vim.b[args.buf][CONST.BUF_KEY.PENDING_REPAIR_ROWS] then
 				validity.repair_invalid_tir_vim(args.buf, 0, -1, -1, true)
