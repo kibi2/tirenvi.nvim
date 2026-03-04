@@ -75,7 +75,10 @@ local function js_lines_to_records(js_lines)
 	local js_records = {}
 	for _, js_line in ipairs(js_lines) do
 		if js_line ~= nil and js_line ~= "" then
-			local js_record = vim.json.decode(js_line)
+			local ok, js_record = pcall(vim.json.decode, js_line)
+			if not ok then
+				error(errors.new_domain_error(errors.invalid_json_error(js_line, js_record)))
+			end
 			table.insert(js_records, js_record)
 		end
 	end
@@ -89,11 +92,8 @@ local function js_records_to_lines(records)
 	for _, record in ipairs(records) do
 		if record ~= nil then
 			local ok, encoded = pcall(vim.json.encode, record)
-			if ok then
-				table.insert(lines, encoded)
-			else
-				assert(false, ("tirenvi: failed to encode record\n%s\nerror: %s"):format(vim.inspect(record), encoded))
-			end
+			assert(ok, ("tirenvi: internal JSON encode failure\n%s\nerror: %s"):format(vim.inspect(record), encoded))
+			table.insert(lines, encoded)
 		end
 	end
 	return lines
