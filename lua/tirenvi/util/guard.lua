@@ -1,4 +1,3 @@
---- guard.lua
 --- Execution guard for user-facing commands.
 ---
 --- Wraps functions with error handling:

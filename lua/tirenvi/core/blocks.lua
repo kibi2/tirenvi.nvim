@@ -1,19 +1,9 @@
---- ndjsons.lua
 --- Utilities for handling NDJSON records and converting them into
 --- plain/grid block structures.
 ---
---- Purpose:
----   - to_blocks: Split NDJSON records into blocks and normalize grid rows.
----   - replace: Apply string replacements to grid cells within blocks.
----
 --- Design:
 ---   - Blocks are separated so that plain and grid records never mix.
----   - A block may begin with "block_start".
 ---   - Column expansion is applied only to grid blocks.
----
---- Notes:
----   - Replacement uses plain string matching (vim.pesc).
----   - This module is independent from Vim APIs except vim.pesc.
 
 local CONST = require("tirenvi.constants")
 local Record = require("tirenvi.core.record")

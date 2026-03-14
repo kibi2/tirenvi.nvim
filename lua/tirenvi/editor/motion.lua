@@ -3,6 +3,8 @@ local buf_state = require("tirenvi.state.buf_state")
 
 local M = {}
 
+---@param op string
+---@return function
 local function build_motion(op)
 	return function()
 		if not buf_state.is_tir_vim(0) then

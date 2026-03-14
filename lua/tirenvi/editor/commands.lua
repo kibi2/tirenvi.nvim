@@ -43,6 +43,8 @@ end
 ----------------------------------------------------------------------
 -- Registration (private)
 ----------------------------------------------------------------------
+
+---@param opts any
 local function on_tir(opts)
 	local args = vim.split(opts.args, " ")
 	local sub = args[1]

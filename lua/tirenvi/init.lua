@@ -52,6 +52,7 @@ end
 -- public API
 
 --- Set up tirenvi plugin (load autocmds and commands)
+---@param opts {[string]:any}
 function M.setup(opts)
 	config.setup(opts)
 	require("tirenvi.editor.autocmd").setup()
@@ -162,6 +163,10 @@ function M.keymap_tab()
 	return config.marks.tab
 end
 
+---@param bufnr number
+---@param first integer
+---@param last integer
+---@param new_last integer
 function M.on_lines(bufnr, first, last, new_last)
 	validator.repair(bufnr, first, last, new_last)
 end

@@ -11,6 +11,7 @@ local M = {}
 -----------------------------------------------------------------------
 -- Defaults
 -----------------------------------------------------------------------
+
 local defaults = {
 	---@type Marks
 	marks = {
@@ -41,14 +42,16 @@ local defaults = {
 -- Initialize with defaults
 -----------------------------------------------------------------------
 
-local function apply(tbl)
-	for k, v in pairs(tbl) do
-		M[k] = v
+---@param opts {[string]:any}
+local function apply(opts)
+	for key, value in pairs(opts) do
+		M[key] = value
 	end
 end
 
 apply(vim.deepcopy(defaults))
 
+---@param opts {[string]:any}
 function M.setup(opts)
 	local merged = vim.tbl_deep_extend("force", {}, M, opts or {})
 	apply(merged)

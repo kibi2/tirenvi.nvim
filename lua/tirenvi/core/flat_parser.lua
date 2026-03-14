@@ -1,4 +1,3 @@
---- flat.lua
 --- Utility for converting between flat format lines and NDJSON lines using external parsers.
 ---
 --- Purpose:

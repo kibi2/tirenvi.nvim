@@ -24,14 +24,17 @@ local last_mem = 0
 local last_time = vim.loop.now()
 local monitoring = false
 
+---@return integer
 local function get_tick()
 	return api.nvim_buf_get_changedtick(0)
 end
 
+---@return integer
 local function get_mem_mb()
 	return collectgarbage("count") / 1024
 end
 
+---@return string
 local function get_monitor()
 	if not config.log.monitor then
 		return ""
@@ -68,29 +71,32 @@ local function monitor()
 	monitoring = false
 end
 
-local function stringify(v)
-	local t = type(v)
+---@param value any
+---@return string
+local function stringify(value)
+	local v_type = type(value)
 
-	if t == "table" then
+	if v_type == "table" then
 		if config.log.single_line then
 			return string.format(
 				"<table> %s",
-				vim.inspect(v, {
+				vim.inspect(value, {
 					newline = " ",
 					indent = "",
 					depth = 3,
 				})
 			)
 		else
-			return string.format("<table>\n%s", vim.inspect(v))
+			return string.format("<table>\n%s", vim.inspect(value))
 		end
-	elseif t == "string" then
-		return string.format("<string> %s", v)
+	elseif v_type == "string" then
+		return string.format("<string> %s", value)
 	else
-		return string.format("<%s> %s", t, tostring(v))
+		return string.format("<%s> %s", v_type, tostring(value))
 	end
 end
 
+---@return string
 local function get_timestamp()
 	if not config.log.use_timestamp then
 		return ""
@@ -98,6 +104,7 @@ local function get_timestamp()
 	local now = uv.hrtime()
 	if not last_time then
 		last_time = now
+		---@type string
 		return os.date("[%H:%M:%S]")
 	end
 	local delta_ms = (now - last_time) / 1e6
@@ -105,6 +112,7 @@ local function get_timestamp()
 	return string.format("[+%.0fms]", delta_ms)
 end
 
+---@return boolean
 local function ensure_log_buf()
 	if log_bufnr and api.nvim_buf_is_valid(log_bufnr) then
 		return log_bufnr
@@ -133,6 +141,7 @@ local function flush()
 	queue = {}
 end
 
+---@param msg string
 local function write_buffer(msg)
 	table.insert(queue, 1, msg)
 
@@ -191,22 +200,27 @@ local function emit(force, level, fmt, ...)
 	end
 end
 
+---@param ... unknown
 function M.debug(...)
 	emit(false, levels.DEBUG, ...)
 end
 
+---@param ... unknown
 function M.info(...)
 	emit(false, levels.INFO, ...)
 end
 
+---@param ... unknown
 function M.warn(...)
 	emit(false, levels.WARN, ...)
 end
 
+---@param ... unknown
 function M.error(...)
 	emit(false, levels.ERROR, ...)
 end
 
+---@param ... unknown
 function M.probe(...)
 	if not config.log.probe then
 		return

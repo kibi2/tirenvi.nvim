@@ -1,4 +1,3 @@
---- errors.lua
 --- Centralized error definitions and error message builders for tirenvi.
 ---
 --- This module:
@@ -49,8 +48,8 @@ end
 function M.err_no_usable_characters(missing)
 	return string.format(
 		PREFIX
-			.. "No usable characters found for marks: [%s].\n"
-			.. "Please configure alternative characters in tirenvi.setup().",
+		.. "No usable characters found for marks: [%s].\n"
+		.. "Please configure alternative characters in tirenvi.setup().",
 		table.concat(missing, ", ")
 	)
 end

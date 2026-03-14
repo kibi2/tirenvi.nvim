@@ -1,12 +1,5 @@
 --- Small utility helpers used across tirenvi modules.
 ---
---- Purpose:
----   - File extension detection
----   - Parser lookup by file extension
----   - Hex string conversion (debug use)
----   - Domain error construction
----   - Replacement pair construction
----
 --- Notes:
 ---   - This module contains only pure helper utilities.
 ---   - No side effects.
@@ -61,6 +54,8 @@ local function collect_reserved_chars()
 	return set
 end
 
+---@param fl_lines string[]
+---@return string[]
 local function find_reserved_marks(fl_lines)
 	local char_to_name = collect_reserved_chars()
 	local found_names = {}
@@ -101,8 +96,10 @@ function M.to_hex(str)
 	return table.concat(hex, " ")
 end
 
+---@param line string
+---@return boolean
 function M.has_pipe(line)
-	return line:find(config.marks.pipe, 1, true)
+	return line:find(config.marks.pipe) ~= nil
 end
 
 ---@param array1 any[]

@@ -70,7 +70,7 @@ local function reset_master_attr(self)
 end
 
 ---@self Block
----@param kind BlockKind
+---@param kind Block_kind
 local function initialize(self, kind)
     self.kind = kind
     self.attr = Attr[self.kind].new()
@@ -96,7 +96,7 @@ function M.new()
 end
 
 ---@self Block
----@param kind BlockKind
+---@param kind Block_kind
 function M:set_kind(kind)
     if self.kind == kind then
         return

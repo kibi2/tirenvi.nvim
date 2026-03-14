@@ -8,6 +8,8 @@ local M = {}
 local fn = vim.fn
 local REQUIRED_VERSION_FMT = "%d.%d.%d"
 
+---@param str string
+---@return integer[] | nil
 local function parse_version(str)
 	local major, minor, patch = str:match("(%d+)%.(%d+)%.(%d+)")
 	if not major then
@@ -16,17 +18,22 @@ local function parse_version(str)
 	return { tonumber(major), tonumber(minor), tonumber(patch) }
 end
 
-local function version_lt(a, b)
+---@param install integer[]
+---@param require integer[]
+---@return boolean
+local function version_lt(install, require)
 	for i = 1, 3 do
-		if a[i] < b[i] then
+		if install[i] < require[i] then
 			return true
-		elseif a[i] > b[i] then
+		elseif install[i] > require[i] then
 			return false
 		end
 	end
 	return false
 end
 
+---@param exe string
+---@param required_version {[string]:string}
 local function check_command(exe, required_version)
 	if fn.executable(exe) ~= 1 then
 		health.error(exe .. " not found in PATH.", {
@@ -74,11 +81,14 @@ local function check_command(exe, required_version)
 	end
 end
 
-local function version_gt(a, b)
+---@param target integer[]
+---@param source integer[]
+---@return boolean
+local function version_gt(target, source)
 	for i = 1, 3 do
-		if a[i] > b[i] then
+		if target[i] > source[i] then
 			return true
-		elseif a[i] < b[i] then
+		elseif target[i] < source[i] then
 			return false
 		end
 	end

@@ -1,4 +1,3 @@
---- notify.lua
 --- UI notification layer for tirenvi.
 ---
 --- Wraps vim.notify and ensures safe scheduling.

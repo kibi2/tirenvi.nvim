@@ -19,6 +19,13 @@ local api = vim.api
 -- Event handlers (private)
 ----------------------------------------------------------------------
 
+---@param _ string
+---@param bufnr number
+---@param tick integer
+---@param first integer
+---@param last integer
+---@param new_last integer
+---@param bytecount integer
 local function on_lines(_, bufnr, tick, first, last, new_last, bytecount)
 	init.on_lines(bufnr, first, last, new_last)
 end
@@ -57,11 +64,14 @@ local function on_buf_write_post(args)
 	init.restore_tir_vim(args.buf, new_path, old_path)
 end
 
-local function on_buf_file_post(args, old_path)
-	local new_path = buffer.to_file_path(args.file)
-	init.export_flat(args.buf, new_path, old_path)
-	init.enable(args.buf)
-	attach_on_lines(args.buf)
+---@param bufnr number
+---@param new_path string
+---@param old_path string
+local function on_buf_file_post(bufnr, new_path, old_path)
+	local new_path = buffer.to_file_path(new_path)
+	init.export_flat(bufnr, new_path, old_path)
+	init.enable(bufnr)
+	attach_on_lines(bufnr)
 end
 
 ---@param args table
@@ -162,12 +172,13 @@ local function register_autocmds()
 		group = augroup,
 		callback = guard.guarded(function(args)
 			local old_path = buffer.get(args.buf, buffer.IKEY.OLD_PATH)
+			---@cast  old_path string | nil
 			if not old_path then
 				return
 			end
 			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
 			buffer.set(args.buf, buffer.IKEY.OLD_PATH, nil)
-			on_buf_file_post(args, old_path)
+			on_buf_file_post(args.buf, args.file, old_path)
 		end),
 	})
 
