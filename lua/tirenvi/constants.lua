@@ -9,7 +9,6 @@ M.KIND = {
 	GRID = "grid",
 }
 M.ALIGN = {
-	DEFAULT = "default",
 	LEFT = "left",
 	CENTER = "center",
 	RIGHT = "right",
