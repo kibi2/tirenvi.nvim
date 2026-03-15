@@ -45,8 +45,8 @@ local function from_flat(bufnr, new_path, old_path)
 	util.assert_no_reserved_marks(fl_lines)
 	local parser = util.get_parser(bufnr, new_path, old_path)
 	local blocks = flat_parser.parse(fl_lines, parser)
-	local new_lines = vim_parser.unparse(blocks)
-	buffer.set_lines(bufnr, 0, -1, new_lines)
+	local vi_lines = vim_parser.unparse(blocks)
+	buffer.set_lines(bufnr, 0, -1, vi_lines)
 end
 
 -- public API
