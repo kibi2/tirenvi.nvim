@@ -1,7 +1,12 @@
 # Command Flow
 
-Blocks represent the logical **TIR structure**,
-while Records represent the **rendered Vim table representation**.
+NDJSON records represent the TIR format itself.
+
+Blocks provide a structured in-memory representation
+derived from NDJSON records.
+
+Records represent a render-oriented form used to display
+tables in the Vim buffer.
 
 All conversions pass through **Blocks**, which act as the central
 intermediate representation.
@@ -10,33 +15,39 @@ intermediate representation.
 
 ## Architecture Overview
 
-
 ```text
           flat formats
         (tir-flat, CSV, etc.)
                 │
-                │
-         fl_lines (text lines)
-                │
+                ▼
+            fl_lines
                 │
         external / flat parser
                 │
                 ▼
+            js_lines
+                │
+                ▼
+            ndjsons
+        (TIR serialized form)
+                │
+                ▼
              Blocks
-      (logical TIR structure)
-                │
-                │
-            vim_parser
+    (structured representation)
                 │
                 ▼
-           vi_lines
-      (rendered table lines)
+             records
+       (render-ready rows)
                 │
                 ▼
-            vim buffer
+            vi_lines
+                │
+                ▼
+           vim buffer
 ```
 
-Blocks act as the **central intermediate representation**.
+NDJSON records represent the TIR format itself.
+Blocks are a structured in-memory representation of TIR.
 All parsing and rendering operations convert through Blocks.
 
 ---
@@ -50,7 +61,7 @@ fl_lines   : string[]   (flat text lines)
    ↓
 js_lines   : string[]   (NDJSON text lines)
    ↓
-ndjsons    : Ndjson[]   (parsed NDJSON objects: Attr_file | Attr | Record)
+ndjsons    : Ndjson[]   (TIR canonical representation)
    ↓
 Blocks     : Block[]    (TIR block structure)
    ↓
@@ -90,7 +101,11 @@ ndjsons ↔ Blocks
     "\n", "\t"  ↔  LF mark, TAB mark
 
 Blocks ↔ records
-    insert/remove padding marks for table alignment
+    convert logical records into renderable rows
+
+    differences from NDJSON records:
+      • padding marks are inserted
+      • column width and alignment are embedded as padding
 
 records ↔ vi_lines
     insert/remove pipe marks for Vim table rendering
