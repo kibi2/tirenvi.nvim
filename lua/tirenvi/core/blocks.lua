@@ -246,7 +246,7 @@ end
 ---@param allow_plain boolean | nil
 ---@return boolean
 ---@return RefAttrError | nil
-function M:validate(attr_prev, attr_next, allow_plain)
+function M:repair(attr_prev, attr_next, allow_plain)
 	if allow_plain then
 		apply_reference_attr_multi(self, attr_prev, attr_next)
 		return true

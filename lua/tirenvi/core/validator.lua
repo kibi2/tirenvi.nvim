@@ -58,7 +58,7 @@ local function get_repaired_lines(bufnr, start_row, end_row)
 	local attr_prev, attr_next = get_reference_attrs(bufnr, start_row, end_row)
 	local parser = util.get_parser(bufnr)
 	local allow_plain = parser.allow_plain
-	local success, reason = Blocks.validate(blocks, attr_prev, attr_next, allow_plain)
+	local success, reason = Blocks.repair(blocks, attr_prev, attr_next, allow_plain)
 	if not success then
 		if reason == "grid in plain" then
 			return flat_parser.unparse(blocks, parser)

@@ -1,7 +1,45 @@
 # Command Flow
 
-Blocks represent the logical TIR structure,
-while Records represent the rendered Vim table representation.
+Blocks represent the logical **TIR structure**,
+while Records represent the **rendered Vim table representation**.
+
+All conversions pass through **Blocks**, which act as the central
+intermediate representation.
+
+---
+
+## Architecture Overview
+
+
+```text
+          flat formats
+        (tir-flat, CSV, etc.)
+                │
+                │
+         fl_lines (text lines)
+                │
+                │
+        external / flat parser
+                │
+                ▼
+             Blocks
+      (logical TIR structure)
+                │
+                │
+            vim_parser
+                │
+                ▼
+           vi_lines
+      (rendered table lines)
+                │
+                ▼
+            vim buffer
+```
+
+Blocks act as the **central intermediate representation**.
+All parsing and rendering operations convert through Blocks.
+
+---
 
 ## Data Types
 
@@ -25,63 +63,119 @@ vim buffer
 
 ---
 
-## BufReadPost (init.lua from_flat)
+## Transformation Layers
+
+The following components are responsible for converting between layers.
+
+### Parsers
 
 ```text
-flat file
-  → (neovim)            read file into fl_lines
-  → (external parser)   fl_lines → js_lines
-  → (flat_parser.lua)   js_lines → ndjsons → Blocks (escape lf, tab)
-  → (vim_parser.lua)    Blocks → records (add padding into cell) → vi_lines
-  → (neovim)            replace vim buffer
+flat_parser
+    fl_lines  ↔ Blocks
+
+vim_parser
+    vi_lines  ↔ Blocks
+
+external parser
+    fl_lines  ↔ js_lines
+```
+
+### Structural Transformations
+
+These transformations are internal normalization steps.
+
+```text
+ndjsons ↔ Blocks
+    escape / unescape LF and TAB characters
+    "\n", "\t"  ↔  LF mark, TAB mark
+
+Blocks ↔ records
+    insert/remove padding marks for table alignment
+
+records ↔ vi_lines
+    insert/remove pipe marks for Vim table rendering
 ```
 
 ---
 
-## BufWritePre (init.lua to_flat)
+## Command Flow
+
+### BufReadPost (init.from_flat)
 
 ```text
-vim buffer
-  → (neovim)            get lines into vi_lines
-  → (vim_parser.lua)    vi_lines → records → Blocks (remove padding from cell)
-  → (flat_parser.lua)   Blocks → ndjsons (unescape lf, tab) → js_lines
-  → (external parser)   js_lines → fl_lines
-  → (neovim)            write to file
+flat file
+  → (neovim)             read file into fl_lines
+  → (flat_parser.parse)  fl_lines → Blocks
+  → (vim_parser.unparse) Blocks → vi_lines
+  → (neovim)             replace vim buffer
 ```
 
-## BufWritePost
+---
 
-init.lua from_flat
-
-## BufFilePost
-
-init.lua to_flat
-
-## :Tir redraw
+### BufWritePre (init.to_flat)
 
 ```text
 vim buffer
-  → (neovim)            get lines into vi_lines
-  → (vim_parser.lua)    vi_lines → records →  Blocks (remove padding from cell)
-  → (vim_parser.lua)    Blocks → records (add padding in cell) → vi_lines
-  → (neovim)            replace vim buffer
+  → (neovim)               get lines into vi_lines
+  → (vim_parser.parse)     vi_lines → Blocks
+  → (flat_parser.unparse)  Blocks → fl_lines
+  → (neovim)               write to file
 ```
 
-## :Tir toggle (disable)
+---
 
-init.lua to_flat
+### BufWritePost
 
-## :Tir toggle (enable)
+```text
+init.from_flat
+```
 
-init.lua from_flat
+---
 
-## on_lines
+### BufFilePost
+
+```text
+init.to_flat
+init.from_flat
+```
+
+---
+
+### :Tir redraw
 
 ```text
 vim buffer
-  → (neovim)            get lines into vi_lines
-  → (vim_parser.lua)    vi_lines → Records →  Blocks (remove padding from cell)
-  → (validator.lua)     Blocks.validate()
-  → (vim_parser.lua)    Blocks → Records (add padding in cell) → vi_lines
-  → (neovim)            replace vim buffer
+  → (neovim)             get lines into vi_lines
+  → (vim_parser.parse)   vi_lines → Blocks
+  → (vim_parser.unparse) Blocks → vi_lines
+  → (neovim)             replace vim buffer
+```
+
+---
+
+### :Tir toggle (disable)
+
+```text
+init.to_flat
+```
+
+---
+
+### :Tir toggle (enable)
+
+```text
+init.from_flat
+```
+
+---
+
+### on_lines
+
+```text
+vim buffer
+  → (neovim)             get lines into vi_lines
+  → (vim_parser.parse)   vi_lines → Blocks
+  → (validator.repair)   Blocks.repair()
+  → (vim_parser.unparse) Blocks → vi_lines
+  → (neovim)             replace vim buffer
 ```
