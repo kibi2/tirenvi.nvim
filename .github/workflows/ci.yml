@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: Test (Neovim ${{ matrix.neovim }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        neovim: [stable, nightly]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Neovim
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: ${{ matrix.neovim }}
+
+      - name: Show versions
+        run: |
+          nvim --version
+          lua -v || true
+
+      - name: Run tests
+        run: |
+          chmod +x tests/run.sh
+          tests/run.sh
+
+      - name: Upload diff artifacts (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-diffs-${{ matrix.neovim }}
+          path: tests/cases/**/diff-*.txt
