@@ -84,12 +84,12 @@ local function repair(bufnr, first, last, new_last)
 	-- Moving the cursor in insert mode may create an invalid table undo node.
 	-- Therefore, when performing undo/redo, skip table validation.
 	if buf_state.is_insert_mode(bufnr) then
-		log.probe("===-===-===-=== insert mode (%d, %d) ===-===-===-===", first, new_last)
+		log.debug("===-===-===-=== insert mode (%d, %d) ===-===-===-===", first, new_last)
 		on_insert_mode(bufnr, first, last, new_last)
 		return
 	end
 	if buf_state.is_undo_mode(bufnr) then
-		log.probe("===-===-===-=== undo/redo mode (%d, %d) ===-===-===-===", first, new_last)
+		log.debug("===-===-===-=== undo/redo mode (%d, %d) ===-===-===-===", first, new_last)
 		return
 	end
 	local new_lines = get_repaired_lines(bufnr, first, new_last)

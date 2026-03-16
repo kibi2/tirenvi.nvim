@@ -248,7 +248,6 @@ end
 ---@return boolean
 ---@return RefAttrError | nil
 function M:repair(attr_prev, attr_next, allow_plain)
-	log.probe(allow_plain)
 	if allow_plain then
 		apply_reference_attr_multi(self, attr_prev, attr_next)
 		return true
