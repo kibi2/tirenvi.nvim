@@ -83,12 +83,13 @@ end
 local function repair(bufnr, first, last, new_last)
 	-- Moving the cursor in insert mode may create an invalid table undo node.
 	-- Therefore, when performing undo/redo, skip table validation.
-	if buf_state.is_undo_mode(bufnr) then
-		log.debug("===-===-===-=== validation undo/redo mode (%d, %d) ===-===-===-===", first, new_last)
+	if buf_state.is_insert_mode(bufnr) then
+		log.probe("===-===-===-=== insert mode (%d, %d) ===-===-===-===", first, new_last)
+		on_insert_mode(bufnr, first, last, new_last)
 		return
 	end
-	if buffer.get(bufnr, buffer.IKEY.INSERT_MODE) then
-		on_insert_mode(bufnr, first, last, new_last)
+	if buf_state.is_undo_mode(bufnr) then
+		log.probe("===-===-===-=== undo/redo mode (%d, %d) ===-===-===-===", first, new_last)
 		return
 	end
 	local new_lines = get_repaired_lines(bufnr, first, new_last)
@@ -119,8 +120,16 @@ function M.repair(bufnr, first, last, new_last)
 			return
 		end
 		buffer.set(bufnr, buffer.IKEY.INTERNAL, true)
-		local ok, err = pcall(repair, bufnr, first, last, new_last)
+
+		local ok, err = xpcall(
+			function()
+				repair(bufnr, first, last, new_last)
+			end,
+			debug.traceback
+		)
+
 		buffer.set(bufnr, buffer.IKEY.INTERNAL, false)
+
 		if not ok then
 			error(err)
 		end

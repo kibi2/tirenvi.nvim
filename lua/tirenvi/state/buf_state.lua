@@ -42,10 +42,13 @@ end
 
 ---@param bufnr number
 ---@return boolean
+function M.is_insert_mode(bufnr)
+	return buffer.get(bufnr, buffer.IKEY.INSERT_MODE) == true
+end
+
+---@param bufnr number
+---@return boolean
 function M.is_undo_mode(bufnr)
-	if buffer.get(bufnr, buffer.IKEY.INSERT_MODE) then
-		return false
-	end
 	local ut = fn.undotree()
 	if buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LASET) == ut.seq_last then
 		return true
