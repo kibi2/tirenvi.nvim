@@ -14,7 +14,18 @@ RED_BG='\033[41m'
 WHITE='\033[37m'
 RESET='\033[0m'
 
+# disable color
+if [ -n "${NO_COLOR:-}" ] || [ -n "${GITHUB_ACTIONS:-}" ]; then
+  GREEN=""
+  RED=""
+  RESET=""
+  BOLD=""
+  RED_BG=""
+  WHITE=""
+fi
+
 UPDATE=0
+FAIL_FAST=${FAIL_FAST:-0}
 
 PATTERNS=""
 
@@ -29,7 +40,8 @@ done
 FAILED_FILE=$(mktemp)
 trap 'rm -f "$FAILED_FILE"' EXIT
 
-# find "$CASES_DIR" -type d | while read -r d; do
+TOTAL=0
+
 find "$CASES_DIR" -type d -print0 |
 while IFS= read -r -d '' d; do
 
@@ -50,11 +62,17 @@ while IFS= read -r -d '' d; do
     done
     [ "$matched" -eq 1 ] || continue
   fi
-  
+
+  TOTAL=$((TOTAL+1))
+
   if [ "$UPDATE" -eq 1 ]; then
     if [ -f "$d/out-expected.txt" ]; then
       continue
     fi
+  fi
+
+  if [ -n "${GITHUB_ACTIONS:-}" ]; then
+    echo "::group::test $name"
   fi
 
   printf "%-40s ... " "$name"
@@ -86,12 +104,14 @@ while IFS= read -r -d '' d; do
 
     diff_file="diff-$name.txt"
     diff_file=$(printf '%s' "$diff_file" | tr ' /' '__')
+
     if diff -u out-expected.txt out-actual.txt > "$diff_file"; then
-        rm "$diff_file"
+      rm "$diff_file"
     else
-        echo "DIFF FOUND (see $diff_file)"
-        exit 1
+      echo "DIFF FOUND (see $diff_file)"
+      exit 1
     fi
+
   ); then
     if [ "$UPDATE" -eq 1 ]; then
       printf "${GREEN}UPDATED${RESET}\n"
@@ -101,7 +121,18 @@ while IFS= read -r -d '' d; do
   else
     printf "${RED}FAIL${RESET}\n"
     echo "$name" >> "$FAILED_FILE"
+
+    if [ "$FAIL_FAST" -eq 1 ]; then
+      echo
+      echo "${BOLD}${RED}FAIL-FAST: stopping after first failure${RESET}"
+      exit 1
+    fi
   fi
+
+  if [ -n "${GITHUB_ACTIONS:-}" ]; then
+    echo "::endgroup::"
+  fi
+
 done
 
 if [ -s "$FAILED_FILE" ]; then
@@ -113,4 +144,4 @@ if [ -s "$FAILED_FILE" ]; then
 fi
 
 echo
-echo "${BOLD}${GREEN}ALL TESTS PASSED${RESET}"
+echo "${BOLD}${GREEN}ALL TESTS PASSED (${TOTAL} cases)${RESET}"
