@@ -33,7 +33,7 @@ local function version_lt(install, require)
 end
 
 ---@param exe string
----@param required_version {[string]:string}
+---@param required_version integer[]
 local function check_command(exe, required_version)
 	if fn.executable(exe) ~= 1 then
 		health.error(exe .. " not found in PATH.", {

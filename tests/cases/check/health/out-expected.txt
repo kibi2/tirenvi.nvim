@@ -1,0 +1,13 @@
+=== MESSAGE ===
+Running healthchecks...
+
+=== DISPLAY ===
+
+==============================================================================
+tirenvi:                                                                    ✅
+
+tirenvi ~
+- version: 0.2.0
+- ✅ OK tir-csv found
+- ✅ OK tir-csv version 0.1.2 OK
+
