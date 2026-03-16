@@ -1,8 +1,15 @@
 # tirenvi.nvim
 
+[![CI](https://github.com/kibi2/tirenvi.nvim/actions/workflows/ci.yml/badge.svg)](https://github.com/kibi2/tirenvi.nvim/actions)
+![GitHub release](https://img.shields.io/github/v/release/kibi2/tirenvi.nvim)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Neovim](https://img.shields.io/badge/Neovim-0.9+-57A143?logo=neovim)
+
 > Structural TIR editing for Neovim — pure text, always valid.
 
----
+![demo gif](./demo.gif)
+
+Raw CSV → structured table view → edit → redraw → undo/redo → back to raw.
 
 ## Design Philosophy
 
@@ -12,8 +19,6 @@
 * Fully reversible transformation
 * No hidden metadata
 * Always valid
-
----
 
 ## Why?
 
@@ -27,16 +32,6 @@ while guaranteeing structural integrity.
 
 You edit text.
 Tirenvi preserves structure.
-
----
-
-## Demo
-
-![demo gif](./demo.gif)
-
-Raw CSV → structured view → edit → redraw → undo/redo → back to raw.
-
----
 
 ## Core Architecture
 
@@ -67,8 +62,6 @@ Key principles:
 * Transformations are reversible
 * The buffer is always structurally valid
 
----
-
 ## Features
 
 * Render CSV/TSV into aligned structured view
@@ -78,8 +71,6 @@ Key principles:
 * External parser architecture (extensible)
 * Works with all native Vim motions and operators
 * No learning curve
-
----
 
 ## Structural Integrity Model
 
@@ -96,8 +87,6 @@ Structural integrity is preserved in the current editing state.
 Tirenvi respects Vim’s undo tree.
 Historical undo states are not modified,
 even if they contain temporary structural inconsistencies.
-
----
 
 ## Installation
 
@@ -129,8 +118,6 @@ Install CSV parser:
 pip install tir-csv
 ```
 
----
-
 ## Usage
 
 Automatically activates for:
@@ -149,8 +136,6 @@ require("tirenvi").setup({
 })
 ```
 
----
-
 ## Commands
 
 | Command       | Description                        |
@@ -158,16 +143,13 @@ require("tirenvi").setup({
 | `:Tir redraw` | Recalculate column widths          |
 | `:Tir toggle` | Switch raw ↔ structured table view |
 
-All native Vim editing works:
+All native Vim editing works.
 
-* `dd`, `yy`, `p`
-* `cw`, `ciw`
-* Visual Block mode
-* `:%s/.../.../g`
+* `dd`, `yy`, `p`, `D`, `o`, `R`, `J`
+* Command-line command
+* Visual mode command
 
 No special editing mode.
-
----
 
 ## Column Editing
 
@@ -181,8 +163,6 @@ To modify a column:
 
 Operations that would break structure
 are automatically corrected.
-
----
 
 ## Pipe Motions
 
@@ -200,8 +180,6 @@ but target table separators.
 
 `;` and `,` continue to repeat as usual.
 
----
-
 ## What Tirenvi Is Not
 
 * Not a spreadsheet
@@ -210,8 +188,6 @@ but target table separators.
 * Not a file-format converter
 
 It is a structured text editor layer.
-
----
 
 ## Roadmap
 
@@ -229,8 +205,6 @@ It is a structured text editor layer.
 * Outline mode
 * Optional non-strict mode (experimental)
 
----
-
 ## Comparison
 
 | Feature                   | Tirenvi | csv.vim | Spreadsheet tools |
@@ -243,8 +217,6 @@ It is a structured text editor layer.
 
 Tirenvi prioritizes **structural safety with Vim purity**.
 
----
-
 ## Contributing
 
 The architecture centers around:
@@ -256,10 +228,7 @@ Large changes should respect this separation.
 
 Please open an issue before major design proposals.
 
----
-
 ## License
 
 MIT License.
 
-![CI](https://github.com/kibi2/tirenvi.nvim/actions/workflows/ci.yml/badge.svg)
