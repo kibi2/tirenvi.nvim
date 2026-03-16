@@ -137,13 +137,24 @@ local function flush()
 	local bufnr = ensure_log_buf()
 	local buf_string = table.concat(queue, "\n")
 	buf_string = buf_string:gsub("\r", "")
-	api.nvim_buf_set_lines(bufnr, 0, 0, false, vim.split(buf_string, "\n"))
+
+	api.nvim_buf_set_lines(bufnr, -1, -1, false, vim.split(buf_string, "\n"))
 	queue = {}
+
+	-- 最終行へスクロール
+	local line_count = api.nvim_buf_line_count(bufnr)
+	local win = vim.fn.bufwinid(bufnr)
+	if win ~= -1 then
+		api.nvim_win_set_cursor(win, { line_count, 0 })
+		vim.api.nvim_win_call(win, function()
+			-- vim.cmd("normal! 3kzz")
+		end)
+	end
 end
 
 ---@param msg string
 local function write_buffer(msg)
-	table.insert(queue, 1, msg)
+	table.insert(queue, msg)
 
 	if not scheduled then
 		scheduled = true
