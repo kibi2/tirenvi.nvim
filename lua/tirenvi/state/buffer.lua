@@ -83,7 +83,7 @@ local function set_lines(bufnr, i_start, i_end, strict, lines)
 	if undotree.seq_last == 0 then
 		bo[bufnr].undolevels = undolevels
 	end
-	log.probe(get_state(bufnr))
+	log.debug(get_state(bufnr))
 end
 
 -----------------------------------------------------------------------
@@ -118,7 +118,7 @@ function M.set_lines(bufnr, i_start, i_end, lines, strict)
 	bufnr = bufnr or 0
 	strict = strict == true
 	log.debug("=== set_lines(%d, %d)[1]%s [%d]%s", i_start, i_end, lines[1], #lines, lines[#lines])
-	log.probe(get_state(bufnr))
+	log.debug(get_state(bufnr))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
 	local ok, err = pcall(set_lines, bufnr, i_start, i_end, strict, lines)
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) - 1)
