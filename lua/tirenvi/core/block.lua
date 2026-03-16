@@ -192,6 +192,10 @@ function M.plain:to_grid()
     return block
 end
 
-M.grid.to_grid = nop
+---@self Block_grid
+---@return Block_grid
+function M.grid:to_grid()
+    return self
+end
 
 return M

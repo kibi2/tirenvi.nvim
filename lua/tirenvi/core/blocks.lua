@@ -97,8 +97,9 @@ local function merge_blocks(self)
 	if #self <= 1 then
 		return
 	end
-	for _, block in ipairs(self) do
-		Block[block.kind].to_grid(block)
+	for index, block in ipairs(self) do
+		local new_block = Block[block.kind].to_grid(block)
+		self[index] = new_block
 	end
 	local first = self[1]
 	local records = first.records
@@ -247,6 +248,7 @@ end
 ---@return boolean
 ---@return RefAttrError | nil
 function M:repair(attr_prev, attr_next, allow_plain)
+	log.probe(allow_plain)
 	if allow_plain then
 		apply_reference_attr_multi(self, attr_prev, attr_next)
 		return true
