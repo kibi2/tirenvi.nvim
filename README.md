@@ -261,3 +261,5 @@ Please open an issue before major design proposals.
 ## License
 
 MIT License.
+
+![CI](https://github.com/kibi2/tirenvi.nvim/actions/workflows/ci.yml/badge.svg)
