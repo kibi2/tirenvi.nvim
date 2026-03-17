@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eu
+set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 ROOT_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
@@ -43,7 +43,6 @@ trap 'rm -f "$FAILED_FILE"' EXIT
 
 TOTAL=0
 
-find "$CASES_DIR" -type d -print0 |
 while IFS= read -r -d '' d; do
 
   # runner が無ければスキップ
@@ -124,8 +123,7 @@ while IFS= read -r -d '' d; do
     echo "$name" >> "$FAILED_FILE"
 
     if [ "$FAIL_FAST" -eq 1 ]; then
-      echo
-      echo "${BOLD}${RED}FAIL-FAST: stopping after first failure${RESET}"
+      printf "\n${BOLD}${RED}FAIL-FAST: stopping after first failure${RESET}"
       exit 1
     fi
   fi
@@ -134,15 +132,13 @@ while IFS= read -r -d '' d; do
     echo "::endgroup::"
   fi
 
-done
+done < <(find "$CASES_DIR" -type d -print0)
 
 if [ -s "$FAILED_FILE" ]; then
   count=$(grep -c '^' "$FAILED_FILE")
-  echo
-  echo "${BOLD}${RED_BG}${WHITE} FAILED CASES ($count) ${RESET}"
+  printf "\n${BOLD}${RED_BG}${WHITE} FAILED CASES ($count) ${RESET}\n"
   awk '{printf("%3d. %s\n", NR, $0)}' "$FAILED_FILE"
   exit 1
 fi
 
-echo
-echo "${BOLD}${GREEN}ALL TESTS PASSED (${TOTAL} cases)${RESET}"
+printf "\n${BOLD}${GREEN}ALL TESTS PASSED (${TOTAL} cases)${RESET}\n"
