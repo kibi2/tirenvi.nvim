@@ -24,6 +24,20 @@ jobs:
           neovim: true
           version: ${{ matrix.neovim }}
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install tir-csv
+        run: |
+          pip install tir-csv
+
+      - name: Check tir-csv
+        run: |
+          which tir-csv
+          tir-csv --help || true
+
       - name: Show versions
         run: |
           nvim --version
