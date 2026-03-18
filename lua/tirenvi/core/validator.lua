@@ -7,6 +7,7 @@
 -- Dependencies
 -----------------------------------------------------------------------
 
+local config = require("tirenvi.config")
 local log = require("tirenvi.util.log")
 local util = require("tirenvi.util.util")
 local buffer = require("tirenvi.state.buffer")
@@ -71,9 +72,88 @@ local function get_repaired_lines(bufnr, start_row, end_row)
 	return vim_parser.unparse(blocks)
 end
 
+vim.fn.sign_define("TirenviSign", { text = "◆", texthl = "ErrorMsg" })
+vim.api.nvim_set_hl(0, "TirenviDebugLine", { bg = "#888840" })
+local NS_INVALID = vim.api.nvim_create_namespace("tirenvi_invalid")
+local function set_range_extmark(bufnr, first, last, id)
+	local opts = {
+		id = id,
+		strict = false,
+		right_gravity = false,
+		end_right_gravity = true,
+		end_row = last,
+		end_col = 0,
+		invalidate = false,
+	}
+	if vim.log.levels.DEBUG >= config.log.level then
+		opts.hl_group = "TirenviDebugLine"
+		opts.hl_eol = false
+		opts.virt_text = { { tostring(id), "ErrorMsg" } }
+		opts.virt_text_pos = "eol_right_align" -- eol
+		opts.sign_text = tostring(id):sub(-2)
+		opts.sign_hl_group = "ErrorMsg"
+	end
+	vim.api.nvim_buf_set_extmark(bufnr, NS_INVALID, first, 0, opts)
+end
+
+local function set_range_extmarks(bufnr, first, last)
+	local marks = vim.api.nvim_buf_get_extmarks(
+		bufnr,
+		NS_INVALID,
+		{ 0, 0 },
+		{ -1, -1 },
+		{ details = true }
+	)
+	vim.api.nvim_buf_clear_namespace(0, NS_INVALID, 0, -1)
+	log.debug(marks)
+	local id = 1
+	for index = 1, #marks do
+		set_range_extmark(bufnr, marks[index][2], marks[index][4].end_row, id)
+		id = id + 1
+	end
+	set_range_extmark(bufnr, first, last, id)
+end
+
 local function on_insert_mode(bufnr, first, last, new_last)
 	log.debug("===-===-===-=== validation insert mode (%d, %d) ===-===-===-===", first, new_last)
 	buffer.set(bufnr, buffer.IKEY.REPAIR_PENDING, true)
+	set_range_extmarks(bufnr, first, new_last)
+end
+
+local function on_undo_mode(bufnr, first, last, new_last)
+	log.debug("===-===-===-=== validation insert mode (%d, %d) ===-===-===-===", first, new_last)
+	buffer.set(bufnr, buffer.IKEY.REPAIR_PENDING, true)
+	set_range_extmarks(bufnr, first, new_last)
+end
+
+local function set_range_extmark(bufnr, first, last)
+	local bufnr = 0 -- 例としてカレントバッファ
+	local ns = vim.api.nvim_create_namespace("tirenvi")
+	vim.api.nvim_buf_clear_namespace(0, ns, 0, -1)
+	vim.api.nvim_set_hl(0, "TirenviDebugLine", { bg = "#888840" })
+	vim.fn.sign_define("TirenviSign", { text = "◆", texthl = "ErrorMsg" })
+	vim.api.nvim_buf_set_extmark(bufnr, ns, 1, 8, {
+		strict = false,
+		right_gravity = false,
+		end_right_gravity = true,
+		end_row = 2,
+		end_col = 8,
+		hl_group = "TirenviDebugLine",
+		hl_eol = false,
+		-- 	line_hl_group = "TirenviDebugLine",
+		virt_text = { { "●●●", "ErrorMsg" } },
+		virt_text_pos = "eol_right_align", -- eol
+		sign_text = "◆◆",
+		sign_hl_group = "ErrorMsg",
+		invalidate = false,
+	})
+	local marks = vim.api.nvim_buf_get_extmarks(
+		bufnr,
+		ns,
+		{ 0, 0 },
+		{ -1, -1 },
+		{ details = true }
+	)
 end
 
 ---@param bufnr number
@@ -90,6 +170,7 @@ local function repair(bufnr, first, last, new_last)
 	end
 	if buf_state.is_undo_mode(bufnr) then
 		log.debug("===-===-===-=== undo/redo mode (%d, %d) ===-===-===-===", first, new_last)
+		on_undo_mode(bufnr, first, last, new_last)
 		return
 	end
 	local new_lines = get_repaired_lines(bufnr, first, new_last)
