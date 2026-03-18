@@ -145,7 +145,7 @@ require("tirenvi").setup({
 
 All native Vim editing works.
 
-* `dd`, `yy`, `p`, `D`, `o`, `R`, `J`, ...
+* `dd`, `yy`, `p`, `D`, `o`, `R`, `J`, and more
 * Command-line command
 * Visual mode command
 
