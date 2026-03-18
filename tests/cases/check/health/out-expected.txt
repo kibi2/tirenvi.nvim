@@ -1,5 +1,3 @@
-=== MESSAGE ===
-Running healthchecks...
 
 === DISPLAY ===
 

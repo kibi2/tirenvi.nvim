@@ -60,8 +60,10 @@ function! RunTest(opts) abort
   let l:out = []
 
   " MESSAGE
-  call add(l:out, '=== MESSAGE ===')
-  let l:out += s:CollectMessages()
+  if !has_key(a:opts, 'nomessage')
+    call add(l:out, '=== MESSAGE ===')
+    let l:out += s:CollectMessages()
+  endif
 
   " DISPLAY
   call add(l:out, '')
