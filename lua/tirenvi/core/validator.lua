@@ -191,39 +191,6 @@ local function set_range_extmarks(bufnr, ranges)
 end
 
 ---@param bufnr number
----@param first integer
----@param last integer
-local function set_range_extmark(bufnr, first, last)
-	local bufnr = 0 -- 例としてカレントバッファ
-	local ns = vim.api.nvim_create_namespace("tirenvi")
-	vim.api.nvim_buf_clear_namespace(0, ns, 0, -1)
-	vim.api.nvim_set_hl(0, "TirenviDebugLine", { bg = "#888840" })
-	vim.fn.sign_define("TirenviSign", { text = "◆", texthl = "ErrorMsg" })
-	vim.api.nvim_buf_set_extmark(bufnr, ns, 1, 8, {
-		strict = false,
-		right_gravity = false,
-		end_right_gravity = true,
-		end_row = 2,
-		end_col = 8,
-		hl_group = "TirenviDebugLine",
-		hl_eol = false,
-		-- 	line_hl_group = "TirenviDebugLine",
-		virt_text = { { "●●●", "ErrorMsg" } },
-		virt_text_pos = "eol_right_align", -- eol
-		sign_text = "◆◆",
-		sign_hl_group = "ErrorMsg",
-		invalidate = false,
-	})
-	local extmarks = vim.api.nvim_buf_get_extmarks(
-		bufnr,
-		ns,
-		{ 0, 0 },
-		{ -1, -1 },
-		{ details = true }
-	)
-end
-
----@param bufnr number
 ---@param ranges Range[]
 local function repair_rages(bufnr, ranges)
 	for index = 1, #ranges do
