@@ -158,6 +158,14 @@ end
 
 ---@param bufnr number
 ---@param first integer
+---@param new_last integer
+local function repair_rages(bufnr, first, new_last)
+	local new_lines = get_repaired_lines(bufnr, first, new_last)
+	buffer.set_lines(bufnr, first, new_last, new_lines)
+end
+
+---@param bufnr number
+---@param first integer
 ---@param last integer
 ---@param new_last integer
 local function repair(bufnr, first, last, new_last)
@@ -173,12 +181,11 @@ local function repair(bufnr, first, last, new_last)
 		on_undo_mode(bufnr, first, last, new_last)
 		return
 	end
-	local new_lines = get_repaired_lines(bufnr, first, new_last)
 	-- Modifying the buffer in insert mode may corrupt the undo node.
 	-- Therefore, in insert mode, only record the invalid changed region
 	-- and repair it when leaving insert mode.
 	pcall(vim.cmd, "undojoin")
-	buffer.set_lines(bufnr, first, new_last, new_lines)
+	repair_rages(bufnr, first, new_last)
 end
 
 -----------------------------------------------------------------------

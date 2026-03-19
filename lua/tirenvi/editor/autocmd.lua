@@ -43,6 +43,10 @@ local function attach_on_lines(bufnr)
 	buffer.attach_on_lines(bufnr, on_lines)
 end
 
+---@param bufnr number
+local function on_insert_leave(bufnr)
+	init.on_insert_leave(bufnr)
+end
 
 ---@param args table
 local function on_buf_read_post(args)
@@ -235,7 +239,7 @@ local function register_autocmds()
 			buffer.set(args.buf, buffer.IKEY.INSERT_MODE, false)
 			log.debug(buffer.get(args.buf, buffer.IKEY.REPAIR_PENDING))
 			if buffer.get(args.buf, buffer.IKEY.REPAIR_PENDING) then
-				validator.repair(args.buf, 0, -1, -1)
+				on_insert_leave(args.buf)
 				buffer.set(args.buf, buffer.IKEY.REPAIR_PENDING, false)
 			end
 		end,

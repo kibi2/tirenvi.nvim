@@ -171,4 +171,9 @@ function M.on_lines(bufnr, first, last, new_last)
 	validator.repair(bufnr, first, last, new_last)
 end
 
+---@param bufnr number
+function M.on_insert_leave(bufnr)
+	validator.repair(bufnr, 0, -1, -1)
+end
+
 return M
