@@ -81,13 +81,15 @@ local NS_INVALID = vim.api.nvim_create_namespace("tirenvi_invalid")
 ---@param last integer
 ---@param id integer
 local function set_range_extmark(bufnr, first, last, id)
+	local line = vim.api.nvim_buf_get_lines(bufnr, last, last + 1, false)[1]
+	local end_col = #line
 	local opts = {
 		id = id,
 		strict = false,
 		right_gravity = false,
 		end_right_gravity = true,
 		end_row = last,
-		end_col = 0,
+		end_col = end_col,
 		invalidate = false,
 	}
 	if vim.log.levels.DEBUG >= config.log.level then
@@ -105,6 +107,47 @@ end
 ---@field first integer
 ---@field last integer
 
+---@param ranges Range[]
+---@return Range[]
+local function sort_range(ranges)
+	table.sort(ranges, function(prev, next)
+		return prev.first < next.first
+	end)
+	return ranges
+end
+
+---@param prev Range
+---@param next Range
+---@return Range | nil
+local function union_range_2(prev, next)
+	if prev.last + 1 < next.first then
+		return nil
+	end
+	return {
+		first = math.min(prev.first, next.first),
+		last  = math.max(prev.last, next.last),
+	}
+end
+
+---@param ranges Range[]
+---@return Range[]
+local function union_range(ranges)
+	if #ranges == 0 then
+		return ranges
+	end
+	ranges = sort_range(ranges)
+	local unions = { ranges[1] }
+	for index = 2, #ranges do
+		local merged = union_range_2(unions[#unions], ranges[index])
+		if merged then
+			unions[#unions] = merged
+		else
+			unions[#unions + 1] = ranges[index]
+		end
+	end
+	return unions
+end
+
 ---@param bufnr number
 ---@return Range[]
 local function get_range_extmarks(bufnr)
@@ -117,7 +160,9 @@ local function get_range_extmarks(bufnr)
 	)
 	local ranges = {}
 	for index = 1, #extmarks do
-		ranges[index] = { first = extmarks[index][2], last = extmarks[index][4].end_row }
+		local start_row = extmarks[index][2]
+		local end_row = extmarks[index][4].end_row
+		ranges[#ranges + 1] = { first = start_row, last = end_row }
 	end
 	return ranges
 end
@@ -130,9 +175,9 @@ local function get_ranges(bufnr, first, last)
 	local ranges = get_range_extmarks(bufnr)
 	if first then
 		---@cast last integer
-		ranges[#ranges + 1] = { first = first, last = last }
+		ranges[#ranges + 1] = { first = first, last = last - 1 }
 	end
-	return ranges
+	return union_range(ranges)
 end
 
 ---@param bufnr number
@@ -182,8 +227,10 @@ end
 ---@param ranges Range[]
 local function repair_rages(bufnr, ranges)
 	for index = 1, #ranges do
-		local new_lines = get_repaired_lines(bufnr, ranges[index].first, ranges[index].last)
-		buffer.set_lines(bufnr, ranges[index].first, ranges[index].last, new_lines)
+		local first = ranges[index].first
+		local last = ranges[index].last + 1
+		local new_lines = get_repaired_lines(bufnr, first, last)
+		buffer.set_lines(bufnr, first, last, new_lines)
 	end
 end
 
