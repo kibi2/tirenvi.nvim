@@ -237,11 +237,7 @@ local function register_autocmds()
 			-- due to the behavior of other plugins (e.g., Telescope).
 			-- Do not assert insert_mode here.
 			buffer.set(args.buf, buffer.IKEY.INSERT_MODE, false)
-			log.debug(buffer.get(args.buf, buffer.IKEY.REPAIR_PENDING))
-			if buffer.get(args.buf, buffer.IKEY.REPAIR_PENDING) then
-				on_insert_leave(args.buf)
-				buffer.set(args.buf, buffer.IKEY.REPAIR_PENDING, false)
-			end
+			on_insert_leave(args.buf)
 		end,
 	})
 

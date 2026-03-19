@@ -173,7 +173,7 @@ end
 
 ---@param bufnr number
 function M.on_insert_leave(bufnr)
-	validator.repair(bufnr, 0, -1, -1)
+	validator.repair(bufnr)
 end
 
 return M

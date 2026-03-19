@@ -17,9 +17,6 @@ M.IKEY = {
 	-- Buffer currently contains invalid TIR structure.
 	BUFFER_INVALID = "buffer_invalid",
 
-	-- Buffer contains edits that require repair after leaving insert mode.
-	REPAIR_PENDING = "repair_pending",
-
 	-- true when in insert mode
 	INSERT_MODE = "insert_mode",
 
@@ -49,7 +46,6 @@ local function get_state(bufnr)
 	if not b[bufnr].tirenvi then
 		b[bufnr].tirenvi = {
 			buffer_invalid = false,
-			repair_pending = false,
 			insert_mode = false,
 			old_path = nil,
 			attached = false,

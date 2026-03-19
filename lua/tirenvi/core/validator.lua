@@ -75,6 +75,11 @@ end
 vim.fn.sign_define("TirenviSign", { text = "◆", texthl = "ErrorMsg" })
 vim.api.nvim_set_hl(0, "TirenviDebugLine", { bg = "#888840" })
 local NS_INVALID = vim.api.nvim_create_namespace("tirenvi_invalid")
+
+---@param bufnr number
+---@param first integer
+---@param last integer
+---@param id integer
 local function set_range_extmark(bufnr, first, last, id)
 	local opts = {
 		id = id,
@@ -96,36 +101,53 @@ local function set_range_extmark(bufnr, first, last, id)
 	vim.api.nvim_buf_set_extmark(bufnr, NS_INVALID, first, 0, opts)
 end
 
-local function set_range_extmarks(bufnr, first, last)
-	local marks = vim.api.nvim_buf_get_extmarks(
+---@class Range
+---@field first integer
+---@field last integer
+
+---@param bufnr number
+---@return Range[]
+local function get_range_extmarks(bufnr)
+	local extmarks = vim.api.nvim_buf_get_extmarks(
 		bufnr,
 		NS_INVALID,
 		{ 0, 0 },
 		{ -1, -1 },
 		{ details = true }
 	)
-	vim.api.nvim_buf_clear_namespace(0, NS_INVALID, 0, -1)
-	log.debug(marks)
+	local ranges = {}
+	for index = 1, #extmarks do
+		ranges[index] = { first = extmarks[index][2], last = extmarks[index][4].end_row }
+	end
+	return ranges
+end
+
+---@param bufnr number
+---@param first integer | nil
+---@param last integer | nil
+---@return Range[]
+local function get_ranges(bufnr, first, last)
+	local ranges = get_range_extmarks(bufnr)
+	if first then
+		---@cast last integer
+		ranges[#ranges + 1] = { first = first, last = last }
+	end
+	return ranges
+end
+
+---@param bufnr number
+---@param ranges Range[]
+local function set_range_extmarks(bufnr, ranges)
 	local id = 1
-	for index = 1, #marks do
-		set_range_extmark(bufnr, marks[index][2], marks[index][4].end_row, id)
+	for index = 1, #ranges do
+		set_range_extmark(bufnr, ranges[index].first, ranges[index].last, id)
 		id = id + 1
 	end
-	set_range_extmark(bufnr, first, last, id)
 end
 
-local function on_insert_mode(bufnr, first, last, new_last)
-	log.debug("===-===-===-=== validation insert mode (%d, %d) ===-===-===-===", first, new_last)
-	buffer.set(bufnr, buffer.IKEY.REPAIR_PENDING, true)
-	set_range_extmarks(bufnr, first, new_last)
-end
-
-local function on_undo_mode(bufnr, first, last, new_last)
-	log.debug("===-===-===-=== validation insert mode (%d, %d) ===-===-===-===", first, new_last)
-	buffer.set(bufnr, buffer.IKEY.REPAIR_PENDING, true)
-	set_range_extmarks(bufnr, first, new_last)
-end
-
+---@param bufnr number
+---@param first integer
+---@param last integer
 local function set_range_extmark(bufnr, first, last)
 	local bufnr = 0 -- 例としてカレントバッファ
 	local ns = vim.api.nvim_create_namespace("tirenvi")
@@ -147,7 +169,7 @@ local function set_range_extmark(bufnr, first, last)
 		sign_hl_group = "ErrorMsg",
 		invalidate = false,
 	})
-	local marks = vim.api.nvim_buf_get_extmarks(
+	local extmarks = vim.api.nvim_buf_get_extmarks(
 		bufnr,
 		ns,
 		{ 0, 0 },
@@ -157,35 +179,38 @@ local function set_range_extmark(bufnr, first, last)
 end
 
 ---@param bufnr number
----@param first integer
----@param new_last integer
-local function repair_rages(bufnr, first, new_last)
-	local new_lines = get_repaired_lines(bufnr, first, new_last)
-	buffer.set_lines(bufnr, first, new_last, new_lines)
+---@param ranges Range[]
+local function repair_rages(bufnr, ranges)
+	for index = 1, #ranges do
+		local new_lines = get_repaired_lines(bufnr, ranges[index].first, ranges[index].last)
+		buffer.set_lines(bufnr, ranges[index].first, ranges[index].last, new_lines)
+	end
 end
 
 ---@param bufnr number
----@param first integer
----@param last integer
----@param new_last integer
+---@param first integer | nil
+---@param last integer | nil
+---@param new_last integer | nil
 local function repair(bufnr, first, last, new_last)
+	local ranges = get_ranges(bufnr, first, new_last)
+	vim.api.nvim_buf_clear_namespace(0, NS_INVALID, 0, -1)
 	-- Moving the cursor in insert mode may create an invalid table undo node.
 	-- Therefore, when performing undo/redo, skip table validation.
 	if buf_state.is_insert_mode(bufnr) then
 		log.debug("===-===-===-=== insert mode (%d, %d) ===-===-===-===", first, new_last)
-		on_insert_mode(bufnr, first, last, new_last)
+		set_range_extmarks(bufnr, ranges)
 		return
 	end
 	if buf_state.is_undo_mode(bufnr) then
 		log.debug("===-===-===-=== undo/redo mode (%d, %d) ===-===-===-===", first, new_last)
-		on_undo_mode(bufnr, first, last, new_last)
+		set_range_extmarks(bufnr, ranges)
 		return
 	end
 	-- Modifying the buffer in insert mode may corrupt the undo node.
 	-- Therefore, in insert mode, only record the invalid changed region
 	-- and repair it when leaving insert mode.
 	pcall(vim.cmd, "undojoin")
-	repair_rages(bufnr, first, new_last)
+	repair_rages(bufnr, ranges)
 end
 
 -----------------------------------------------------------------------
@@ -193,8 +218,9 @@ end
 -----------------------------------------------------------------------
 
 ---@param bufnr number
----@param first integer
----@param new_last integer
+---@param first integer | nil
+---@param last integer | nil
+---@param new_last integer | nil
 function M.repair(bufnr, first, last, new_last)
 	vim.schedule(function()
 		if not api.nvim_buf_is_valid(bufnr) then
