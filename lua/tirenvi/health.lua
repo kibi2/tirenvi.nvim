@@ -1,5 +1,6 @@
 local config = require("tirenvi.config")
 local version = require("tirenvi.version")
+local log = require("tirenvi.util.log")
 
 local health = vim.health or require("health")
 
@@ -114,6 +115,9 @@ function M.check()
 			end
 		end
 	end
+	table.sort(command_requirements, function(prev, next)
+		return prev.key < next.key
+	end)
 	for exe, required_version in pairs(command_requirements) do
 		check_command(exe, required_version)
 	end
