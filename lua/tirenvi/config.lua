@@ -16,7 +16,7 @@ local defaults = {
 	---@type Marks
 	marks = {
 		pipe = "│", -- │┆┊┇┃┋▏▕
-		padding = " ", --    ·∙⸱␣␠⠀░
+		padding = "·", --    ·∙⸱␣␠⠀░
 		trim = "⇢", -- ⇢⋯⋮︙›↠▶¬…
 		lf = "↲", -- ⤶⏎↵↲⤷␤¶—↩️
 		tab = "»", -- »⇥→⇨▹▸▻►⇤␉》

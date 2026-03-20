@@ -257,6 +257,14 @@ local function register_autocmds()
 		end,
 	})
 
+	vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
+		callback = function()
+			vim.fn.clearmatches()
+			vim.fn.matchadd("TirenviPipe", config.marks.pipe, 20)
+			vim.fn.matchadd("TirenviPadding", config.marks.padding, 10)
+		end,
+	})
+
 	api.nvim_create_autocmd("VimLeave", {
 		group = augroup,
 		callback = guard.guarded(function(args)
