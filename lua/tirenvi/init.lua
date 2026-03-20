@@ -61,6 +61,7 @@ end
 
 vim.api.nvim_set_hl(0, "TirenviPadding", { fg = "bg", bg = "bg", })
 safe_link_multi("TirenviPipe", { "@punctuation.special.markdown", "Delimiter", "Special", })
+safe_link_multi("TirenviSpecialChar", { "NonText", })
 safe_link_multi("TirenviHeader", { "@markup.heading.markdown", "Title", })
 
 -- public API
