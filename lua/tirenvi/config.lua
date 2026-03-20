@@ -16,10 +16,10 @@ local defaults = {
 	---@type Marks
 	marks = {
 		pipe = "│", -- │┆┊┇┃┋▏▕
-		padding = "·", --    ·∙⸱␣␠⠀░
-		trim = "⇢", -- ⇢⋯⋮︙›↠▶¬…
+		padding = "⠀", --    ·∙⸱␣␠⠀░
+		trim = "⋯", -- ⇢⋯⋮︙›↠▶¬…
 		lf = "↲", -- ⤶⏎↵↲⤷␤¶—↩️
-		tab = "»", -- »⇥→⇨▹▸▻►⇤␉》
+		tab = "⇥", -- »⇥→⇨▹▸▻►⇤␉》
 	},
 	---@type {[string]: Parser}
 	parser_map = {
