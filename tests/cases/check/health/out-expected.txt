@@ -2,11 +2,11 @@
 
 
 
-- version: 0.2.0
 - ✅ OK tir-csv found
 - ✅ OK tir-csv version 0.1.2 OK
 - ✅ OK tir-gfm-lite found
-- ✅ OK tir-gfm-lite version 0.1.1 OK
+- ✅ OK tir-gfm-lite version 0.1.0 OK
+- version: 0.2.0
 === DISPLAY ===
 ==============================================================================
 tirenvi ~
