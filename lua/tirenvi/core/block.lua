@@ -112,9 +112,30 @@ function M:add(record)
 end
 
 M.plain.serialize = serialize_records
-M.grid.serialize = serialize_records
-
 M.plain.normalize = nop
+M.plain.to_vim = nop
+M.plain.apply_replacements = nop
+M.plain.remove_padding = nop
+
+---@self Block_plain
+---@param attr Attr_plain
+function M.plain:set_attr_if_empty(attr)
+    self.attr = attr
+end
+
+---@self Block_plain
+---@return Block_grid
+function M.plain:to_grid()
+    local block = M.new()
+    M.set_kind(block, CONST.KIND.GRID)
+    for index, record in ipairs(self.records) do
+        block.records[index] = Record.plain.to_grid(record)
+    end
+    ---@cast block Block_grid
+    return block
+end
+
+M.grid.serialize = serialize_records
 
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
@@ -126,8 +147,6 @@ function M.grid:normalize()
     end
 end
 
-M.plain.to_vim = nop
-
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 function M.grid:to_vim()
@@ -135,8 +154,6 @@ function M.grid:to_vim()
         Record.grid.pad_cells(record, self.attr.columns)
     end
 end
-
-M.plain.apply_replacements = nop
 
 ---@self Block_grid
 ---@param replace {[string]:string}
@@ -152,8 +169,6 @@ function M.grid:apply_replacements(replace)
     end
 end
 
-M.plain.remove_padding = nop
-
 ---@self Block_grid
 function M.grid:remove_padding()
     local escaped_padding = vim.pesc(config.marks.padding)
@@ -166,30 +181,12 @@ function M.grid:remove_padding()
     end
 end
 
----@self Block_plain
----@param attr Attr_plain
-function M.plain:set_attr_if_empty(attr)
-    self.attr = attr
-end
-
 ---@self Block_grid
 ---@param attr Attr_grid
 function M.grid:set_attr_if_empty(attr)
     if Attr.is_empty(self.attr) then
         self.attr = attr
     end
-end
-
----@self Block_plain
----@return Block_grid
-function M.plain:to_grid()
-    local block = M.new()
-    M.set_kind(block, CONST.KIND.GRID)
-    for index, record in ipairs(self.records) do
-        block.records[index] = Record.plain.to_grid(record)
-    end
-    ---@cast block Block_grid
-    return block
 end
 
 ---@self Block_grid

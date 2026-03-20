@@ -28,6 +28,12 @@ function M.plain.new_from_vi_line(vi_line)
     return { kind = CONST.KIND.PLAIN, line = vi_line }
 end
 
+---@param self Record_plain
+---@return Record_grid
+function M.plain:to_grid()
+    return new({ self.line })
+end
+
 ---@param vi_line string
 ---@return Record_grid
 function M.grid.new_from_vi_line(vi_line)
@@ -50,12 +56,6 @@ function M.grid:pad_cells(columns)
     for icol, cell in ipairs(self.row) do
         self.row[icol] = Cell.pad_cell(cell, columns[icol].width)
     end
-end
-
----@param self Record_plain
----@return Record_grid
-function M.plain:to_grid()
-    return new({ self.line })
 end
 
 return M

@@ -81,33 +81,6 @@ function M.new()
     return {}
 end
 
----@return Attr_plain
-function M.plain.new()
-    return M.plain.new_from_record()
-end
-
----@return Attr_grid
-function M.grid.new()
-    return new_from_columns({})
-end
-
----@return Attr_plain
-function M.plain.new_from_record()
-    return { kind = CONST.KIND.ATTR_PLAIN, }
-end
-
----@param record Record_grid
----@return Attr_grid
-function M.grid.new_from_record(record)
-    return new_from_columns(get_columns(record.row))
-end
-
----@self Attr_grid
----@param records Record_grid[]
-function M.grid:extend(records)
-    extend(self, new_merged_attr(records))
-end
-
 ---@self Attr
 ---@return boolean
 function M:is_empty()
@@ -121,6 +94,49 @@ function M:is_empty()
         return true
     end
     return false
+end
+
+---@self Attr
+---@param source Attr
+---@return boolean
+function M:is_conflict(source)
+    if M.is_empty(self) or M.is_empty(source) then
+        return false
+    end
+    if self.kind ~= source.kind then
+        return true
+    end
+    if #self.columns ~= #source.columns then
+        return true
+    end
+    return false
+end
+
+---@return Attr_plain
+function M.plain.new()
+    return M.plain.new_from_record()
+end
+
+---@return Attr_plain
+function M.plain.new_from_record()
+    return { kind = CONST.KIND.ATTR_PLAIN, }
+end
+
+---@return Attr_grid
+function M.grid.new()
+    return new_from_columns({})
+end
+
+---@param record Record_grid
+---@return Attr_grid
+function M.grid.new_from_record(record)
+    return new_from_columns(get_columns(record.row))
+end
+
+---@self Attr_grid
+---@param records Record_grid[]
+function M.grid:extend(records)
+    extend(self, new_merged_attr(records))
 end
 
 ---@self Attr_grid
@@ -140,22 +156,6 @@ function M.grid:has_all()
         end
     end
     return true
-end
-
----@self Attr
----@param source Attr
----@return boolean
-function M:is_conflict(source)
-    if M.is_empty(self) or M.is_empty(source) then
-        return false
-    end
-    if self.kind ~= source.kind then
-        return true
-    end
-    if #self.columns ~= #source.columns then
-        return true
-    end
-    return false
 end
 
 return M
