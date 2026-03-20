@@ -50,6 +50,19 @@ local function from_flat(bufnr, new_path, old_path)
 	ui.set_lines(bufnr, 0, -1, vi_lines)
 end
 
+local function safe_link_multi(name, targets)
+	for _, t in ipairs(targets) do
+		local ok = pcall(vim.api.nvim_get_hl, 0, { name = t })
+		if ok then
+			vim.api.nvim_set_hl(0, name, { link = t })
+			return
+		end
+	end
+end
+
+safe_link_multi("TirenviPipe", { "@punctuation.special.markdown", "Delimiter", "Special", })
+safe_link_multi("TirenviHeader", { "@markup.heading.markdown", "Title", })
+
 -- public API
 
 --- Set up tirenvi plugin (load autocmds and commands)
