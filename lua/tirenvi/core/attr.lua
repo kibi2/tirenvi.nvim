@@ -1,5 +1,6 @@
 local CONST = require("tirenvi.constants")
 local Cell = require("tirenvi.core.cell")
+local log = require("tirenvi.util.log")
 
 local M = {}
 M.plain = {}
@@ -67,7 +68,8 @@ local function extend(self, source)
         self.columns = source.columns
     else
         for index, column in ipairs(self.columns) do
-            column.align = column.align or source[index].align
+            column.align = column.align or source.columns[index].align
+            column.width = column.width or source.columns[index].width
         end
     end
 end

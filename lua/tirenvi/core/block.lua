@@ -3,6 +3,7 @@ local Record = require("tirenvi.core.record")
 local Cell = require("tirenvi.core.cell")
 local config = require("tirenvi.config")
 local Attr = require("tirenvi.core.attr")
+local log = require("tirenvi.util.log")
 
 local M = {}
 M.plain = {}
