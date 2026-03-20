@@ -268,6 +268,8 @@ local function register_autocmds()
 			end
 			vim.fn.clearmatches()
 			vim.fn.matchadd("TirenviPipe", config.marks.pipe, 20)
+			vim.fn.matchadd("TirenviSpecialChar", config.marks.lf, 20)
+			vim.fn.matchadd("TirenviSpecialChar", config.marks.tab, 20)
 			vim.fn.matchadd("TirenviPadding", config.marks.padding, 10)
 		end,
 	})
