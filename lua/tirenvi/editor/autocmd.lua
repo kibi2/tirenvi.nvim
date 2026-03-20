@@ -258,7 +258,14 @@ local function register_autocmds()
 	})
 
 	vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
-		callback = function()
+		callback = function(args)
+			if buf_state.should_skip(args.buf, {
+					unsupported = true,
+					already_invalid = true,
+					is_tir_vim = true,
+				}) then
+				return
+			end
 			vim.fn.clearmatches()
 			vim.fn.matchadd("TirenviPipe", config.marks.pipe, 20)
 			vim.fn.matchadd("TirenviPadding", config.marks.padding, 10)
