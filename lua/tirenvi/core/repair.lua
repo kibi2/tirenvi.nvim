@@ -35,12 +35,10 @@ local function correct_empty_line(vi_lines, attr_prev)
 	if not attr_prev then
 		return
 	end
-	log.probe(vi_lines)
 	if #vi_lines == 0 then
 		return
 	end
 	if vi_lines[1] == "" then
-		log.probe(attr_prev)
 		if attr_prev.kind == CONST.KIND.ATTR_GRID then
 			vi_lines[1] = config.marks.pipe .. config.marks.pipe
 		end
