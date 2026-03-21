@@ -93,25 +93,6 @@ local function build_blocks(records)
 	return blocks
 end
 
----@param self Blocks
-local function merge_blocks(self)
-	if #self <= 1 then
-		return
-	end
-	for index, block in ipairs(self) do
-		local new_block = Block[block.kind].to_grid(block)
-		self[index] = new_block
-	end
-	local first = self[1]
-	local records = first.records
-	for index = 2, #self do
-		util.extend(records, self[index].records)
-	end
-	for i = #self, 2, -1 do
-		self[i] = nil
-	end
-end
-
 -----------------------------------------------------------------------
 -- Attribute handling
 -----------------------------------------------------------------------
@@ -126,7 +107,7 @@ end
 ---@return boolean
 ---@return RefAttrError | nil
 local function apply_reference_attr_single(blocks, attr_prev, attr_next)
-	merge_blocks(blocks)
+	M.merge_blocks(blocks)
 	if Attr.is_conflict(attr_prev, attr_next) then
 		return false, "conflict"
 	end
@@ -195,6 +176,25 @@ end
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
+
+---@param self Blocks
+function M.merge_blocks(self)
+	if #self <= 1 then
+		return
+	end
+	for index, block in ipairs(self) do
+		local new_block = Block[block.kind].to_grid(block)
+		self[index] = new_block
+	end
+	local first = self[1]
+	local records = first.records
+	for index = 2, #self do
+		util.extend(records, self[index].records)
+	end
+	for i = #self, 2, -1 do
+		self[i] = nil
+	end
+end
 
 --- Convert NDJSON records into normalized blocks.
 ---@param ndjsons Ndjson[]
