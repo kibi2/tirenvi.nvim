@@ -99,7 +99,7 @@ end
 ---@param line string
 ---@return boolean
 function M.has_pipe(line)
-	return line:find(config.marks.pipe) ~= nil
+	return line:find(config.marks.pipe, 1, true) ~= nil
 end
 
 ---@param array1 any[]
