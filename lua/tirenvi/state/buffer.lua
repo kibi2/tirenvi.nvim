@@ -3,7 +3,6 @@
 -----------------------------------------------------------------------
 
 ----- dependencies
-local ui = require("tirenvi.ui")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -107,19 +106,15 @@ end
 ---@param bufnr number
 ---@param i_start integer
 ---@param i_end integer integer
----@param lines string[] | nil
+---@param lines string[]
 ---@param strict boolean | nil
 function M.set_lines(bufnr, i_start, i_end, lines, strict)
-	if lines == nil then
-		return
-	end
 	bufnr = bufnr or 0
 	strict = strict == true
 	log.debug("=== set_lines(%d, %d)[1]%s [%d]%s", i_start, i_end, lines[1], #lines, lines[#lines])
 	log.debug(get_state(bufnr))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
 	local ok, err = pcall(set_lines, bufnr, i_start, i_end, strict, lines)
-	ui.table_apply_header(bufnr, i_start, lines)
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) - 1)
 	assert(M.get(bufnr, M.IKEY.PATCH_DEPTH) == 0)
 	if not ok then

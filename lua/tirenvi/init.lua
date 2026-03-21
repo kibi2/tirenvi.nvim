@@ -7,6 +7,7 @@ local log = require("tirenvi.util.log")
 local buffer = require("tirenvi.state.buffer")
 local flat_parser = require("tirenvi.core.flat_parser")
 local vim_parser = require("tirenvi.core.vim_parser")
+local ui = require("tirenvi.ui")
 
 -- module
 ---@class tirenvi
@@ -33,7 +34,7 @@ local function to_flat(bufnr, old_path, new_path)
 	local blocks = vim_parser.parse(vi_lines)
 	log.debug(blocks)
 	local fl_lines = flat_parser.unparse(blocks, parser)
-	buffer.set_lines(bufnr, 0, -1, fl_lines)
+	ui.set_lines(bufnr, 0, -1, fl_lines)
 end
 
 ---@param bufnr number Buffer number.
@@ -46,7 +47,7 @@ local function from_flat(bufnr, new_path, old_path)
 	local parser = util.get_parser(bufnr, new_path, old_path)
 	local blocks = flat_parser.parse(fl_lines, parser)
 	local vi_lines = vim_parser.unparse(blocks)
-	buffer.set_lines(bufnr, 0, -1, vi_lines)
+	ui.set_lines(bufnr, 0, -1, vi_lines)
 end
 
 -- public API
@@ -119,7 +120,7 @@ function M.redraw(bufnr)
 	local vi_lines = vim_parser.unparse(blocks)
 	if table.concat(old_lines, "\n") ~= table.concat(vi_lines, "\n") then
 		log.debug({ vi_lines[1], vi_lines[2] })
-		buffer.set_lines(bufnr, 0, -1, vi_lines)
+		ui.set_lines(bufnr, 0, -1, vi_lines)
 	end
 end
 

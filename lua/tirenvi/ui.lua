@@ -1,6 +1,9 @@
 local config = require("tirenvi.config")
 local range = require("tirenvi.util.range")
 local render = require("tirenvi.render")
+local buffer = require("tirenvi.state.buffer")
+local util = require("tirenvi.util.util")
+local log = require("tirenvi.util.log")
 
 local matches = {}
 
@@ -29,6 +32,20 @@ local function safe_link_multi(name, targets)
             vim.api.nvim_set_hl(0, name, { link = t })
             return
         end
+    end
+end
+
+---@param bufnr number
+---@param i_start integer
+---@param i_end integer integer
+---@param lines string[]
+---@param strict boolean | nil
+function M.set_lines(bufnr, i_start, i_end, lines, strict)
+    buffer.set_lines(bufnr, i_start, i_end, lines, strict)
+    local parser = util.get_parser(bufnr)
+    if parser.allow_plain then
+        local new_lines = buffer.get_lines(bufnr, 0, -1)
+        M.highlight(bufnr, new_lines)
     end
 end
 
@@ -92,27 +109,19 @@ function M.table_setup()
 end
 
 ---@param bufnr number
----@param i_start integer
 ---@param lines string[]
-local function highlight(bufnr, i_start, lines)
+function M.highlight(bufnr, lines)
     local has_pipe = false
     for index, line in ipairs(lines) do
         if line:find(config.marks.pipe, 1, true) ~= nil then
             if has_pipe == false then
-                render.highlight_header_line(bufnr, index + i_start - 1, line)
+                render.highlight_header_line(bufnr, index - 1, line)
             end
             has_pipe = true
         else
             has_pipe = false
         end
     end
-end
-
----@param bufnr number
----@param i_start integer
----@param lines string[]
-function M.table_apply_header(bufnr, i_start, lines)
-    highlight(bufnr, i_start, lines)
 end
 
 -- =========================

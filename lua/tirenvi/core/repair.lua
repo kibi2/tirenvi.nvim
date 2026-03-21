@@ -80,7 +80,7 @@ local function repair_ranges(bufnr, ranges)
 		local first = ranges[index].first
 		local last = ranges[index].last + 1
 		local new_lines = get_repaired_lines(bufnr, first, last)
-		buffer.set_lines(bufnr, first, last, new_lines)
+		ui.set_lines(bufnr, first, last, new_lines)
 	end
 end
 

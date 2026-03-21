@@ -23,7 +23,6 @@ end
 ---@param bufnr number
 ---@return boolean
 local function has_pipe(bufnr)
-	log.debug("check has_pipe: %d", bufnr)
 	local fl_lines = buffer.get_lines(bufnr, 0, -1, false)
 	for _, fl_line in ipairs(fl_lines) do
 		if util.has_pipe(fl_line) then
