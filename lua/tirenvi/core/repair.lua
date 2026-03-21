@@ -67,7 +67,7 @@ local function get_repaired_lines(bufnr, start_row, end_row)
 		elseif reason == "conflict" then
 			blocks = get_blocks(bufnr, 0, -1)
 		else
-			error("validator: unexpected error: " .. tostring(reason))
+			error("repair: unexpected error: " .. tostring(reason))
 		end
 	end
 	return vim_parser.unparse(blocks)
