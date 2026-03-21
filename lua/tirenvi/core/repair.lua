@@ -7,6 +7,7 @@
 -- Dependencies
 -----------------------------------------------------------------------
 
+local CONST = require("tirenvi.constants")
 local config = require("tirenvi.config")
 local log = require("tirenvi.util.log")
 local util = require("tirenvi.util.util")
@@ -28,12 +29,32 @@ local api = vim.api
 -- Private helpers
 -----------------------------------------------------------------------
 
+---@param vi_lines string[]
+---@param attr_prev Attr|nil
+local function correct_empty_line(vi_lines, attr_prev)
+	if not attr_prev then
+		return
+	end
+	log.probe(vi_lines)
+	if #vi_lines == 0 then
+		return
+	end
+	if vi_lines[1] == "" then
+		log.probe(attr_prev)
+		if attr_prev.kind == CONST.KIND.ATTR_GRID then
+			vi_lines[1] = config.marks.pipe .. config.marks.pipe
+		end
+	end
+end
+
 ---@param bufnr number
 ---@param start_row integer
 ---@param end_row integer
+---@param attr_prev Attr|nil
 ---@return Blocks
-local function get_blocks(bufnr, start_row, end_row)
+local function get_blocks(bufnr, start_row, end_row, attr_prev)
 	local vi_lines = buffer.get_lines(bufnr, start_row, end_row)
+	correct_empty_line(vi_lines, attr_prev)
 	return vim_parser.parse(vi_lines)
 end
 
@@ -56,8 +77,8 @@ end
 ---@return string[]
 local function get_repaired_lines(bufnr, start_row, end_row)
 	log.debug("===-===-===-=== validation start (%d, %d) ===-===-===-===", start_row, end_row)
-	local blocks = get_blocks(bufnr, start_row, end_row)
 	local attr_prev, attr_next = get_reference_attrs(bufnr, start_row, end_row)
+	local blocks = get_blocks(bufnr, start_row, end_row, attr_prev)
 	local parser = util.get_parser(bufnr)
 	local allow_plain = parser.allow_plain
 	local success, reason = Blocks.repair(blocks, attr_prev, attr_next, allow_plain)
