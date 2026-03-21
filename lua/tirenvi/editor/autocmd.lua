@@ -5,7 +5,7 @@ local init = require("tirenvi.init")
 local buf_state = require("tirenvi.state.buf_state")
 local config = require("tirenvi.config")
 local log = require("tirenvi.util.log")
-local validator = require("tirenvi.core.validator")
+local ui = require("tirenvi.ui")
 
 -- module
 local M = {}
@@ -266,12 +266,16 @@ local function register_autocmds()
 				}) then
 				return
 			end
-			vim.fn.clearmatches()
-			vim.fn.matchadd("TirenviPipe", config.marks.pipe, 20)
-			vim.fn.matchadd("TirenviSpecialChar", config.marks.lf, 20)
-			vim.fn.matchadd("TirenviSpecialChar", config.marks.tab, 20)
-			vim.fn.matchadd("TirenviPadding", config.marks.padding, 10)
+			ui.special_clear()
+			ui.special_apply()
 		end,
+	})
+
+	vim.api.nvim_create_autocmd("WinClosed", {
+		callback = function(args)
+			local winid = tonumber(args.match)
+			ui.clear_matches(winid)
+		end
 	})
 
 	api.nvim_create_autocmd("VimLeave", {

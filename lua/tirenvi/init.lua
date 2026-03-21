@@ -32,8 +32,8 @@ local function to_flat(bufnr, old_path, new_path)
 	local vi_lines = buffer.get_lines(bufnr, 0, -1, false)
 	local blocks = vim_parser.parse(vi_lines)
 	log.debug(blocks)
-	local new_lines = flat_parser.unparse(blocks, parser)
-	buffer.set_lines(bufnr, 0, -1, new_lines)
+	local fl_lines = flat_parser.unparse(blocks, parser)
+	buffer.set_lines(bufnr, 0, -1, fl_lines)
 end
 
 ---@param bufnr number Buffer number.
@@ -49,28 +49,6 @@ local function from_flat(bufnr, new_path, old_path)
 	buffer.set_lines(bufnr, 0, -1, vi_lines)
 end
 
-local function safe_link_multi(name, targets)
-	for _, t in ipairs(targets) do
-		local ok = pcall(vim.api.nvim_get_hl, 0, { name = t })
-		if ok then
-			vim.api.nvim_set_hl(0, name, { link = t })
-			return
-		end
-	end
-end
-
-vim.api.nvim_set_hl(0, "TirenviPadding", { fg = "bg", bg = "bg", })
-safe_link_multi("TirenviPipe", { "@punctuation.special.markdown", "Delimiter", "Special", })
-safe_link_multi("TirenviSpecialChar", { "NonText", })
-local title = vim.api.nvim_get_hl(0, { name = "Title" })
-vim.api.nvim_set_hl(0, "TirenviHeader", {
-	fg = title.fg,
-	bg = title.bg,
-	bold = title.bold,
-	underline = true,
-	sp = title.fg,
-})
-
 -- public API
 
 --- Set up tirenvi plugin (load autocmds and commands)
@@ -79,6 +57,7 @@ function M.setup(opts)
 	config.setup(opts)
 	require("tirenvi.editor.autocmd").setup()
 	require("tirenvi.editor.commands").setup()
+	require("tirenvi.ui").setup()
 end
 
 --- Convert current buffer (or specified buffer) from plain format to tir-vim format
@@ -135,12 +114,12 @@ end
 ---@param bufnr number Buffer number.
 ---@return nil
 function M.redraw(bufnr)
-	local vi_lines = buffer.get_lines(bufnr, 0, -1, false)
-	local blocks = vim_parser.parse(vi_lines)
-	local new_lines = vim_parser.unparse(blocks)
-	if table.concat(vi_lines, "\n") ~= table.concat(new_lines, "\n") then
-		log.debug({ new_lines[1], new_lines[2] })
-		buffer.set_lines(bufnr, 0, -1, new_lines)
+	local old_lines = buffer.get_lines(bufnr, 0, -1, false)
+	local blocks = vim_parser.parse(old_lines)
+	local vi_lines = vim_parser.unparse(blocks)
+	if table.concat(old_lines, "\n") ~= table.concat(vi_lines, "\n") then
+		log.debug({ vi_lines[1], vi_lines[2] })
+		buffer.set_lines(bufnr, 0, -1, vi_lines)
 	end
 end
 

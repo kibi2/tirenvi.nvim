@@ -3,7 +3,7 @@
 -----------------------------------------------------------------------
 
 ----- dependencies
-local config = require("tirenvi.config")
+local ui = require("tirenvi.ui")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -83,32 +83,6 @@ local function set_lines(bufnr, i_start, i_end, strict, lines)
 	log.debug(get_state(bufnr))
 end
 
-local ns = vim.api.nvim_create_namespace("tirenvi")
-
-local function highlight_header_line(buf, lnum, line)
-	local npipe = #config.marks.pipe
-	vim.api.nvim_buf_set_extmark(buf, ns, lnum, npipe, {
-		strict = true,
-		end_row = lnum,
-		end_col = #line - npipe,
-		hl_group = "TirenviHeader",
-		priority = 100,
-	})
-end
-
-local function highlight(buf, i_start, lines)
-	local has_pipe = false
-	for index, line in ipairs(lines) do
-		if line:find(config.marks.pipe) ~= nil then
-			if has_pipe == false then
-				highlight_header_line(buf, index + i_start - 1, line)
-			end
-			has_pipe = true
-		else
-			has_pipe = false
-		end
-	end
-end
 
 -----------------------------------------------------------------------
 -- Public API
@@ -145,7 +119,7 @@ function M.set_lines(bufnr, i_start, i_end, lines, strict)
 	log.debug(get_state(bufnr))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
 	local ok, err = pcall(set_lines, bufnr, i_start, i_end, strict, lines)
-	highlight(bufnr, i_start, lines)
+	ui.table_apply_header(bufnr, i_start, lines)
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) - 1)
 	assert(M.get(bufnr, M.IKEY.PATCH_DEPTH) == 0)
 	if not ok then
