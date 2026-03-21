@@ -112,6 +112,13 @@ function M:add(record)
     self.records[#self.records + 1] = record
 end
 
+function M.plain.new()
+    local self = M.new()
+    M:set_kind(CONST.KIND.PLAIN)
+    M:add(Record.plain.new_from_vi_line(""))
+    return self
+end
+
 M.plain.serialize = serialize_records
 M.plain.normalize = nop
 M.plain.to_vim = nop

@@ -133,26 +133,42 @@ local function apply_reference_attr_single(blocks, attr_prev, attr_next)
 end
 
 ---@param self Blocks
----@param block Block
----@param attr Attr
----@param is_first boolean
-local function insert_plain_block(self, block, attr, is_first)
-	if attr.kind ~= CONST.KIND.ATTR_GRID then
+---@param attr_prev Attr
+---@param attr_next Attr
+local function insert_plain_block(self, attr_prev, attr_next)
+	if #self > 1 then
 		return
 	end
-	if block.kind ~= CONST.KIND.GRID then
+	if attr_prev.kind ~= CONST.KIND.ATTR_GRID then
+		return self
+	end
+	if attr_next.kind ~= CONST.KIND.ATTR_GRID then
+		return self
+	end
+	if #attr_prev.columns == #attr_next.columns then
+		return self
+	end
+	self[#self + 1] = Block.palin.new()
+end
+
+---@param self Blocks
+---@param attr_prev Attr
+---@param attr_next Attr
+local function attach_attr(self, attr_prev, attr_next)
+	if #self == 0 then
 		return
 	end
-	if #attr.columns == #block.records then
-		return
+	if not Attr.is_empty(attr_prev) then
+		local block = self[1]
+		if block.kind == CONST.KIND.GRID then
+			Block[block.kind].set_attr_if_empty(block, attr_prev)
+		end
 	end
-	local block = Block.new()
-	Block.set_kind(block, CONST.KIND.PLAIN)
-	Block.add(block, Record.plain.new_from_vi_line(""))
-	if is_first then
-		table.insert(self, 1, block)
-	else
-		self[#self + 1] = block
+	if not Attr.is_empty(attr_next) then
+		local block = self[#self]
+		if block.kind == CONST.KIND.GRID then
+			Block[block.kind].set_attr_if_empty(block, attr_next)
+		end
 	end
 end
 
@@ -160,8 +176,8 @@ end
 ---@param attr_prev Attr
 ---@param attr_next Attr
 local function apply_reference_attr_multi(blocks, attr_prev, attr_next)
-	insert_plain_block(blocks, blocks[1], attr_prev, true)
-	insert_plain_block(blocks, blocks[#blocks], attr_next, false)
+	insert_plain_block(blocks, attr_prev, attr_next)
+	attach_attr(blocks, attr_prev, attr_next)
 end
 
 ---@param map {[string]: string}
