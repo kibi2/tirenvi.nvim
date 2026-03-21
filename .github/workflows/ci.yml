@@ -33,9 +33,14 @@ jobs:
         run: |
           pip install tir-csv
 
+      - name: Install tir-gfm-lite
+        run: |
+          pip install tir-gfm-lite
+
       - name: Show versions
         run: |
           tir-csv --version
+          tir-gfm-lite --version
           nvim --version
           lua -v || true
 
