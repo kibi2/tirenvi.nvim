@@ -190,7 +190,7 @@ init.from_flat
 vim buffer
   → (neovim)             get lines into vi_lines
   → (vim_parser.parse)   vi_lines → Blocks
-  → (validator.repair)   Blocks.repair()
+  → (rapair.repair)      Blocks.repair()
   → (vim_parser.unparse) Blocks → vi_lines
   → (neovim)             replace vim buffer
 ```
