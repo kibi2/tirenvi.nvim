@@ -274,7 +274,7 @@ local function register_autocmds()
 	vim.api.nvim_create_autocmd("WinClosed", {
 		callback = function(args)
 			local winid = tonumber(args.match)
-			ui.clear_matches(winid)
+			pcall(ui.clear_matches, winid)
 		end
 	})
 

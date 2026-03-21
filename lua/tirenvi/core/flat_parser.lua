@@ -124,6 +124,9 @@ function M.parse(fl_lines, parser)
 	local js_lines = flat_to_js_lines(fl_lines, parser)
 	local ndjsons = js_lines_to_ndjsons(js_lines)
 	local blocks = Blocks.new_from_flat(ndjsons)
+	if not parser.allow_plain then
+		Blocks.merge_blocks(blocks)
+	end
 	return blocks
 end
 
