@@ -178,4 +178,15 @@ function M.on_insert_leave(bufnr)
 	repair.repair(bufnr)
 end
 
+---@param bufnr number
+function M.on_filetype(bufnr)
+	local old_fileypte = buffer.get(bufnr, buffer.IKEY.FILETYPE)
+	local new_fileypte = vim.bo.filetype
+	if old_fileypte == new_fileypte then
+		return
+	end
+	log.probe("filetype %s -> %s", tostring(old_fileypte), tostring(new_fileypte))
+	buffer.set(bufnr, buffer.IKEY.FILETYPE, vim.bo.filetype)
+end
+
 return M

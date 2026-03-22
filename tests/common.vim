@@ -9,6 +9,7 @@ set shortmess+=A
 let s:root = $TIRENVI_ROOT
 execute 'set rtp+=' . s:root
 let g:tirenvi_test_mode = 1
+filetype plugin indent on
 
 lua << EOF
 local M = require("tirenvi")
@@ -17,6 +18,7 @@ M.setup({
 		level = vim.log.levels.WARN,
 		-- level = vim.log.levels.DEBUG,
 		use_timestamp = false,
+		monitor = false,
 		probe = false,
 		-- probe = true,
 		output = "print",

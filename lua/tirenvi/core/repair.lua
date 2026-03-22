@@ -145,21 +145,12 @@ function M.repair(bufnr, first, last, new_last)
 		if api.nvim_get_current_buf() ~= bufnr then
 			return
 		end
-		if buffer.get(bufnr, buffer.IKEY.INTERNAL) then
-			-- log.debug("===-===-===-=== validation skip (%d, %d) ===-===-===-===", i_start, i_end)
-			return
-		end
-		buffer.set(bufnr, buffer.IKEY.INTERNAL, true)
-
 		local ok, err = xpcall(
 			function()
 				repair(bufnr, first, last, new_last)
 			end,
 			debug.traceback
 		)
-
-		buffer.set(bufnr, buffer.IKEY.INTERNAL, false)
-
 		if not ok then
 			error(err)
 		end

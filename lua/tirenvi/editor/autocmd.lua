@@ -89,35 +89,36 @@ local function on_cursor_hold(args)
 end
 
 ---@param args table
-local function on_vim_leave(args) end
-
----@return string[]
-local function get_tirenvi_patterns()
-	local tirenvi_patterns = {}
-	for ext, _ in pairs(config.parser_map) do
-		table.insert(tirenvi_patterns, "*." .. ext)
-	end
-	return tirenvi_patterns
+local function on_filetype(args)
+	init.on_filetype(args.bufnr)
 end
+
+---@param args table
+local function on_vim_leave(args) end
 
 ----------------------------------------------------------------------
 -- Autocmd registration (private)
 ----------------------------------------------------------------------
+
+local function debug_entry_point(args)
+	local filetype = vim.bo.filetype
+	log.debug("===+===+===+===+=== %s(%d)%s ===+===+===+===+===", args.event, args.buf, filetype)
+end
 
 local function register_autocmds()
 	local augroup = api.nvim_create_augroup(GROUP_NAME, { clear = true })
 	api.nvim_create_autocmd("BufReadPost", {
 		group = augroup,
 		-- Process only items for which a parser has been specified
-		pattern = get_tirenvi_patterns(),
 		callback = guard.guarded(function(args)
+			debug_entry_point(args)
 			if buf_state.should_skip(args.buf, {
 					unsupported = true,
 					has_parser = true,
 				}) then
 				return
 			end
-			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
+			debug_entry_point(args)
 			on_buf_read_post(args)
 		end, {
 			on_error = function(args)
@@ -135,7 +136,7 @@ local function register_autocmds()
 				}) then
 				return
 			end
-			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
+			debug_entry_point(args)
 			local old_path = buffer.get_file_path(args.buf)
 			buffer.set(args.buf, buffer.IKEY.OLD_PATH, old_path)
 			on_buf_write_pre(args)
@@ -150,7 +151,7 @@ local function register_autocmds()
 				log.debug("===+===+===+===+=== %s %s skip", args.event, args.buf)
 				return
 			end
-			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
+			debug_entry_point(args)
 			buffer.set(args.buf, buffer.IKEY.OLD_PATH, nil)
 			on_buf_write_post(args)
 		end),
@@ -165,7 +166,7 @@ local function register_autocmds()
 				}) then
 				return
 			end
-			log.debug("===+===+===+===+=== BufFilePre %s ===+===+===+===+===", args.buf)
+			debug_entry_point(args)
 			local old_path = buffer.get_file_path(args.buf)
 			buffer.set(args.buf, buffer.IKEY.OLD_PATH, old_path)
 			log.debug(buffer.get(args.buf, buffer.IKEY.OLD_PATH))
@@ -180,7 +181,7 @@ local function register_autocmds()
 			if not old_path then
 				return
 			end
-			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
+			debug_entry_point(args)
 			buffer.set(args.buf, buffer.IKEY.OLD_PATH, nil)
 			on_buf_file_post(args.buf, args.file, old_path)
 		end),
@@ -188,7 +189,6 @@ local function register_autocmds()
 
 	api.nvim_create_autocmd("CursorHold", {
 		group = augroup,
-		pattern = get_tirenvi_patterns(),
 		callback = guard.guarded(function(args)
 			log.debug()
 			if buf_state.should_skip(args.buf, {
@@ -198,14 +198,13 @@ local function register_autocmds()
 				}) then
 				return
 			end
-			-- log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
+			-- debug_entry_point(args)
 			on_cursor_hold(args)
 		end),
 	})
 
 	api.nvim_create_autocmd("InsertEnter", {
 		group = augroup,
-		pattern = get_tirenvi_patterns(),
 		callback = function(args)
 			log.debug()
 			if buf_state.should_skip(args.buf, {
@@ -215,7 +214,7 @@ local function register_autocmds()
 				}) then
 				return
 			end
-			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
+			debug_entry_point(args)
 			assert(not buffer.get(args.buf, buffer.IKEY.INSERT_MODE))
 			buffer.set(args.buf, buffer.IKEY.INSERT_MODE, true)
 		end,
@@ -223,7 +222,6 @@ local function register_autocmds()
 
 	api.nvim_create_autocmd("InsertLeave", {
 		group = augroup,
-		pattern = get_tirenvi_patterns(),
 		callback = function(args)
 			if buf_state.should_skip(args.buf, {
 					unsupported = true,
@@ -232,7 +230,7 @@ local function register_autocmds()
 				}) then
 				return
 			end
-			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
+			debug_entry_point(args)
 			-- InsertLeave may be triggered without a preceding InsertEnter
 			-- due to the behavior of other plugins (e.g., Telescope).
 			-- Do not assert insert_mode here.
@@ -243,7 +241,6 @@ local function register_autocmds()
 
 	api.nvim_create_autocmd("InsertCharPre", {
 		group = augroup,
-		pattern = get_tirenvi_patterns(),
 		callback = function(args)
 			if buf_state.should_skip(args.buf, {
 					unsupported = true,
@@ -252,7 +249,7 @@ local function register_autocmds()
 				}) then
 				return
 			end
-			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
+			debug_entry_point(args)
 			on_insert_char_pre(args)
 		end,
 	})
@@ -278,10 +275,17 @@ local function register_autocmds()
 		end
 	})
 
+	vim.api.nvim_create_autocmd("FileType", {
+		callback = function(args)
+			debug_entry_point(args)
+			on_filetype(args)
+		end
+	})
+
 	api.nvim_create_autocmd("VimLeave", {
 		group = augroup,
 		callback = guard.guarded(function(args)
-			log.debug("===+===+===+===+=== %s %s ===+===+===+===+===", args.event, args.buf)
+			debug_entry_point(args)
 			on_vim_leave(args)
 		end),
 	})
