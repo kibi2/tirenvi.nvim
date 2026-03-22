@@ -11,6 +11,7 @@
 local config = require("tirenvi.config")
 local buffer = require("tirenvi.state.buffer")
 local errors = require("tirenvi.util.errors")
+local log = require("tirenvi.util.log")
 
 
 -----------------------------------------------------------------------

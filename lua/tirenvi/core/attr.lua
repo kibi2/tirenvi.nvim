@@ -124,9 +124,14 @@ function M.plain.new_from_record()
     return { kind = CONST.KIND.ATTR_PLAIN, }
 end
 
+---@param record Record_grid | nil
 ---@return Attr_grid
-function M.grid.new()
-    return new_from_columns({})
+function M.grid.new(record)
+    if record then
+        return M.grid.new_from_record(record)
+    else
+        return new_from_columns({})
+    end
 end
 
 ---@param record Record_grid

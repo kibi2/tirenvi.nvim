@@ -78,11 +78,13 @@ local function initialize(self, kind)
 end
 
 ---@param self Block
+---@param attr Attr
 ---@return Ndjson[]
-local function serialize_records(self)
-    local ndjsons = {}
-    for i, record in ipairs(self.records) do
-        ndjsons[i] = record
+local function serialize_records(self, attr)
+    ---@type Ndjson[]
+    local ndjsons = { attr }
+    for _, record in ipairs(self.records) do
+        ndjsons[#ndjsons + 1] = record
     end
     return ndjsons
 end
@@ -119,7 +121,12 @@ function M.plain.new()
     return self
 end
 
-M.plain.serialize = serialize_records
+---@self Block_plain
+---@return Ndjson[]
+function M.plain:serialize()
+    return serialize_records(self, Attr.plain.new())
+end
+
 M.plain.normalize = nop
 M.plain.to_vim = nop
 M.plain.apply_replacements = nop
@@ -143,7 +150,11 @@ function M.plain:to_grid()
     return block
 end
 
-M.grid.serialize = serialize_records
+---@self Block_grid
+---@return Ndjson[]
+function M.grid:serialize()
+    return serialize_records(self, Attr.grid.new(self.records[1]))
+end
 
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
