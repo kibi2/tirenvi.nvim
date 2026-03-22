@@ -27,7 +27,7 @@ local fn = vim.fn
 ---@param filename string
 ---@return Parser | nil
 local function get_parser_for_file(filename)
-	local ext = M.get_ext(filename)
+	local ext = vim.bo.filetype
 	if not ext then
 		return nil
 	end

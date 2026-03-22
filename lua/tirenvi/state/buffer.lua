@@ -32,7 +32,8 @@ M.IKEY = {
 	-- vim.fn.undotree().seq_last
 	UNDO_TREE_LASET = "undo_tree_laset",
 
-	INTERNAL = "internal",
+	-- vim.bo.filetype
+	FILETYPE = "filetype",
 }
 
 -----------------------------------------------------------------------
@@ -45,13 +46,13 @@ local function get_state(bufnr)
 	bufnr = bufnr or 0
 	if not b[bufnr].tirenvi then
 		b[bufnr].tirenvi = {
+			attached = false,
 			buffer_invalid = false,
+			filetype = "",
 			insert_mode = false,
 			old_path = nil,
-			attached = false,
 			patch_depth = 0,
 			undo_tree_last = -1,
-			internal = false,
 		}
 	end
 	return b[bufnr].tirenvi
@@ -98,6 +99,7 @@ end
 ---@param key string
 ---@param val boolean | integer | string | nil
 function M.set(bufnr, key, val)
+	bufnr = bufnr or 0
 	local state = get_state(bufnr)
 	state[key] = val
 	b[bufnr].tirenvi = state

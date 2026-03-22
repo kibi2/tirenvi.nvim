@@ -97,7 +97,7 @@ function M.should_skip(bufnr, opts)
 		if enabled then
 			local ok = checks[name](bufnr)
 			if not ok then
-				log.debug("===+===+=== skip: %s", name)
+				-- log.debug("===+===+=== skip: %s", name)
 				return true
 			end
 		end

@@ -1,5 +1,5 @@
 === MESSAGE ===
-[TIR][5:0(+0)MB][ERROR][[string ":lua"]:5] [CI] key = 0D
+[TIR][ERROR][[string ":lua"]:5] [CI] key = 0D
 
 === DISPLAY ===
 │1a⠀│2 a│ 3a⠀│
