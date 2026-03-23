@@ -171,14 +171,15 @@ end
 
 ---@param bufnr number
 function M.on_filetype(bufnr)
-	local old_fileypte = buffer.get(bufnr, buffer.IKEY.FILETYPE)
-	local new_fileypte = bo[bufnr].filetype
-	buffer.set(bufnr, buffer.IKEY.FILETYPE, new_fileypte)
-	if old_fileypte == new_fileypte or old_fileypte == "" then
-		return
+	local old_filetype = buffer.get(bufnr, buffer.IKEY.FILETYPE)
+	local new_filetype = bo[bufnr].filetype
+	log.debug("filetype %s -> %s", tostring(old_filetype), tostring(new_filetype))
+	if old_filetype then
+		if old_filetype ~= new_filetype then
+			to_flat(bufnr)
+		end
 	end
-	log.debug("filetype %s -> %s", tostring(old_fileypte), tostring(new_fileypte))
-	to_flat(bufnr)
+	buffer.set(bufnr, buffer.IKEY.FILETYPE, new_filetype)
 end
 
 return M

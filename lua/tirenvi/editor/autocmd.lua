@@ -230,12 +230,6 @@ local function register_autocmds()
 
 	vim.api.nvim_create_autocmd("FileType", {
 		callback = function(args)
-			if buf_state.should_skip(args.buf, {
-					unsupported = true,
-					is_tir_vim = true,
-				}) then
-				return
-			end
 			debug_entry_point(args)
 			on_filetype(args)
 		end

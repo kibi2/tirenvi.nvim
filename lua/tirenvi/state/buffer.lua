@@ -45,7 +45,7 @@ local function get_state(bufnr)
 		b[bufnr].tirenvi = {
 			attached = false,
 			buffer_invalid = false,
-			filetype = "",
+			filetype = nil,
 			insert_mode = false,
 			patch_depth = 0,
 			undo_tree_last = -1,

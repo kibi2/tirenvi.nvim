@@ -28,7 +28,7 @@ local bo = vim.bo
 ---@param bufnr number
 ---@return Parser | nil
 local function get_parser_for_file(bufnr)
-	local filetype = bo[bufnr].filetype
+	local filetype = buffer.get(bufnr, buffer.IKEY.FILETYPE)
 	if not filetype then
 		return nil
 	end
