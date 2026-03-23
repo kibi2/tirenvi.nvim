@@ -3,7 +3,7 @@
 source $TIRENVI_ROOT/tests/common.vim
 let outfile = 'gen.tsv'
 
-edit $TIRENVI_ROOT/tests/data/complex.csv
+edit $TIRENVI_ROOT/tests/data/simple.csv
 execute 'write ' . outfile
 
 call RunTest({ 'file': outfile })

@@ -14,6 +14,7 @@ local M = {}
 local GROUP_NAME = "tirenvi"
 
 local api = vim.api
+local bo = vim.bo
 
 ----------------------------------------------------------------------
 -- Event handlers (private)
@@ -56,26 +57,12 @@ end
 
 ---@param args table
 local function on_buf_write_pre(args)
-	local old_path = buffer.get_file_path(args.buf)
-	local new_path = buffer.to_file_path(args.file)
-	init.export_flat(args.buf, new_path, old_path)
+	init.export_flat(args.buf)
 end
 
 ---@param args table
 local function on_buf_write_post(args)
-	local old_path = buffer.get_file_path(args.buf)
-	local new_path = buffer.to_file_path(args.file)
-	init.restore_tir_vim(args.buf, new_path, old_path)
-end
-
----@param bufnr number
----@param new_path string
----@param old_path string
-local function on_buf_file_post(bufnr, new_path, old_path)
-	local new_path = buffer.to_file_path(new_path)
-	init.export_flat(bufnr, new_path, old_path)
-	init.enable(bufnr)
-	attach_on_lines(bufnr)
+	init.restore_tir_vim(args.buf)
 end
 
 ---@param args table
@@ -90,7 +77,7 @@ end
 
 ---@param args table
 local function on_filetype(args)
-	init.on_filetype(args.bufnr)
+	init.on_filetype(args.buf)
 end
 
 ---@param args table
@@ -101,7 +88,7 @@ local function on_vim_leave(args) end
 ----------------------------------------------------------------------
 
 local function debug_entry_point(args)
-	local filetype = vim.bo.filetype
+	local filetype = bo[args.buf].filetype
 	log.debug("===+===+===+===+=== %s(%d)%s ===+===+===+===+===", args.event, args.buf, filetype)
 end
 
@@ -111,7 +98,6 @@ local function register_autocmds()
 		group = augroup,
 		-- Process only items for which a parser has been specified
 		callback = guard.guarded(function(args)
-			debug_entry_point(args)
 			if buf_state.should_skip(args.buf, {
 					unsupported = true,
 					has_parser = true,
@@ -137,8 +123,6 @@ local function register_autocmds()
 				return
 			end
 			debug_entry_point(args)
-			local old_path = buffer.get_file_path(args.buf)
-			buffer.set(args.buf, buffer.IKEY.OLD_PATH, old_path)
 			on_buf_write_pre(args)
 		end),
 	})
@@ -146,44 +130,13 @@ local function register_autocmds()
 	api.nvim_create_autocmd("BufWritePost", {
 		group = augroup,
 		callback = guard.guarded(function(args)
-			local old_path = buffer.get(args.buf, buffer.IKEY.OLD_PATH)
-			if not old_path then
-				log.debug("===+===+===+===+=== %s %s skip", args.event, args.buf)
-				return
-			end
-			debug_entry_point(args)
-			buffer.set(args.buf, buffer.IKEY.OLD_PATH, nil)
-			on_buf_write_post(args)
-		end),
-	})
-
-	api.nvim_create_autocmd("BufFilePre", {
-		group = augroup,
-		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
 					unsupported = true,
-					already_invalid = true,
 				}) then
 				return
 			end
 			debug_entry_point(args)
-			local old_path = buffer.get_file_path(args.buf)
-			buffer.set(args.buf, buffer.IKEY.OLD_PATH, old_path)
-			log.debug(buffer.get(args.buf, buffer.IKEY.OLD_PATH))
-		end),
-	})
-
-	api.nvim_create_autocmd("BufFilePost", {
-		group = augroup,
-		callback = guard.guarded(function(args)
-			local old_path = buffer.get(args.buf, buffer.IKEY.OLD_PATH)
-			---@cast  old_path string | nil
-			if not old_path then
-				return
-			end
-			debug_entry_point(args)
-			buffer.set(args.buf, buffer.IKEY.OLD_PATH, nil)
-			on_buf_file_post(args.buf, args.file, old_path)
+			on_buf_write_post(args)
 		end),
 	})
 
@@ -277,6 +230,12 @@ local function register_autocmds()
 
 	vim.api.nvim_create_autocmd("FileType", {
 		callback = function(args)
+			if buf_state.should_skip(args.buf, {
+					unsupported = true,
+					is_tir_vim = true,
+				}) then
+				return
+			end
 			debug_entry_point(args)
 			on_filetype(args)
 		end

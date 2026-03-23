@@ -20,9 +20,6 @@ M.IKEY = {
 	-- true when in insert mode
 	INSERT_MODE = "insert_mode",
 
-	-- Has a value only between Buf[Write|File]Pre and Buf[Write|File]Post.
-	OLD_PATH = "old_path",
-
 	-- Set only when the on_lines callback is attached.
 	ATTACHED = "attached",
 
@@ -32,7 +29,7 @@ M.IKEY = {
 	-- vim.fn.undotree().seq_last
 	UNDO_TREE_LASET = "undo_tree_laset",
 
-	-- vim.bo.filetype
+	-- vim.bo[bufnr].filetype
 	FILETYPE = "filetype",
 }
 
@@ -50,7 +47,6 @@ local function get_state(bufnr)
 			buffer_invalid = false,
 			filetype = "",
 			insert_mode = false,
-			old_path = nil,
 			patch_depth = 0,
 			undo_tree_last = -1,
 		}

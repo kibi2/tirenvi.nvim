@@ -21,17 +21,18 @@ local log = require("tirenvi.util.log")
 local M = {}
 
 local fn = vim.fn
+local bo = vim.bo
 -- private helpers
 
 --- Get parser configuration for a file.
----@param filename string
+---@param bufnr number
 ---@return Parser | nil
-local function get_parser_for_file(filename)
-	local ext = vim.bo.filetype
-	if not ext then
+local function get_parser_for_file(bufnr)
+	local filetype = bo[bufnr].filetype
+	if not filetype then
 		return nil
 	end
-	return config.parser_map[ext]
+	return config.parser_map[filetype]
 end
 
 ---@param str string
@@ -45,6 +46,7 @@ local function utf8_chars(str)
 	return chars
 end
 
+---@return {[string]:string}
 local function collect_reserved_chars()
 	local set = {}
 	for name, marks in pairs(config.marks) do
@@ -119,19 +121,9 @@ function M.assert_no_reserved_marks(fl_lines)
 end
 
 ---@param bufnr number
----@param new_path string|nil
----@param old_path string|nil
 ---@return Parser
-function M.get_parser(bufnr, new_path, old_path)
-	if new_path == nil then
-		new_path = buffer.get_file_path(bufnr)
-	end
-	local file_path = new_path
-	local parser = get_parser_for_file(file_path)
-	if not parser and old_path then
-		file_path = old_path
-		parser = get_parser_for_file(file_path)
-	end
+function M.get_parser(bufnr)
+	local parser = get_parser_for_file(bufnr)
 	if parser == nil then
 		error(errors.new_domain_error(""))
 	end

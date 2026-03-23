@@ -22,14 +22,12 @@ M.motion = require("tirenvi.editor.motion")
 -- private helpers
 
 ---@param bufnr number Buffer number.
----@param old_path string
----@param new_path string
 ---@return nil
-local function to_flat(bufnr, old_path, new_path)
+local function to_flat(bufnr)
 	if not buf_state.is_tir_vim(bufnr) then
 		return
 	end
-	local parser = util.get_parser(bufnr, new_path, old_path)
+	local parser = util.get_parser(bufnr)
 	local vi_lines = buffer.get_lines(bufnr, 0, -1, false)
 	local blocks = vim_parser.parse(vi_lines)
 	log.debug(blocks)
@@ -38,13 +36,11 @@ local function to_flat(bufnr, old_path, new_path)
 end
 
 ---@param bufnr number Buffer number.
----@param new_path string|nil
----@param old_path string|nil
 ---@return nil
-local function from_flat(bufnr, new_path, old_path)
+local function from_flat(bufnr)
 	local fl_lines = buffer.get_lines(bufnr, 0, -1, false)
 	util.assert_no_reserved_marks(fl_lines)
-	local parser = util.get_parser(bufnr, new_path, old_path)
+	local parser = util.get_parser(bufnr)
 	local blocks = flat_parser.parse(fl_lines, parser)
 	local vi_lines = vim_parser.unparse(blocks)
 	ui.set_lines(bufnr, 0, -1, vi_lines)
@@ -77,19 +73,16 @@ end
 
 --- Convert current buffer (or specified buffer) from display format back to file format (tsv)
 ---@param bufnr number Buffer number.
----@param new_path string
 ---@return nil
-function M.export_flat(bufnr, new_path, old_path)
-	log.debug("old_path: %s, new_path: %s", old_path, new_path)
-	to_flat(bufnr, old_path, new_path)
+function M.export_flat(bufnr)
+	to_flat(bufnr)
 	log.debug("export_flat done")
 end
 
 ---@param bufnr number Buffer number.
 ---@return nil
 function M.disable(bufnr)
-	local file_path = buffer.get_file_path(bufnr)
-	to_flat(bufnr, file_path, file_path)
+	to_flat(bufnr)
 end
 
 ---@param bufnr number Buffer number.
@@ -104,12 +97,10 @@ end
 
 --- Convert current buffer (or specified buffer) from plain format to view format
 ---@param bufnr number Buffer number.
----@param new_path string
----@param old_path string
 ---@return nil
-function M.restore_tir_vim(bufnr, new_path, old_path)
+function M.restore_tir_vim(bufnr)
 	pcall(vim.cmd, "undojoin")
-	from_flat(bufnr, new_path, old_path)
+	from_flat(bufnr)
 end
 
 ---@param bufnr number Buffer number.
@@ -181,12 +172,13 @@ end
 ---@param bufnr number
 function M.on_filetype(bufnr)
 	local old_fileypte = buffer.get(bufnr, buffer.IKEY.FILETYPE)
-	local new_fileypte = vim.bo.filetype
-	if old_fileypte == new_fileypte then
+	local new_fileypte = bo[bufnr].filetype
+	buffer.set(bufnr, buffer.IKEY.FILETYPE, new_fileypte)
+	if old_fileypte == new_fileypte or old_fileypte == "" then
 		return
 	end
-	log.probe("filetype %s -> %s", tostring(old_fileypte), tostring(new_fileypte))
-	buffer.set(bufnr, buffer.IKEY.FILETYPE, vim.bo.filetype)
+	log.debug("filetype %s -> %s", tostring(old_fileypte), tostring(new_fileypte))
+	to_flat(bufnr)
 end
 
 return M
