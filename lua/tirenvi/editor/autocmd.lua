@@ -143,7 +143,6 @@ local function register_autocmds()
 	api.nvim_create_autocmd("CursorHold", {
 		group = augroup,
 		callback = guard.guarded(function(args)
-			log.debug()
 			if buf_state.should_skip(args.buf, {
 					unsupported = true,
 					already_invalid = true,
@@ -158,8 +157,8 @@ local function register_autocmds()
 
 	api.nvim_create_autocmd("InsertEnter", {
 		group = augroup,
-		callback = function(args)
-			log.debug()
+		callback = guard.guarded(function(args)
+			debug_entry_point(args)
 			if buf_state.should_skip(args.buf, {
 					unsupported = true,
 					already_invalid = true,
@@ -170,12 +169,12 @@ local function register_autocmds()
 			debug_entry_point(args)
 			assert(not buffer.get(args.buf, buffer.IKEY.INSERT_MODE))
 			buffer.set(args.buf, buffer.IKEY.INSERT_MODE, true)
-		end,
+		end),
 	})
 
 	api.nvim_create_autocmd("InsertLeave", {
 		group = augroup,
-		callback = function(args)
+		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
 					unsupported = true,
 					already_invalid = true,
@@ -189,12 +188,12 @@ local function register_autocmds()
 			-- Do not assert insert_mode here.
 			buffer.set(args.buf, buffer.IKEY.INSERT_MODE, false)
 			on_insert_leave(args.buf)
-		end,
+		end),
 	})
 
 	api.nvim_create_autocmd("InsertCharPre", {
 		group = augroup,
-		callback = function(args)
+		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
 					unsupported = true,
 					already_invalid = true,
@@ -204,11 +203,11 @@ local function register_autocmds()
 			end
 			debug_entry_point(args)
 			on_insert_char_pre(args)
-		end,
+		end),
 	})
 
 	vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
-		callback = function(args)
+		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
 					unsupported = true,
 					already_invalid = true,
@@ -218,21 +217,21 @@ local function register_autocmds()
 			end
 			ui.special_clear()
 			ui.special_apply()
-		end,
+		end),
 	})
 
 	vim.api.nvim_create_autocmd("WinClosed", {
-		callback = function(args)
+		callback = guard.guarded(function(args)
 			local winid = tonumber(args.match)
 			pcall(ui.clear_matches, winid)
-		end
+		end),
 	})
 
 	vim.api.nvim_create_autocmd("FileType", {
-		callback = function(args)
+		callback = guard.guarded(function(args)
 			debug_entry_point(args)
 			on_filetype(args)
-		end
+		end),
 	})
 
 	api.nvim_create_autocmd("VimLeave", {
