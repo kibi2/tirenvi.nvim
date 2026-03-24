@@ -1,0 +1,54 @@
+* 今日の予定 [#b1c3e09d]
+
+** tirenvi [#xf25a077]
+- tir-pukiwiki, --md option ? --raw
+-- 開発着手
+- &#9989;filetypeとparserを関連つける
+- align, width = right+1, center+2
+- テストケース、セル幅0
+- padding config : 色
+- excel, Google doc とかコピペで使えないか？
+
+* pukiwiki 表 [#k0258d54]
+
+||
+|||
+|a|
+|bbbb|
+
+|a
+|a|
+|a|a|c
+|a|a|h|c
+|   a   |a|3|h
+,1,2,3
+|a|a|3|4|f
+|a|a|3|4|5|x
+
+,
+,a
+,|,|
+,a,
+,1,2
+,1,2,
+,1,2,3
+
+
+|LEFT:|CENTER:|RIGHT:|c
+|1234|2345|3456|
+|h1|h2|h3|h
+|a|b|c|
+|CENTER:|RIGHT:|LEFT:|c
+|foot|foot|foot|f
+|BGCOLOR(red): |BGCOLOR(green): |BGCOLOR(blue):|c
+|H1|H2|H3|h
+|a|b|c|
+|F|F|F|f
+,a,b,c
+
+
+- CSV
+
+,1a,2 a, 3a
+,"1 ,",2b,"3 b	"
+," ",,	c

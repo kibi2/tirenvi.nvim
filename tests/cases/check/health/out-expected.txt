@@ -7,6 +7,8 @@
 - ✅ OK tir-csv version 0.1.2 OK
 - ✅ OK tir-gfm-lite found
 - ✅ OK tir-gfm-lite version 0.1.1 OK
+- ✅ OK tir-pukiwiki found
+- ✅ OK tir-pukiwiki version 0.1.0 OK
 === DISPLAY ===
 ==============================================================================
 tirenvi ~

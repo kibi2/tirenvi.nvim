@@ -26,6 +26,7 @@ local defaults = {
 		csv = { executable = "tir-csv", options = {}, required_version = { 0, 1, 2 } },
 		tsv = { executable = "tir-csv", options = { "--delimiter", "\t" }, required_version = { 0, 1, 2 } },
 		markdown = { executable = "tir-gfm-lite", options = {}, allow_plain = true, required_version = { 0, 1, 0 } },
+		pukiwiki = { executable = "tir-pukiwiki", options = {}, allow_plain = true, required_version = { 0, 1, 0 } },
 	},
 	log = {
 		level = levels.WARN,
