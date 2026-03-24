@@ -45,7 +45,6 @@ TOTAL=0
 
 while IFS= read -r -d '' d; do
 
-  # runner が無ければスキップ
   if [ ! -f "$d/run.sh" ] && [ ! -f "$d/run.vim" ]; then
     continue
   fi

@@ -141,7 +141,6 @@ local function flush()
 	api.nvim_buf_set_lines(bufnr, -1, -1, false, vim.split(buf_string, "\n"))
 	queue = {}
 
-	-- 最終行へスクロール
 	local line_count = api.nvim_buf_line_count(bufnr)
 	local win = vim.fn.bufwinid(bufnr)
 	if win ~= -1 then
