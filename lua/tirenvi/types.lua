@@ -71,4 +71,3 @@
 ---@field ensure_tir_vim? boolean
 ---@field is_tir_vim? boolean
 ---@field has_parser? boolean
----@field already_invalid? boolean

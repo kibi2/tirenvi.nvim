@@ -1,6 +1,6 @@
-/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/ui.lua:    vim.fn.sign_define("TirenviSign", { text = "◆", texthl = "ErrorMsg" })
-/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/config.lua:		pipe = "│", -- │┆┊┇┃┋▏▕
-/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/config.lua:		padding = "⠀", --    ·∙⸱␣␠⠀░
-/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/config.lua:		trim = "⋯", -- ⇢⋯⋮︙›↠▶¬…
-/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/config.lua:		lf = "↲", -- ⤶⏎↵↲⤷␤¶—↩️
-/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/config.lua:		tab = "⇥", -- »⇥→⇨▹▸▻►⇤␉》
+/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/ui.lua:132:    vim.fn.sign_define("TirenviSign", { text = "◆", texthl = "ErrorMsg" })
+/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/config.lua:18:		pipe = "│", -- │┆┊┇┃┋▏▕
+/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/config.lua:19:		padding = "⠀", --    ·∙⸱␣␠⠀░
+/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/config.lua:20:		trim = "⋯", -- ⇢⋯⋮︙›↠▶¬…
+/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/config.lua:21:		lf = "↲", -- ⤶⏎↵↲⤷␤¶—↩️
+/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/config.lua:22:		tab = "⇥", -- »⇥→⇨▹▸▻►⇤␉》

@@ -14,9 +14,6 @@ local b = vim.b
 
 -- Buffer-local flags.
 M.IKEY = {
-	-- Buffer currently contains invalid TIR structure.
-	BUFFER_INVALID = "buffer_invalid",
-
 	-- true when in insert mode
 	INSERT_MODE = "insert_mode",
 
