@@ -56,13 +56,6 @@ function M.is_undo_mode(bufnr)
 	return false
 end
 
---- set unsupported buffer. for example, ther is no parser for the file, or the parser fails to parse it.
----@param bufnr number
-function M.set_invalid(bufnr)
-	log.debug("set unsupported buffer: %d", bufnr)
-	buffer.set(bufnr, buffer.IKEY.BUFFER_INVALID, true)
-end
-
 local checks = {
 	unsupported = function(bufnr)
 		return bo[bufnr].buftype == ""
@@ -82,10 +75,6 @@ local checks = {
 	has_parser = function(bufnr)
 		return ensure_has_parser(bufnr)
 	end,
-
-	already_invalid = function(bufnr)
-		return not buffer.get(bufnr, buffer.IKEY.BUFFER_INVALID)
-	end,
 }
 
 --- check if the buffer is supported and valid according to the options. for example, it may be a tir-vim buffer.
@@ -97,7 +86,7 @@ function M.should_skip(bufnr, opts)
 		if enabled then
 			local ok = checks[name](bufnr)
 			if not ok then
-				-- log.debug("===+===+=== skip: %s", name)
+				log.debug("===+===+=== skip:(%d) %s", bufnr, name)
 				return true
 			end
 		end

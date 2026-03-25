@@ -36,7 +36,6 @@ local function attach_on_lines(bufnr)
 	local check_items = {
 		unsupported = true,
 		has_parser = true,
-		already_invalid = true,
 	}
 	if buf_state.should_skip(bufnr, check_items) then
 		return
@@ -106,11 +105,7 @@ local function register_autocmds()
 			end
 			debug_entry_point(args)
 			on_buf_read_post(args)
-		end, {
-			on_error = function(args)
-				buf_state.set_invalid(args.buf)
-			end,
-		}),
+		end),
 	})
 
 	api.nvim_create_autocmd("BufWritePre", {
@@ -145,7 +140,6 @@ local function register_autocmds()
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
 					unsupported = true,
-					already_invalid = true,
 					has_parser = true,
 				}) then
 				return
@@ -161,7 +155,6 @@ local function register_autocmds()
 			debug_entry_point(args)
 			if buf_state.should_skip(args.buf, {
 					unsupported = true,
-					already_invalid = true,
 					has_parser = true,
 				}) then
 				return
@@ -177,7 +170,6 @@ local function register_autocmds()
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
 					unsupported = true,
-					already_invalid = true,
 					has_parser = true,
 				}) then
 				return
@@ -196,7 +188,6 @@ local function register_autocmds()
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
 					unsupported = true,
-					already_invalid = true,
 					is_tir_vim = true,
 				}) then
 				return
@@ -210,7 +201,6 @@ local function register_autocmds()
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
 					unsupported = true,
-					already_invalid = true,
 					is_tir_vim = true,
 				}) then
 				return

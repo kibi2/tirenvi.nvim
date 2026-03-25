@@ -33,7 +33,6 @@ local function cmd_toggle(bufnr)
 	if buf_state.should_skip(bufnr, {
 			unsupported = true,
 			has_parser = true,
-			already_invalid = true,
 		}) then
 		return
 	end
