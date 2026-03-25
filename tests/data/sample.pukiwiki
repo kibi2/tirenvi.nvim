@@ -11,28 +11,37 @@
 
 * pukiwiki 表 [#k0258d54]
 
+- table
+
 ||
-|||
-|a|
-|bbbb|
+|| |
+|a ||
+|bbbb ||
+
+- PIPE
 
 |a
-|a|
-|a|a|c
-|a|a|h|c
-|   a   |a|3|h
-,1,2,3
+|a ||||
+|a|a|c||
+|a|a|h|c|
+|a|a|3|h|
+|1|2|3||
 |a|a|3|4|f
 |a|a|3|4|5|x
+|a|a|3|4|5|ch
+|a|a|3|4|5|cb
 
+- CSV
+
+|a|
 ,
-,a
-,|,|
-,a,
-,1,2
-,1,2,
-,1,2,3
+|｜|｜||
+|a|||
+|1|2||
+|1|2||
+|1|2|3|
 
+- format
 
 |LEFT:|CENTER:|RIGHT:|c
 |1234|2345|3456|
@@ -40,15 +49,18 @@
 |a|b|c|
 |CENTER:|RIGHT:|LEFT:|c
 |foot|foot|foot|f
-|BGCOLOR(red): |BGCOLOR(green): |BGCOLOR(blue):|c
+|BGCOLOR(red):|BGCOLOR(green):|BGCOLOR(blue):|c
 |H1|H2|H3|h
 |a|b|c|
 |F|F|F|f
-,a,b,c
+|a|b|c|
 
+- width
+|100|100|100|c
+|a|b2|12345678901234567890|
 
-- CSV
+- CSV(escape)
 
-,1a,2 a, 3a
-,"1 ,",2b,"3 b	"
-," ",,	c
+|1a|2 a|3a|
+|1 ,|2b|3 b|
+|||c|

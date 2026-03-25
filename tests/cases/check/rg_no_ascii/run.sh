@@ -1,4 +1,4 @@
 #!/bin/sh
 set -eu
 
-rg '[^\x00-\x7F]' $TIRENVI_ROOT -g '*.lua' -g '*.sh' > out-actual.txt
+rg -n -g '*.lua' -g '*.sh' '[^\x00-\x7F]' $TIRENVI_ROOT > out-actual.txt
