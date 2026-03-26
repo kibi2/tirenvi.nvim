@@ -31,9 +31,6 @@
 
 ---@class Attr_column
 ---@field width? integer  -- display width (logical column width)
----@field align? Align
-
----@alias Align "left" | "center" | "right"
 
 ---@alias Record Record_plain | Record_grid
 

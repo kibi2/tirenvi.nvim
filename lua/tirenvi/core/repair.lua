@@ -14,6 +14,7 @@ local util = require("tirenvi.util.util")
 local buffer = require("tirenvi.state.buffer")
 local buf_state = require("tirenvi.state.buf_state")
 local Blocks = require("tirenvi.core.blocks")
+local Attr = require("tirenvi.core.attr")
 local vim_parser = require("tirenvi.core.vim_parser")
 local flat_parser = require("tirenvi.core.flat_parser")
 local ui = require("tirenvi.ui")
@@ -29,17 +30,26 @@ local api = vim.api
 -- Private helpers
 -----------------------------------------------------------------------
 
+
+------ Adjust an empty line based on the previous block context.
+---
+--- If a new line is added below a table, it is treated as a grid row,
+--- so an empty line is converted into an empty table row ("||").
+---
+--- If a new line is added above a table, it is treated as a plain line,
+--- so no modification is applied.
+---
 ---@param vi_lines string[]
 ---@param attr_prev Attr|nil
-local function correct_empty_line(vi_lines, attr_prev)
+local function fix_empty_line_after_table(vi_lines, attr_prev)
 	if not attr_prev then
 		return
 	end
 	if #vi_lines == 0 then
 		return
 	end
-	if vi_lines[1] == "" then
-		if attr_prev.kind == CONST.KIND.ATTR_GRID then
+	if not Attr.is_plain(attr_prev) then
+		if vi_lines[1] == "" then
 			vi_lines[1] = config.marks.pipe .. config.marks.pipe
 		end
 	end
@@ -52,7 +62,7 @@ end
 ---@return Blocks
 local function get_blocks(bufnr, start_row, end_row, attr_prev)
 	local vi_lines = buffer.get_lines(bufnr, start_row, end_row)
-	correct_empty_line(vi_lines, attr_prev)
+	fix_empty_line_after_table(vi_lines, attr_prev)
 	return vim_parser.parse(vi_lines)
 end
 

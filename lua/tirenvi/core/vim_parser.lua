@@ -75,13 +75,13 @@ function M.unparse(blocks)
 	return to_lines(ndjsons)
 end
 
----@param line string | nil
+---@param vi_line string | nil
 ---@return Attr
-function M.parse_to_attr(line)
-	if not line then
+function M.parse_to_attr(vi_line)
+	if not vi_line then
 		return Attr.new()
 	end
-	local record = tir_vim_to_ndjson(line)
+	local record = tir_vim_to_ndjson(vi_line)
 	return Attr[record.kind].new_from_record(record)
 end
 

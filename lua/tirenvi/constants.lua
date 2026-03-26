@@ -6,10 +6,5 @@ M.KIND = {
 	PLAIN = "plain",
 	GRID = "grid",
 }
-M.ALIGN = {
-	LEFT = "left",
-	CENTER = "center",
-	RIGHT = "right",
-}
 
 return M

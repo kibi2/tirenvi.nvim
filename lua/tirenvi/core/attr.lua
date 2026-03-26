@@ -18,7 +18,7 @@ local function get_columns(cells)
     local columns = {}
     local widths = Cell.get_widths(cells)
     for _, width in ipairs(widths) do
-        columns[#columns + 1] = { align = CONST.ALIGN.LEFT, width = width }
+        columns[#columns + 1] = { width = width }
     end
     return columns
 end
@@ -38,9 +38,6 @@ local function merge(self, source)
             mcols[index] = scol
         elseif scol then
             mcol.width = math.max(mcol.width, scol.width)
-            if mcol.align ~= scol.align then
-                mcol.align = CONST.ALIGN.LEFT
-            end
         end
     end
 end
@@ -68,7 +65,6 @@ local function extend(self, source)
         self.columns = source.columns
     else
         for index, column in ipairs(self.columns) do
-            column.align = column.align or source.columns[index].align
             column.width = column.width or source.columns[index].width
         end
     end
