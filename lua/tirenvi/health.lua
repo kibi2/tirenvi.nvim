@@ -10,7 +10,7 @@ local fn = vim.fn
 local REQUIRED_VERSION_FMT = "%d.%d.%d"
 
 ---@param str string
----@return integer[] | nil
+---@return integer[]|nil
 local function parse_version(str)
 	local major, minor, patch = str:match("(%d+)%.(%d+)%.(%d+)")
 	if not major then

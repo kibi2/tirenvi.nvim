@@ -81,7 +81,7 @@ local function js_lines_to_ndjsons(js_lines)
 end
 
 ---@param ndjson Ndjson
----@return string | nil
+---@return string|nil
 local function ndjson_to_line(ndjson)
 	if ndjson == nil then
 		return nil

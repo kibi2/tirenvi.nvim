@@ -1,6 +1,6 @@
 ---@meta
 
----@alias Ndjson Attr_file | Record
+---@alias Ndjson Attr_file|Record
 
 ---@alias Blocks Block[]
 
@@ -32,7 +32,7 @@
 ---@class Attr_column
 ---@field width? integer  -- display width (logical column width)
 
----@alias Record Record_plain | Record_grid
+---@alias Record Record_plain|Record_grid
 
 ---@class Record_plain
 ---@field kind "plain"

@@ -114,7 +114,7 @@ function M.plain.new_from_record()
     return new_from_columns({})
 end
 
----@param record Record_grid | nil
+---@param record Record_grid|nil
 ---@return Attr
 function M.grid.new(record)
     if record then

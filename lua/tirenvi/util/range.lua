@@ -15,7 +15,7 @@ end
 
 ---@param prev Range
 ---@param next Range
----@return Range | nil
+---@return Range|nil
 local function union_range_2(prev, next)
     if prev.last + 1 < next.first then
         return nil
