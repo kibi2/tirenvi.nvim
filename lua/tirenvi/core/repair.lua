@@ -69,8 +69,8 @@ end
 ---@param bufnr number
 ---@param start_row integer
 ---@param end_row integer
----@return Attr
----@return Attr
+---@return Attr|nil
+---@return Attr|nil
 local function get_reference_attrs(bufnr, start_row, end_row)
 	local line_prev, line_next = buffer.get_lines_around(bufnr, start_row, end_row)
 	log.debug("[prev] %s [next] %s", tostring(line_prev), tostring(line_next))

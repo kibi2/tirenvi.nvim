@@ -96,8 +96,8 @@ end
 ---| "grid in plain"
 
 ---@param blocks Blocks
----@param attr_prev Attr
----@param attr_next Attr
+---@param attr_prev Attr|nil
+---@param attr_next Attr|nil
 ---@return boolean
 ---@return RefAttrError|nil
 local function apply_reference_attr_single(blocks, attr_prev, attr_next)
@@ -108,9 +108,11 @@ local function apply_reference_attr_single(blocks, attr_prev, attr_next)
 	if #blocks == 0 then
 		return true
 	end
-	local attr = Attr.is_empty(attr_prev) and attr_next or attr_prev
+	local attr = not attr_prev and attr_next or attr_prev
 	local block = blocks[1]
-	if not Attr.is_plain(attr) then
+	if not attr then
+		return true
+	elseif not Attr.is_plain(attr) then
 		if block.kind == CONST.KIND.PLAIN then
 			block = Block.plain.to_grid(block)
 			blocks[1] = block
@@ -119,24 +121,19 @@ local function apply_reference_attr_single(blocks, attr_prev, attr_next)
 		if block.kind == CONST.KIND.GRID then
 			return false, "grid in plain"
 		end
-	elseif Attr.is_empty(attr) then
-		return true
 	end
-	Block[block.kind].set_attr_if_empty(block, attr)
+	Block.set_attr(block, attr)
 	return true
 end
 
 ---@param self Blocks
----@param attr_prev Attr
----@param attr_next Attr
+---@param attr_prev Attr|nil
+---@param attr_next Attr|nil
 local function insert_plain_block(self, attr_prev, attr_next)
 	if #self > 1 then
 		return
 	end
-	if Attr.is_plain(attr_prev) then
-		return self
-	end
-	if Attr.is_plain(attr_next) then
+	if not attr_prev or not attr_next then
 		return self
 	end
 	if #attr_prev.columns == #attr_next.columns then
@@ -145,30 +142,29 @@ local function insert_plain_block(self, attr_prev, attr_next)
 	self[#self + 1] = Block.palin.new()
 end
 
----@param self Blocks
----@param attr_prev Attr
----@param attr_next Attr
-local function attach_attr(self, attr_prev, attr_next)
-	if #self == 0 then
-		return
-	end
-	if not Attr.is_empty(attr_prev) then
-		local block = self[1]
+local function set_attr(self, attr, index)
+	if attr and not Attr.is_plain(attr) then
+		local block = self[index]
 		if block.kind == CONST.KIND.GRID then
-			Block[block.kind].set_attr_if_empty(block, attr_prev)
-		end
-	end
-	if not Attr.is_empty(attr_next) then
-		local block = self[#self]
-		if block.kind == CONST.KIND.GRID then
-			Block[block.kind].set_attr_if_empty(block, attr_next)
+			Block.set_attr(block, attr)
 		end
 	end
 end
 
+---@param self Blocks
+---@param attr_prev Attr|nil
+---@param attr_next Attr|nil
+local function attach_attr(self, attr_prev, attr_next)
+	if #self == 0 then
+		return
+	end
+	set_attr(self, attr_prev, 1)
+	set_attr(self, attr_next, #self)
+end
+
 ---@param blocks Blocks
----@param attr_prev Attr
----@param attr_next Attr
+---@param attr_prev Attr|nil
+---@param attr_next Attr|nil
 local function apply_reference_attr_multi(blocks, attr_prev, attr_next)
 	insert_plain_block(blocks, attr_prev, attr_next)
 	attach_attr(blocks, attr_prev, attr_next)
@@ -253,8 +249,8 @@ function M:serialize_to_vim()
 end
 
 ---@self Blocks
----@param attr_prev Attr
----@param attr_next Attr
+---@param attr_prev Attr|nil
+---@param attr_next Attr|nil
 ---@param allow_plain boolean|nil
 ---@return boolean
 ---@return RefAttrError|nil

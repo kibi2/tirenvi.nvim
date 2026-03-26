@@ -113,6 +113,12 @@ function M:add(record)
     self.records[#self.records + 1] = record
 end
 
+---@self Block
+---@param attr Attr
+function M:set_attr(attr)
+    self.attr = attr
+end
+
 function M.plain.new()
     local self = M.new()
     M:set_kind(CONST.KIND.PLAIN)
@@ -130,12 +136,6 @@ M.plain.normalize = nop
 M.plain.to_vim = nop
 M.plain.apply_replacements = nop
 M.plain.remove_padding = nop
-
----@self Block_plain
----@param attr Attr
-function M.plain:set_attr_if_empty(attr)
-    self.attr = attr
-end
 
 ---@self Block_plain
 ---@return Block_grid
@@ -196,14 +196,6 @@ function M.grid:remove_padding()
             cell = cell:gsub(escaped_padding, "")
             record.row[icol] = cell
         end
-    end
-end
-
----@self Block_grid
----@param attr Attr
-function M.grid:set_attr_if_empty(attr)
-    if Attr.is_empty(self.attr) then
-        self.attr = attr
     end
 end
 

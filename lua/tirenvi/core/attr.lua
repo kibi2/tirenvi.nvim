@@ -81,27 +81,18 @@ end
 
 ---@self Attr
 ---@return boolean
-function M:is_empty()
-    return #self.columns == 0
-end
-
----@self Attr
----@return boolean
 function M:is_plain()
     return #self.columns == 0
 end
 
----@self Attr
----@param source Attr
+---@param self Attr|nil
+---@param source Attr|nil
 ---@return boolean
 function M:is_conflict(source)
-    if M.is_empty(self) or M.is_empty(source) then
+    if not self or not source then
         return false
     end
-    if #self.columns ~= #source.columns then
-        return true
-    end
-    return false
+    return #self.columns ~= #source.columns
 end
 
 ---@return Attr
