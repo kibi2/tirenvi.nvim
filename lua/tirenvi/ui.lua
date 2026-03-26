@@ -39,7 +39,7 @@ end
 ---@param i_start integer
 ---@param i_end integer integer
 ---@param lines string[]
----@param strict boolean | nil
+---@param strict boolean|nil
 function M.set_lines(bufnr, i_start, i_end, lines, strict)
     buffer.set_lines(bufnr, i_start, i_end, lines, strict)
     local parser = util.get_parser(bufnr)
@@ -142,8 +142,8 @@ function M.diagnostic_set(bufnr, ranges)
 end
 
 ---@param bufnr number
----@param first integer | nil
----@param last integer | nil
+---@param first integer|nil
+---@param last integer|nil
 ---@return Range[]
 function M.diagnostic_get(bufnr, first, last)
     local ranges = render.get_range(bufnr)

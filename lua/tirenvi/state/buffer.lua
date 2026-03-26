@@ -35,7 +35,7 @@ M.IKEY = {
 -----------------------------------------------------------------------
 
 ---@param bufnr number
----@return {[string]: boolean | integer | string | nil}
+---@return {[string]: boolean|integer|string|nil}
 local function get_state(bufnr)
 	bufnr = bufnr or 0
 	if not b[bufnr].tirenvi then
@@ -83,14 +83,14 @@ end
 
 ---@param bufnr number
 ---@param key string
----@return boolean | integer | string | nil
+---@return boolean|integer|string|nil
 function M.get(bufnr, key)
 	return get_state(bufnr)[key]
 end
 
 ---@param bufnr number
 ---@param key string
----@param val boolean | integer | string | nil
+---@param val boolean|integer|string|nil
 function M.set(bufnr, key, val)
 	bufnr = bufnr or 0
 	local state = get_state(bufnr)
@@ -102,7 +102,7 @@ end
 ---@param i_start integer
 ---@param i_end integer integer
 ---@param lines string[]
----@param strict boolean | nil
+---@param strict boolean|nil
 function M.set_lines(bufnr, i_start, i_end, lines, strict)
 	bufnr = bufnr or 0
 	strict = strict == true
@@ -120,7 +120,7 @@ end
 ---@param bufnr number
 ---@param i_start integer
 ---@param i_end integer integer
----@param strict boolean | nil
+---@param strict boolean|nil
 ---@return string[]
 function M.get_lines(bufnr, i_start, i_end, strict)
 	strict = strict or false
@@ -129,7 +129,7 @@ end
 
 ---@param bufnr number
 ---@param index integer
----@return string | nil
+---@return string|nil
 function M.get_line(bufnr, index)
 	local lines = M.get_lines(bufnr, index, index + 1)
 	return lines[1]
@@ -138,8 +138,8 @@ end
 ---@param bufnr number
 ---@param start integer
 ---@param end_ integer
----@return string | nil
----@return string | nil
+---@return string|nil
+---@return string|nil
 function M.get_lines_around(bufnr, start, end_)
 	return M.get_line(bufnr, start - 1), M.get_line(bufnr, end_)
 end

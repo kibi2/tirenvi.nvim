@@ -75,7 +75,7 @@ function M.unparse(blocks)
 	return to_lines(ndjsons)
 end
 
----@param vi_line string | nil
+---@param vi_line string|nil
 ---@return Attr
 function M.parse_to_attr(vi_line)
 	if not vi_line then

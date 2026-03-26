@@ -99,7 +99,7 @@ end
 ---@param attr_prev Attr
 ---@param attr_next Attr
 ---@return boolean
----@return RefAttrError | nil
+---@return RefAttrError|nil
 local function apply_reference_attr_single(blocks, attr_prev, attr_next)
 	M.merge_blocks(blocks)
 	if Attr.is_conflict(attr_prev, attr_next) then
@@ -255,9 +255,9 @@ end
 ---@self Blocks
 ---@param attr_prev Attr
 ---@param attr_next Attr
----@param allow_plain boolean | nil
+---@param allow_plain boolean|nil
 ---@return boolean
----@return RefAttrError | nil
+---@return RefAttrError|nil
 function M:repair(attr_prev, attr_next, allow_plain)
 	if allow_plain then
 		apply_reference_attr_multi(self, attr_prev, attr_next)

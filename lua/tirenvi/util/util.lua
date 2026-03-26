@@ -26,7 +26,7 @@ local bo = vim.bo
 
 --- Get parser configuration for a file.
 ---@param bufnr number
----@return Parser | nil
+---@return Parser|nil
 local function get_parser_for_file(bufnr)
 	local filetype = buffer.get(bufnr, buffer.IKEY.FILETYPE)
 	if not filetype then
@@ -83,7 +83,7 @@ end
 
 --- Get file extension.
 ---@param filename string
----@return string | nil
+---@return string|nil
 function M.get_ext(filename)
 	return filename:match("^.+%.([^.]+)$")
 end

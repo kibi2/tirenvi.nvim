@@ -114,9 +114,9 @@ local function repair_ranges(bufnr, ranges)
 end
 
 ---@param bufnr number
----@param first integer | nil
----@param last integer | nil
----@param new_last integer | nil
+---@param first integer|nil
+---@param last integer|nil
+---@param new_last integer|nil
 local function repair(bufnr, first, last, new_last)
 	local ranges = ui.diagnostic_get(bufnr, first, new_last)
 	ui.diagnostic_clear(bufnr)
@@ -144,9 +144,9 @@ end
 -----------------------------------------------------------------------
 
 ---@param bufnr number
----@param first integer | nil
----@param last integer | nil
----@param new_last integer | nil
+---@param first integer|nil
+---@param last integer|nil
+---@param new_last integer|nil
 function M.repair(bufnr, first, last, new_last)
 	vim.schedule(function()
 		if not api.nvim_buf_is_valid(bufnr) then
