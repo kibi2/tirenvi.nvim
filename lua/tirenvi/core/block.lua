@@ -94,7 +94,7 @@ end
 
 ---@return Block
 function M.new()
-    return { records = {} }
+    return { attr = Attr.new(), records = {} }
 end
 
 ---@self Block

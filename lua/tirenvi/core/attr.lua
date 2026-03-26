@@ -48,7 +48,7 @@ end
 ---@param columns Attr_column[]
 ---@return Attr
 local function new_from_columns(columns)
-    return { kind = CONST.KIND.ATTR_GRID, columns = columns }
+    return { columns = columns }
 end
 
 ---@param records Record_grid[]
@@ -80,28 +80,19 @@ end
 
 ---@return Attr
 function M.new()
-    return {}
+    return new_from_columns({})
 end
 
 ---@self Attr
 ---@return boolean
 function M:is_empty()
-    if self == nil then
-        return true
-    end
-    if not self.kind then
-        return true
-    end
-    if not self.columns or #self.columns == 0 then
-        return true
-    end
-    return false
+    return #self.columns == 0
 end
 
 ---@self Attr
 ---@return boolean
 function M:is_plain()
-    return not self.columns or #self.columns == 0
+    return #self.columns == 0
 end
 
 ---@self Attr
@@ -124,7 +115,7 @@ end
 
 ---@return Attr
 function M.plain.new_from_record()
-    return { kind = CONST.KIND.ATTR_PLAIN, }
+    return new_from_columns({})
 end
 
 ---@param record Record_grid | nil
