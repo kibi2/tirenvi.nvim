@@ -73,12 +73,6 @@ local function build_blocks(records)
 		local kind = record.kind
 		if kind == CONST.KIND.ATTR_FILE then
 			flush_block()
-		elseif kind == CONST.KIND.ATTR_PLAIN then
-		elseif kind == CONST.KIND.ATTR_GRID then
-			flush_block()
-			---@cast record Attr_grid
-			Block.set_kind(block, CONST.KIND.GRID)
-			Block.grid.set_attr_if_empty(block, record)
 		elseif record.kind == "plain" or record.kind == "grid" then
 			if block.kind ~= kind then
 				flush_block()
