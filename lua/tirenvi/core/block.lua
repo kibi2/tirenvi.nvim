@@ -132,7 +132,7 @@ M.plain.apply_replacements = nop
 M.plain.remove_padding = nop
 
 ---@self Block_plain
----@param attr Attr_plain
+---@param attr Attr
 function M.plain:set_attr_if_empty(attr)
     self.attr = attr
 end
@@ -200,7 +200,7 @@ function M.grid:remove_padding()
 end
 
 ---@self Block_grid
----@param attr Attr_grid
+---@param attr Attr
 function M.grid:set_attr_if_empty(attr)
     if Attr.is_empty(self.attr) then
         self.attr = attr
