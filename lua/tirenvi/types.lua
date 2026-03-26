@@ -27,7 +27,7 @@
 ---@field version string
 
 ---@class Attr
----@field columns? Attr_column[]
+---@field columns Attr_column[]
 
 ---@class Attr_column
 ---@field width? integer  -- display width (logical column width)
