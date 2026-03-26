@@ -1,6 +1,6 @@
 ---@meta
 
----@alias Ndjson Attr_file | Attr | Record
+---@alias Ndjson Attr_file | Record
 
 ---@alias Blocks Block[]
 
@@ -14,25 +14,19 @@
 
 ---@class Block_plain
 ---@field kind "plain"
----@field attr Attr_plain
+---@field attr Attr
 ---@field records Record_plain[]
 
 ---@class Block_grid
 ---@field kind "grid"
----@field attr Attr_grid
+---@field attr Attr
 ---@field records Record_grid[]
 
 ---@class Attr_file
 ---@field kind "attr_file"
 ---@field version string
 
----@alias Attr Attr_plain | Attr_grid
-
----@class Attr_plain
----@field kind "attr_plain"
-
----@class Attr_grid
----@field kind "attr_grid"
+---@class Attr
 ---@field columns? Attr_column[]
 
 ---@class Attr_column

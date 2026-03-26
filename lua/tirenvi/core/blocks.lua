@@ -110,12 +110,12 @@ local function apply_reference_attr_single(blocks, attr_prev, attr_next)
 	end
 	local attr = Attr.is_empty(attr_prev) and attr_next or attr_prev
 	local block = blocks[1]
-	if attr.kind == CONST.KIND.ATTR_GRID then
+	if not Attr.is_plain(attr) then
 		if block.kind == CONST.KIND.PLAIN then
 			block = Block.plain.to_grid(block)
 			blocks[1] = block
 		end
-	elseif attr.kind == CONST.KIND.ATTR_PLAIN then
+	elseif Attr.is_plain(attr) then
 		if block.kind == CONST.KIND.GRID then
 			return false, "grid in plain"
 		end
@@ -133,10 +133,10 @@ local function insert_plain_block(self, attr_prev, attr_next)
 	if #self > 1 then
 		return
 	end
-	if attr_prev.kind ~= CONST.KIND.ATTR_GRID then
+	if Attr.is_plain(attr_prev) then
 		return self
 	end
-	if attr_next.kind ~= CONST.KIND.ATTR_GRID then
+	if Attr.is_plain(attr_next) then
 		return self
 	end
 	if #attr_prev.columns == #attr_next.columns then

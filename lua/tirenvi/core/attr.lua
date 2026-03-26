@@ -23,8 +23,8 @@ local function get_columns(cells)
     return columns
 end
 
----@self Attr_grid
----@param source Attr_grid
+---@self Attr
+---@param source Attr
 local function merge(self, source)
     ---@type Attr_column[]
     local mcols = self.columns
@@ -46,13 +46,13 @@ local function merge(self, source)
 end
 
 ---@param columns Attr_column[]
----@return Attr_grid
+---@return Attr
 local function new_from_columns(columns)
     return { kind = CONST.KIND.ATTR_GRID, columns = columns }
 end
 
 ---@param records Record_grid[]
----@return Attr_grid
+---@return Attr
 local function new_merged_attr(records)
     local attr = M.grid.new()
     for _, record in ipairs(records) do
@@ -61,8 +61,8 @@ local function new_merged_attr(records)
     return attr
 end
 
----@self Attr_grid
----@param source Attr_grid
+---@self Attr
+---@param source Attr
 local function extend(self, source)
     if #self.columns == 0 then
         self.columns = source.columns
@@ -78,7 +78,7 @@ end
 -- Public API
 -----------------------------------------------------------------------
 
----@return Attr_grid
+---@return Attr
 function M.new()
     return {}
 end
@@ -99,14 +99,17 @@ function M:is_empty()
 end
 
 ---@self Attr
+---@return boolean
+function M:is_plain()
+    return not self.columns or #self.columns == 0
+end
+
+---@self Attr
 ---@param source Attr
 ---@return boolean
 function M:is_conflict(source)
     if M.is_empty(self) or M.is_empty(source) then
         return false
-    end
-    if self.kind ~= source.kind then
-        return true
     end
     if #self.columns ~= #source.columns then
         return true
@@ -114,18 +117,18 @@ function M:is_conflict(source)
     return false
 end
 
----@return Attr_plain
+---@return Attr
 function M.plain.new()
     return M.plain.new_from_record()
 end
 
----@return Attr_plain
+---@return Attr
 function M.plain.new_from_record()
     return { kind = CONST.KIND.ATTR_PLAIN, }
 end
 
 ---@param record Record_grid | nil
----@return Attr_grid
+---@return Attr
 function M.grid.new(record)
     if record then
         return M.grid.new_from_record(record)
@@ -135,18 +138,18 @@ function M.grid.new(record)
 end
 
 ---@param record Record_grid
----@return Attr_grid
+---@return Attr
 function M.grid.new_from_record(record)
     return new_from_columns(get_columns(record.row))
 end
 
----@self Attr_grid
+---@self Attr
 ---@param records Record_grid[]
 function M.grid:extend(records)
     extend(self, new_merged_attr(records))
 end
 
----@self Attr_grid
+---@self Attr
 ---@return boolean
 function M.grid:has_all()
     if not self or self.kind ~= CONST.KIND.ATTR_GRID then
