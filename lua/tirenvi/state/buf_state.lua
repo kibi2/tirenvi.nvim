@@ -42,17 +42,23 @@ end
 ---@param bufnr number
 ---@return boolean
 function M.is_insert_mode(bufnr)
-	return buffer.get(bufnr, buffer.IKEY.INSERT_MODE) == true
+	local mode = buffer.get(bufnr, buffer.IKEY.INSERT_MODE) == true
+	if mode then
+		log.debug("===-===-===-=== insert mode[%d] ===-===-===-===", bufnr)
+	end
+	return mode
 end
 
 ---@param bufnr number
 ---@return boolean
 function M.is_undo_mode(bufnr)
-	local ut = fn.undotree()
-	if buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LASET) == ut.seq_last then
+	local pre = buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST)
+	local next = fn.undotree(bufnr).seq_last
+	if pre == next then
+		log.debug("===-===-===-=== und/redo mode[%d] (%d, %d) ===-===-===-===", bufnr, pre, next)
 		return true
 	end
-	buffer.set(bufnr, buffer.IKEY.UNDO_TREE_LASET, ut.seq_last)
+	buffer.set(bufnr, buffer.IKEY.UNDO_TREE_LAST, next)
 	return false
 end
 
@@ -86,7 +92,7 @@ function M.should_skip(bufnr, opts)
 		if enabled then
 			local ok = checks[name](bufnr)
 			if not ok then
-				log.debug("===+===+=== skip:(%d) %s", bufnr, name)
+				-- log.debug("===+===+=== skip:(%d) %s", bufnr, name)
 				return true
 			end
 		end

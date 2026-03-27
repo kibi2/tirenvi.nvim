@@ -4,4 +4,5 @@
 /Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/config.lua:20:		trim = "⋯", -- ⇢⋯⋮︙›↠▶¬…
 /Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/config.lua:21:		lf = "↲", -- ⤶⏎↵↲⤷␤¶—↩️
 /Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/config.lua:22:		tab = "⇥", -- »⇥→⇨▹▸▻►⇤␉》
+/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/util/log.lua:201:		name = "🟧PROBE"
 /Users/ogawa/oss/tirenvi.nvim/tests/cases/error/invalid-table2/run.vim:8:execute "normal! i│\<Esc>"

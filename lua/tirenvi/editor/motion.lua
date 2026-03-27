@@ -7,7 +7,8 @@ local M = {}
 ---@return function
 local function build_motion(op)
 	return function()
-		if not buf_state.is_tir_vim(0) then
+		local bufnr = vim.api.nvim_get_current_buf()
+		if not buf_state.is_tir_vim(bufnr) then
 			return op
 		end
 

@@ -54,10 +54,11 @@ local function on_tir(opts)
 	end
 
 	log.debug("===+===+===+===+=== Tir %s ===+===+===+===+===", args[1])
+	local bufnr = vim.api.nvim_get_current_buf()
 	if sub == "toggle" then
-		cmd_toggle(0)
+		cmd_toggle(bufnr)
 	elseif sub == "redraw" then
-		cmd_redraw(0)
+		cmd_redraw(bufnr)
 	else
 		notify.error(errors.err_unknown_command(sub))
 	end
@@ -79,14 +80,15 @@ local function register_user_command()
 end
 
 local function register_keymaps()
+	local bufnr = vim.api.nvim_get_current_buf()
 	vim.keymap.set("i", "<CR>", function()
-		return M.keymap_lf(0)
+		return M.keymap_lf(bufnr)
 	end, {
 		expr = true,
 		buffer = 0,
 	})
 	vim.keymap.set("i", "<Tab>", function()
-		return M.keymap_tab(0)
+		return M.keymap_tab(bufnr)
 	end, {
 		expr = true,
 		buffer = 0,
