@@ -47,7 +47,9 @@ end
 ---@return string stdout
 local function run_parser(executable, subcmd, options, lines)
 	local command = { executable, subcmd }
-	vim.list_extend(command, options)
+	if options then
+		vim.list_extend(command, options)
+	end
 	local result = vim_system(command, lines)
 	if result.code ~= 0 then
 		error(errors.new_domain_error(errors.vim_system_error(result, command)))

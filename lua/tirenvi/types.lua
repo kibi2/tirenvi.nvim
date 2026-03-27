@@ -46,7 +46,7 @@
 
 ---@class Parser
 ---@field executable string             Parser executable name
----@field options string[]              Command-line arguments passed to the parser
+---@field options? string[]              Command-line arguments passed to the parser
 ---@field required_version? integer[]   Parser required version [ major, minor, patch ]
 ---@field allow_plain? boolean          Whether plain blocks are allowed (GFM). If false, only a single table is permitted.
 
