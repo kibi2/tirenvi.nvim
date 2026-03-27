@@ -14,6 +14,8 @@ local util = require("tirenvi.util.util")
 local errors = require("tirenvi.util.errors")
 local Blocks = require("tirenvi.core.blocks")
 
+local fn = vim.fn
+
 -- module
 local M = {}
 
@@ -39,6 +41,37 @@ local function vim_system(command, input)
 	return result
 end
 
+---@param exe string
+---@param required_version integer[]|nil
+---@return string|nil
+local function ensure_command(exe, required_version)
+	local results = M.check_command(exe, required_version)
+	for _, item in ipairs(results) do
+		if item.status == "error" then
+			return item.message
+		elseif item.status == "warn" then
+			-- vim.notify(item.message, vim.log.levels.WARN)
+		end
+	end
+	return nil
+end
+
+---@param parser table
+local function ensure_parser(parser)
+	if parser._checked then
+		if not parser._ok then
+			error(errors.new_domain_error(parser._message))
+		end
+		return
+	end
+	parser._message = ensure_command(parser.executable, parser.required_version)
+	parser._checked = true
+	parser._ok = parser._message == nil
+	if parser._message then
+		error(errors.new_domain_error(parser._message))
+	end
+end
+
 --- run external parser command
 ---@param executable string Parser command
 ---@param subcmd string Subcommand ("parse" or "unparse")
@@ -62,6 +95,7 @@ end
 ---@param parser Parser
 ---@return string[] NDJSON lines
 local function flat_to_js_lines(fl_lines, parser)
+	ensure_parser(parser)
 	local js_string = run_parser(parser.executable, "parse", parser.options, fl_lines)
 	return vim.split(js_string, "\n", { plain = true })
 end
@@ -117,6 +151,30 @@ local function js_lines_to_flat(js_lines, parser)
 	return fl_lines
 end
 
+---@param str string
+---@return integer[]|nil
+local function parse_version(str)
+	local major, minor, patch = str:match("(%d+)%.(%d+)%.(%d+)")
+	if not major then
+		return nil
+	end
+	return { tonumber(major), tonumber(minor), tonumber(patch) }
+end
+
+---@param install integer[]
+---@param require integer[]
+---@return boolean
+local function version_lt(install, require)
+	for i = 1, 3 do
+		if install[i] < require[i] then
+			return true
+		elseif install[i] > require[i] then
+			return false
+		end
+	end
+	return false
+end
+
 -- public API
 
 ---@param fl_lines string[]
@@ -141,6 +199,76 @@ function M.unparse(blocks, parser)
 	local js_lines = ndjsons_to_lines(ndjsons)
 	log.debug({ #js_lines, js_lines[1], js_lines[#js_lines] })
 	return js_lines_to_flat(js_lines, parser)
+end
+
+---@class HealthItem
+---@field status "ok"|"warn"|"error"
+---@field message string
+
+---@param exe string
+---@param required_version integer[]|nil
+---@return HealthItem[]
+function M.check_command(exe, required_version)
+	local results = {}
+	-- existence
+	if fn.executable(exe) ~= 1 then
+		table.insert(results, {
+			status = "error",
+			message = exe .. " not found in PATH",
+		})
+		return results
+	end
+	table.insert(results, {
+		status = "ok",
+		message = exe .. " found",
+	})
+	-- version (optional)
+	if not required_version then
+		return results
+	end
+	local output = fn.system({ exe, "--version" })
+	if vim.v.shell_error ~= 0 then
+		table.insert(results, {
+			status = "warn",
+			message = "Failed to get " .. exe .. " version",
+		})
+		return results
+	end
+	local installed = parse_version(output)
+	if not installed then
+		table.insert(results, {
+			status = "warn",
+			message = "Could not parse version string: " .. output,
+		})
+		return results
+	end
+	if version_lt(installed, required_version) then
+		table.insert(results, {
+			status = "error",
+			message = string.format(
+				"%s >= %d.%d.%d required, but %d.%d.%d found",
+				exe,
+				required_version[1],
+				required_version[2],
+				required_version[3],
+				installed[1],
+				installed[2],
+				installed[3]
+			),
+		})
+	else
+		table.insert(results, {
+			status = "ok",
+			message = string.format(
+				"%s version %d.%d.%d OK",
+				exe,
+				installed[1],
+				installed[2],
+				installed[3]
+			),
+		})
+	end
+	return results
 end
 
 return M

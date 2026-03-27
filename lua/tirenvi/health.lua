@@ -1,4 +1,5 @@
 local config = require("tirenvi.config")
+local flat_parser = require("tirenvi.core.flat_parser")
 local version = require("tirenvi.version")
 local log = require("tirenvi.util.log")
 
@@ -6,79 +7,20 @@ local health = vim.health or require("health")
 
 local M = {}
 
-local fn = vim.fn
-local REQUIRED_VERSION_FMT = "%d.%d.%d"
-
----@param str string
----@return integer[]|nil
-local function parse_version(str)
-	local major, minor, patch = str:match("(%d+)%.(%d+)%.(%d+)")
-	if not major then
-		return nil
-	end
-	return { tonumber(major), tonumber(minor), tonumber(patch) }
-end
-
----@param install integer[]
----@param require integer[]
----@return boolean
-local function version_lt(install, require)
-	for i = 1, 3 do
-		if install[i] < require[i] then
-			return true
-		elseif install[i] > require[i] then
-			return false
-		end
-	end
-	return false
-end
-
----@param exe string
----@param required_version integer[]
-local function check_command(exe, required_version)
-	if fn.executable(exe) ~= 1 then
-		health.error(exe .. " not found in PATH.", {
-			"Install it and ensure it is in your PATH.",
-			"Check with: which " .. exe,
-		})
-		return
-	end
-
-	health.ok(exe .. " found")
-
-	if not required_version then
-		return
-	end
-
-	local output = fn.system({ exe, "--version" })
-
-	if vim.v.shell_error ~= 0 then
-		health.warn("Failed to get " .. exe .. " version.")
-		return
-	end
-
-	local installed = parse_version(output)
-
-	if not installed then
-		health.warn("Could not parse " .. exe .. " version string: " .. output)
-		return
-	end
-
-	if version_lt(installed, required_version) then
-		health.error(
-			string.format(
-				"%s >= " .. REQUIRED_VERSION_FMT .. " required, but %d.%d.%d found.",
-				exe,
-				required_version[1],
-				required_version[2],
-				required_version[3],
-				installed[1],
-				installed[2],
-				installed[3]
-			)
-		)
+local function report(item)
+	if item.status == "ok" then
+		health.ok(item.message)
+	elseif item.status == "warn" then
+		health.warn(item.message)
 	else
-		health.ok(string.format("%s version %d.%d.%d OK", exe, installed[1], installed[2], installed[3]))
+		health.error(item.message)
+	end
+end
+
+local function check_command(exe, required_version)
+	local results = flat_parser.check_command(exe, required_version)
+	for _, item in ipairs(results) do
+		report(item)
 	end
 end
 
