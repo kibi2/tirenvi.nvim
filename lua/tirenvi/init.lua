@@ -117,7 +117,8 @@ end
 
 ---@param bufnr number
 function M.insert_char_in_newline(bufnr)
-	local row = api.nvim_win_get_cursor(0)[1]
+	local winid = vim.api.nvim_get_current_win()
+	local row = api.nvim_win_get_cursor(winid)[1]
 	local line_prev, line_next = buffer.get_lines_around(bufnr, row - 1, row)
 	local ref_line = line_prev and line_prev or line_next
 	local pipe = config.marks.pipe

@@ -1,5 +1,6 @@
 local config = require("tirenvi.config")
 local ns = require("tirenvi.ns")
+local log = require("tirenvi.util.log")
 
 local M = {}
 
@@ -8,6 +9,8 @@ local M = {}
 ---@param last integer
 ---@param id integer
 function M.set_range(bufnr, first, last, id)
+    local line_count = vim.api.nvim_buf_line_count(bufnr)
+    last = math.min(last, line_count - 1)
     local line = vim.api.nvim_buf_get_lines(bufnr, last, last + 1, false)[1]
     local end_col = #line
     local opts = {

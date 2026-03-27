@@ -30,7 +30,7 @@
 ---@field columns Attr_column[]
 
 ---@class Attr_column
----@field width? integer  -- display width (logical column width)
+---@field width integer  -- display width (logical column width)
 
 ---@alias Record Record_plain|Record_grid
 

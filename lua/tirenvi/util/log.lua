@@ -26,7 +26,8 @@ local monitoring = false
 
 ---@return integer
 local function get_tick()
-	return api.nvim_buf_get_changedtick(0)
+	local bufnr = vim.api.nvim_get_current_buf()
+	return api.nvim_buf_get_changedtick(bufnr)
 end
 
 ---@return integer
@@ -197,7 +198,7 @@ local function emit(force, level, fmt, ...)
 	local mon = get_monitor()
 	local name = level_names[level]
 	if force then
-		name = "PROBE"
+		name = "🟧PROBE"
 	end
 	local final = string.format("%s%s%s[%s][%s:%d] %s", PREFIX, ts, mon, name, file, line, msg)
 

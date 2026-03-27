@@ -24,7 +24,7 @@ M.IKEY = {
 	PATCH_DEPTH = "patch_depth",
 
 	-- vim.fn.undotree().seq_last
-	UNDO_TREE_LASET = "undo_tree_laset",
+	UNDO_TREE_LAST = "undo_tree_last",
 
 	-- vim.bo[bufnr].filetype
 	FILETYPE = "filetype",
@@ -34,9 +34,46 @@ M.IKEY = {
 -- Private helpers
 -----------------------------------------------------------------------
 
+local function fix_cursor_utf8()
+	local winid = vim.api.nvim_get_current_win()
+	local row, col = unpack(api.nvim_win_get_cursor(winid))
+	local line = api.nvim_get_current_line()
+	local char_index = vim.str_utfindex(line, col)
+	local boundary = vim.str_byteindex(line, char_index)
+	if boundary ~= col then
+		api.nvim_win_set_cursor(0, { row, boundary })
+	end
+end
+
+---@param bufnr number
+---@param i_start integer
+---@param i_end integer
+---@param strict boolean
+---@param lines string[]
+local function set_lines(bufnr, i_start, i_end, strict, lines)
+	local undotree = fn.undotree(bufnr)
+	local undolevels
+	local is_first_action = undotree.seq_last == 0
+	if is_first_action then
+		undolevels = bo[bufnr].undolevels
+		bo[bufnr].undolevels = -1
+	end
+	api.nvim_buf_set_lines(bufnr, i_start, i_end, strict, lines)
+	fix_cursor_utf8()
+	if is_first_action then
+		bo[bufnr].undolevels = undolevels
+	end
+	log.debug(M.get_state(bufnr))
+end
+
+
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
+
 ---@param bufnr number
 ---@return {[string]: boolean|integer|string|nil}
-local function get_state(bufnr)
+function M.get_state(bufnr)
 	bufnr = bufnr or 0
 	if not b[bufnr].tirenvi then
 		b[bufnr].tirenvi = {
@@ -51,41 +88,11 @@ local function get_state(bufnr)
 	return b[bufnr].tirenvi
 end
 
-local function fix_cursor_utf8()
-	local row, col = unpack(api.nvim_win_get_cursor(0))
-	local line = api.nvim_get_current_line()
-	local char_index = vim.str_utfindex(line, col)
-	local boundary = vim.str_byteindex(line, char_index)
-	if boundary ~= col then
-		api.nvim_win_set_cursor(0, { row, boundary })
-	end
-end
-
-local function set_lines(bufnr, i_start, i_end, strict, lines)
-	local undotree = fn.undotree()
-	local undolevels
-	if undotree.seq_last == 0 then
-		undolevels = bo[bufnr].undolevels
-		bo[bufnr].undolevels = -1
-	end
-	api.nvim_buf_set_lines(bufnr, i_start, i_end, strict, lines)
-	fix_cursor_utf8()
-	if undotree.seq_last == 0 then
-		bo[bufnr].undolevels = undolevels
-	end
-	log.debug(get_state(bufnr))
-end
-
-
------------------------------------------------------------------------
--- Public API
------------------------------------------------------------------------
-
 ---@param bufnr number
 ---@param key string
 ---@return boolean|integer|string|nil
 function M.get(bufnr, key)
-	return get_state(bufnr)[key]
+	return M.get_state(bufnr)[key]
 end
 
 ---@param bufnr number
@@ -93,7 +100,7 @@ end
 ---@param val boolean|integer|string|nil
 function M.set(bufnr, key, val)
 	bufnr = bufnr or 0
-	local state = get_state(bufnr)
+	local state = M.get_state(bufnr)
 	state[key] = val
 	b[bufnr].tirenvi = state
 end
@@ -107,7 +114,7 @@ function M.set_lines(bufnr, i_start, i_end, lines, strict)
 	bufnr = bufnr or 0
 	strict = strict == true
 	log.debug("=== set_lines(%d, %d)[1]%s [%d]%s", i_start, i_end, lines[1], #lines, lines[#lines])
-	log.debug(get_state(bufnr))
+	log.debug(M.get_state(bufnr))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
 	local ok, err = pcall(set_lines, bufnr, i_start, i_end, strict, lines)
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) - 1)
