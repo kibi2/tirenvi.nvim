@@ -23,9 +23,9 @@ local defaults = {
 	},
 	---@type {[string]: Parser}
 	parser_map = {
-		csv = { executable = "tir-csv", required_version = { 0, 1, 2 } },
-		tsv = { executable = "tir-csv", options = { "--delimiter", "\t" }, required_version = { 0, 1, 2 } },
-		markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = { 0, 1, 2 } },
+		csv = { executable = "tir-csv", required_version = { 0, 1, 4 } },
+		tsv = { executable = "tir-csv", options = { "--delimiter", "\t" }, required_version = { 0, 1, 4 } },
+		markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = { 0, 1, 3 } },
 		pukiwiki = { executable = "tir-pukiwiki", allow_plain = true, required_version = { 0, 1, 0 } },
 	},
 	log = {
