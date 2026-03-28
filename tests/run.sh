@@ -49,6 +49,13 @@ while IFS= read -r -d '' d; do
     continue
   fi
 
+    if [ -f "$d/skip-ci" ]; then
+    if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
+      echo "skip (ci): $d"
+      continue
+    fi
+  fi
+
   name=${d#"$CASES_DIR"/}
 
   # --- filter ---

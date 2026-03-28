@@ -36,14 +36,15 @@ local function to_flat(bufnr)
 end
 
 ---@param bufnr number Buffer number.
+---@param no_undo boolean|nil
 ---@return nil
-local function from_flat(bufnr)
+local function from_flat(bufnr, no_undo)
 	local fl_lines = buffer.get_lines(bufnr, 0, -1, false)
 	util.assert_no_reserved_marks(fl_lines)
 	local parser = util.get_parser(bufnr)
 	local blocks = flat_parser.parse(fl_lines, parser)
 	local vi_lines = vim_parser.unparse(blocks)
-	ui.set_lines(bufnr, 0, -1, vi_lines)
+	ui.set_lines(bufnr, 0, -1, vi_lines, true, no_undo)
 end
 
 -- public API
@@ -61,8 +62,7 @@ end
 ---@param bufnr number Buffer number.
 ---@return nil
 function M.import_flat(bufnr)
-	pcall(vim.cmd, "undojoin")
-	from_flat(bufnr)
+	from_flat(bufnr, true)
 end
 
 ---@param bufnr number Buffer number.

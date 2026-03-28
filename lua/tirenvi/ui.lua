@@ -40,8 +40,9 @@ end
 ---@param i_end integer integer
 ---@param lines string[]
 ---@param strict boolean|nil
-function M.set_lines(bufnr, i_start, i_end, lines, strict)
-    buffer.set_lines(bufnr, i_start, i_end, lines, strict)
+---@param no_undo boolean|nil
+function M.set_lines(bufnr, i_start, i_end, lines, strict, no_undo)
+    buffer.set_lines(bufnr, i_start, i_end, lines, strict, no_undo)
     local parser = util.get_parser(bufnr)
     if parser.allow_plain then
         local new_lines = buffer.get_lines(bufnr, 0, -1)

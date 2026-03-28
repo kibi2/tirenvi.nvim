@@ -37,10 +37,15 @@ jobs:
         run: |
           pip install tir-gfm-lite
 
+      - name: Install tir-pukiwiki
+        run: |
+          pip install tir-pukiwiki
+
       - name: Show versions
         run: |
           tir-csv --version
           tir-gfm-lite --version
+          tir-pukiwiki --version
           nvim --version
           lua -v || true
 

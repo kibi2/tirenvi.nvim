@@ -45,27 +45,30 @@ local function fix_cursor_utf8()
 	end
 end
 
+local function set_undo_tree_last(bufnr)
+	local next = fn.undotree(bufnr).seq_last
+	M.set(bufnr, M.IKEY.UNDO_TREE_LAST, next)
+end
+
 ---@param bufnr number
 ---@param i_start integer
 ---@param i_end integer
 ---@param strict boolean
 ---@param lines string[]
-local function set_lines(bufnr, i_start, i_end, strict, lines)
-	local undotree = fn.undotree(bufnr)
-	local undolevels
-	local is_first_action = undotree.seq_last == 0
-	if is_first_action then
-		undolevels = bo[bufnr].undolevels
-		bo[bufnr].undolevels = -1
+---@param no_undo boolean|nil
+local function set_lines(bufnr, i_start, i_end, strict, lines, no_undo)
+	local undolevels = bo[bufnr].undolevels
+	if no_undo then
+		local undotree = fn.undotree(bufnr)
+		if undotree.seq_last == 0 then
+			bo[bufnr].undolevels = -1
+		end
 	end
 	api.nvim_buf_set_lines(bufnr, i_start, i_end, strict, lines)
 	fix_cursor_utf8()
-	if is_first_action then
-		bo[bufnr].undolevels = undolevels
-	end
-	log.debug(M.get_state(bufnr))
+	set_undo_tree_last(bufnr)
+	bo[bufnr].undolevels = undolevels
 end
-
 
 -----------------------------------------------------------------------
 -- Public API
@@ -110,13 +113,13 @@ end
 ---@param i_end integer integer
 ---@param lines string[]
 ---@param strict boolean|nil
-function M.set_lines(bufnr, i_start, i_end, lines, strict)
-	bufnr = bufnr or 0
+---@param no_undo boolean|nil
+function M.set_lines(bufnr, i_start, i_end, lines, strict, no_undo)
 	strict = strict == true
 	log.debug("=== set_lines(%d, %d)[1]%s [%d]%s", i_start, i_end, lines[1], #lines, lines[#lines])
 	log.debug(M.get_state(bufnr))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
-	local ok, err = pcall(set_lines, bufnr, i_start, i_end, strict, lines)
+	local ok, err = pcall(set_lines, bufnr, i_start, i_end, strict, lines, no_undo)
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) - 1)
 	assert(M.get(bufnr, M.IKEY.PATCH_DEPTH) == 0)
 	if not ok then
