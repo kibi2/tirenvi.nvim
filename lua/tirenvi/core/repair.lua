@@ -105,6 +105,7 @@ end
 ---@param bufnr number
 ---@param ranges Range[]
 local function repair_ranges(bufnr, ranges)
+	buffer.set_undo_tree_last(bufnr)
 	for index = 1, #ranges do
 		local first = ranges[index].first
 		local last = ranges[index].last + 1

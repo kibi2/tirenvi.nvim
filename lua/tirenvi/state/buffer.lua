@@ -45,11 +45,6 @@ local function fix_cursor_utf8()
 	end
 end
 
-local function set_undo_tree_last(bufnr)
-	local next = fn.undotree(bufnr).seq_last
-	M.set(bufnr, M.IKEY.UNDO_TREE_LAST, next)
-end
-
 ---@param bufnr number
 ---@param i_start integer
 ---@param i_end integer
@@ -66,13 +61,19 @@ local function set_lines(bufnr, i_start, i_end, strict, lines, no_undo)
 	end
 	api.nvim_buf_set_lines(bufnr, i_start, i_end, strict, lines)
 	fix_cursor_utf8()
-	set_undo_tree_last(bufnr)
+	M.set_undo_tree_last(bufnr)
 	bo[bufnr].undolevels = undolevels
 end
 
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
+
+---@param bufnr number
+function M.set_undo_tree_last(bufnr)
+	local next = fn.undotree(bufnr).seq_last
+	M.set(bufnr, M.IKEY.UNDO_TREE_LAST, next)
+end
 
 ---@param bufnr number
 ---@return {[string]: boolean|integer|string|nil}

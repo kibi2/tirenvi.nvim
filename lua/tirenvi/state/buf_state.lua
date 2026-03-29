@@ -58,7 +58,6 @@ function M.is_undo_mode(bufnr)
 		log.debug("===-===-===-=== und/redo mode[%d] (%d, %d) ===-===-===-===", bufnr, pre, next)
 		return true
 	end
-	buffer.set(bufnr, buffer.IKEY.UNDO_TREE_LAST, next)
 	return false
 end
 
