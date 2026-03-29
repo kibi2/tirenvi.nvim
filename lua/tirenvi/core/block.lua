@@ -121,8 +121,8 @@ end
 
 function M.plain.new()
     local self = M.new()
-    M:set_kind(CONST.KIND.PLAIN)
-    M:add(Record.plain.new_from_vi_line(""))
+    M.set_kind(self, CONST.KIND.PLAIN)
+    M.add(self, Record.plain.new_from_vi_line(""))
     return self
 end
 
