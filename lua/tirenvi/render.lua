@@ -57,18 +57,4 @@ function M.clear(bufnr)
     vim.api.nvim_buf_clear_namespace(bufnr, ns.INVALID, 0, -1)
 end
 
----@param bufnr number
----@param lnum integer
----@param line string
-function M.highlight_header_line(bufnr, lnum, line)
-    local npipe = #config.marks.pipe
-    vim.api.nvim_buf_set_extmark(bufnr, ns.HIGHLIGHT, lnum, npipe, {
-        strict = true,
-        end_row = lnum,
-        end_col = #line - npipe,
-        hl_group = "TirenviHeader",
-        priority = 100,
-    })
-end
-
 return M

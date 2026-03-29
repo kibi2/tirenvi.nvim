@@ -39,29 +39,59 @@ local function cmd_toggle(bufnr)
 	init.toggle(bufnr)
 end
 
+---@param bufnr number
+---@return nil
+local function cmd_hbar(bufnr)
+	log.debug("===+===+===+===+=== hbar %s ===+===+===+===+===", bufnr)
+	if buf_state.should_skip(bufnr, {
+			ensure_tir_vim = true,
+		}) then
+		return
+	end
+	init.hbar(bufnr)
+end
+
 ----------------------------------------------------------------------
 -- Registration (private)
 ----------------------------------------------------------------------
 
+local commands = {
+	toggle = cmd_toggle,
+	redraw = cmd_redraw,
+	hbar = cmd_hbar,
+}
+
+local function get_command_keys()
+	local keys = vim.tbl_keys(commands)
+	table.sort(keys)
+	return keys
+end
+
+local function build_usage()
+	return "Usage: :Tir <" .. table.concat(get_command_keys(), "|") .. ">"
+end
+
+local function build_desc()
+	return "Tir command: " .. table.concat(get_command_keys(), "/")
+end
+
 ---@param opts any
 local function on_tir(opts)
-	local args = vim.split(opts.args, " ")
-	local sub = args[1]
-
-	if not sub or sub == "" then
-		notify.info("Usage: :Tir <toggle|redraw>")
+	local sub = opts.fargs[1]
+	if not sub then
+		notify.info(build_usage())
 		return
 	end
 
-	log.debug("===+===+===+===+=== Tir %s ===+===+===+===+===", args[1])
+	log.debug("===+===+===+===+=== Tir %s ===+===+===+===+===", opts.fargs[1])
 	local bufnr = vim.api.nvim_get_current_buf()
-	if sub == "toggle" then
-		cmd_toggle(bufnr)
-	elseif sub == "redraw" then
-		cmd_redraw(bufnr)
-	else
+	local fn = commands[sub]
+	if not fn then
 		notify.error(errors.err_unknown_command(sub))
+		return
 	end
+
+	fn(bufnr)
 end
 
 local function register_user_command()
@@ -73,9 +103,9 @@ local function register_user_command()
 		nargs = "*",
 		range = true,
 		complete = function()
-			return { "toggle", "redraw" }
+			return get_command_keys()
 		end,
-		desc = "Tir command: toggle/redraw",
+		desc = build_desc()
 	})
 end
 

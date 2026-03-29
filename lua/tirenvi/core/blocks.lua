@@ -139,7 +139,7 @@ local function insert_plain_block(self, attr_prev, attr_next)
 	if #attr_prev.columns == #attr_next.columns then
 		return self
 	end
-	self[#self + 1] = Block.palin.new()
+	self[#self + 1] = Block.plain.new()
 end
 
 local function set_attr(self, attr, index)
