@@ -102,7 +102,7 @@ end
 ---@return RefAttrError|nil
 local function apply_reference_attr_single(blocks, attr_prev, attr_next)
 	M.merge_blocks(blocks)
-	if Attr.is_conflict(attr_prev, attr_next) then
+	if Attr.is_conflict(attr_prev, attr_next, false) then
 		return false, "conflict"
 	end
 	if #blocks == 0 then
@@ -133,18 +133,19 @@ local function insert_plain_block(self, attr_prev, attr_next)
 	if #self > 1 then
 		return
 	end
-	if not attr_prev or not attr_next then
-		return self
+	if #self == 1 and self[1].kind == CONST.KIND.PLAIN then
+		return
 	end
-	if #attr_prev.columns == #attr_next.columns then
-		return self
+	if not Attr.is_conflict(attr_prev, attr_next, true) then
+		return
 	end
 	self[#self + 1] = Block.plain.new()
 end
 
-local function set_attr(self, attr, index)
+---@param block Block
+---@param attr Attr|nil
+local function set_attr(block, attr)
 	if attr and not Attr.is_plain(attr) then
-		local block = self[index]
 		if block.kind == CONST.KIND.GRID then
 			Block.set_attr(block, attr)
 		end
@@ -158,8 +159,8 @@ local function attach_attr(self, attr_prev, attr_next)
 	if #self == 0 then
 		return
 	end
-	set_attr(self, attr_prev, 1)
-	set_attr(self, attr_next, #self)
+	set_attr(self[1], attr_prev)
+	set_attr(self[#self], attr_next)
 end
 
 ---@param blocks Blocks

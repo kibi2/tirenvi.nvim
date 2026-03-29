@@ -87,12 +87,22 @@ end
 
 ---@param self Attr|nil
 ---@param source Attr|nil
+---@param allow_plain boolean
 ---@return boolean
-function M:is_conflict(source)
+function M:is_conflict(source, allow_plain)
     if not self or not source then
         return false
     end
-    return #self.columns ~= #source.columns
+    if #self.columns == #source.columns then
+        return false
+    end
+    if not allow_plain then
+        return true
+    end
+    if #self.columns == 0 or #source.columns == 0 then
+        return false
+    end
+    return true
 end
 
 ---@return Attr
