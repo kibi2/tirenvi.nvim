@@ -115,6 +115,13 @@ function M.redraw(bufnr)
 	end
 end
 
+---@param bufnr number Buffer number.
+---@return nil
+function M.hbar(bufnr)
+	vim.w.tirenvi_view_bar = not (vim.w.tirenvi_view_bar or false)
+	ui.special_apply()
+end
+
 ---@param bufnr number
 function M.insert_char_in_newline(bufnr)
 	local winid = vim.api.nvim_get_current_win()
