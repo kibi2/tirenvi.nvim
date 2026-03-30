@@ -3,3 +3,8 @@
 .DS_Store
 
 .luarc.private.json
+
+# coverage
+luacov.stats.out
+luacov.report.out
+luacov.report.html

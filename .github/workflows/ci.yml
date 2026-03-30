@@ -1,8 +1,10 @@
 name: CI
 
 on:
-  push:
   pull_request:
+  push:
+    tags:
+      - "v*"
 
 jobs:
   test:
@@ -41,6 +43,14 @@ jobs:
         run: |
           pip install tir-pukiwiki
 
+      - name: Install LuaRocks & LuaCov
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y luarocks
+          luarocks install --local luacov
+          luarocks install --local luacov-html
+          eval "$(luarocks path --bin)"
+
       - name: Show versions
         run: |
           tir-csv --version
@@ -60,3 +70,14 @@ jobs:
         with:
           name: test-diffs-${{ matrix.neovim }}
           path: tests/cases/**/diff-*.txt
+
+      - name: Generate coverage report
+        run: |
+          chmod +x tests/coverage.sh
+          tests/coverage.sh
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.neovim }}
+          path: luacov.report.html

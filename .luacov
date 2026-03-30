@@ -1,0 +1,12 @@
+return {
+  statsfile = "luacov.stats.out",
+  reportfile = "luacov.report.html",
+
+  exclude = {
+    "^vim/.*",
+    "^@vim/.*",
+    ".*/nvim/runtime/.*",
+    ".*/.luarocks/.*",
+    ".*/site/pack/.*",
+  },
+}

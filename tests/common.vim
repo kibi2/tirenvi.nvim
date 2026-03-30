@@ -12,6 +12,7 @@ let g:tirenvi_test_mode = 1
 filetype plugin indent on
 
 lua << EOF
+require("luacov")
 local M = require("tirenvi")
 M.setup({
   log = {

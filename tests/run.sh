@@ -8,6 +8,8 @@ CASES_DIR="$SCRIPT_DIR/cases"
 
 export TIRENVI_ROOT="$ROOT_DIR"
 
+eval "$(luarocks path)"
+
 GREEN='\033[32m'
 RED='\033[31m'
 BOLD='\033[1m'
@@ -90,7 +92,7 @@ while IFS= read -r -d '' d; do
     if [ -f run.sh ]; then
       sh run.sh > stdout.txt 2> stderr.txt
     else
-      NVIM_TIRENVI_DEV=1 nvim --headless -u NONE -n -S run.vim \
+      NVIM_TIRENVI_DEV=1 nvim --headless -u NONE -n -S run.vim  +qa \
         > stdout.txt 2> stderr.txt
     fi
 
@@ -148,3 +150,10 @@ if [ -s "$FAILED_FILE" ]; then
 fi
 
 printf "\n${BOLD}${GREEN}ALL TESTS PASSED (${TOTAL} cases)${RESET}\n"
+
+# --- merge coverage ---
+rm -f "$ROOT_DIR/luacov.stats.out"
+find "$CASES_DIR" -name "luacov.stats.out" \
+  -exec cat {} >> "$ROOT_DIR/luacov.stats.out" \;
+# --- cleanup ---
+find "$CASES_DIR" -name "luacov.stats.out" -delete
