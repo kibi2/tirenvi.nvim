@@ -6,17 +6,16 @@ ROOT_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
 
 cd "$ROOT_DIR"
 
-# ★ これが重要
 eval "$(luarocks path)"
 
-# stats確認
 if [ ! -f "$ROOT_DIR/luacov.stats.out" ]; then
   echo "No coverage data. Run tests first."
   exit 1
 fi
 
-# HTML生成
 nvim --headless +"lua require('luacov.reporter.html').report()" +qa
+mv luacov.report.out luacov.report.html
+nvim --headless +"lua require('luacov.reporter.default').report()" +qa
 
 echo "Coverage report: $ROOT_DIR/luacov.report.html"
 
