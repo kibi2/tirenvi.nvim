@@ -1,6 +1,7 @@
 # tirenvi.nvim
 
 [![CI](https://github.com/kibi2/tirenvi.nvim/actions/workflows/ci.yml/badge.svg)](https://github.com/kibi2/tirenvi.nvim/actions)
+[![codecov](https://codecov.io/gh/kibi2/tirenvi.nvim/branch/main/graph/badge.svg)](https://codecov.io/gh/kibi2/tirenvi.nvim)
 ![GitHub release](https://img.shields.io/github/v/release/kibi2/tirenvi.nvim)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Neovim](https://img.shields.io/badge/Neovim-0.9+-57A143?logo=neovim)

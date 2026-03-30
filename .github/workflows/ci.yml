@@ -81,3 +81,10 @@ jobs:
         with:
           name: coverage-${{ matrix.neovim }}
           path: luacov.report.html
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./luacov.report.out
+          fail_ci_if_error: true
+          verbose: true
