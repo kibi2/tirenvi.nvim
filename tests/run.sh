@@ -5,10 +5,12 @@ set -euo pipefail
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 ROOT_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
 CASES_DIR="$SCRIPT_DIR/cases"
+STATS="luacov.stats.out"
 
 export TIRENVI_ROOT="$ROOT_DIR"
 
 eval "$(luarocks path)"
+touch "$ROOT_DIR/$STATS"
 
 GREEN='\033[32m'
 RED='\033[31m'
@@ -42,6 +44,9 @@ done
 
 FAILED_FILE=$(mktemp)
 trap 'rm -f "$FAILED_FILE"' EXIT
+
+# --- cleanup ---
+find "$CASES_DIR" -name "$STATS" -delete
 
 TOTAL=0
 
@@ -89,12 +94,14 @@ while IFS= read -r -d '' d; do
     cd "$d"
     rm -f diff-*.txt gen.* stdout.txt stderr.txt out-actual.txt
 
+    cp "$ROOT_DIR/$STATS" . 2> /dev/null || true
     if [ -f run.sh ]; then
       sh run.sh > stdout.txt 2> stderr.txt
     else
       NVIM_TIRENVI_DEV=1 nvim --headless -u NONE -n -S run.vim  +qa \
         > stdout.txt 2> stderr.txt
     fi
+    cp "$STATS" "$ROOT_DIR" 2> /dev/null || true
 
     if [ "$UPDATE" -eq 1 ]; then
       if [ -f out-expected.txt ]; then
@@ -150,10 +157,3 @@ if [ -s "$FAILED_FILE" ]; then
 fi
 
 printf "\n${BOLD}${GREEN}ALL TESTS PASSED (${TOTAL} cases)${RESET}\n"
-
-# --- merge coverage ---
-rm -f "$ROOT_DIR/luacov.stats.out"
-find "$CASES_DIR" -name "luacov.stats.out" \
-  -exec cat {} >> "$ROOT_DIR/luacov.stats.out" \;
-# --- cleanup ---
-find "$CASES_DIR" -name "luacov.stats.out" -delete
