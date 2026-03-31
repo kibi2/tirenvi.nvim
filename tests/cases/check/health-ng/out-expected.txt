@@ -1,0 +1,17 @@
+
+
+
+
+- version: 0.2.0
+- ⚠️ WARNING Could not parse grep version string.
+- ✅ OK grep found
+- ✅ OK tir-csv found
+- ✅ OK tir-gfm-lite found
+- ❌ ERROR Could not parse tir-pukiwiki version string: 0.
+- ❌ ERROR foo not found in PATH
+- ❌ ERROR tir-csv >= 1.1.4 required, but 0.1.4 found
+- ❌ ERROR tir-gfm-lite >= 0.2 required, but 0.1.3 found
+=== DISPLAY ===
+==============================================================================
+tirenvi ~
+tirenvi:                                                            1 ⚠️  4 ❌

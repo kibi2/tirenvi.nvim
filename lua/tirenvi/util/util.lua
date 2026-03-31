@@ -133,4 +133,18 @@ function M.get_parser(bufnr)
 	return parser
 end
 
+---@param version any
+---@return integer|nil
+function M.version_to_integer(version)
+	if type(version) ~= "string" then
+		return nil
+	end
+	local major, minor, patch = version:match("^(%d+)%.(%d+)%.?(%d*)$")
+	if not major then
+		return nil
+	end
+	local maj, min, pat = tonumber(major), tonumber(minor), tonumber(patch) or 0
+	return (maj * 100000 + min) * 100000 + pat
+end
+
 return M

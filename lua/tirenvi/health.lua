@@ -17,25 +17,12 @@ local function report(item)
 	end
 end
 
-local function check_command(exe, required_version)
-	local results = flat_parser.check_command(exe, required_version)
+---@param parser Parser
+local function check_command(parser)
+	local results = flat_parser.check_command(parser)
 	for _, item in ipairs(results) do
 		report(item)
 	end
-end
-
----@param target integer[]
----@param source integer[]
----@return boolean
-local function version_gt(target, source)
-	for i = 1, 3 do
-		if target[i] > source[i] then
-			return true
-		elseif target[i] < source[i] then
-			return false
-		end
-	end
-	return false
 end
 
 function M.check()
@@ -48,20 +35,24 @@ function M.check()
 	local command_requirements = {}
 	for _, parser in pairs(config.parser_map) do
 		local exe = parser.executable
-		local req = parser.required_version
-		if exe then
+		if not parser._iversion then
+			report({
+				status = "error",
+				message = "Could not parse " .. exe .. " version string: " .. parser.required_version,
+			})
+		elseif exe then
 			if not command_requirements[exe] then
-				command_requirements[exe] = req
-			elseif req and version_gt(req, command_requirements[exe]) then
-				command_requirements[exe] = req
+				command_requirements[exe] = parser
+			elseif parser._iversion > command_requirements[exe]._iversion then
+				command_requirements[exe] = parser
 			end
 		end
 	end
 	table.sort(command_requirements, function(prev, next)
 		return prev.key < next.key
 	end)
-	for exe, required_version in pairs(command_requirements) do
-		check_command(exe, required_version)
+	for _, parser in pairs(command_requirements) do
+		check_command(parser)
 	end
 end
 
