@@ -41,11 +41,13 @@ local function vim_system(command, input)
 	return result
 end
 
----@param exe string
----@param required_version integer[]|nil
+---@param parser Parser
 ---@return string|nil
-local function ensure_command(exe, required_version)
-	local results = M.check_command(exe, required_version)
+local function ensure_command(parser)
+	if not parser.required_version or not parser._iversion then
+		return "Could not parse " .. parser.executable .. " version string: " .. parser.required_version
+	end
+	local results = M.check_command(parser)
 	for _, item in ipairs(results) do
 		if item.status == "error" then
 			return item.message
@@ -64,7 +66,7 @@ local function ensure_parser(parser)
 		end
 		return
 	end
-	parser._message = ensure_command(parser.executable, parser.required_version)
+	parser._message = ensure_command(parser)
 	parser._checked = true
 	parser._ok = parser._message == nil
 	if parser._message then
@@ -151,30 +153,6 @@ local function js_lines_to_flat(js_lines, parser)
 	return fl_lines
 end
 
----@param str string
----@return integer[]|nil
-local function parse_version(str)
-	local major, minor, patch = str:match("(%d+)%.(%d+)%.(%d+)")
-	if not major then
-		return nil
-	end
-	return { tonumber(major), tonumber(minor), tonumber(patch) }
-end
-
----@param install integer[]
----@param require integer[]
----@return boolean
-local function version_lt(install, require)
-	for i = 1, 3 do
-		if install[i] < require[i] then
-			return true
-		elseif install[i] > require[i] then
-			return false
-		end
-	end
-	return false
-end
-
 -- public API
 
 ---@param fl_lines string[]
@@ -205,66 +183,57 @@ end
 ---@field status "ok"|"warn"|"error"
 ---@field message string
 
----@param exe string
----@param required_version integer[]|nil
+---@param parser Parser
 ---@return HealthItem[]
-function M.check_command(exe, required_version)
+function M.check_command(parser)
 	local results = {}
 	-- existence
-	if fn.executable(exe) ~= 1 then
+	if fn.executable(parser.executable) ~= 1 then
 		table.insert(results, {
 			status = "error",
-			message = exe .. " not found in PATH",
+			message = parser.executable .. " not found in PATH",
 		})
 		return results
 	end
 	table.insert(results, {
 		status = "ok",
-		message = exe .. " found",
+		message = parser.executable .. " found",
 	})
 	-- version (optional)
-	if not required_version then
-		return results
-	end
-	local output = fn.system({ exe, "--version" })
+	local installed_version = fn.system({ parser.executable, "--version" })
+	installed_version = vim.trim(installed_version)
 	if vim.v.shell_error ~= 0 then
 		table.insert(results, {
 			status = "warn",
-			message = "Failed to get " .. exe .. " version",
+			message = "Failed to get " .. parser.executable .. " version",
 		})
 		return results
 	end
-	local installed = parse_version(output)
+	local installed = util.version_to_integer(installed_version)
 	if not installed then
 		table.insert(results, {
 			status = "warn",
-			message = "Could not parse version string: " .. output,
+			message = "Could not parse " .. parser.executable .. " version string."
 		})
 		return results
 	end
-	if version_lt(installed, required_version) then
+	if installed < parser._iversion then
 		table.insert(results, {
 			status = "error",
 			message = string.format(
-				"%s >= %d.%d.%d required, but %d.%d.%d found",
-				exe,
-				required_version[1],
-				required_version[2],
-				required_version[3],
-				installed[1],
-				installed[2],
-				installed[3]
+				"%s >= %s required, but %s found",
+				parser.executable,
+				parser.required_version,
+				installed_version
 			),
 		})
 	else
 		table.insert(results, {
 			status = "ok",
 			message = string.format(
-				"%s version %d.%d.%d OK",
-				exe,
-				installed[1],
-				installed[2],
-				installed[3]
+				"%s version %s OK",
+				parser.executable,
+				installed_version
 			),
 		})
 	end

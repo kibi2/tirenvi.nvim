@@ -23,10 +23,10 @@ local defaults = {
 	},
 	---@type {[string]: Parser}
 	parser_map = {
-		csv = { executable = "tir-csv", required_version = { 0, 1, 4 } },
-		tsv = { executable = "tir-csv", options = { "--delimiter", "\t" }, required_version = { 0, 1, 4 } },
-		markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = { 0, 1, 3 } },
-		pukiwiki = { executable = "tir-pukiwiki", allow_plain = true, required_version = { 0, 1, 0 } },
+		csv = { executable = "tir-csv", required_version = "0.1.4" },
+		tsv = { executable = "tir-csv", options = { "--delimiter", "\t" }, required_version = "0.1.4" },
+		markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = "0.1.3" },
+		pukiwiki = { executable = "tir-pukiwiki", allow_plain = true, required_version = "0.1.0" },
 	},
 	log = {
 		level = levels.WARN,
@@ -50,12 +50,16 @@ local function apply(opts)
 	end
 end
 
-apply(vim.deepcopy(defaults))
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
 
 ---@param opts {[string]:any}
 function M.setup(opts)
 	local merged = vim.tbl_deep_extend("force", {}, M, opts or {})
 	apply(merged)
 end
+
+apply(vim.deepcopy(defaults))
 
 return M

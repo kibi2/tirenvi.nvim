@@ -47,12 +47,20 @@ local function from_flat(bufnr, no_undo)
 	ui.set_lines(bufnr, 0, -1, vi_lines, true, no_undo)
 end
 
+---@param parser_map Parser[]
+local function parse_version(parser_map)
+	for _, parser in pairs(parser_map) do
+		parser._iversion = util.version_to_integer(parser.required_version)
+	end
+end
+
 -- public API
 
 --- Set up tirenvi plugin (load autocmds and commands)
 ---@param opts {[string]:any}
 function M.setup(opts)
 	config.setup(opts)
+	parse_version(config.parser_map)
 	require("tirenvi.editor.autocmd").setup()
 	require("tirenvi.editor.commands").setup()
 	require("tirenvi.ui").setup()
