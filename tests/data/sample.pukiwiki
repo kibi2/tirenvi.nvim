@@ -1,31 +1,22 @@
-* 今日の予定 [#b1c3e09d]
-
-** tirenvi [#xf25a077]
-- tir-pukiwiki, --md option ? --raw
--- 開発着手
-- &#9989;filetypeとparserを関連つける
-- align, width = right+1, center+2
-- テストケース、セル幅0
-- padding config : 色
-- excel, Google doc とかコピペで使えないか？
-
 * pukiwiki 表 [#k0258d54]
 
 - table
 
 ||
-|| |
-|a ||
-|bbbb ||
+|||
+
+|a|
+|bbbb|
 
 - PIPE
 
 |a
-|a ||||
-|a|a|c||
-|a|a|h|c|
-|a|a|3|h|
-|1|2|3||
+|a|
+|a|a|c
+|a|a|h|c
+|   a   |a|3x|h
+|a|a|3|
+,1,2,3
 |a|a|3|4|f
 |a|a|3|4|5|x
 |a|a|3|4|5|ch
@@ -33,13 +24,13 @@
 
 - CSV
 
-|a|
+,a
 ,
-|｜|｜||
-|a|||
-|1|2||
-|1|2||
-|1|2|3|
+,|,|
+,a,
+,1,2
+,1,2,
+,1,2,3
 
 - format
 
@@ -49,18 +40,21 @@
 |a|b|c|
 |CENTER:|RIGHT:|LEFT:|c
 |foot|foot|foot|f
-|BGCOLOR(red):|BGCOLOR(green):|BGCOLOR(blue):|c
+|BGCOLOR(red): |BGCOLOR(green): |BGCOLOR(blue):|c
 |H1|H2|H3|h
-|a|b|c|
+|a|b|c| 
 |F|F|F|f
-|a|b|c|
+,a,b,c
+
+|BGCOLOR(red): |BGCOLOR(green): |BGCOLOR(blue):|c 
+|H1|H2|H3|h 
 
 - width
 |100|100|100|c
 |a|b2|12345678901234567890|
 
-- CSV(escape)
+- CSV
 
-|1a|2 a|3a|
-|1 ,|2b|3 b|
-|||c|
+,1a,2 a, 3a
+,"1 ,",2b,"""3 b	"
+," ",,	c
