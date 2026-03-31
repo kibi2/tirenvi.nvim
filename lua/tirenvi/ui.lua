@@ -56,7 +56,7 @@ end
 -- =========================
 
 function M.special_setup()
-    vim.api.nvim_set_hl(0, "TirenviPadding", { fg = "bg", bg = "bg", })
+    vim.api.nvim_set_hl(0, "TirenviPadding", {})
     local target = get_safe_link_name({ "@punctuation.special.markdown", "Delimiter", "Special", })
     local special = vim.api.nvim_get_hl(0, { name = target })
     vim.api.nvim_set_hl(0, "TirenviPipeNoHbar", { link = target })

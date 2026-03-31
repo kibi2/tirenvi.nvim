@@ -11,7 +11,8 @@ local bo = vim.bo
 ---@param bufnr number
 ---@return boolean
 local function ensure_has_parser(bufnr)
-	if bo[bufnr].buftype ~= "" then
+	if not bo[bufnr].modifiable then
+		log.debug("buftype:%s", bo[bufnr].buftype)
 		return false
 	end
 	local parser = util.get_parser(bufnr)
@@ -63,7 +64,8 @@ end
 
 local checks = {
 	unsupported = function(bufnr)
-		return bo[bufnr].buftype == ""
+		-- return bo[bufnr].buftype == ""
+		return bo[bufnr].modifiable
 	end,
 
 	ensure_tir_vim = function(bufnr)
@@ -80,7 +82,16 @@ local checks = {
 	has_parser = function(bufnr)
 		return ensure_has_parser(bufnr)
 	end,
+
+	no_vscode = function()
+		return not M.is_vscode()
+	end,
 }
+
+---@return boolean
+function M.is_vscode()
+	return vim.g.vscode ~= nil
+end
 
 --- check if the buffer is supported and valid according to the options. for example, it may be a tir-vim buffer.
 ---@param bufnr number
@@ -91,7 +102,7 @@ function M.should_skip(bufnr, opts)
 		if enabled then
 			local ok = checks[name](bufnr)
 			if not ok then
-				-- log.debug("===+===+=== skip:(%d) %s", bufnr, name)
+				log.debug("===+===+=== skip:(%d) %s", bufnr, name)
 				return true
 			end
 		end

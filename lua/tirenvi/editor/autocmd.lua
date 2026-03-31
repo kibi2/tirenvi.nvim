@@ -100,6 +100,7 @@ local function register_autocmds()
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
 					unsupported = true,
+					no_vscode = true,
 					has_parser = true,
 				}) then
 				return

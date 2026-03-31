@@ -129,19 +129,9 @@ local function ensure_log_buf()
 	return log_bufnr
 end
 
-local function flush()
-	scheduled = false
-	if #queue == 0 then
-		return
-	end
-
+local function flush_buffer(buf_string)
 	local bufnr = ensure_log_buf()
-	local buf_string = table.concat(queue, "\n")
-	buf_string = buf_string:gsub("\r", "")
-
 	api.nvim_buf_set_lines(bufnr, -1, -1, false, vim.split(buf_string, "\n"))
-	queue = {}
-
 	local line_count = api.nvim_buf_line_count(bufnr)
 	local win = vim.fn.bufwinid(bufnr)
 	if win ~= -1 then
@@ -152,10 +142,43 @@ local function flush()
 	end
 end
 
+local initialized = false
+local function flush_file(buf_string)
+	local file = config.log.file_name or "/tmp/tirenvi.log"
+	if not initialized then
+		local fds = io.open(file, "w")
+		if fds then
+			fds:close()
+		else
+			error("tirenvi: failed to open log file: " .. file)
+		end
+		initialized = true
+	end
+	local fds = io.open(file, "a")
+	if fds then
+		fds:write(buf_string .. "\n")
+		fds:close()
+	end
+end
+
+local function flush()
+	scheduled = false
+	if #queue == 0 then
+		return
+	end
+	local buf_string = table.concat(queue, "\n")
+	buf_string = buf_string:gsub("\r", "")
+	if config.log.output == "buffer" then
+		flush_buffer(buf_string)
+	elseif config.log.output == "file" then
+		flush_file(buf_string)
+	end
+	queue = {}
+end
+
 ---@param msg string
 local function write_buffer(msg)
 	table.insert(queue, msg)
-
 	if not scheduled then
 		scheduled = true
 		vim.schedule(flush)
@@ -203,6 +226,8 @@ local function emit(force, level, fmt, ...)
 	local final = string.format("%s%s%s[%s][%s:%d] %s", PREFIX, ts, mon, name, file, line, msg)
 
 	if config.log.output == "buffer" then
+		write_buffer(final)
+	elseif config.log.output == "file" then
 		write_buffer(final)
 	elseif config.log.output == "print" then
 		print(final)

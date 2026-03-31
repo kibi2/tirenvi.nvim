@@ -11,6 +11,7 @@
 
 local errors = require("tirenvi.util.errors")
 local notify = require("tirenvi.util.notify")
+local buf_state = require("tirenvi.state.buf_state")
 
 -----------------------------------------------------------------------
 -- Module
@@ -30,6 +31,9 @@ function M.guarded(func, opts)
 	opts = opts or {}
 
 	return function(...)
+		if buf_state.is_vscode() then
+			return
+		end
 		local args = { ... }
 
 		local ok, result = xpcall(func, function(err)
