@@ -59,7 +59,7 @@
 ---@field tab string
 
 ---@class Check_options
----@field unsupported? boolean
+---@field supported? boolean
 ---@field ensure_tir_vim? boolean
 ---@field is_tir_vim? boolean
 ---@field has_parser? boolean

@@ -63,7 +63,7 @@ function M.is_undo_mode(bufnr)
 end
 
 local checks = {
-	unsupported = function(bufnr)
+	supported = function(bufnr)
 		-- return bo[bufnr].buftype == ""
 		return bo[bufnr].modifiable
 	end,

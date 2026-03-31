@@ -31,7 +31,7 @@ end
 local function cmd_toggle(bufnr)
 	log.debug("===+===+===+===+=== toggle %s ===+===+===+===+===", bufnr)
 	if buf_state.should_skip(bufnr, {
-			unsupported = true,
+			supported = true,
 			has_parser = true,
 		}) then
 		return

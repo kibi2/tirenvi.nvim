@@ -35,7 +35,7 @@ end
 ---@param bufnr number
 local function attach_on_lines(bufnr)
 	local check_items = {
-		unsupported = true,
+		supported = true,
 		has_parser = true,
 	}
 	if buf_state.should_skip(bufnr, check_items) then
@@ -99,7 +99,7 @@ local function register_autocmds()
 		-- Process only items for which a parser has been specified
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
-					unsupported = true,
+					supported = true,
 					no_vscode = true,
 					has_parser = true,
 				}) then
@@ -114,7 +114,7 @@ local function register_autocmds()
 		group = augroup,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
-					unsupported = true,
+					supported = true,
 					is_tir_vim = true,
 				}) then
 				return
@@ -128,7 +128,7 @@ local function register_autocmds()
 		group = augroup,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
-					unsupported = true,
+					supported = true,
 				}) then
 				return
 			end
@@ -141,7 +141,7 @@ local function register_autocmds()
 		group = augroup,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
-					unsupported = true,
+					supported = true,
 					has_parser = true,
 				}) then
 				return
@@ -156,7 +156,7 @@ local function register_autocmds()
 		callback = guard.guarded(function(args)
 			debug_entry_point(args)
 			if buf_state.should_skip(args.buf, {
-					unsupported = true,
+					supported = true,
 					has_parser = true,
 				}) then
 				return
@@ -171,7 +171,7 @@ local function register_autocmds()
 		group = augroup,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
-					unsupported = true,
+					supported = true,
 					has_parser = true,
 				}) then
 				return
@@ -189,7 +189,7 @@ local function register_autocmds()
 		group = augroup,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
-					unsupported = true,
+					supported = true,
 					is_tir_vim = true,
 				}) then
 				return
@@ -202,7 +202,7 @@ local function register_autocmds()
 	vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
-					unsupported = true,
+					supported = true,
 					is_tir_vim = true,
 				}) then
 				return
