@@ -38,6 +38,9 @@ local defaults = {
 		monitor = true,
 		probe = false,
 	},
+	textobj = {
+		column = "l"
+	},
 }
 
 -----------------------------------------------------------------------

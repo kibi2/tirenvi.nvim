@@ -63,6 +63,7 @@ function M.setup(opts)
 	parse_version(config.parser_map)
 	require("tirenvi.editor.autocmd").setup()
 	require("tirenvi.editor.commands").setup()
+	require("tirenvi.editor.textobj").setup(config)
 	require("tirenvi.ui").setup()
 end
 
