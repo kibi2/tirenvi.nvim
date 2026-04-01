@@ -48,16 +48,6 @@ function M.select_column2()
     end
 end
 
-function M.select_column(type)
-    log.probe("select_column")
-    local row, _    = unpack(vim.api.nvim_win_get_cursor(0))
-    local line      = vim.api.nvim_get_current_line()
-    local start_col = 1
-    local end_col   = #line
-    vim.fn.setpos("'[", { 0, row, start_col, 0 })
-    vim.fn.setpos("']", { 0, row, end_col, 0 })
-end
-
 local function setup_which_key()
     local ok, wk = pcall(require, "which-key")
     if ok then
@@ -68,7 +58,10 @@ local function setup_which_key()
     end
 end
 
+local M = {}
+
 local function get_select()
+    log.probe("get_select")
     return {
         start_row = 2,
         end_row   = 3,
@@ -77,38 +70,21 @@ local function get_select()
     }
 end
 
+-- setup
 function M.setup(opts)
     log.probe("setup")
     setup_which_key()
-    local pos = get_select()
-    vim.keymap.set("o", "il", function()
-        -- 開始位置へ
-        vim.api.nvim_win_set_cursor(0, {
-            pos.start_row,
-            pos.start_col - 1, -- cursorは0-base
-        })
-
-        -- visual開始
-        vim.cmd("normal! v")
-
-        -- 終了位置へ
-        vim.api.nvim_win_set_cursor(0, {
-            pos.end_row,
-            pos.end_col - 1,
-        })
-    end)
-
     vim.keymap.set("x", "il", function()
-        -- 一旦カーソルを開始位置へ
+        local pos = get_select()
+
         vim.api.nvim_win_set_cursor(0, {
             pos.start_row,
             pos.start_col - 1,
         })
 
-        -- anchor切替
+        vim.api.nvim_feedkeys(vim.keycode("<C-v>"), "n", false)
         vim.cmd("normal! o")
 
-        -- 終端へ
         vim.api.nvim_win_set_cursor(0, {
             pos.end_row,
             pos.end_col - 1,
