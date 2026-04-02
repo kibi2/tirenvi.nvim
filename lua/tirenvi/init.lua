@@ -7,10 +7,10 @@ local log = require("tirenvi.util.log")
 local buffer = require("tirenvi.state.buffer")
 local flat_parser = require("tirenvi.core.flat_parser")
 local vim_parser = require("tirenvi.core.vim_parser")
+local tir_vim = require("tirenvi.core.tir_vim")
 local ui = require("tirenvi.ui")
 
 -- module
----@class tirenvi
 local M = {}
 
 local api = vim.api
@@ -47,20 +47,17 @@ local function from_flat(bufnr, no_undo)
 	ui.set_lines(bufnr, 0, -1, vi_lines, true, no_undo)
 end
 
----@param parser_map Parser[]
-local function parse_version(parser_map)
-	for _, parser in pairs(parser_map) do
-		parser._iversion = util.version_to_integer(parser.required_version)
-	end
-end
-
 -- public API
 
 --- Set up tirenvi plugin (load autocmds and commands)
 ---@param opts {[string]:any}
 function M.setup(opts)
+	if vim.g.tirenvi_initialized then
+		log.error("tirenvi does not support reload. Please restart Neovim.")
+		return
+	end
+	vim.g.tirenvi_initialized = true
 	config.setup(opts)
-	parse_version(config.parser_map)
 	require("tirenvi.editor.autocmd").setup()
 	require("tirenvi.editor.commands").setup()
 	require("tirenvi.editor.textobj").setup(config)
@@ -152,7 +149,7 @@ end
 function M.keymap_lf()
 	local col = fn.col(".")
 	local line = fn.getline(".")
-	if not util.has_pipe(line) then
+	if not tir_vim.has_pipe(line) then
 		return api.nvim_replace_termcodes("<CR>", true, true, true)
 	end
 	if col == 1 or col > #line then
@@ -164,7 +161,7 @@ end
 ---@return string
 function M.keymap_tab()
 	local line = fn.getline(".")
-	if not util.has_pipe(line) then
+	if not tir_vim.has_pipe(line) then
 		return api.nvim_replace_termcodes("<Tab>", true, true, true)
 	end
 	if bo.expandtab then

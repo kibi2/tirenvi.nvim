@@ -9,6 +9,7 @@ local util = require("tirenvi.util.util")
 local Blocks = require("tirenvi.core.blocks")
 local Record = require("tirenvi.core.record")
 local Attr = require("tirenvi.core.attr")
+local tir_vim = require("tirenvi.core.tir_vim")
 -- local log = require("tirenvi.util.log")
 
 local M = {}
@@ -39,7 +40,7 @@ end
 ---@param vi_line string
 ---@return Record
 local function tir_vim_to_ndjson(vi_line)
-	if util.has_pipe(vi_line) then
+	if tir_vim.has_pipe(vi_line) then
 		return Record.grid.new_from_vi_line(vi_line)
 	else
 		return Record.plain.new_from_vi_line(vi_line)

@@ -13,6 +13,7 @@ local log = require("tirenvi.util.log")
 local util = require("tirenvi.util.util")
 local errors = require("tirenvi.util.errors")
 local Blocks = require("tirenvi.core.blocks")
+local config = require("tirenvi.config")
 
 local fn = vim.fn
 
@@ -209,7 +210,7 @@ function M.check_command(parser)
 		})
 		return results
 	end
-	local installed = util.version_to_integer(installed_version)
+	local installed = config.version_to_integer(installed_version)
 	if not installed then
 		table.insert(results, {
 			status = "warn",

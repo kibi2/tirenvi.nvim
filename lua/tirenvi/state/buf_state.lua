@@ -2,6 +2,7 @@ local log = require("tirenvi.util.log")
 local errors = require("tirenvi.util.errors")
 local util = require("tirenvi.util.util")
 local buffer = require("tirenvi.state.buffer")
+local tir_vim = require("tirenvi.core.tir_vim")
 
 local M = {}
 
@@ -26,7 +27,7 @@ end
 local function has_pipe(bufnr)
 	local fl_lines = buffer.get_lines(bufnr, 0, -1, false)
 	for _, fl_line in ipairs(fl_lines) do
-		if util.has_pipe(fl_line) then
+		if tir_vim.has_pipe(fl_line) then
 			return true
 		end
 	end

@@ -24,8 +24,8 @@ M.setup({
 		-- probe = true,
 		output = "print",
 	},
-
 })
+vim.g.tirenvi_initialized = false
 EOF
 
 " ----------------------------
