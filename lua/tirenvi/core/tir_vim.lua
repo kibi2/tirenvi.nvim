@@ -50,7 +50,6 @@ end
 ---@return integer[]
 function M.get_cell_indexes(line)
     local ndexes = {}
-    log.probe(plen)
     for ichar = 1, #line do
         if line:sub(ichar, ichar + plen - 1) == pipe then
             table.insert(ndexes, ichar)
@@ -61,12 +60,12 @@ end
 
 ---@param line string
 ---@return integer[]
-function M.get_pipe_byte_indexes(line)
+function M.get_pipe_byte_position(line)
     local indexes = {}
     local index = 1
     while index <= #line do
         if line:sub(index, index + plen - 1) == pipe then
-            indexes[#indexes] = index
+            indexes[#indexes + 1] = index
             index = index + plen
         else
             index = index + 1
@@ -86,21 +85,21 @@ function M.get_pipe_positions(line)
     local indexes = M.get_pipe_indexes(line)
     local positions = {}
     for _, index in ipairs(indexes) do
-        positions[#positions] = vim.str_utfindex(line, index - 1) + 1
+        positions[#positions + 1] = vim.str_utfindex(line, index - 1) + 1
     end
     return positions
 end
 
----@param indexes integer[]
----@param current_index integer
----@return integer
-function M.get_current_row_index(indexes, current_index)
-    for _, index in ipairs(indexes) do
-        if current_index < index then
+---@param byte_pos integer[]
+---@param icol integer
+---@return integer|nil
+function M.get_current_col_index(byte_pos, icol)
+    for index, ibyte in ipairs(byte_pos) do
+        if icol < ibyte then
             return index - 1
         end
     end
-    return #indexes
+    return nil
 end
 
 ---@param base_pipe boolean
@@ -111,13 +110,13 @@ local function same_block(base_pipe, target)
 end
 
 ---@param lines string[]
----@param current_index integer
+---@param irow integer
 ---@param step integer  -- -1 or 1
 ---@return integer
-local function find_block_edge(lines, current_index, step)
-    local base = lines[current_index]
+local function find_block_edge(lines, irow, step)
+    local base = lines[irow]
     local base_pipe = M.has_pipe(base)
-    local index = current_index + step
+    local index = irow + step
     while index >= 1 and index <= #lines do
         if not same_block(base_pipe, lines[index]) then
             return index - step
@@ -128,17 +127,17 @@ local function find_block_edge(lines, current_index, step)
 end
 
 ---@param lines string[]
----@param current_index integer
+---@param irow integer
 ---@return integer
-function M.get_block_top_nrow(lines, current_index)
-    return find_block_edge(lines, current_index, -1)
+function M.get_block_top_nrow(lines, irow)
+    return find_block_edge(lines, irow, -1)
 end
 
 ---@param lines string[]
----@param current_index integer
+---@param irow integer
 ---@return integer
-function M.get_block_bottom_nrow(lines, current_index)
-    return find_block_edge(lines, current_index, 1)
+function M.get_block_bottom_nrow(lines, irow)
+    return find_block_edge(lines, irow, 1)
 end
 
 ---@param count integer
@@ -160,44 +159,35 @@ function M.has_pipe(line)
     return line:find(pipe, 1, true) ~= nil
 end
 
+---@param lines string[]
 ---@param count integer
+---@param is_around boolean
 ---@return Range|nil
-function M.get_select(count)
-    log.probe("get_select:" .. count)
-    log.probe("select_column")
+function M.get_select(lines, count, is_around)
     local mode = vim.fn.mode()
-    log.probe(mode)
 
-    local row, col0 = unpack(vim.api.nvim_win_get_cursor(0))
-    local col = col0 + 1
-    local line = vim.api.nvim_get_current_line()
-    log.probe({ row, col, line })
+    local irow, icol0 = unpack(vim.api.nvim_win_get_cursor(0))
+    local icol = icol0 + 1
+    local cline = vim.api.nvim_get_current_line()
 
-    local pipes = {}
-    log.probe(plen)
-    for ichar = 1, #line do
-        if line:sub(ichar, ichar + plen - 1) == pipe then
-            table.insert(pipes, ichar)
-        end
+    local cbyte_pos = M.get_pipe_byte_position(cline)
+    if #cbyte_pos == 0 then
+        return nil
     end
-    log.probe(pipes)
-
-    local col_idx
-    for index = 1, #pipes - 1 do
-        if col >= pipes[index] and col < pipes[index + 1] then
-            col_idx = index
-            break
-        end
+    local colIndex = M.get_current_col_index(cbyte_pos, icol)
+    if not colIndex then
+        return nil
     end
-    log.probe(col_idx)
-    if not col_idx then return nil end
-
+    local trow = M.get_block_top_nrow(lines, irow)
+    local brow = M.get_block_bottom_nrow(lines, irow)
+    local tbyte_pos = M.get_pipe_byte_position(lines[trow])
+    local bbyte_pos = M.get_pipe_byte_position(lines[brow])
 
     return {
-        start_row = 2,
-        end_row   = 3,
-        start_col = pipes[col_idx] + plen - 1,
-        end_col   = pipes[col_idx + 1] - 2
+        start_row = trow,
+        end_row   = brow,
+        start_col = tbyte_pos[colIndex] + (is_around and 0 or plen),
+        end_col   = bbyte_pos[colIndex + 1] - 1
     }
 end
 
