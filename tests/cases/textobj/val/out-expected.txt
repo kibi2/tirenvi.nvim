@@ -1,0 +1,11 @@
+=== MESSAGE ===
+block of 5 lines yanked
+
+=== DISPLAY ===
+gfm
+│Name⠀│Age│City⠀⠀│Age│
+│----⠀│---│----⠀⠀│---│
+│Alice│23⠀│Tokyo⠀│23⠀│
+│Bob⠀⠀│31⠀│Osaka⠀│31⠀│
+│Carol│27⠀│Nagoya│27⠀│
+markdown

@@ -8,11 +8,11 @@ local M = {}
 
 -- private helpers
 
-local function str_byteindex(line, char_index)
-    -- local char_index = vim.str_utfindex(str, byte_index)
-    -- vim.fn.strcharpart(str, start, len)
-    return vim.str_byteindex(line, char_index)
-end
+-- local function str_byteindex(line, char_index)
+--     -- local char_index = vim.str_utfindex(str, byte_index)
+--     -- vim.fn.strcharpart(str, start, len)
+--     return vim.str_byteindex(line, char_index)
+-- end
 
 ---@param line string
 ---@return boolean
@@ -44,64 +44,6 @@ local function remove_end_pipe(line)
     return line
 end
 
--- public API
-
----@param line string
----@return integer[]
-function M.get_cell_indexes(line)
-    local ndexes = {}
-    for ichar = 1, #line do
-        if line:sub(ichar, ichar + plen - 1) == pipe then
-            table.insert(ndexes, ichar)
-        end
-    end
-    return {}
-end
-
----@param line string
----@return integer[]
-function M.get_pipe_byte_position(line)
-    local indexes = {}
-    local index = 1
-    while index <= #line do
-        if line:sub(index, index + plen - 1) == pipe then
-            indexes[#indexes + 1] = index
-            index = index + plen
-        else
-            index = index + 1
-        end
-    end
-    if #indexes > 0 then
-        if indexes[1] ~= 1 then
-            table.insert(indexes, 1, 0)
-        end
-    end
-    return indexes
-end
-
----@param line string
----@return integer[]
-function M.get_pipe_positions(line)
-    local indexes = M.get_pipe_indexes(line)
-    local positions = {}
-    for _, index in ipairs(indexes) do
-        positions[#positions + 1] = vim.str_utfindex(line, index - 1) + 1
-    end
-    return positions
-end
-
----@param byte_pos integer[]
----@param icol integer
----@return integer|nil
-function M.get_current_col_index(byte_pos, icol)
-    for index, ibyte in ipairs(byte_pos) do
-        if icol < ibyte then
-            return index - 1
-        end
-    end
-    return nil
-end
-
 ---@param base_pipe boolean
 ---@param target string
 ---@return boolean
@@ -124,6 +66,64 @@ local function find_block_edge(lines, irow, step)
         index = index + step
     end
     return (step == -1) and 1 or #lines
+end
+
+-- public API
+
+-----@param line string
+-----@return integer[]
+-- function M.get_cell_indexes(line)
+--     local ndexes = {}
+--     for ichar = 1, #line do
+--         if line:sub(ichar, ichar + plen - 1) == pipe then
+--             table.insert(ndexes, ichar)
+--         end
+--     end
+--     return {}
+-- end
+
+---@param line string
+---@return integer[]
+function M.get_pipe_byte_position(line)
+    local indexes = {}
+    local index = 1
+    while index <= #line do
+        if line:sub(index, index + plen - 1) == pipe then
+            indexes[#indexes + 1] = index
+            index = index + plen
+        else
+            index = index + 1
+        end
+    end
+    if #indexes > 0 then
+        if indexes[1] ~= 1 then
+            table.insert(indexes, 1, 0)
+        end
+    end
+    return indexes
+end
+
+-----@param line string
+-----@return integer[]
+--function M.get_pipe_positions(line)
+--    local indexes = M.get_pipe_indexes(line)
+--    local positions = {}
+--    for _, index in ipairs(indexes) do
+--        positions[#positions + 1] = vim.str_utfindex(line, index - 1) + 1
+--    end
+--    return positions
+--end
+
+---@param byte_pos integer[]
+---@param icol integer
+---@return integer|nil
+function M.get_current_col_index(byte_pos, icol)
+    for index, ibyte in ipairs(byte_pos) do
+        if icol < ibyte then
+            return index - 1
+        end
+    end
+    return nil
 end
 
 ---@param lines string[]
@@ -164,12 +164,10 @@ end
 ---@param is_around boolean
 ---@return Range|nil
 function M.get_select(lines, count, is_around)
-    local mode = vim.fn.mode()
-
+    -- local mode = vim.fn.mode()
     local irow, icol0 = unpack(vim.api.nvim_win_get_cursor(0))
     local icol = icol0 + 1
     local cline = vim.api.nvim_get_current_line()
-
     local cbyte_pos = M.get_pipe_byte_position(cline)
     if #cbyte_pos == 0 then
         return nil
@@ -182,7 +180,6 @@ function M.get_select(lines, count, is_around)
     local brow = M.get_block_bottom_nrow(lines, irow)
     local tbyte_pos = M.get_pipe_byte_position(lines[trow])
     local bbyte_pos = M.get_pipe_byte_position(lines[brow])
-
     return {
         start_row = trow,
         end_row   = brow,

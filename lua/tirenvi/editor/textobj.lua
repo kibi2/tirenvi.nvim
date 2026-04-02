@@ -1,21 +1,15 @@
 local tir_vim = require("tirenvi.core.tir_vim")
 local buffer = require("tirenvi.state.buffer")
+local config = require("tirenvi.config")
 local log = require("tirenvi.util.log")
-
-local function setup_which_key()
-    local ok, wk = pcall(require, "which-key")
-    if ok then
-        wk.add({
-            { "al", desc = "Around column", mode = { "o", "x" } },
-            { "il", desc = "Inner column",  mode = { "o", "x" } },
-        })
-    end
-end
 
 local M = {}
 
 ---@param is_around boolean|nil
 local function setup_vl(is_around)
+    if vim.fn.mode() == "n" then
+        return
+    end
     is_around = is_around or false
     local count = vim.v.count1
     local lines = buffer.get_lines(0, 0, -1, false)
@@ -39,9 +33,13 @@ end
 
 -- setup
 function M.setup(opts)
-    setup_which_key()
-    vim.keymap.set("x", "il", M.setup_vil)
-    vim.keymap.set("x", "al", M.setup_val)
+    vim.keymap.set({ "o", "x" }, "i" .. config.textobj.column, M.setup_vil, {
+        desc = "Inner column",
+    })
+
+    vim.keymap.set({ "o", "x" }, "a" .. config.textobj.column, M.setup_val, {
+        desc = "Around column",
+    })
 end
 
 return M

@@ -1,0 +1,10 @@
+=== MESSAGE ===
+
+=== DISPLAY ===
+gfm
+│City⠀⠀│Age││
+│----⠀⠀│---││
+│Tokyo⠀│23⠀││
+│Osaka⠀│31⠀││
+│Nagoya│27⠀││
+markdown

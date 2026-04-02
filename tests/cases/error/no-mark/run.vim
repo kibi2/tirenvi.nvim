@@ -8,6 +8,10 @@ M.setup({
   marks = {
     pipe = "a"
   },
+	log = {
+		output = "buffer", -- "notify" | "buffer" | "print" | "file"
+		buffer_name = "tirenvi://log",
+	},
 })
 EOF
 
