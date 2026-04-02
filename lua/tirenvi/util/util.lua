@@ -99,12 +99,6 @@ function M.to_hex(str)
 	return table.concat(hex, " ")
 end
 
----@param line string
----@return boolean
-function M.has_pipe(line)
-	return line:find(config.marks.pipe, 1, true) ~= nil
-end
-
 ---@param array1 any[]
 ---@param array2 any[]
 function M.extend(array1, array2)
@@ -131,20 +125,6 @@ function M.get_parser(bufnr)
 		error(errors.new_domain_error(errors.not_found_parser_error(parser)))
 	end
 	return parser
-end
-
----@param version any
----@return integer|nil
-function M.version_to_integer(version)
-	if type(version) ~= "string" then
-		return nil
-	end
-	local major, minor, patch = version:match("^(%d+)%.(%d+)%.?(%d*)$")
-	if not major then
-		return nil
-	end
-	local maj, min, pat = tonumber(major), tonumber(minor), tonumber(patch) or 0
-	return (maj * 100000 + min) * 100000 + pat
 end
 
 return M

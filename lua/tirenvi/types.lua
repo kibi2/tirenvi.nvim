@@ -64,3 +64,9 @@
 ---@field is_tir_vim? boolean
 ---@field has_parser? boolean
 ---@field no_vscode? boolean
+
+---@class Range
+---@field start_row integer
+---@field end_row integer
+---@field start_col integer
+---@field end_col integer

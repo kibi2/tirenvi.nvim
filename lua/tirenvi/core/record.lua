@@ -1,6 +1,6 @@
 local CONST = require("tirenvi.constants")
-local config = require("tirenvi.config")
 local Cell = require("tirenvi.core.cell")
+local tir_vim = require("tirenvi.core.tir_vim")
 
 local M = {}
 M.plain = {}
@@ -44,15 +44,7 @@ end
 ---@return Record_grid
 function M.grid.new_from_vi_line(vi_line)
     vi_line = vi_line or ""
-    local pipe = config.marks.pipe
-    if vi_line:sub(1, #pipe) == pipe then
-        vi_line = vi_line:sub(#pipe + 1)
-    end
-
-    if vi_line:sub(- #pipe) == pipe then
-        vi_line = vi_line:sub(1, - #pipe - 1)
-    end
-    local cells = vim.split(vi_line, pipe, { plain = true })
+    local cells = tir_vim.get_cells(vi_line)
     return grid_new(cells)
 end
 

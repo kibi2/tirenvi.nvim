@@ -54,6 +54,13 @@ local function apply(opts)
 	end
 end
 
+---@param parser_map Parser[]
+local function parse_version(parser_map)
+	for _, parser in pairs(parser_map) do
+		parser._iversion = M.version_to_integer(parser.required_version)
+	end
+end
+
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
@@ -62,6 +69,21 @@ end
 function M.setup(opts)
 	local merged = vim.tbl_deep_extend("force", {}, M, opts or {})
 	apply(merged)
+	parse_version(M.parser_map)
+end
+
+---@param version any
+---@return integer|nil
+function M.version_to_integer(version)
+	if type(version) ~= "string" then
+		return nil
+	end
+	local major, minor, patch = version:match("^(%d+)%.(%d+)%.?(%d*)$")
+	if not major then
+		return nil
+	end
+	local maj, min, pat = tonumber(major), tonumber(minor), tonumber(patch) or 0
+	return (maj * 100000 + min) * 100000 + pat
 end
 
 apply(vim.deepcopy(defaults))

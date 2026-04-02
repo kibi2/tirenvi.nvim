@@ -113,9 +113,22 @@ local function get_timestamp()
 	return string.format("[+%.0fms]", delta_ms)
 end
 
+local function get_bufnr_by_name(name)
+	for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+		if vim.api.nvim_buf_get_name(bufnr) == name then
+			return bufnr
+		end
+	end
+	return nil
+end
+
 ---@return boolean
 local function ensure_log_buf()
 	if log_bufnr and api.nvim_buf_is_valid(log_bufnr) then
+		return log_bufnr
+	end
+	log_bufnr = get_bufnr_by_name(config.log.buffer_name)
+	if log_bufnr then
 		return log_bufnr
 	end
 
