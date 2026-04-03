@@ -9,8 +9,8 @@ M.setup({
 })
 EOF
 
-edit $TIRENVI_ROOT/tests/data/simple.md
-call cursor(6, 12)
+edit $TIRENVI_ROOT/tests/data/simple.csv
+call cursor(2, 11)
 call feedkeys("vah", "x")
 execute "normal y"
 execute "normal $"
