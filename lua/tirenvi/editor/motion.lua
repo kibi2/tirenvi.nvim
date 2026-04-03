@@ -30,7 +30,7 @@ M.F = build_motion("F")
 M.t = build_motion("t")
 M.T = build_motion("T")
 
-function M.g()
+function M.block_top()
 	local bufnr = vim.api.nvim_get_current_buf()
 	local cursor = vim.api.nvim_win_get_cursor(0)
 	local row, col = cursor[1], cursor[2]
@@ -45,7 +45,7 @@ function M.g()
 	vim.api.nvim_win_set_cursor(0, { top, col })
 end
 
-function M.G()
+function M.block_bottom()
 	local bufnr = vim.api.nvim_get_current_buf()
 	local cursor = vim.api.nvim_win_get_cursor(0)
 	local row, col = cursor[1], cursor[2]
