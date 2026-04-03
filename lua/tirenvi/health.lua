@@ -28,6 +28,12 @@ end
 function M.check()
 	health.start("tirenvi")
 	health.info("version: " .. version.VERSION)
+	pcall(vim.fn["repeat#set"], "")
+	if vim.fn.exists("*repeat#set") == 1 then
+		vim.health.ok("vim-repeat is available")
+	else
+		vim.health.warn("vim-repeat not found ('.' repeat disabled)")
+	end
 	if not config.parser_map or vim.tbl_isempty(config.parser_map) then
 		health.warn("No parsers configured.")
 		return

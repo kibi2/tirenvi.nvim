@@ -1,9 +1,8 @@
-local config = require("tirenvi.config")
 local buffer = require("tirenvi.state.buffer")
 local vim_parser = require("tirenvi.core.vim_parser")
 local tir_vim = require("tirenvi.core.tir_vim")
 local ui = require("tirenvi.ui")
-local Attr = require("tirenvi.core.attr")
+local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -49,8 +48,18 @@ local function change_width(mode, count)
     ui.set_lines(bufnr, top - 1, bottom, vi_lines)
 end
 
+local warned = false
+
 local function set_repeat(cmd)
-    pcall(vim.fn["repeat#set"], cmd)
+    local ok = pcall(function()
+        vim.fn["repeat#set"](cmd)
+    end)
+    if not ok and not warned then
+        warned = true
+        notify.info(
+            "tirenvi: install 'tpope/vim-repeat' to enable '.' repeat"
+        )
+    end
 end
 
 -- public API

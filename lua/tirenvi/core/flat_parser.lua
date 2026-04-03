@@ -53,7 +53,7 @@ local function ensure_command(parser)
 		if item.status == "error" then
 			return item.message
 		elseif item.status == "warn" then
-			-- vim.notify(item.message, vim.log.levels.WARN)
+			-- notify.warn(item.message)
 		end
 	end
 	return nil
