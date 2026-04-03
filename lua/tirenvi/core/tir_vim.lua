@@ -84,7 +84,7 @@ end
 
 ---@param line string
 ---@return integer[]
-local function get_pipe_byte_position(line)
+function M.get_pipe_byte_position(line)
     local indexes = {}
     local index = 1
     while index <= #line do
@@ -164,7 +164,7 @@ function M.get_block_range(lines, count, is_around, allow_plain)
     local irow, icol0 = unpack(vim.api.nvim_win_get_cursor(0))
     local icol = icol0 + 1
     local cline = vim.api.nvim_get_current_line()
-    local cbyte_pos = get_pipe_byte_position(cline)
+    local cbyte_pos = M.get_pipe_byte_position(cline)
     if #cbyte_pos == 0 then
         return nil
     end
@@ -181,8 +181,8 @@ function M.get_block_range(lines, count, is_around, allow_plain)
         trow = 1
         brow = #lines
     end
-    local tbyte_pos = get_pipe_byte_position(lines[trow])
-    local bbyte_pos = get_pipe_byte_position(lines[brow])
+    local tbyte_pos = M.get_pipe_byte_position(lines[trow])
+    local bbyte_pos = M.get_pipe_byte_position(lines[brow])
     local end_index = colIndex + count
     end_index = math.min(end_index, #bbyte_pos)
     return {

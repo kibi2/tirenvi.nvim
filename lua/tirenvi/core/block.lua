@@ -114,9 +114,8 @@ function M:add(record)
 end
 
 ---@self Block
----@param attr Attr
-function M:set_attr(attr)
-    self.attr = attr
+function M:reset_attr()
+    self.attr = Attr.new()
 end
 
 function M.plain.new()
@@ -136,6 +135,8 @@ M.plain.normalize = nop
 M.plain.to_vim = nop
 M.plain.apply_replacements = nop
 M.plain.remove_padding = nop
+M.plain.set_attr = nop
+M.plain.set_attr_from_vi = nop
 
 ---@self Block_plain
 ---@return Block_grid
@@ -203,6 +204,23 @@ end
 ---@return Block_grid
 function M.grid:to_grid()
     return self
+end
+
+---@self Block
+---@param attr Attr|nil
+function M.grid:set_attr(attr)
+    if not attr or Attr.is_plain(attr) then
+        return
+    end
+    self.attr = attr
+end
+
+---@self Block
+function M.grid:set_attr_from_vi()
+    if #self.records == 0 then
+        return
+    end
+    self.attr = Attr.grid.new_from_record(self.records[1])
 end
 
 return M
