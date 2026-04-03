@@ -84,7 +84,7 @@ end
 
 ---@param line string
 ---@return integer[]
-function M.get_pipe_byte_position(line)
+local function get_pipe_byte_position(line)
     local indexes = {}
     local index = 1
     while index <= #line do
@@ -140,11 +140,6 @@ function M.get_block_bottom_nrow(lines, irow)
     return find_block_edge(lines, irow, 1)
 end
 
----@param count integer
----@return Range|nil
-function M.get_block_range(count)
-end
-
 ---@param line string
 ---@return string[]
 function M.get_cells(line)
@@ -162,13 +157,14 @@ end
 ---@param lines string[]
 ---@param count integer
 ---@param is_around boolean
+---@param allow_plain boolean
 ---@return Range|nil
-function M.get_select(lines, count, is_around)
+function M.get_block_range(lines, count, is_around, allow_plain)
     -- local mode = vim.fn.mode()
     local irow, icol0 = unpack(vim.api.nvim_win_get_cursor(0))
     local icol = icol0 + 1
     local cline = vim.api.nvim_get_current_line()
-    local cbyte_pos = M.get_pipe_byte_position(cline)
+    local cbyte_pos = get_pipe_byte_position(cline)
     if #cbyte_pos == 0 then
         return nil
     end
@@ -176,10 +172,17 @@ function M.get_select(lines, count, is_around)
     if not colIndex then
         return nil
     end
-    local trow = M.get_block_top_nrow(lines, irow)
-    local brow = M.get_block_bottom_nrow(lines, irow)
-    local tbyte_pos = M.get_pipe_byte_position(lines[trow])
-    local bbyte_pos = M.get_pipe_byte_position(lines[brow])
+    local trow
+    local brow
+    if allow_plain then
+        trow = M.get_block_top_nrow(lines, irow)
+        brow = M.get_block_bottom_nrow(lines, irow)
+    else
+        trow = 1
+        brow = #lines
+    end
+    local tbyte_pos = get_pipe_byte_position(lines[trow])
+    local bbyte_pos = get_pipe_byte_position(lines[brow])
     return {
         start_row = trow,
         end_row   = brow,

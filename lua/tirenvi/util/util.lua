@@ -114,9 +114,10 @@ function M.assert_no_reserved_marks(fl_lines)
 	end
 end
 
----@param bufnr number
+---@param bufnr number|nil
 ---@return Parser
 function M.get_parser(bufnr)
+	bufnr = bufnr or vim.api.nvim_get_current_buf()
 	local parser = get_parser_for_file(bufnr)
 	if parser == nil then
 		error(errors.new_domain_error(""))

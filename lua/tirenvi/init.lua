@@ -60,7 +60,7 @@ function M.setup(opts)
 	config.setup(opts)
 	require("tirenvi.editor.autocmd").setup()
 	require("tirenvi.editor.commands").setup()
-	require("tirenvi.editor.textobj").setup(config)
+	require("tirenvi.editor.textobj").setup()
 	require("tirenvi.ui").setup()
 end
 
