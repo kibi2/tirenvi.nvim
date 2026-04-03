@@ -8,6 +8,7 @@ local buffer = require("tirenvi.state.buffer")
 local flat_parser = require("tirenvi.core.flat_parser")
 local vim_parser = require("tirenvi.core.vim_parser")
 local tir_vim = require("tirenvi.core.tir_vim")
+local Blocks = require("tirenvi.core.blocks")
 local ui = require("tirenvi.ui")
 
 -- module
@@ -61,6 +62,7 @@ function M.setup(opts)
 	require("tirenvi.editor.autocmd").setup()
 	require("tirenvi.editor.commands").setup()
 	require("tirenvi.editor.textobj").setup()
+	require("tirenvi.editor.column").setup()
 	require("tirenvi.ui").setup()
 end
 
@@ -109,11 +111,13 @@ function M.restore_tir_vim(bufnr)
 	from_flat(bufnr)
 end
 
----@param bufnr number Buffer number.
+---@param bufnr number|nil Buffer number.
 ---@return nil
 function M.redraw(bufnr)
+	bufnr = bufnr or vim.api.nvim_get_current_buf()
 	local old_lines = buffer.get_lines(bufnr, 0, -1, false)
 	local blocks = vim_parser.parse(old_lines)
+	Blocks.reset_attr(blocks)
 	local vi_lines = vim_parser.unparse(blocks)
 	if table.concat(old_lines, "\n") ~= table.concat(vi_lines, "\n") then
 		log.debug({ vi_lines[1], vi_lines[2] })

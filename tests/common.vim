@@ -20,8 +20,8 @@ M.setup({
 		-- level = vim.log.levels.DEBUG,
 		use_timestamp = false,
 		monitor = false,
-		probe = false,
-		-- probe = true,
+		-- probe = false,
+		probe = true,
 		output = "print",
 	},
 })

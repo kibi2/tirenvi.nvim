@@ -37,7 +37,7 @@ function M.block_top()
 	local top
 	local parser = util.get_parser(bufnr)
 	if not parser or not parser.allow_plain then
-		top = vim.api.nvim_buf_line_count(bufnr)
+		top = 1
 	else
 		local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
 		top = tir_vim.get_block_top_nrow(lines, row)

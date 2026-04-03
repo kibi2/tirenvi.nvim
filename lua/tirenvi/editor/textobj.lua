@@ -6,6 +6,8 @@ local log = require("tirenvi.util.log")
 
 local M = {}
 
+-- private helpers
+
 ---@param is_around boolean|nil
 local function setup_vl(is_around)
     is_around = is_around or false
@@ -21,6 +23,8 @@ local function setup_vl(is_around)
     vim.cmd("normal! o")
     vim.api.nvim_win_set_cursor(0, { pos.end_row, pos.end_col - 1, })
 end
+
+-- public API
 
 function M.setup_vil()
     setup_vl()

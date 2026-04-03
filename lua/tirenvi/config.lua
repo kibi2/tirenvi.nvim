@@ -39,7 +39,8 @@ local defaults = {
 		probe = false,
 	},
 	textobj = {
-		column = "l"
+		column = "l",
+		cell = "c",
 	},
 }
 

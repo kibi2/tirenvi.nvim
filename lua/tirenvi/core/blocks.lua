@@ -46,6 +46,13 @@ local function apply_replacements(self, replace)
 end
 
 ---@self Blocks
+local function set_attr(self)
+	for _, block in ipairs(self) do
+		Block[block.kind].set_attr_from_vi(block)
+	end
+end
+
+---@self Blocks
 local function remove_padding(self)
 	for _, block in ipairs(self) do
 		Block[block.kind].remove_padding(block)
@@ -122,7 +129,7 @@ local function apply_reference_attr_single(blocks, attr_prev, attr_next)
 			return false, "grid in plain"
 		end
 	end
-	Block.set_attr(block, attr)
+	Block[block.kind].set_attr(block, attr)
 	return true
 end
 
@@ -142,16 +149,6 @@ local function insert_plain_block(self, attr_prev, attr_next)
 	self[#self + 1] = Block.plain.new()
 end
 
----@param block Block
----@param attr Attr|nil
-local function set_attr(block, attr)
-	if attr and not Attr.is_plain(attr) then
-		if block.kind == CONST.KIND.GRID then
-			Block.set_attr(block, attr)
-		end
-	end
-end
-
 ---@param self Blocks
 ---@param attr_prev Attr|nil
 ---@param attr_next Attr|nil
@@ -159,8 +156,8 @@ local function attach_attr(self, attr_prev, attr_next)
 	if #self == 0 then
 		return
 	end
-	set_attr(self[1], attr_prev)
-	set_attr(self[#self], attr_next)
+	Block[self[1].kind].set_attr(self[1], attr_prev)
+	Block[self[#self].kind].set_attr(self[#self], attr_next)
 end
 
 ---@param blocks Blocks
@@ -218,8 +215,16 @@ end
 ---@return Blocks
 function M.new_from_vim(records)
 	local self = build_blocks(records)
+	set_attr(self)
 	remove_padding(self)
 	return self
+end
+
+---@self Blocks
+function M:reset_attr()
+	for _, block in ipairs(self) do
+		Block.reset_attr(block)
+	end
 end
 
 ---@self Blocks
