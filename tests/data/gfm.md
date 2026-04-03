@@ -1,3 +1,6 @@
+# Copied from GitHub Flavored Markdown Spec (Tables Extension)
+# https://github.github.com/gfm/#tables-extension-
+
 4.10Tables (extension)
 GFM enables the table extension, where an additional leaf block type is available.
 
