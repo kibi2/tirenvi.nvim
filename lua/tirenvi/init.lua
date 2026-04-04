@@ -10,6 +10,7 @@ local vim_parser = require("tirenvi.core.vim_parser")
 local tir_vim = require("tirenvi.core.tir_vim")
 local Blocks = require("tirenvi.core.blocks")
 local ui = require("tirenvi.ui")
+local notify = require("tirenvi.util.notify")
 
 -- module
 local M = {}
@@ -48,6 +49,68 @@ local function from_flat(bufnr, no_undo)
 	ui.set_lines(bufnr, 0, -1, vi_lines, true, no_undo)
 end
 
+---@return integer|nil
+---@return integer|nil
+local function get_current_col()
+	local irow, icol0 = unpack(vim.api.nvim_win_get_cursor(0))
+	local icol = icol0 + 1
+	local cline = vim.api.nvim_get_current_line()
+	local cbyte_pos = tir_vim.get_pipe_byte_position(cline)
+	if #cbyte_pos == 0 then
+		return nil, nil
+	end
+	return irow, tir_vim.get_current_col_index(cbyte_pos, icol)
+end
+
+---@param operator string
+local function change_width(operator, count)
+	local bufnr = vim.api.nvim_get_current_buf()
+	local irow, icol = get_current_col()
+	if not irow or not icol then
+		return
+	end
+	local lines = buffer.get_lines(bufnr, 0, -1, false)
+	local top = tir_vim.get_block_top_nrow(lines, irow)
+	local bottom = tir_vim.get_block_bottom_nrow(lines, irow)
+	local lines = buffer.get_lines(bufnr, top - 1, bottom, false)
+	local blocks = vim_parser.parse(lines)
+	local block = blocks[1]
+	assert(block.kind == "grid")
+	local old_width = block.attr.columns[icol].width
+	if operator == "=" then
+		if count <= 0 then
+			return
+		end
+		block.attr.columns[icol].width = count
+	elseif operator == "+" then
+		if count == 0 then
+			count = 1
+		end
+		block.attr.columns[icol].width = old_width + count
+	elseif operator == "-" then
+		if count == 0 then
+			count = 1
+		end
+		block.attr.columns[icol].width = old_width - count
+	end
+	local vi_lines = vim_parser.unparse(blocks)
+	ui.set_lines(bufnr, top - 1, bottom, vi_lines)
+end
+
+local warned = false
+
+local function set_repeat(cmd)
+	local ok = pcall(function()
+		vim.fn["repeat#set"](cmd)
+	end)
+	if not ok and not warned then
+		warned = true
+		notify.info(
+			"tirenvi: install 'tpope/vim-repeat' to enable '.' repeat"
+		)
+	end
+end
+
 -- public API
 
 --- Set up tirenvi plugin (load autocmds and commands)
@@ -62,7 +125,6 @@ function M.setup(opts)
 	require("tirenvi.editor.autocmd").setup()
 	require("tirenvi.editor.commands").setup()
 	require("tirenvi.editor.textobj").setup()
-	require("tirenvi.editor.column").setup()
 	require("tirenvi.ui").setup()
 end
 
@@ -130,6 +192,15 @@ end
 function M.hbar(bufnr)
 	vim.w.tirenvi_view_bar = not (vim.w.tirenvi_view_bar or false)
 	ui.special_apply()
+end
+
+---@param bufnr number Buffer number.
+---@param operator string Operator: "", "=", "+", "-"
+---@param count integer Count for the operator (default: 0)
+---@return nil
+function M.width(bufnr, operator, count)
+	change_width(operator, count)
+	set_repeat(":Tir width" .. operator .. count .. "\n")
 end
 
 ---@param bufnr number

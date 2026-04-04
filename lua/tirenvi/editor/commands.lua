@@ -15,9 +15,9 @@ local fn = vim.fn
 
 -- Command / Keymap handlers (private)
 ---@param bufnr number
+---@param opts {[string]:any}
 ---@return nil
-local function cmd_redraw(bufnr)
-	log.debug("===+===+===+===+=== redraw %s ===+===+===+===+===", bufnr)
+local function cmd_redraw(bufnr, opts)
 	if buf_state.should_skip(bufnr, {
 			ensure_tir_vim = true,
 		}) then
@@ -27,9 +27,9 @@ local function cmd_redraw(bufnr)
 end
 
 ---@param bufnr number
+---@param opts {[string]:any}
 ---@return nil
-local function cmd_toggle(bufnr)
-	log.debug("===+===+===+===+=== toggle %s ===+===+===+===+===", bufnr)
+local function cmd_toggle(bufnr, opts)
 	if buf_state.should_skip(bufnr, {
 			supported = true,
 			has_parser = true,
@@ -40,15 +40,29 @@ local function cmd_toggle(bufnr)
 end
 
 ---@param bufnr number
+---@param opts {[string]:any}
 ---@return nil
-local function cmd_hbar(bufnr)
-	log.debug("===+===+===+===+=== hbar %s ===+===+===+===+===", bufnr)
+local function cmd_hbar(bufnr, opts)
 	if buf_state.should_skip(bufnr, {
 			ensure_tir_vim = true,
 		}) then
 		return
 	end
 	init.hbar(bufnr)
+end
+
+---@param bufnr number
+---@param opts {[string]:any}
+---@return nil
+local function cmd_width(bufnr, opts)
+	if buf_state.should_skip(bufnr, {
+			ensure_tir_vim = true,
+		}) then
+		return
+	end
+	local operator, num = opts.args:match("^width%s*([=+-]?)(%d*)")
+	num = tonumber(num) or 1
+	init.width(bufnr, operator, num)
 end
 
 ----------------------------------------------------------------------
@@ -59,6 +73,7 @@ local commands = {
 	toggle = cmd_toggle,
 	redraw = cmd_redraw,
 	hbar = cmd_hbar,
+	width = cmd_width,
 }
 
 local function get_command_keys()
@@ -78,20 +93,21 @@ end
 ---@param opts any
 local function on_tir(opts)
 	local sub = opts.fargs[1]
+	local command = sub:match("^[A-Za-z]+") or ""
 	if not sub then
 		notify.info(build_usage())
 		return
 	end
 
-	log.debug("===+===+===+===+=== Tir %s ===+===+===+===+===", opts.fargs[1])
 	local bufnr = vim.api.nvim_get_current_buf()
-	local fn = commands[sub]
-	if not fn then
+	log.debug("===+===+===+===+=== %s %s[%d] ===+===+===+===+===", opts.name, opts.fargs[1], bufnr)
+	local func = commands[command]
+	if not func then
 		notify.error(errors.err_unknown_command(sub))
 		return
 	end
 
-	fn(bufnr)
+	func(bufnr, opts)
 end
 
 local function register_user_command()
