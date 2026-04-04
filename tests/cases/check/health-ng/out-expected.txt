@@ -4,6 +4,7 @@
 
 - version: 0.2.0
 - ⚠️ WARNING Could not parse grep version string.
+- ⚠️ WARNING vim-repeat not found ('.' repeat disabled)
 - ✅ OK grep found
 - ✅ OK tir-csv found
 - ✅ OK tir-gfm-lite found
@@ -14,4 +15,4 @@
 === DISPLAY ===
 ==============================================================================
 tirenvi ~
-tirenvi:                                                            1 ⚠️  4 ❌
+tirenvi:                                                            2 ⚠️  4 ❌

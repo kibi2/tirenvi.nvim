@@ -52,14 +52,14 @@ end
 ---@return integer|nil
 ---@return integer|nil
 local function get_current_col()
-	local irow, icol0 = unpack(vim.api.nvim_win_get_cursor(0))
-	local icol = icol0 + 1
+	local irow, ibyte0 = unpack(vim.api.nvim_win_get_cursor(0))
+	local ibyte = ibyte0 + 1
 	local cline = vim.api.nvim_get_current_line()
-	local cbyte_pos = tir_vim.get_pipe_byte_position(cline)
-	if #cbyte_pos == 0 then
+	local pipe_pos = tir_vim.get_pipe_byte_position(cline)
+	if #pipe_pos == 0 then
 		return nil, nil
 	end
-	return irow, tir_vim.get_current_col_index(cbyte_pos, icol)
+	return irow, tir_vim.get_current_col_index(pipe_pos, ibyte)
 end
 
 ---@param operator string
@@ -99,9 +99,10 @@ end
 
 local warned = false
 
-local function set_repeat(cmd)
+---@param command string
+local function set_repeat(command)
 	local ok = pcall(function()
-		vim.fn["repeat#set"](cmd)
+		vim.fn["repeat#set"](command)
 	end)
 	if not ok and not warned then
 		warned = true
@@ -200,7 +201,11 @@ end
 ---@return nil
 function M.width(bufnr, operator, count)
 	change_width(operator, count)
-	set_repeat(":Tir width" .. operator .. count .. "\n")
+	local command = vim.api.nvim_replace_termcodes(
+		":<C-u>Tir width " .. operator .. count .. "<CR>",
+		true, false, true
+	)
+	set_repeat(command)
 end
 
 ---@param bufnr number

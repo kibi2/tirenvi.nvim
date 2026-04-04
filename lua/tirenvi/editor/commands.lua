@@ -61,7 +61,7 @@ local function cmd_width(bufnr, opts)
 		return
 	end
 	local operator, num = opts.args:match("^width%s*([=+-]?)(%d*)")
-	num = tonumber(num) or 1
+	num = tonumber(num) or 0
 	init.width(bufnr, operator, num)
 end
 

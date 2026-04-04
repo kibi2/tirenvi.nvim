@@ -1,0 +1,12 @@
+=== MESSAGE ===
+tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
+5 changes; before #6  0 seconds ago
+
+=== DISPLAY ===
+gfm
+│Name│Age⠀⠀│City⠀⠀⠀⠀│
+│----│---⠀⠀│----⠀⠀⠀⠀│
+│Alice│23⠀⠀⠀│Tokyo⠀⠀⠀│
+│Bob│31⠀⠀⠀│Osaka⠀⠀⠀│
+│Carol│27⠀⠀⠀│Nagoya⠀⠀│
+markdown

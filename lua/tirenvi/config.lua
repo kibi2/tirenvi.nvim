@@ -40,7 +40,6 @@ local defaults = {
 	},
 	textobj = {
 		column = "l",
-		cell = "c",
 	},
 }
 
