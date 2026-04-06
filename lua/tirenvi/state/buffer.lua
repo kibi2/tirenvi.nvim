@@ -181,7 +181,7 @@ end
 function M.get_lines(bufnr, i_start, i_end)
 	bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
 	i_start = math.max(0, i_start)
-	local nline = api.nvim_buf_line_count(bufnr)
+	local nline = M.line_count(bufnr)
 	if i_end == -1 then
 		i_end = nline
 	end
@@ -210,7 +210,7 @@ function M.get_line(bufnr, iline)
 			get_lines_and_cache(bufnr, iline - 2 * STEP, iline + 1)
 		end
 	else
-		if iline < api.nvim_buf_line_count(bufnr) then
+		if iline < M.line_count(bufnr) then
 			get_lines_and_cache(bufnr, iline, iline + 2 * STEP)
 		end
 	end
@@ -218,7 +218,7 @@ function M.get_line(bufnr, iline)
 end
 
 ---@param bufnr number
----@return string|nil
+---@return integer
 function M.line_count(bufnr)
 	return api.nvim_buf_line_count(bufnr)
 end

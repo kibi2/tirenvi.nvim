@@ -1,5 +1,6 @@
 local config = require("tirenvi.config")
 local util = require("tirenvi.util.util")
+local buffer = require("tirenvi.state.buffer")
 local log = require("tirenvi.util.log")
 
 local pipen = config.marks.pipe
@@ -205,7 +206,7 @@ function M.get_block_rect(line_provider, count, is_around, allow_plain)
         brow = M.get_block_bottom_nrow(line_provider, irow)
     else
         trow = 1
-        brow = api.nvim_buf_line_count(0)
+        brow = buffer.line_count(0)
     end
     local tline = line_provider.get_line(trow) or ""
     local bline = line_provider.get_line(brow) or ""

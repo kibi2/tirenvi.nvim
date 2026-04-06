@@ -10,8 +10,7 @@ local M = {}
 ---@param last integer
 ---@param id integer
 function M.set_range(bufnr, first, last, id)
-    local line_count = vim.api.nvim_buf_line_count(bufnr)
-    last = math.min(last, line_count - 1)
+    last = math.min(last, buffer.line_count(bufnr) - 1)
     local line = buffer.get_line(bufnr, last)
     local end_col = #line
     local opts = {

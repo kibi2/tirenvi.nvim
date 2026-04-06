@@ -123,7 +123,7 @@ local function get_bufnr_by_name(name)
 	return nil
 end
 
----@return boolean
+---@return number
 local function ensure_log_buf()
 	if log_bufnr and api.nvim_buf_is_valid(log_bufnr) then
 		return log_bufnr
@@ -132,7 +132,7 @@ local function ensure_log_buf()
 	if log_bufnr then
 		return log_bufnr
 	end
-
+	---@type number
 	log_bufnr = api.nvim_create_buf(false, true)
 	api.nvim_buf_set_name(log_bufnr, config.log.buffer_name)
 
