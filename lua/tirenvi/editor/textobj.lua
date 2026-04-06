@@ -12,9 +12,9 @@ local M = {}
 local function setup_vl(is_around)
     is_around = is_around or false
     local count = vim.v.count1
-    local lines = buffer.get_lines(0, 0, -1, false)
+    local lines = buffer.get_lines(0, 0, -1)
     local parser = util.get_parser()
-    local pos = tir_vim.get_block_range(lines, count, is_around, parser.allow_plain)
+    local pos = tir_vim.get_block_rect(lines, count, is_around, parser.allow_plain)
     if not pos then
         return
     end

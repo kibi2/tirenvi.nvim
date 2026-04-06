@@ -30,7 +30,7 @@
 ---@field columns Attr_column[]
 
 ---@class Attr_column
----@field width integer  -- display width (logical column width)
+---@field width integer                 display width (logical column width)
 
 ---@alias Record Record_plain|Record_grid
 
@@ -41,6 +41,7 @@
 ---@class Record_grid
 ---@field kind "grid"
 ---@field row Cell[]
+---@field _has_continuation? boolean    true if this record continues to the next row
 
 ---@alias Cell string
 
@@ -54,7 +55,7 @@
 ---@class Marks
 ---@field pipe string
 ---@field padding string
----@field trim string
+---@field pipec string
 ---@field lf string
 ---@field tab string
 
@@ -65,8 +66,12 @@
 ---@field has_parser? boolean
 ---@field no_vscode? boolean
 
----@class Range
+---@class Rect
 ---@field start_row integer
 ---@field end_row integer
 ---@field start_col integer
 ---@field end_col integer
+
+---@class Range
+---@field first integer
+---@field last integer

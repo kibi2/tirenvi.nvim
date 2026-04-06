@@ -5,15 +5,17 @@
 ----- dependencies
 local config = require("tirenvi.config")
 local CONST = require("tirenvi.constants")
-local util = require("tirenvi.util.util")
 local Blocks = require("tirenvi.core.blocks")
 local Record = require("tirenvi.core.record")
 local Attr = require("tirenvi.core.attr")
 local tir_vim = require("tirenvi.core.tir_vim")
--- local log = require("tirenvi.util.log")
+local log = require("tirenvi.util.log")
 
 local M = {}
 
+-- constants / defaults
+local pipen = config.marks.pipe
+local pipec = config.marks.pipec
 -----------------------------------------------------------------------
 -- Private helpers
 -----------------------------------------------------------------------
@@ -21,13 +23,13 @@ local M = {}
 ---@param ndjsons Ndjson[]
 ---@return string[]
 local function to_lines(ndjsons)
-	local pipe = config.marks.pipe
 	local tir_vim = {}
 	for _, record in ipairs(ndjsons) do
 		local kind = record.kind
 		if kind == CONST.KIND.PLAIN then
 			tir_vim[#tir_vim + 1] = record.line or ""
 		elseif kind == CONST.KIND.GRID then
+			local pipe = record._has_continuation and pipec or pipen
 			local row_items = record.row
 			local row = table.concat(row_items, pipe)
 			row = pipe .. row .. pipe
@@ -40,8 +42,9 @@ end
 ---@param vi_line string
 ---@return Record
 local function tir_vim_to_ndjson(vi_line)
-	if tir_vim.has_pipe(vi_line) then
-		return Record.grid.new_from_vi_line(vi_line)
+	local pipe = tir_vim.has_pipe(vi_line)
+	if pipe then
+		return Record.grid.new_from_vi_line(vi_line, pipe == pipec)
 	else
 		return Record.plain.new_from_vi_line(vi_line)
 	end

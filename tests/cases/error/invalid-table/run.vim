@@ -3,7 +3,7 @@
 source $TIRENVI_ROOT/tests/common.vim
 
 edit $TIRENVI_ROOT/tests/data/simple.csv
-call cursor(2, 1)
+call cursor(6, 0)
 execute "normal! x"
 
 call RunTest({})

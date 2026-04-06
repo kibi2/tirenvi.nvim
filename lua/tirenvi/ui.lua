@@ -2,21 +2,15 @@ local config = require("tirenvi.config")
 local range = require("tirenvi.util.range")
 local render = require("tirenvi.render")
 local buffer = require("tirenvi.state.buffer")
-local util = require("tirenvi.util.util")
+local tir_vim = require("tirenvi.core.tir_vim")
 local log = require("tirenvi.util.log")
 
 local matches = {}
 
 local M = {}
 
--- =========================
--- setup
--- =========================
-
-function M.setup()
-    M.special_setup()
-    M.diagnostic_setup()
-end
+local pipen = config.marks.pipe
+local pipec = config.marks.pipec
 
 -- =========================
 -- utils
@@ -41,6 +35,38 @@ local function safe_link_multi(name, targets)
     vim.api.nvim_set_hl(0, name, { link = target })
 end
 
+local function diagnostic_setup()
+    vim.fn.sign_define("TirenviSign", { text = "◆", texthl = "ErrorMsg" })
+    vim.api.nvim_set_hl(0, "TirenviDebugLine", { bg = "#888840" })
+end
+
+local function special_setup()
+    vim.api.nvim_set_hl(0, "TirenviPadding", {})
+    local target = get_safe_link_name({ "@punctuation.special.markdown", "Delimiter", "Special", })
+    local special = vim.api.nvim_get_hl(0, { name = target })
+    vim.api.nvim_set_hl(0, "TirenviPipeNoHbar", { link = target })
+    vim.api.nvim_set_hl(0, "TirenviPipeHbar", {
+        fg = special.fg,
+        bg = special.bg,
+        underline = true,
+    })
+    vim.api.nvim_set_hl(0, "TirenviHbar", {
+        underline = true,
+        sp = special.fg,
+    })
+    vim.api.nvim_set_hl(0, "Conceal", { link = "TirenviPipeNoHbar" })
+    safe_link_multi("TirenviSpecialChar", { "NonText", })
+end
+
+-- =========================
+-- setup
+-- =========================
+
+function M.setup()
+    special_setup()
+    diagnostic_setup()
+end
+
 ---@param bufnr number
 ---@param i_start integer
 ---@param i_end integer integer
@@ -54,23 +80,6 @@ end
 -- =========================
 -- special chars
 -- =========================
-
-function M.special_setup()
-    vim.api.nvim_set_hl(0, "TirenviPadding", {})
-    local target = get_safe_link_name({ "@punctuation.special.markdown", "Delimiter", "Special", })
-    local special = vim.api.nvim_get_hl(0, { name = target })
-    vim.api.nvim_set_hl(0, "TirenviPipeNoHbar", { link = target })
-    vim.api.nvim_set_hl(0, "TirenviPipe", {
-        fg = special.fg,
-        bg = special.bg,
-        underline = true,
-    })
-    vim.api.nvim_set_hl(0, "TirenviHbar", {
-        underline = true,
-        sp = special.fg,
-    })
-    safe_link_multi("TirenviSpecialChar", { "NonText", })
-end
 
 ---@param winid integer
 ---@param group string
@@ -114,15 +123,24 @@ function M.special_apply()
     add_match(winid, "TirenviPadding", pat_v(config.marks.padding), 10)
     add_match(winid, "TirenviSpecialChar", pat_v(config.marks.lf), 20)
     add_match(winid, "TirenviSpecialChar", pat_v(config.marks.tab), 20)
-    local pipe = config.marks.pipe
+    vim.w.tirenvi_view_bar = true
     if vim.w.tirenvi_view_bar then
-        add_match(winid, "TirenviPipe", pat_v(pipe), 30)
-        add_match(winid, "TirenviHbar", pat_line_inner(pipe), 20)
-        add_match(winid, "TirenviPipeNoHbar", pat_line_start(pipe), 40)
-        add_match(winid, "TirenviPipeNoHbar", pat_line_end(pipe), 40)
+        add_match(winid, "TirenviPipeHbar", pat_v(pipen), 30)
+        add_match(winid, "TirenviHbar", pat_line_inner(pipen), 20)
+        add_match(winid, "TirenviPipeNoHbar", pat_line_start(pipen), 40)
+        add_match(winid, "TirenviPipeNoHbar", pat_line_end(pipen), 40)
+        add_match(winid, "TirenviPipeNoHbar", pat_v(pipec), 30)
     else
-        add_match(winid, "TirenviPipeNoHbar", pat_v(pipe), 30)
+        add_match(winid, "TirenviPipeNoHbar", pat_v(pipen), 30)
     end
+    vim.opt_local.conceallevel = 2
+    vim.opt_local.concealcursor = "nc"
+    local pattern = vim.fn.escape(pipec, [[/\]])
+    vim.cmd(string.format(
+        [[syntax match TirPipeC /%s/ conceal cchar=%s]],
+        pattern,
+        pipen
+    ))
 end
 
 function M.special_clear()
@@ -134,17 +152,27 @@ end
 -- diagnostic
 -- =========================
 
-function M.diagnostic_setup()
-    vim.fn.sign_define("TirenviSign", { text = "◆", texthl = "ErrorMsg" })
-    vim.api.nvim_set_hl(0, "TirenviDebugLine", { bg = "#888840" })
-end
-
 ---@param bufnr number
 ---@param ranges Range[]
 function M.diagnostic_set(bufnr, ranges)
     for index, range in ipairs(ranges) do
         render.set_range(bufnr, range.first, range.last, index)
     end
+end
+
+---@param bufnr number
+---@param first integer
+---@param last integer
+---@return integer
+local function expand_continue_lines(bufnr, first, last)
+    local lines = buffer.get_lines(bufnr, first, last)
+    ---@type string|nil
+    local last_line = lines[#lines]
+    while tir_vim.is_continue_line(last_line) do
+        last_line = buffer.get_line(bufnr, last)
+        last = last + 1
+    end
+    return last
 end
 
 ---@param bufnr number
@@ -155,6 +183,7 @@ function M.diagnostic_get(bufnr, first, last)
     local ranges = render.get_range(bufnr)
     if first then
         ---@cast last integer
+        last = expand_continue_lines(bufnr, first, last)
         ranges[#ranges + 1] = { first = first, last = last - 1 }
     end
     return range.union(ranges)

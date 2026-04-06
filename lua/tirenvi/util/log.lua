@@ -5,6 +5,7 @@ local M = {}
 
 local api = vim.api
 local bo = vim.bo
+local fn = vim.fn
 
 local levels = vim.log.levels
 
@@ -21,12 +22,12 @@ end
 
 local last_tick = 0
 local last_mem = 0
-local last_time = vim.loop.now()
+local last_time = uv.now()
 local monitoring = false
 
 ---@return integer
 local function get_tick()
-	local bufnr = vim.api.nvim_get_current_buf()
+	local bufnr = api.nvim_get_current_buf()
 	return api.nvim_buf_get_changedtick(bufnr)
 end
 
@@ -53,7 +54,7 @@ local function monitor()
 
 	local mem = get_mem_mb()
 	local tick = get_tick()
-	local now = vim.loop.now()
+	local now = uv.now()
 
 	if now - last_time < 1000 then
 		if tick - last_tick > 100 then
@@ -84,7 +85,7 @@ local function stringify(value)
 				vim.inspect(value, {
 					newline = " ",
 					indent = "",
-					depth = 3,
+					depth = 4,
 				})
 			)
 		else
@@ -114,8 +115,8 @@ local function get_timestamp()
 end
 
 local function get_bufnr_by_name(name)
-	for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-		if vim.api.nvim_buf_get_name(bufnr) == name then
+	for _, bufnr in ipairs(api.nvim_list_bufs()) do
+		if api.nvim_buf_get_name(bufnr) == name then
 			return bufnr
 		end
 	end
@@ -146,10 +147,10 @@ local function flush_buffer(buf_string)
 	local bufnr = ensure_log_buf()
 	api.nvim_buf_set_lines(bufnr, -1, -1, false, vim.split(buf_string, "\n"))
 	local line_count = api.nvim_buf_line_count(bufnr)
-	local win = vim.fn.bufwinid(bufnr)
+	local win = fn.bufwinid(bufnr)
 	if win ~= -1 then
 		api.nvim_win_set_cursor(win, { line_count, 0 })
-		vim.api.nvim_win_call(win, function()
+		api.nvim_win_call(win, function()
 			-- vim.cmd("normal! 3kzz")
 		end)
 	end

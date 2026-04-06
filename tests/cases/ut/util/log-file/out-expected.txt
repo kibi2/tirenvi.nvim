@@ -1,0 +1,7 @@
+[TIR][ERROR][[string ":lua"]:13] error
+[TIR][WARN][[string ":lua"]:14] 3.14
+[TIR][DEBUG][[string ":lua"]:16] <boolean> false
+[TIR][🟧PROBE][[string ":lua"]:17] -0.003
+[TIR][DEBUG][autocmd.lua:93] ===+===+===+===+=== VimLeavePre(1)text ===+===+===+===+===
+[TIR][DEBUG][autocmd.lua:93] ===+===+===+===+=== VimLeavePre(1)text ===+===+===+===+===
+[TIR][DEBUG][autocmd.lua:93] ===+===+===+===+=== VimLeave(1)text ===+===+===+===+===

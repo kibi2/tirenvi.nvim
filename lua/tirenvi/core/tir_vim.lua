@@ -1,8 +1,9 @@
 local config = require("tirenvi.config")
+local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
 
-local pipe = config.marks.pipe
-local plen = #pipe
+local pipen = config.marks.pipe
+local pipec = config.marks.pipec
 
 local M = {}
 
@@ -15,22 +16,12 @@ local M = {}
 -- end
 
 ---@param line string
----@return boolean
-local function start_with_pipe(line)
-    return line:sub(1, plen) == pipe
-end
-
----@param line string
----@return boolean
-local function end_with_pipe(line)
-    return line:sub(-plen) == pipe
-end
-
----@param line string
 ---@return string
 local function remove_start_pipe(line)
-    if start_with_pipe(line) then
-        line = line:sub(plen + 1)
+    if util.start_with(line, pipen) then
+        line = line:sub(#pipen + 1)
+    elseif util.start_with(line, pipec) then
+        line = line:sub(#pipec + 1)
     end
     return line
 end
@@ -38,8 +29,10 @@ end
 ---@param line string
 ---@return string
 local function remove_end_pipe(line)
-    if end_with_pipe(line) then
-        line = line:sub(1, -plen - 1)
+    if util.end_with(line, pipen) then
+        line = line:sub(1, - #pipen - 1)
+    elseif util.end_with(line, pipec) then
+        line = line:sub(1, - #pipec - 1)
     end
     return line
 end
@@ -48,7 +41,7 @@ end
 ---@param target string
 ---@return boolean
 local function same_block(base_pipe, target)
-    return base_pipe == M.has_pipe(target)
+    return base_pipe == (M.has_pipe(target) ~= nil)
 end
 
 ---@param lines string[]
@@ -57,7 +50,7 @@ end
 ---@return integer
 local function find_block_edge(lines, irow, step)
     local base = lines[irow]
-    local base_pipe = M.has_pipe(base)
+    local base_pipe = (M.has_pipe(base) ~= nil)
     local index = irow + step
     while index >= 1 and index <= #lines do
         if not same_block(base_pipe, lines[index]) then
@@ -66,6 +59,28 @@ local function find_block_edge(lines, irow, step)
         index = index + step
     end
     return (step == -1) and 1 or #lines
+end
+
+---@param line string
+---@param pipe string
+---@return integer[]
+local function get_pipe_byte_position(line, pipe)
+    local indexes = {}
+    local index = 1
+    while index <= #line do
+        if line:sub(index, index + #pipe - 1) == pipe then
+            indexes[#indexes + 1] = index
+            index = index + #pipe
+        else
+            index = index + 1
+        end
+    end
+    if #indexes > 0 then
+        if indexes[1] ~= 1 then
+            table.insert(indexes, 1, 0)
+        end
+    end
+    return indexes
 end
 
 -- public API
@@ -85,20 +100,9 @@ end
 ---@param line string
 ---@return integer[]
 function M.get_pipe_byte_position(line)
-    local indexes = {}
-    local index = 1
-    while index <= #line do
-        if line:sub(index, index + plen - 1) == pipe then
-            indexes[#indexes + 1] = index
-            index = index + plen
-        else
-            index = index + 1
-        end
-    end
-    if #indexes > 0 then
-        if indexes[1] ~= 1 then
-            table.insert(indexes, 1, 0)
-        end
+    local indexes = get_pipe_byte_position(line, pipen)
+    if #indexes == 0 then
+        indexes = get_pipe_byte_position(line, pipec)
     end
     return indexes
 end
@@ -145,21 +149,37 @@ end
 function M.get_cells(line)
     line = remove_start_pipe(line)
     line = remove_end_pipe(line)
-    return vim.split(line, pipe, { plain = true })
+    line = line:gsub(vim.pesc(pipec), pipen)
+    return vim.split(line, pipen, { plain = true })
 end
 
 ---@param line string
----@return boolean
+---@return string|nil
 function M.has_pipe(line)
-    return line:find(pipe, 1, true) ~= nil
+    if line:find(pipen, 1, true) then
+        return pipen
+    end
+    if line:find(pipec, 1, true) then
+        return pipec
+    end
+    return nil
+end
+
+---@param line string|nil
+---@return boolean
+function M.is_continue_line(line)
+    if not line then
+        return false
+    end
+    return M.has_pipe(line) == pipec
 end
 
 ---@param lines string[]
 ---@param count integer
 ---@param is_around boolean
 ---@param allow_plain boolean
----@return Range|nil
-function M.get_block_range(lines, count, is_around, allow_plain)
+---@return Rect|nil
+function M.get_block_rect(lines, count, is_around, allow_plain)
     -- local mode = vim.fn.mode()
     local irow, icol0 = unpack(vim.api.nvim_win_get_cursor(0))
     local icol = icol0 + 1
@@ -188,9 +208,15 @@ function M.get_block_range(lines, count, is_around, allow_plain)
     return {
         start_row = trow,
         end_row   = brow,
-        start_col = tbyte_pos[colIndex] + (is_around and 0 or plen),
+        start_col = tbyte_pos[colIndex] + (is_around and 0 or #pipen),
         end_col   = bbyte_pos[end_index] - 1
     }
+end
+
+---@param line string
+---@return boolean
+function M.start_with_pipe(line)
+    return util.start_with(line, pipen) or util.start_with(line, pipec)
 end
 
 return M

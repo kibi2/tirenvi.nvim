@@ -128,4 +128,18 @@ function M.get_parser(bufnr)
 	return parser
 end
 
+---@param line string
+---@param str string
+---@return boolean
+function M.start_with(line, str)
+	return line:sub(1, #str) == str
+end
+
+---@param line string
+---@param str string
+---@return boolean
+function M.end_with(line, str)
+	return line:sub(- #str) == str
+end
+
 return M

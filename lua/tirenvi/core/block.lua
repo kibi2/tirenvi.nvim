@@ -3,6 +3,7 @@ local Record = require("tirenvi.core.record")
 local Cell = require("tirenvi.core.cell")
 local config = require("tirenvi.config")
 local Attr = require("tirenvi.core.attr")
+local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -16,51 +17,6 @@ M.grid = {}
 -----------------------------------------------------------------------
 
 local function nop(...) end
-
----@param record Record_grid
----@param new_count integer
----@return nil
-local function increase_cols(record, new_count)
-    local row = record.row
-    for _ = #row + 1, new_count do
-        row[#row + 1] = ""
-    end
-end
-
----@param record Record_grid
----@param new_count integer
----@return nil
-local function decrease_cols(record, new_count)
-    local row = record.row
-    row[new_count] = table.concat(row, " ", new_count)
-    for i = #row, new_count + 1, -1 do
-        row[i] = nil
-    end
-end
-
----@param record Record_grid
----@param ncol integer
-local function resize_columns(record, ncol)
-    local old_count = #record.row
-    if old_count > ncol then
-        decrease_cols(record, ncol)
-    elseif old_count < ncol then
-        increase_cols(record, ncol)
-    end
-end
-
----@param record Record_grid
-local function normalize_row(record)
-    record.row = record.row or {}
-    Cell.normalize(record.row)
-end
-
----@param record Record_grid
----@param ncol integer
-local function normalize_and_resize(record, ncol)
-    normalize_row(record)
-    resize_columns(record, ncol)
-end
 
 ---@self Block_grid
 local function reset_master_attr(self)
@@ -86,6 +42,47 @@ local function serialize_records(self)
         ndjsons[#ndjsons + 1] = record
     end
     return ndjsons
+end
+
+---@param self Block_grid
+local function split_lf(self)
+    local records = {}
+    for _, record in ipairs(self.records) do
+        util.extend(records, Record.grid.split_lf(record))
+    end
+    self.records = records
+end
+
+---@param self Block_grid
+local function fill_padding(self)
+    for _, record in ipairs(self.records) do
+        Record.grid.fill_padding(record, self.attr.columns)
+    end
+end
+
+---@self Block_grid
+local function remove_padding(self)
+    for _, record in ipairs(self.records) do
+        Record.grid.remove_padding(record)
+    end
+end
+
+---@self Block_grid
+local function concat_record(self)
+    local records = {}
+    ---@type Record_grid
+    local new_record = nil
+    local cont = false
+    for _, record in ipairs(self.records) do
+        if not cont then
+            new_record = Record.grid.new(record.row)
+            records[#records + 1] = new_record
+        else
+            Record.grid.concat(new_record, record)
+        end
+        cont = record._has_continuation
+    end
+    self.records = records
 end
 
 -----------------------------------------------------------------------
@@ -134,7 +131,7 @@ end
 M.plain.normalize = nop
 M.plain.to_vim = nop
 M.plain.apply_replacements = nop
-M.plain.remove_padding = nop
+M.plain.from_vim = nop
 M.plain.set_attr = nop
 M.plain.set_attr_from_vi = nop
 
@@ -162,16 +159,15 @@ function M.grid:normalize()
     reset_master_attr(self)
     local ncol = #self.attr.columns
     for _, record in ipairs(self.records) do
-        normalize_and_resize(record, ncol)
+        Record.normalize_and_resize(record, ncol)
     end
 end
 
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 function M.grid:to_vim()
-    for _, record in ipairs(self.records) do
-        Record.grid.pad_cells(record, self.attr.columns)
-    end
+    split_lf(self)
+    fill_padding(self)
 end
 
 ---@self Block_grid
@@ -189,15 +185,9 @@ function M.grid:apply_replacements(replace)
 end
 
 ---@self Block_grid
-function M.grid:remove_padding()
-    local escaped_padding = vim.pesc(config.marks.padding)
-    for _, record in ipairs(self.records) do
-        assert(record.kind == CONST.KIND.GRID)
-        for icol, cell in ipairs(record.row) do
-            cell = cell:gsub(escaped_padding, "")
-            record.row[icol] = cell
-        end
-    end
+function M.grid:from_vim()
+    remove_padding(self)
+    concat_record(self)
 end
 
 ---@self Block_grid

@@ -28,6 +28,7 @@ local bo = vim.bo
 ---@param new_last integer
 ---@param bytecount integer
 local function on_lines(_, bufnr, tick, first, last, new_last, bytecount)
+	buffer.clear_cache()
 	log.debug("===+===+===+===+=== on_lines(%d)(%d-%d) ===+===+===+===+===", bufnr, first, new_last)
 	init.on_lines(bufnr, first, last, new_last)
 end

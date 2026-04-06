@@ -17,7 +17,7 @@ local defaults = {
 	marks = {
 		pipe = "│", -- │┆┊┇┃┋▏▕
 		padding = "⠀", --    ·∙⸱␣␠⠀░
-		trim = "⋯", -- ⇢⋯⋮︙›↠▶¬…
+		pipec = "┊", -- 》⇥⇢⋯⋮︙›↠▶¬…
 		lf = "↲", -- ⤶⏎↵↲⤷␤¶—↩️
 		tab = "⇥", -- »⇥→⇨▹▸▻►⇤␉》
 	},
@@ -36,7 +36,7 @@ local defaults = {
 		file_name = "/tmp/tirenvi.log",
 		use_timestamp = false,
 		monitor = true,
-		probe = false,
+		probe = true,
 	},
 	textobj = {
 		column = "l",

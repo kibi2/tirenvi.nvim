@@ -3,17 +3,20 @@
 -----------------------------------------------------------------------
 
 ----- dependencies
-local log = require("tirenvi.util.log")
+local log   = require("tirenvi.util.log")
 
-local M = {}
+local M     = {}
 
-local api = vim.api
-local fn = vim.fn
-local bo = vim.bo
-local b = vim.b
+local api   = vim.api
+local fn    = vim.fn
+local bo    = vim.bo
+local b     = vim.b
+
+local cache = { bufnr = -1, start = -1, lines = {}, }
+local STEP  = 25
 
 -- Buffer-local flags.
-M.IKEY = {
+M.IKEY      = {
 	-- true when in insert mode
 	INSERT_MODE = "insert_mode",
 
@@ -23,10 +26,10 @@ M.IKEY = {
 	-- Depth of patch recursion
 	PATCH_DEPTH = "patch_depth",
 
-	-- vim.fn.undotree().seq_last
+	-- fn.undotree().seq_last
 	UNDO_TREE_LAST = "undo_tree_last",
 
-	-- vim.bo[bufnr].filetype
+	-- bo[bufnr].filetype
 	FILETYPE = "filetype",
 }
 
@@ -35,7 +38,7 @@ M.IKEY = {
 -----------------------------------------------------------------------
 
 local function fix_cursor_utf8()
-	local winid = vim.api.nvim_get_current_win()
+	local winid = api.nvim_get_current_win()
 	local row, col = unpack(api.nvim_win_get_cursor(winid))
 	local line = api.nvim_get_current_line()
 	local char_index = vim.str_utfindex(line, col)
@@ -52,6 +55,7 @@ end
 ---@param lines string[]
 ---@param no_undo boolean|nil
 local function set_lines(bufnr, i_start, i_end, strict, lines, no_undo)
+	M.clear_cache()
 	local undolevels = bo[bufnr].undolevels
 	if no_undo then
 		local undotree = fn.undotree(bufnr)
@@ -63,6 +67,44 @@ local function set_lines(bufnr, i_start, i_end, strict, lines, no_undo)
 	fix_cursor_utf8()
 	M.set_undo_tree_last(bufnr)
 	bo[bufnr].undolevels = undolevels
+end
+
+---@param bufnr number
+---@param i_start integer
+---@param i_end integer integer
+local function get_lines_and_cache(bufnr, i_start, i_end)
+	local start = math.max(0, i_start)
+	local lines = api.nvim_buf_get_lines(bufnr, start, i_end, false)
+	cache       = { bufnr = bufnr, start = start, lines = lines, }
+	log.debug("===== bufnr=%d, start=%d, end=%d, lines[1]=%s, line[%d]=%s, ",
+		cache.bufnr, cache.start, cache.start + #cache.lines,
+		tostring(cache.lines[1]), #cache.lines, tostring(cache.lines[#cache.lines]))
+end
+
+---@param bufnr number
+---@param iline integer
+---@return string|nil
+local function get_line_from_cache(bufnr, iline)
+	if cache.bufnr ~= bufnr then
+		return nil
+	end
+	return cache.lines[iline - cache.start + 1]
+end
+
+---@param bufnr number
+---@param i_start integer
+---@param i_end integer
+---@return string[]
+local function get_lines_from_cache(bufnr, i_start, i_end)
+	if cache.bufnr ~= bufnr then
+		return {}
+	end
+	local start = i_start - cache.start + 1
+	local end_ = i_end - cache.start
+	if start < 1 or end_ > #cache.lines then
+		return {}
+	end
+	return vim.list_slice(cache.lines, start, end_)
 end
 
 -----------------------------------------------------------------------
@@ -78,7 +120,7 @@ end
 ---@param bufnr number
 ---@return {[string]: boolean|integer|string|nil}
 function M.get_state(bufnr)
-	bufnr = bufnr or 0
+	bufnr = bufnr or api.nvim_get_current_buf()
 	if not b[bufnr].tirenvi then
 		b[bufnr].tirenvi = {
 			attached = false,
@@ -103,7 +145,7 @@ end
 ---@param key string
 ---@param val boolean|integer|string|nil
 function M.set(bufnr, key, val)
-	bufnr = bufnr or 0
+	bufnr = bufnr or api.nvim_get_current_buf()
 	local state = M.get_state(bufnr)
 	state[key] = val
 	b[bufnr].tirenvi = state
@@ -128,22 +170,51 @@ function M.set_lines(bufnr, i_start, i_end, lines, strict, no_undo)
 	end
 end
 
----@param bufnr number
----@param i_start integer
----@param i_end integer integer
----@param strict boolean|nil
----@return string[]
-function M.get_lines(bufnr, i_start, i_end, strict)
-	strict = strict or false
-	return api.nvim_buf_get_lines(bufnr, i_start, i_end, strict)
+function M.clear_cache()
+	cache = { bufnr = -1, start = -1, lines = {}, }
 end
 
 ---@param bufnr number
----@param index integer
+---@param i_start integer
+---@param i_end integer
+---@return string[]
+function M.get_lines(bufnr, i_start, i_end)
+	bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
+	i_start = math.max(0, i_start)
+	local nline = api.nvim_buf_line_count(bufnr)
+	if i_end == -1 then
+		i_end = nline
+	end
+	i_end = math.min(nline, i_end)
+	local lines = get_lines_from_cache(bufnr, i_start, i_end)
+	if #lines ~= 0 then
+		return lines
+	end
+	get_lines_and_cache(bufnr, i_start - STEP, i_end + STEP)
+	return get_lines_from_cache(bufnr, i_start, i_end)
+end
+
+---@param bufnr number
+---@param iline integer
 ---@return string|nil
-function M.get_line(bufnr, index)
-	local lines = M.get_lines(bufnr, index, index + 1)
-	return lines[1]
+function M.get_line(bufnr, iline)
+	bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
+	local line = get_line_from_cache(bufnr, iline)
+	if line then
+		return line
+	end
+	if cache.bufnr ~= bufnr then
+		M.get_lines(bufnr, iline, iline + 1)
+	elseif iline < cache.start then
+		if iline >= 0 then
+			get_lines_and_cache(bufnr, iline - 2 * STEP, iline + 1)
+		end
+	else
+		if iline < api.nvim_buf_line_count(bufnr) then
+			get_lines_and_cache(bufnr, iline, iline + 2 * STEP)
+		end
+	end
+	return get_line_from_cache(bufnr, iline)
 end
 
 ---@param bufnr number
@@ -194,6 +265,11 @@ function M.attach_on_lines(bufnr, callback)
 		end,
 	})
 	M.set(bufnr, M.IKEY.ATTACHED, true)
+end
+
+---@param step integer
+function M.set_step(step)
+	STEP = step
 end
 
 return M

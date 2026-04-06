@@ -4,6 +4,9 @@ local M = {}
 
 -- constants / defaults
 local fn = vim.fn
+local padding = config.marks.padding
+local escaped_padding = vim.pesc(padding)
+
 -----------------------------------------------------------------------
 -- Private helpers
 -----------------------------------------------------------------------
@@ -32,8 +35,10 @@ function M.get_widths(cells)
     return widths
 end
 
-function M.normalize(cells)
-    for index = 1, #cells do
+---@param cells Cell[]
+---@param ncol integer:w
+function M.normalize(cells, ncol)
+    for index = 1, ncol do
         local cell = cells[index]
         if cell == nil then
             cells[index] = ""
@@ -48,7 +53,7 @@ end
 ---@param self Cell
 ---@param target_width integer
 ---@return string
-function M:pad_cell(target_width)
+function M:fill_padding(target_width)
     if target_width == nil then
         return self
     end
@@ -57,7 +62,13 @@ function M:pad_cell(target_width)
     if diff <= 0 then
         return self
     end
-    return self .. string.rep(config.marks.padding, diff)
+    return self .. string.rep(padding, diff)
+end
+
+---@param self Cell
+---@return string
+function M:remove_padding()
+    return (self:gsub(escaped_padding, ""))
 end
 
 return M

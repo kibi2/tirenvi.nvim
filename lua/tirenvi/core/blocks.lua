@@ -53,9 +53,9 @@ local function set_attr(self)
 end
 
 ---@self Blocks
-local function remove_padding(self)
+local function from_vim(self)
 	for _, block in ipairs(self) do
-		Block[block.kind].remove_padding(block)
+		Block[block.kind].from_vim(block)
 	end
 end
 
@@ -216,7 +216,7 @@ end
 function M.new_from_vim(records)
 	local self = build_blocks(records)
 	set_attr(self)
-	remove_padding(self)
+	from_vim(self)
 	return self
 end
 

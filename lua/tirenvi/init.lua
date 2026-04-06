@@ -30,9 +30,9 @@ local function to_flat(bufnr)
 		return
 	end
 	local parser = util.get_parser(bufnr)
-	local vi_lines = buffer.get_lines(bufnr, 0, -1, false)
+	local vi_lines = buffer.get_lines(bufnr, 0, -1)
 	local blocks = vim_parser.parse(vi_lines)
-	log.debug(blocks)
+	log.debug(blocks[1].records)
 	local fl_lines = flat_parser.unparse(blocks, parser)
 	ui.set_lines(bufnr, 0, -1, fl_lines)
 end
@@ -41,9 +41,9 @@ end
 ---@param no_undo boolean|nil
 ---@return nil
 local function from_flat(bufnr, no_undo)
-	local fl_lines = buffer.get_lines(bufnr, 0, -1, false)
-	util.assert_no_reserved_marks(fl_lines)
+	local fl_lines = buffer.get_lines(bufnr, 0, -1)
 	local parser = util.get_parser(bufnr)
+	util.assert_no_reserved_marks(fl_lines)
 	local blocks = flat_parser.parse(fl_lines, parser)
 	local vi_lines = vim_parser.unparse(blocks)
 	ui.set_lines(bufnr, 0, -1, vi_lines, true, no_undo)
@@ -69,10 +69,10 @@ local function change_width(operator, count)
 	if not irow or not icol then
 		return
 	end
-	local lines = buffer.get_lines(bufnr, 0, -1, false)
+	local lines = buffer.get_lines(bufnr, 0, -1)
 	local top = tir_vim.get_block_top_nrow(lines, irow)
 	local bottom = tir_vim.get_block_bottom_nrow(lines, irow)
-	local lines = buffer.get_lines(bufnr, top - 1, bottom, false)
+	local lines = buffer.get_lines(bufnr, top - 1, bottom)
 	local blocks = vim_parser.parse(lines)
 	local block = blocks[1]
 	assert(block.kind == "grid")
@@ -178,7 +178,7 @@ end
 ---@return nil
 function M.redraw(bufnr)
 	bufnr = bufnr or vim.api.nvim_get_current_buf()
-	local old_lines = buffer.get_lines(bufnr, 0, -1, false)
+	local old_lines = buffer.get_lines(bufnr, 0, -1)
 	local blocks = vim_parser.parse(old_lines)
 	Blocks.reset_attr(blocks)
 	local vi_lines = vim_parser.unparse(blocks)
@@ -214,15 +214,15 @@ function M.insert_char_in_newline(bufnr)
 	local row = api.nvim_win_get_cursor(winid)[1]
 	local line_prev, line_next = buffer.get_lines_around(bufnr, row - 1, row)
 	local ref_line = line_prev and line_prev or line_next
-	local pipe = config.marks.pipe
-	if not ref_line or ref_line:sub(1, #pipe) ~= pipe then
+	if not ref_line or not tir_vim.start_with_pipe(ref_line) then
 		return
 	end
 	if buffer.get_line(bufnr, row - 1) ~= "" then
 		return
 	end
 	local ch = vim.v.char
-	vim.v.char = config.marks.pipe .. ch
+	local pipe = fn.strcharpart(ref_line, 0, 1)
+	vim.v.char = pipe .. ch
 end
 
 ---@return string

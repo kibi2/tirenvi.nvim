@@ -38,7 +38,6 @@ local api = vim.api
 ---
 --- If a new line is added above a table, it is treated as a plain line,
 --- so no modification is applied.
----
 ---@param vi_lines string[]
 ---@param attr_prev Attr|nil
 local function fix_empty_line_after_table(vi_lines, attr_prev)

@@ -25,7 +25,7 @@ end
 ---@param bufnr number
 ---@return boolean
 local function has_pipe(bufnr)
-	local fl_lines = buffer.get_lines(bufnr, 0, -1, false)
+	local fl_lines = buffer.get_lines(bufnr, 0, -1)
 	for _, fl_line in ipairs(fl_lines) do
 		if tir_vim.has_pipe(fl_line) then
 			return true

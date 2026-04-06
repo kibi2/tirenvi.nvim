@@ -1,6 +1,7 @@
 -- dependencies
 local guard = require("tirenvi.util.guard")
 local buf_state = require("tirenvi.state.buf_state")
+local buffer = require("tirenvi.state.buffer")
 local init = require("tirenvi.init")
 local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
@@ -139,15 +140,12 @@ local function register_keymaps()
 		expr = true,
 		buffer = 0,
 	})
-	-- default mapping (only if free)
-	if fn.maparg("<C-L>", "n") == "" then
-		vim.keymap.set("n", "<C-L>", "<Plug>(tir-redraw)", { silent = true, desc = "Tir redraw" })
-	end
 end
 
 ---@param bufnr number
 ---@return string
 function M.keymap_lf(bufnr)
+	buffer.clear_cache()
 	log.debug("===+===+===+===+=== keymap_lf %s ===+===+===+===+===", bufnr)
 	if buf_state.should_skip(bufnr, {
 			is_tir_vim = true,
@@ -160,6 +158,7 @@ end
 ---@param bufnr number
 ---@return string
 function M.keymap_tab(bufnr)
+	buffer.clear_cache()
 	log.debug("===+===+===+===+=== keymap_tab %s ===+===+===+===+===", bufnr)
 	if buf_state.should_skip(bufnr, {
 			is_tir_vim = true,

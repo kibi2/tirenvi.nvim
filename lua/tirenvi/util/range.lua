@@ -1,7 +1,3 @@
----@class Range
----@field first integer
----@field last integer
-
 local M = {}
 
 ---@param ranges Range[]
