@@ -1,11 +1,13 @@
 source $TIRENVI_ROOT/tests/common.vim
 
 edit $TIRENVI_ROOT/tests/data/simple.csv
-call cursor(1, 1)
+call cursor(2, 2)
 execute "normal! o123\<Esc>"
-call cursor(0, 1)
+sleep 1m
+call cursor(1, 5)
 execute "normal! O abc\<Esc>"
+sleep 1m
 execute "normal! Go 1 | 2\<Esc>"
-Tir redraw
+sleep 1m
 
 call RunTest({})

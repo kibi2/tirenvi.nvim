@@ -65,7 +65,6 @@ local function set_lines(bufnr, i_start, i_end, strict, lines, no_undo)
 	end
 	api.nvim_buf_set_lines(bufnr, i_start, i_end, strict, lines)
 	fix_cursor_utf8()
-	M.set_undo_tree_last(bufnr)
 	bo[bufnr].undolevels = undolevels
 end
 
@@ -231,6 +230,7 @@ end
 ---@return string|nil
 ---@return string|nil
 function M.get_lines_around(bufnr, start, end_)
+	M.get_lines(bufnr, start - 1, end_ + 1)
 	return M.get_line(bufnr, start - 1), M.get_line(bufnr, end_)
 end
 

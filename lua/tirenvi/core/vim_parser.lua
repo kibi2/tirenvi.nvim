@@ -42,7 +42,7 @@ end
 ---@param vi_line string
 ---@return Record
 local function tir_vim_to_ndjson(vi_line)
-	local pipe = tir_vim.has_pipe(vi_line)
+	local pipe = tir_vim.get_pipe_char(vi_line)
 	if pipe then
 		return Record.grid.new_from_vi_line(vi_line, pipe == pipec)
 	else

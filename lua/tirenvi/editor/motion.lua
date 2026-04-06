@@ -1,5 +1,3 @@
-local config = require("tirenvi.config")
-local buf_state = require("tirenvi.state.buf_state")
 local buffer = require("tirenvi.state.buffer")
 local LinProvider = require("tirenvi.state.buffer_line_provider")
 local tir_vim = require("tirenvi.core.tir_vim")
@@ -7,23 +5,21 @@ local util = require("tirenvi.util.util")
 
 local M = {}
 
+---@return string
+local function get_pipe()
+	local irow = vim.api.nvim_win_get_cursor(0)[1]
+	local bufnr = vim.api.nvim_get_current_buf()
+	local line = buffer.get_line(bufnr, irow - 1)
+	return tir_vim.get_pipe_char(line) or ""
+end
+
 ---@param op string
 ---@return function
 local function build_motion(op)
 	return function()
-		local bufnr = vim.api.nvim_get_current_buf()
-		if not buf_state.is_tir_vim(bufnr) then
-			return op
-		end
-
-		local delim = config.marks.pipe
 		local count = vim.v.count
-
-		if count > 0 then
-			return count .. op .. delim
-		end
-
-		return op .. delim
+		local prefix = (count > 0) and tostring(count) or ""
+		return prefix .. op .. get_pipe()
 	end
 end
 

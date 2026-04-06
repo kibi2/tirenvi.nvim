@@ -1,4 +1,3 @@
-local CONST = require("tirenvi.constants")
 local Cell = require("tirenvi.core.cell")
 local log = require("tirenvi.util.log")
 
@@ -46,28 +45,6 @@ end
 ---@return Attr
 local function new_from_columns(columns)
     return { columns = columns }
-end
-
----@param records Record_grid[]
----@return Attr
-local function new_merged_attr(records)
-    local attr = M.grid.new()
-    for _, record in ipairs(records) do
-        merge(attr, M.grid.new_from_record(record))
-    end
-    return attr
-end
-
----@self Attr
----@param source Attr
-local function extend(self, source)
-    if #self.columns == 0 then
-        self.columns = source.columns
-    else
-        for index, column in ipairs(self.columns) do
-            column.width = column.width or source.columns[index].width
-        end
-    end
 end
 
 -----------------------------------------------------------------------
@@ -131,29 +108,14 @@ function M.grid.new_from_record(record)
     return new_from_columns(get_columns(record.row))
 end
 
----@self Attr
 ---@param records Record_grid[]
-function M.grid:extend(records)
-    extend(self, new_merged_attr(records))
-end
-
----@self Attr
----@return boolean
-function M.grid:has_all()
-    if not self or self.kind ~= CONST.KIND.ATTR_GRID then
-        return false
+---@return Attr
+function M.new_merged_attr(records)
+    local attr = M.grid.new()
+    for _, record in ipairs(records) do
+        merge(attr, M.grid.new_from_record(record))
     end
-    local cols = self.columns
-    if not cols or #cols == 0 then
-        return false
-    end
-    for index = 1, #cols do
-        local col = cols[index]
-        if not col or not col.width or not col.align then
-            return false
-        end
-    end
-    return true
+    return attr
 end
 
 return M

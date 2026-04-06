@@ -1,5 +1,4 @@
 local tir_vim = require("tirenvi.core.tir_vim")
-local buffer = require("tirenvi.state.buffer")
 local config = require("tirenvi.config")
 local util = require("tirenvi.util.util")
 local LinProvider = require("tirenvi.state.buffer_line_provider")
@@ -25,24 +24,23 @@ local function setup_vl(line_provider, is_around)
     vim.api.nvim_win_set_cursor(0, { pos.end_row, pos.end_col - 1, })
 end
 
--- public API
-
-function M.setup_vil()
+local function setup_vil()
     local line_provider = LinProvider.new(0)
     setup_vl(line_provider)
 end
 
-function M.setup_val()
+local function setup_val()
     local line_provider = LinProvider.new(0)
     setup_vl(line_provider, true)
 end
 
+-- public API
+
 function M.setup()
-    vim.keymap.set({ "x" }, "i" .. config.textobj.column, M.setup_vil, {
+    vim.keymap.set({ "x" }, "i" .. config.textobj.column, setup_vil, {
         desc = "Inner column",
     })
-
-    vim.keymap.set({ "x" }, "a" .. config.textobj.column, M.setup_val, {
+    vim.keymap.set({ "x" }, "a" .. config.textobj.column, setup_val, {
         desc = "Around column",
     })
 end

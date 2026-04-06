@@ -156,30 +156,6 @@ end
 
 -- public API
 
----@param fl_lines string[]
----@param parser Parser
----@return Blocks
-function M.parse(fl_lines, parser)
-	local js_lines = flat_to_js_lines(fl_lines, parser)
-	local ndjsons = js_lines_to_ndjsons(js_lines)
-	local blocks = Blocks.new_from_flat(ndjsons)
-	if not parser.allow_plain then
-		Blocks.merge_blocks(blocks)
-	end
-	return blocks
-end
-
---- Convert display lines back to TSV format
----@param blocks Blocks
----@param parser Parser
----@return string[]
-function M.unparse(blocks, parser)
-	local ndjsons = Blocks.serialize_to_flat(blocks)
-	local js_lines = ndjsons_to_lines(ndjsons)
-	log.debug({ #js_lines, js_lines[1], js_lines[#js_lines] })
-	return js_lines_to_flat(js_lines, parser)
-end
-
 ---@class HealthItem
 ---@field status "ok"|"warn"|"error"
 ---@field message string
@@ -239,6 +215,27 @@ function M.check_command(parser)
 		})
 	end
 	return results
+end
+
+---@param fl_lines string[]
+---@param parser Parser
+---@return Blocks
+function M.parse(fl_lines, parser)
+	local js_lines = flat_to_js_lines(fl_lines, parser)
+	local ndjsons = js_lines_to_ndjsons(js_lines)
+	local blocks = Blocks.new_from_flat(ndjsons, parser.allow_plain)
+	return blocks
+end
+
+--- Convert display lines back to TSV format
+---@param blocks Blocks
+---@param parser Parser
+---@return string[]
+function M.unparse(blocks, parser)
+	local ndjsons = Blocks.serialize_to_flat(blocks)
+	local js_lines = ndjsons_to_lines(ndjsons)
+	log.debug({ #js_lines, js_lines[1], js_lines[#js_lines] })
+	return js_lines_to_flat(js_lines, parser)
 end
 
 return M

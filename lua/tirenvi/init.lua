@@ -171,7 +171,7 @@ end
 ---@return nil
 function M.restore_tir_vim(bufnr)
 	pcall(vim.cmd, "undojoin")
-	from_flat(bufnr)
+	from_flat(bufnr) -- TODO recover Attr_grid
 end
 
 ---@param bufnr number|nil Buffer number.
@@ -213,15 +213,16 @@ function M.insert_char_in_newline(bufnr)
 	local winid = api.nvim_get_current_win()
 	local row = api.nvim_win_get_cursor(winid)[1]
 	local line_prev, line_next = buffer.get_lines_around(bufnr, row - 1, row)
-	local ref_line = line_prev and line_prev or line_next
-	if not ref_line or not tir_vim.start_with_pipe(ref_line) then
+	local line_ref = line_prev and line_prev or line_next
+	if not line_ref or not tir_vim.start_with_pipe(line_ref) then
 		return
 	end
-	if buffer.get_line(bufnr, row - 1) ~= "" then
+	local line_new = buffer.get_line(bufnr, row - 1)
+	if line_new ~= "" then
 		return
 	end
 	local ch = vim.v.char
-	local pipe = fn.strcharpart(ref_line, 0, 1)
+	local pipe = fn.strcharpart(line_ref, 0, 1)
 	vim.v.char = pipe .. ch
 end
 
@@ -229,7 +230,7 @@ end
 function M.keymap_lf()
 	local col = fn.col(".")
 	local line = fn.getline(".")
-	if not tir_vim.has_pipe(line) then
+	if not tir_vim.get_pipe_char(line) then
 		return api.nvim_replace_termcodes("<CR>", true, true, true)
 	end
 	if col == 1 or col > #line then
@@ -241,7 +242,7 @@ end
 ---@return string
 function M.keymap_tab()
 	local line = fn.getline(".")
-	if not tir_vim.has_pipe(line) then
+	if not tir_vim.get_pipe_char(line) then
 		return api.nvim_replace_termcodes("<Tab>", true, true, true)
 	end
 	if bo.expandtab then

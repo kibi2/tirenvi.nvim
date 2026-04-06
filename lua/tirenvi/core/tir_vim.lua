@@ -46,7 +46,7 @@ local function is_block_boundary(base_pipe, target)
     if not target then
         return true
     end
-    return base_pipe ~= (M.has_pipe(target) ~= nil)
+    return base_pipe ~= (M.get_pipe_char(target) ~= nil)
 end
 
 ---@param provider LineProvider
@@ -55,7 +55,7 @@ end
 ---@return integer
 local function find_block_edge(provider, irow, step)
     local line = provider.get_line(irow)
-    local base_pipe = (M.has_pipe(line) ~= nil)
+    local base_pipe = (M.get_pipe_char(line) ~= nil)
     while true do
         irow = irow + step
         local line = provider.get_line(irow)
@@ -159,7 +159,7 @@ end
 
 ---@param line string|nil
 ---@return string|nil
-function M.has_pipe(line)
+function M.get_pipe_char(line)
     if not line then
         return nil
     end
@@ -178,7 +178,7 @@ function M.is_continue_line(line)
     if not line then
         return false
     end
-    return M.has_pipe(line) == pipec
+    return M.get_pipe_char(line) == pipec
 end
 
 ---@param line_provider LineProvider

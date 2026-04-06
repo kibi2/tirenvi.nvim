@@ -1,6 +1,5 @@
 local CONST = require("tirenvi.constants")
 local Record = require("tirenvi.core.record")
-local Cell = require("tirenvi.core.cell")
 local config = require("tirenvi.config")
 local Attr = require("tirenvi.core.attr")
 local util = require("tirenvi.util.util")
@@ -12,19 +11,31 @@ M.grid = {}
 
 -- constants / defaults
 
+---@param map {[string]: string}
+---@return {[string]: string}
+local function prepare_replace_map(map)
+    local out = {}
+    for key, value in pairs(map) do
+        out[vim.pesc(key)] = value
+    end
+    return out
+end
+
+local ESCAPE_MAP = prepare_replace_map({
+    ["\n"] = config.marks.lf,
+    ["\t"] = config.marks.tab,
+})
+
+local UNESCAPE_MAP = prepare_replace_map({
+    [config.marks.lf] = "\n",
+    [config.marks.tab] = "\t",
+})
+
 -----------------------------------------------------------------------
 -- Private helpers
 -----------------------------------------------------------------------
 
 local function nop(...) end
-
----@self Block_grid
-local function reset_master_attr(self)
-    if Attr.grid.has_all(self.attr) then
-        return
-    end
-    Attr.grid.extend(self.attr, self.records)
-end
 
 ---@self Block
 ---@param kind Block_kind
@@ -45,16 +56,25 @@ local function serialize_records(self)
 end
 
 ---@param self Block_grid
-local function split_lf(self)
+local function wrap_lf(self)
     local records = {}
     for _, record in ipairs(self.records) do
-        util.extend(records, Record.grid.split_lf(record))
+        util.extend(records, Record.grid.wrap_lf(record))
     end
     self.records = records
 end
 
 ---@param self Block_grid
-local function fill_padding(self)
+local function wrap_width(self)
+    local records = {}
+    for _, record in ipairs(self.records) do
+        util.extend(records, Record.grid.wrap_width(record, self.attr.columns))
+    end
+    self.records = records
+end
+
+---@param self Block_grid
+local function apply_column_widths(self)
     for _, record in ipairs(self.records) do
         Record.grid.fill_padding(record, self.attr.columns)
     end
@@ -68,7 +88,7 @@ local function remove_padding(self)
 end
 
 ---@self Block_grid
-local function concat_record(self)
+local function unwrap(self)
     local records = {}
     ---@type Record_grid
     local new_record = nil
@@ -83,6 +103,44 @@ local function concat_record(self)
         cont = record._has_continuation
     end
     self.records = records
+end
+
+--- Normalize all rows in a grid block to have the same number of columns.
+---@self Block_grid
+local function apply_column_count(self, ncol)
+    for _, record in ipairs(self.records) do
+        Record.apply_column_count(record, ncol)
+    end
+end
+
+local function derive_column_count(self)
+    local ncol = 0
+    for _, record in ipairs(self.records) do
+        ncol = math.max(ncol, #record.row)
+    end
+    return ncol
+end
+
+---@self Block
+local function ensure_table_attr(self)
+    if #self.attr.columns == 0 then
+        self.attr = Attr.new_merged_attr(self.records)
+    end
+end
+
+---@self Block
+---@self Block_grid
+---@param replace {[string]:string}
+local function apply_replacements(self, replace)
+    for _, record in ipairs(self.records) do
+        assert(record.kind == CONST.KIND.GRID, "unexpected record kind")
+        for icol, cell in ipairs(record.row) do
+            for key, val in pairs(replace) do
+                cell = cell:gsub(key, val)
+            end
+            record.row[icol] = cell
+        end
+    end
 end
 
 -----------------------------------------------------------------------
@@ -128,13 +186,6 @@ function M.plain:serialize()
     return serialize_records(self)
 end
 
-M.plain.normalize = nop
-M.plain.to_vim = nop
-M.plain.apply_replacements = nop
-M.plain.from_vim = nop
-M.plain.set_attr = nop
-M.plain.set_attr_from_vi = nop
-
 ---@self Block_plain
 ---@return Block_grid
 function M.plain:to_grid()
@@ -147,47 +198,16 @@ function M.plain:to_grid()
     return block
 end
 
+M.plain.set_attr = nop
+M.plain.from_flat = nop
+M.plain.to_flat = nop
+M.plain.from_vim = nop
+M.plain.to_vim = nop
+
 ---@self Block_grid
 ---@return Ndjson[]
 function M.grid:serialize()
     return serialize_records(self)
-end
-
---- Normalize all rows in a grid block to have the same number of columns.
----@self Block_grid
-function M.grid:normalize()
-    reset_master_attr(self)
-    local ncol = #self.attr.columns
-    for _, record in ipairs(self.records) do
-        Record.normalize_and_resize(record, ncol)
-    end
-end
-
---- Normalize all rows in a grid block to have the same number of columns.
----@self Block_grid
-function M.grid:to_vim()
-    split_lf(self)
-    fill_padding(self)
-end
-
----@self Block_grid
----@param replace {[string]:string}
-function M.grid:apply_replacements(replace)
-    for _, record in ipairs(self.records) do
-        assert(record.kind == CONST.KIND.GRID, "unexpected record kind")
-        for icol, cell in ipairs(record.row) do
-            for key, val in pairs(replace) do
-                cell = cell:gsub(key, val)
-            end
-            record.row[icol] = cell
-        end
-    end
-end
-
----@self Block_grid
-function M.grid:from_vim()
-    remove_padding(self)
-    concat_record(self)
 end
 
 ---@self Block_grid
@@ -205,12 +225,35 @@ function M.grid:set_attr(attr)
     self.attr = attr
 end
 
----@self Block
-function M.grid:set_attr_from_vi()
-    if #self.records == 0 then
-        return
-    end
-    self.attr = Attr.grid.new_from_record(self.records[1])
+--- Normalize all rows in a grid block to have the same number of columns.
+---@self Block_grid
+function M.grid:from_flat()
+    local ncol = derive_column_count(self)
+    apply_column_count(self, ncol)
+    apply_replacements(self, ESCAPE_MAP)
+end
+
+---@self Block_grid
+function M.grid:to_flat()
+    apply_replacements(self, UNESCAPE_MAP)
+end
+
+---@self Block_grid
+function M.grid:from_vim()
+    ensure_table_attr(self)
+    remove_padding(self)
+    apply_column_count(self, #self.attr.columns)
+    unwrap(self)
+end
+
+--- Normalize all rows in a grid block to have the same number of columns.
+---@self Block_grid
+function M.grid:to_vim()
+    wrap_lf(self)
+    ensure_table_attr(self)
+    wrap_width(self)
+    apply_column_count(self, #self.attr.columns)
+    apply_column_widths(self)
 end
 
 return M

@@ -35,17 +35,6 @@ local function get_parser_for_file(bufnr)
 	return config.parser_map[filetype]
 end
 
----@param str string
----@return string[]
-local function utf8_chars(str)
-	local chars = {}
-	local nStr = fn.strchars(str)
-	for iStr = 0, nStr - 1 do
-		chars[#chars + 1] = fn.strcharpart(str, iStr, 1)
-	end
-	return chars
-end
-
 ---@return {[string]:string}
 local function collect_reserved_chars()
 	local set = {}
@@ -63,7 +52,7 @@ local function find_reserved_marks(fl_lines)
 	local char_to_name = collect_reserved_chars()
 	local found_names = {}
 	for _, line in ipairs(fl_lines) do
-		for _, ch in ipairs(utf8_chars(line)) do
+		for _, ch in ipairs(M.utf8_chars(line)) do
 			local name = char_to_name[ch]
 			if name then
 				found_names[name] = true
@@ -80,6 +69,17 @@ end
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
+
+---@param str string
+---@return string[]
+function M.utf8_chars(str)
+	local chars = {}
+	local nStr = fn.strchars(str)
+	for iStr = 0, nStr - 1 do
+		chars[#chars + 1] = fn.strcharpart(str, iStr, 1)
+	end
+	return chars
+end
 
 --- Get file extension.
 ---@param filename string

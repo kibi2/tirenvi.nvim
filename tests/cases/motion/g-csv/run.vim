@@ -17,8 +17,10 @@ call cursor(2, 1)
 call feedkeys("gtg", "x")
 call feedkeys("j", "x")
 execute "normal dd"
+sleep 1m
 call feedkeys("gtG", "x")
 call feedkeys("k", "x")
 execute "normal dd"
+sleep 1m
 
 call RunTest({})

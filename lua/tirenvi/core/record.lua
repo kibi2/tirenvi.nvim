@@ -9,71 +9,39 @@ M.plain = {}
 M.grid = {}
 
 -- constants / defaults
-local lf = config.marks.lf
 
 -----------------------------------------------------------------------
 -- Private helpers
 -----------------------------------------------------------------------
 
----@param line string
----@return Record_plain
-local function plain_new(line)
-    return { kind = CONST.KIND.PLAIN, line = line }
-end
-
----@param self Record_grid
----@param new_count integer
----@return nil
-local function decrease_cols(self, new_count)
-    local row = self.row
-    row[new_count] = table.concat(row, " ", new_count)
-    for i = #row, new_count + 1, -1 do
-        row[i] = nil
-    end
-end
-
----@param self Record_grid
----@param ncol integer
-local function resize_columns(self, ncol)
-    local old_count = #self.row
-    if old_count > ncol then
-        decrease_cols(self, ncol)
-    end
-end
-
----@param self Record_grid
-local function normalize_row(self, ncol)
-    self.row = self.row or {}
-    Cell.normalize(self.row, ncol)
-end
-
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
 
----@param cells Cell[]|nil
----@return Record_grid
-function M.grid.new(cells)
-    return { kind = CONST.KIND.GRID, row = cells or {} }
+---@param self Record_grid
+---@param ncol integer
+function M:apply_column_count(ncol)
+    self.row = self.row or {}
+    Cell.normalize(self.row, ncol)
+    self.row = Cell.merge_tail(self.row, ncol) -- TODO join
 end
 
 ---@param vi_line string
 ---@return Record_plain
 function M.plain.new_from_vi_line(vi_line)
-    return plain_new(vi_line)
-end
-
----@param self Record_grid
----@param ncol integer
-function M:normalize_and_resize(ncol)
-    normalize_row(self, ncol)
-    resize_columns(self, ncol)
+    return { kind = CONST.KIND.PLAIN, line = vi_line }
 end
 
 ---@param self Record_plain
 ---@return Record_grid
 function M.plain:to_grid()
     return M.grid.new({ self.line })
+end
+
+---@param cells Cell[]|nil
+---@return Record_grid
+function M.grid.new(cells)
+    return { kind = CONST.KIND.GRID, row = cells or {} }
 end
 
 ---@param vi_line string
@@ -102,32 +70,42 @@ function M.grid:remove_padding()
     end
 end
 
-local multiline_lf = true
-
 ---@param self Record_grid
 ---@return Record_grid[]
-function M.grid:split_lf()
+function M.grid:wrap_lf()
     local records = {}
-    local nrow = 0
     for icol, cell in ipairs(self.row) do
-        local cells = { cell }
-        if multiline_lf then
-            cells = vim.split(cell, lf)
-            if #cells > 1 and cells[#cells] == "" and self._has_continuation then
-                cells[#cells] = nil
-            end
-        end
+        local cells = Cell.wrap_lf(cell, self._has_continuation)
         for irow, cell in ipairs(cells) do
             records[irow] = records[irow] or M.grid.new()
-            local append = irow ~= #cells and lf or ""
-            records[irow].row[icol] = cell .. append
+            records[irow].row[icol] = cell
         end
-        nrow = math.max(nrow, #cells)
     end
     local ncol = #self.row
-    for irow = 1, nrow do
+    for irow = 1, #records do
         records[irow]._has_continuation = true
-        normalize_row(records[irow], ncol)
+        Cell.normalize(records[irow].row, ncol)
+    end
+    records[#records]._has_continuation = self._has_continuation
+    return records
+end
+
+---@param self Record_grid
+---@param columns Attr_column[]
+---@return Record_grid[]
+function M.grid:wrap_width(columns)
+    local records = {}
+    for icol, cell in ipairs(self.row) do
+        local cells = Cell.wrap_width(cell, columns[icol].width)
+        for irow, cell in ipairs(cells) do
+            records[irow] = records[irow] or M.grid.new()
+            records[irow].row[icol] = cell
+        end
+    end
+    local ncol = #self.row
+    for irow = 1, #records do
+        records[irow]._has_continuation = true
+        Cell.normalize(records[irow].row, ncol)
     end
     records[#records]._has_continuation = self._has_continuation
     return records

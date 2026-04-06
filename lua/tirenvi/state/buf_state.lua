@@ -27,7 +27,7 @@ end
 local function has_pipe(bufnr)
 	for iline = 0, buffer.line_count(bufnr) do
 		local fl_line = buffer.get_line(bufnr, iline)
-		if tir_vim.has_pipe(fl_line) then
+		if tir_vim.get_pipe_char(fl_line) then
 			return true
 		end
 	end
@@ -56,6 +56,7 @@ end
 function M.is_undo_mode(bufnr)
 	local pre = buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST)
 	local next = fn.undotree(bufnr).seq_last
+	--log.probe("===-===-===-=== und/redo mode[%d] (%d, %d) ===-===-===-===", bufnr, pre, next)
 	if pre == next then
 		log.debug("===-===-===-=== und/redo mode[%d] (%d, %d) ===-===-===-===", bufnr, pre, next)
 		return true

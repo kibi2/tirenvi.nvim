@@ -18,16 +18,6 @@ M.VERSION = "tir/0.1"
 
 -- constants / defaults
 
-local ESCAPE_MAP = {
-	["\n"] = config.marks.lf,
-	["\t"] = config.marks.tab,
-}
-
-local UNESCAPE_MAP = {
-	[config.marks.lf] = "\n",
-	[config.marks.tab] = "\t",
-}
-
 -----------------------------------------------------------------------
 -- Utility
 -----------------------------------------------------------------------
@@ -35,28 +25,6 @@ local UNESCAPE_MAP = {
 ---@return Ndjson
 local function new_attr_file()
 	return { kind = CONST.KIND.ATTR_FILE, version = M.VERSION }
-end
-
----@self Blocks
----@param replace {[string]: string}
-local function apply_replacements(self, replace)
-	for _, block in ipairs(self) do
-		Block[block.kind].apply_replacements(block, replace)
-	end
-end
-
----@self Blocks
-local function set_attr(self)
-	for _, block in ipairs(self) do
-		Block[block.kind].set_attr_from_vi(block)
-	end
-end
-
----@self Blocks
-local function from_vim(self)
-	for _, block in ipairs(self) do
-		Block[block.kind].from_vim(block)
-	end
 end
 
 -----------------------------------------------------------------------
@@ -67,12 +35,12 @@ end
 ---@param records Ndjson[]
 ---@return Blocks
 local function build_blocks(records)
-	local blocks = {}
+	local self = {}
 	---@type Block
 	local block = Block.new()
 	local function flush_block()
 		if #(block.records) ~= 0 then
-			table.insert(blocks, block)
+			table.insert(self, block)
 		end
 		block = Block.new()
 	end
@@ -91,7 +59,7 @@ local function build_blocks(records)
 		end
 	end
 	flush_block()
-	return blocks
+	return self
 end
 
 -----------------------------------------------------------------------
@@ -163,20 +131,13 @@ end
 ---@param blocks Blocks
 ---@param attr_prev Attr|nil
 ---@param attr_next Attr|nil
+---@return boolean
 local function apply_reference_attr_multi(blocks, attr_prev, attr_next)
 	insert_plain_block(blocks, attr_prev, attr_next)
 	attach_attr(blocks, attr_prev, attr_next)
+	return true
 end
 
----@param map {[string]: string}
----@return {[string]: string}
-local function prepare_replace_map(map)
-	local out = {}
-	for key, value in pairs(map) do
-		out[vim.pesc(key)] = value
-	end
-	return out
-end
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
@@ -200,26 +161,6 @@ function M.merge_blocks(self)
 	end
 end
 
---- Convert NDJSON records into normalized blocks.
----@param ndjsons Ndjson[]
----@return Blocks
-function M.new_from_flat(ndjsons)
-	local self = build_blocks(ndjsons)
-	local map = prepare_replace_map(ESCAPE_MAP)
-	apply_replacements(self, map)
-	return self
-end
-
---- Convert NDJSON records into normalized blocks.
----@param records Record[]
----@return Blocks
-function M.new_from_vim(records)
-	local self = build_blocks(records)
-	set_attr(self)
-	from_vim(self)
-	return self
-end
-
 ---@self Blocks
 function M:reset_attr()
 	for _, block in ipairs(self) do
@@ -227,18 +168,42 @@ function M:reset_attr()
 	end
 end
 
+--- Convert NDJSON records into normalized blocks.
+---@param ndjsons Ndjson[]
+---@return Blocks
+function M.new_from_flat(ndjsons, allow_plain)
+	local self = build_blocks(ndjsons)
+	if not allow_plain then
+		M.merge_blocks(self)
+	end
+	for _, block in ipairs(self) do
+		Block[block.kind].from_flat(block)
+	end
+	return self
+end
+
 ---@self Blocks
 ---@return Ndjson[]
 function M:serialize_to_flat()
-	local map = prepare_replace_map(UNESCAPE_MAP)
-	apply_replacements(self, map)
 	local ndjsons = { new_attr_file() }
 	for _, block in ipairs(self) do
 		local impl = Block[block.kind]
-		impl.normalize(block)
+		impl.to_flat(block)
 		util.extend(ndjsons, impl.serialize(block))
 	end
 	return ndjsons
+end
+
+--- Convert NDJSON records into normalized blocks.
+---@param records Record[]
+---@return Blocks
+function M.new_from_vim(records)
+	local self = build_blocks(records)
+	for _, block in ipairs(self) do
+		Block[block.kind].from_vim(block)
+	end
+
+	return self
 end
 
 ---@self Blocks
@@ -247,7 +212,6 @@ function M:serialize_to_vim()
 	local ndjsons = {}
 	for _, block in ipairs(self) do
 		local impl = Block[block.kind]
-		impl.normalize(block)
 		impl.to_vim(block)
 		util.extend(ndjsons, impl.serialize(block))
 	end
@@ -262,8 +226,7 @@ end
 ---@return RefAttrError|nil
 function M:repair(attr_prev, attr_next, allow_plain)
 	if allow_plain then
-		apply_reference_attr_multi(self, attr_prev, attr_next)
-		return true
+		return apply_reference_attr_multi(self, attr_prev, attr_next)
 	else
 		return apply_reference_attr_single(self, attr_prev, attr_next)
 	end

@@ -14,17 +14,22 @@ EOF
 
 edit $TIRENVI_ROOT/tests/data/complex.md
 call cursor(2, 1)
-call feedkeys("gtg", "x")
+execute "normal gtg"
 execute "normal dd"
-call feedkeys("gtG", "x")
+sleep 1m
+execute "normal gtG"
 execute "normal dd"
+sleep 1m
 call cursor(11, 1)
-call feedkeys("gtg", "x")
+execute "normal gtg"
 execute "normal dd"
-call feedkeys("gtG", "x")
+sleep 1m
+execute "normal gtG"
 execute "normal dd"
+sleep 1m
 call cursor(21, 1)
-call feedkeys("gtf", "x")
+execute "normal gtf"
 execute "normal D"
+sleep 1m
 
 call RunTest({})
