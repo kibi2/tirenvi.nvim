@@ -133,7 +133,7 @@ function M.special_apply()
     else
         add_match(winid, "TirenviPipeNoHbar", pat_v(pipen), 30)
     end
-    vim.opt_local.conceallevel = 2
+    vim.opt_local.conceallevel = 1
     vim.opt_local.concealcursor = "nc"
     local pattern = vim.fn.escape(pipec, [[/\]])
     vim.cmd(string.format(

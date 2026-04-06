@@ -52,9 +52,9 @@ end
 ---@return integer|nil
 ---@return integer|nil
 local function get_current_col()
-	local irow, ibyte0 = unpack(vim.api.nvim_win_get_cursor(0))
+	local irow, ibyte0 = unpack(api.nvim_win_get_cursor(0))
 	local ibyte = ibyte0 + 1
-	local cline = vim.api.nvim_get_current_line()
+	local cline = buffer.get_line(0, irow - 1) or ""
 	local pipe_pos = tir_vim.get_pipe_byte_position(cline)
 	if #pipe_pos == 0 then
 		return nil, nil
@@ -62,16 +62,16 @@ local function get_current_col()
 	return irow, tir_vim.get_current_col_index(pipe_pos, ibyte)
 end
 
+---@param line_provider LineProvider
 ---@param operator string
-local function change_width(operator, count)
-	local bufnr = vim.api.nvim_get_current_buf()
+local function change_width(line_provider, operator, count)
+	local bufnr = api.nvim_get_current_buf()
 	local irow, icol = get_current_col()
 	if not irow or not icol then
 		return
 	end
-	local lines = buffer.get_lines(bufnr, 0, -1)
-	local top = tir_vim.get_block_top_nrow(lines, irow)
-	local bottom = tir_vim.get_block_bottom_nrow(lines, irow)
+	local top = tir_vim.get_block_top_nrow(line_provider, irow)
+	local bottom = tir_vim.get_block_bottom_nrow(line_provider, irow)
 	local lines = buffer.get_lines(bufnr, top - 1, bottom)
 	local blocks = vim_parser.parse(lines)
 	local block = blocks[1]
@@ -102,7 +102,7 @@ local warned = false
 ---@param command string
 local function set_repeat(command)
 	local ok = pcall(function()
-		vim.fn["repeat#set"](command)
+		fn["repeat#set"](command)
 	end)
 	if not ok and not warned then
 		warned = true
@@ -177,7 +177,7 @@ end
 ---@param bufnr number|nil Buffer number.
 ---@return nil
 function M.redraw(bufnr)
-	bufnr = bufnr or vim.api.nvim_get_current_buf()
+	bufnr = bufnr or api.nvim_get_current_buf()
 	local old_lines = buffer.get_lines(bufnr, 0, -1)
 	local blocks = vim_parser.parse(old_lines)
 	Blocks.reset_attr(blocks)
@@ -195,13 +195,13 @@ function M.hbar(bufnr)
 	ui.special_apply()
 end
 
----@param bufnr number Buffer number.
+---@param line_provider LineProvider
 ---@param operator string Operator: "", "=", "+", "-"
 ---@param count integer Count for the operator (default: 0)
 ---@return nil
-function M.width(bufnr, operator, count)
-	change_width(operator, count)
-	local command = vim.api.nvim_replace_termcodes(
+function M.width(line_provider, operator, count)
+	change_width(line_provider, operator, count)
+	local command = api.nvim_replace_termcodes(
 		":<C-u>Tir width " .. operator .. count .. "<CR>",
 		true, false, true
 	)
@@ -210,7 +210,7 @@ end
 
 ---@param bufnr number
 function M.insert_char_in_newline(bufnr)
-	local winid = vim.api.nvim_get_current_win()
+	local winid = api.nvim_get_current_win()
 	local row = api.nvim_win_get_cursor(winid)[1]
 	local line_prev, line_next = buffer.get_lines_around(bufnr, row - 1, row)
 	local ref_line = line_prev and line_prev or line_next

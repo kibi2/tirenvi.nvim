@@ -1,5 +1,6 @@
 local config = require("tirenvi.config")
 local buf_state = require("tirenvi.state.buf_state")
+local LinProvider = require("tirenvi.state.buffer_line_provider")
 local tir_vim = require("tirenvi.core.tir_vim")
 local util = require("tirenvi.util.util")
 
@@ -39,8 +40,8 @@ function M.block_top()
 	if not parser or not parser.allow_plain then
 		top = 1
 	else
-		local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-		top = tir_vim.get_block_top_nrow(lines, row)
+		local line_provider = LinProvider.new(0)
+		top = tir_vim.get_block_top_nrow(line_provider, row)
 	end
 	vim.api.nvim_win_set_cursor(0, { top, col })
 end
@@ -54,8 +55,8 @@ function M.block_bottom()
 	if not parser or not parser.allow_plain then
 		bottom = vim.api.nvim_buf_line_count(bufnr)
 	else
-		local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-		bottom = tir_vim.get_block_bottom_nrow(lines, row)
+		local line_provider = LinProvider.new(0)
+		bottom = tir_vim.get_block_bottom_nrow(line_provider, row)
 	end
 	vim.api.nvim_win_set_cursor(0, { bottom, col })
 end

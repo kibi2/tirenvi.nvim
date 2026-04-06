@@ -2,6 +2,7 @@
 local guard = require("tirenvi.util.guard")
 local buf_state = require("tirenvi.state.buf_state")
 local buffer = require("tirenvi.state.buffer")
+local LinProvider = require("tirenvi.state.buffer_line_provider")
 local init = require("tirenvi.init")
 local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
@@ -63,7 +64,8 @@ local function cmd_width(bufnr, opts)
 	end
 	local operator, num = opts.args:match("^width%s*([=+-]?)(%d*)")
 	num = tonumber(num) or 0
-	init.width(bufnr, operator, num)
+	local line_provider = LinProvider.new(bufnr)
+	init.width(line_provider, operator, num)
 end
 
 ----------------------------------------------------------------------

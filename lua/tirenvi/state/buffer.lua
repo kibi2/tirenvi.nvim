@@ -40,7 +40,7 @@ M.IKEY      = {
 local function fix_cursor_utf8()
 	local winid = api.nvim_get_current_win()
 	local row, col = unpack(api.nvim_win_get_cursor(winid))
-	local line = api.nvim_get_current_line()
+	local line = M.get_line(0, row - 1)
 	local char_index = vim.str_utfindex(line, col)
 	local boundary = vim.str_byteindex(line, char_index)
 	if boundary ~= col then
@@ -215,6 +215,12 @@ function M.get_line(bufnr, iline)
 		end
 	end
 	return get_line_from_cache(bufnr, iline)
+end
+
+---@param bufnr number
+---@return string|nil
+function M.line_count(bufnr)
+	return api.nvim_buf_line_count(bufnr)
 end
 
 ---@param bufnr number

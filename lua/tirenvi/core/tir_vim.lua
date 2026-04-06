@@ -7,6 +7,7 @@ local pipec = config.marks.pipec
 
 local M = {}
 
+local api = vim.api
 -- private helpers
 
 -- local function str_byteindex(line, char_index)
@@ -38,27 +39,29 @@ local function remove_end_pipe(line)
 end
 
 ---@param base_pipe boolean
----@param target string
+---@param target string|nil
 ---@return boolean
-local function same_block(base_pipe, target)
-    return base_pipe == (M.has_pipe(target) ~= nil)
+local function is_block_boundary(base_pipe, target)
+    if not target then
+        return true
+    end
+    return base_pipe ~= (M.has_pipe(target) ~= nil)
 end
 
----@param lines string[]
+---@param provider LineProvider
 ---@param irow integer
 ---@param step integer  -- -1 or 1
 ---@return integer
-local function find_block_edge(lines, irow, step)
-    local base = lines[irow]
-    local base_pipe = (M.has_pipe(base) ~= nil)
-    local index = irow + step
-    while index >= 1 and index <= #lines do
-        if not same_block(base_pipe, lines[index]) then
-            return index - step
+local function find_block_edge(provider, irow, step)
+    local line = provider.get_line(irow)
+    local base_pipe = (M.has_pipe(line) ~= nil)
+    while true do
+        irow = irow + step
+        local line = provider.get_line(irow)
+        if is_block_boundary(base_pipe, line) then
+            return irow - step
         end
-        index = index + step
     end
-    return (step == -1) and 1 or #lines
 end
 
 ---@param line string
@@ -130,18 +133,18 @@ function M.get_current_col_index(byte_pos, icol)
     return nil
 end
 
----@param lines string[]
+---@param line_provider LineProvider
 ---@param irow integer
 ---@return integer
-function M.get_block_top_nrow(lines, irow)
-    return find_block_edge(lines, irow, -1)
+function M.get_block_top_nrow(line_provider, irow)
+    return find_block_edge(line_provider, irow, -1)
 end
 
----@param lines string[]
+---@param line_provider LineProvider
 ---@param irow integer
 ---@return integer
-function M.get_block_bottom_nrow(lines, irow)
-    return find_block_edge(lines, irow, 1)
+function M.get_block_bottom_nrow(line_provider, irow)
+    return find_block_edge(line_provider, irow, 1)
 end
 
 ---@param line string
@@ -153,9 +156,12 @@ function M.get_cells(line)
     return vim.split(line, pipen, { plain = true })
 end
 
----@param line string
+---@param line string|nil
 ---@return string|nil
 function M.has_pipe(line)
+    if not line then
+        return nil
+    end
     if line:find(pipen, 1, true) then
         return pipen
     end
@@ -174,16 +180,16 @@ function M.is_continue_line(line)
     return M.has_pipe(line) == pipec
 end
 
----@param lines string[]
+---@param line_provider LineProvider
 ---@param count integer
 ---@param is_around boolean
 ---@param allow_plain boolean
 ---@return Rect|nil
-function M.get_block_rect(lines, count, is_around, allow_plain)
+function M.get_block_rect(line_provider, count, is_around, allow_plain)
     -- local mode = vim.fn.mode()
-    local irow, icol0 = unpack(vim.api.nvim_win_get_cursor(0))
+    local irow, icol0 = unpack(api.nvim_win_get_cursor(0))
     local icol = icol0 + 1
-    local cline = vim.api.nvim_get_current_line()
+    local cline = line_provider.get_line(irow) or ""
     local cbyte_pos = M.get_pipe_byte_position(cline)
     if #cbyte_pos == 0 then
         return nil
@@ -195,14 +201,16 @@ function M.get_block_rect(lines, count, is_around, allow_plain)
     local trow
     local brow
     if allow_plain then
-        trow = M.get_block_top_nrow(lines, irow)
-        brow = M.get_block_bottom_nrow(lines, irow)
+        trow = M.get_block_top_nrow(line_provider, irow)
+        brow = M.get_block_bottom_nrow(line_provider, irow)
     else
         trow = 1
-        brow = #lines
+        brow = api.nvim_buf_line_count(0)
     end
-    local tbyte_pos = M.get_pipe_byte_position(lines[trow])
-    local bbyte_pos = M.get_pipe_byte_position(lines[brow])
+    local tline = line_provider.get_line(trow) or ""
+    local bline = line_provider.get_line(brow) or ""
+    local tbyte_pos = M.get_pipe_byte_position(tline)
+    local bbyte_pos = M.get_pipe_byte_position(bline)
     local end_index = colIndex + count
     end_index = math.min(end_index, #bbyte_pos)
     return {

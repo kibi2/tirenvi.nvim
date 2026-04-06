@@ -24,16 +24,6 @@ end
 ---@param self Record_grid
 ---@param new_count integer
 ---@return nil
-local function increase_cols(self, new_count)
-    local row = self.row
-    for _ = #row + 1, new_count do
-        row[#row + 1] = ""
-    end
-end
-
----@param self Record_grid
----@param new_count integer
----@return nil
 local function decrease_cols(self, new_count)
     local row = self.row
     row[new_count] = table.concat(row, " ", new_count)
@@ -48,8 +38,6 @@ local function resize_columns(self, ncol)
     local old_count = #self.row
     if old_count > ncol then
         decrease_cols(self, ncol)
-    elseif old_count < ncol then
-        increase_cols(self, ncol)
     end
 end
 
