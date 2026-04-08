@@ -71,10 +71,9 @@ end
 ---@param i_start integer
 ---@param i_end integer integer
 ---@param lines string[]
----@param strict boolean|nil
 ---@param no_undo boolean|nil
-function M.set_lines(bufnr, i_start, i_end, lines, strict, no_undo)
-    buffer.set_lines(bufnr, i_start, i_end, lines, strict, no_undo)
+function M.set_lines(bufnr, i_start, i_end, lines, no_undo)
+    buffer.set_lines(bufnr, i_start, i_end, lines, no_undo)
 end
 
 -- =========================
@@ -123,8 +122,7 @@ function M.special_apply()
     add_match(winid, "TirenviPadding", pat_v(config.marks.padding), 10)
     add_match(winid, "TirenviSpecialChar", pat_v(config.marks.lf), 20)
     add_match(winid, "TirenviSpecialChar", pat_v(config.marks.tab), 20)
-    vim.w.tirenvi_view_bar = true
-    if vim.w.tirenvi_view_bar then
+    if not vim.w.tirenvi_view_nobar then
         add_match(winid, "TirenviPipeHbar", pat_v(pipen), 30)
         add_match(winid, "TirenviHbar", pat_line_inner(pipen), 20)
         add_match(winid, "TirenviPipeNoHbar", pat_line_start(pipen), 40)
@@ -136,11 +134,8 @@ function M.special_apply()
     vim.opt_local.conceallevel = 1
     vim.opt_local.concealcursor = "nc"
     local pattern = vim.fn.escape(pipec, [[/\]])
-    vim.cmd(string.format(
-        [[syntax match TirPipeC /%s/ conceal cchar=%s]],
-        pattern,
-        pipen
-    ))
+    local command = string.format([[syntax match TirPipeC /%s/ conceal cchar=%s]], pattern, pipen)
+    vim.cmd(command)
 end
 
 function M.special_clear()

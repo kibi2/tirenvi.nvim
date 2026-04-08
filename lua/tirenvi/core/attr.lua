@@ -17,6 +17,7 @@ local function get_columns(cells)
     local columns = {}
     local widths = Cell.get_widths(cells)
     for _, width in ipairs(widths) do
+        width = math.max(width, 2)
         columns[#columns + 1] = { width = width }
     end
     return columns
@@ -96,26 +97,34 @@ end
 ---@return Attr
 function M.grid.new(record)
     if record then
-        return M.grid.new_from_record(record)
+        return M.grid.new_from_record(record.row)
     else
         return new_from_columns({})
     end
 end
 
----@param record Record_grid
+---@param cells Cell[]
 ---@return Attr
-function M.grid.new_from_record(record)
-    return new_from_columns(get_columns(record.row))
+function M.grid.new_from_record(cells)
+    return new_from_columns(get_columns(cells))
 end
 
 ---@param records Record_grid[]
 ---@return Attr
-function M.new_merged_attr(records)
+function M.grid.new_merged_attr(records)
     local attr = M.grid.new()
     for _, record in ipairs(records) do
-        merge(attr, M.grid.new_from_record(record))
+        merge(attr, M.grid.new_from_record(record.row))
     end
     return attr
+end
+
+---@self Attr
+---@param icol integer
+---@param width integer
+function M.grid:set_width(icol, width)
+    self.columns[icol] = self.columns[icol] or {}
+    self.columns[icol].width = math.max(width, 2)
 end
 
 return M

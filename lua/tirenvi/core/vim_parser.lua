@@ -65,10 +65,12 @@ end
 -----------------------------------------------------------------------
 
 ---@param vi_lines string[]
+---@param no_unwrap boolean|nil
 ---@return Blocks
-function M.parse(vi_lines)
+function M.parse(vi_lines, no_unwrap)
+	no_unwrap = no_unwrap or false
 	local records = tir_vim_to_ndjsons(vi_lines)
-	local blocks = Blocks.new_from_vim(records)
+	local blocks = Blocks.new_from_vim(records, no_unwrap)
 	return blocks
 end
 
@@ -86,7 +88,7 @@ function M.parse_to_attr(vi_line)
 		return nil
 	end
 	local record = tir_vim_to_ndjson(vi_line)
-	return Attr[record.kind].new_from_record(record)
+	return Attr[record.kind].new_from_record(record.row)
 end
 
 return M

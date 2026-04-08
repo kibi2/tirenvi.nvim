@@ -9,6 +9,7 @@ local flat_parser = require("tirenvi.core.flat_parser")
 local vim_parser = require("tirenvi.core.vim_parser")
 local tir_vim = require("tirenvi.core.tir_vim")
 local Blocks = require("tirenvi.core.blocks")
+local Attr = require("tirenvi.core.attr")
 local ui = require("tirenvi.ui")
 local notify = require("tirenvi.util.notify")
 
@@ -46,7 +47,7 @@ local function from_flat(bufnr, no_undo)
 	util.assert_no_reserved_marks(fl_lines)
 	local blocks = flat_parser.parse(fl_lines, parser)
 	local vi_lines = vim_parser.unparse(blocks)
-	ui.set_lines(bufnr, 0, -1, vi_lines, true, no_undo)
+	ui.set_lines(bufnr, 0, -1, vi_lines, no_undo)
 end
 
 ---@return integer|nil
@@ -81,17 +82,17 @@ local function change_width(line_provider, operator, count)
 		if count <= 0 then
 			return
 		end
-		block.attr.columns[icol].width = count
+		Attr.grid.set_width(block.attr, icol, count)
 	elseif operator == "+" then
 		if count == 0 then
 			count = 1
 		end
-		block.attr.columns[icol].width = old_width + count
+		Attr.grid.set_width(block.attr, icol, old_width + count)
 	elseif operator == "-" then
 		if count == 0 then
 			count = 1
 		end
-		block.attr.columns[icol].width = old_width - count
+		Attr.grid.set_width(block.attr, icol, old_width - count)
 	end
 	local vi_lines = vim_parser.unparse(blocks)
 	ui.set_lines(bufnr, top - 1, bottom, vi_lines)
@@ -142,12 +143,26 @@ function M.enable(bufnr)
 	from_flat(bufnr)
 end
 
+local buffer_backup
+
 --- Convert current buffer (or specified buffer) from display format back to file format (tsv)
 ---@param bufnr number Buffer number.
 ---@return nil
 function M.export_flat(bufnr)
+	buffer_backup = buffer.get_lines(bufnr, 0, -1)
 	to_flat(bufnr)
-	log.debug("export_flat done")
+end
+
+--- Convert current buffer (or specified buffer) from plain format to view format
+---@param bufnr number Buffer number.
+---@return nil
+function M.restore_tir_vim(bufnr)
+	if not buffer_backup then
+		return
+	end
+	pcall(vim.cmd, "undojoin")
+	buffer.set_lines(bufnr, 0, -1, buffer_backup)
+	buffer_backup = nil
 end
 
 ---@param bufnr number Buffer number.
@@ -164,14 +179,6 @@ function M.toggle(bufnr)
 	else
 		M.enable(bufnr)
 	end
-end
-
---- Convert current buffer (or specified buffer) from plain format to view format
----@param bufnr number Buffer number.
----@return nil
-function M.restore_tir_vim(bufnr)
-	pcall(vim.cmd, "undojoin")
-	from_flat(bufnr) -- TODO recover Attr_grid
 end
 
 ---@param bufnr number|nil Buffer number.
@@ -191,7 +198,7 @@ end
 ---@param bufnr number Buffer number.
 ---@return nil
 function M.hbar(bufnr)
-	vim.w.tirenvi_view_bar = not (vim.w.tirenvi_view_bar or false)
+	vim.w.tirenvi_view_nobar = not (vim.w.tirenvi_view_nobar or false)
 	ui.special_apply()
 end
 

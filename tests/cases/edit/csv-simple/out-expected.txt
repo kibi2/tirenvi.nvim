@@ -2,8 +2,8 @@
 "gen.csv" [New] 2L, 8B written
 
 === DISPLAY ===
-│a│b│
-│c│d│
+│a⠀│b⠀│
+│c⠀│d⠀│
 
 === FILE ===
 a,b

@@ -7,6 +7,7 @@ local init = require("tirenvi.init")
 local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
 local errors = require("tirenvi.util.errors")
+local ui = require("tirenvi.ui")
 
 -- module
 local M = {}
@@ -38,6 +39,8 @@ local function cmd_toggle(bufnr, opts)
 		}) then
 		return
 	end
+	ui.special_clear()
+	ui.special_apply()
 	init.toggle(bufnr)
 end
 
@@ -75,12 +78,18 @@ end
 local commands = {
 	toggle = cmd_toggle,
 	redraw = cmd_redraw,
-	hbar = cmd_hbar,
+	_hbar = cmd_hbar,
 	width = cmd_width,
 }
 
+
 local function get_command_keys()
-	local keys = vim.tbl_keys(commands)
+	local keys = {}
+	for key, _ in pairs(commands) do
+		if not key:match("^_") then
+			table.insert(keys, key)
+		end
+	end
 	table.sort(keys)
 	return keys
 end
@@ -96,7 +105,7 @@ end
 ---@param opts any
 local function on_tir(opts)
 	local sub = opts.fargs[1]
-	local command = sub:match("^[A-Za-z]+") or ""
+	local command = sub:match("^[A-Za-z_]+") or ""
 	if not sub then
 		notify.info(build_usage())
 		return

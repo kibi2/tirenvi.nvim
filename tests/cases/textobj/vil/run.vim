@@ -5,7 +5,7 @@ call cursor(2, 1)
 call feedkeys("vil", "x")
 execute "normal d"
 sleep 1m
-call cursor(4, 15)
+call cursor(4, 18)
 call feedkeys("vil", "x")
 execute "normal d"
 sleep 1m
