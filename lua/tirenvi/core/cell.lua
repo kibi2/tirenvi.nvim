@@ -106,36 +106,26 @@ end
 ---@return Cell[]
 function M:wrap_width(width)
     local cells = {}
-
-    -- 空やwidth不正はそのまま返す
     if not self or self == "" or width <= 0 then
         return { self }
     end
-
     local chars = util.utf8_chars(self)
-
     local current = ""
     local current_width = 0
-
-    for _, ch in ipairs(chars) do
-        local ch_width = display_width(ch)
-
-        -- 追加すると幅オーバーする場合は確定
+    for _, char in ipairs(chars) do
+        local ch_width = display_width(char)
         if current ~= "" and current_width + ch_width > width then
             cells[#cells + 1] = current
-            current = ch
+            current = char
             current_width = ch_width
         else
-            current = current .. ch
+            current = current .. char
             current_width = current_width + ch_width
         end
     end
-
-    -- 残りを追加
     if current ~= "" then
         cells[#cells + 1] = current
     end
-
     return cells
 end
 

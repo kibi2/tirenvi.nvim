@@ -78,6 +78,8 @@ end
 local function apply_reference_attr_single(blocks, attr_prev, attr_next)
 	M.merge_blocks(blocks)
 	if Attr.is_conflict(attr_prev, attr_next, false) then
+		log.debug("===-===-===-=== conflict")
+		log.debug(blocks[1].records[1])
 		return false, "conflict"
 	end
 	if #blocks == 0 then
@@ -94,6 +96,9 @@ local function apply_reference_attr_single(blocks, attr_prev, attr_next)
 		end
 	elseif Attr.is_plain(attr) then
 		if block.kind == CONST.KIND.GRID then
+			log.debug("===-===-===-=== grid in plain")
+			log.debug(attr_prev)
+			log.debug(attr_next)
 			return false, "grid in plain"
 		end
 	end
@@ -196,11 +201,12 @@ end
 
 --- Convert NDJSON records into normalized blocks.
 ---@param records Record[]
+---@param no_unwrap boolean
 ---@return Blocks
-function M.new_from_vim(records)
+function M.new_from_vim(records, no_unwrap)
 	local self = build_blocks(records)
 	for _, block in ipairs(self) do
-		Block[block.kind].from_vim(block)
+		Block[block.kind].from_vim(block, no_unwrap)
 	end
 
 	return self

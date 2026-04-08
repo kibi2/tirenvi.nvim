@@ -56,7 +56,6 @@ end
 function M.is_undo_mode(bufnr)
 	local pre = buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST)
 	local next = fn.undotree(bufnr).seq_last
-	--log.probe("===-===-===-=== und/redo mode[%d] (%d, %d) ===-===-===-===", bufnr, pre, next)
 	if pre == next then
 		log.debug("===-===-===-=== und/redo mode[%d] (%d, %d) ===-===-===-===", bufnr, pre, next)
 		return true

@@ -92,15 +92,16 @@ local function unwrap(self)
     local records = {}
     ---@type Record_grid
     local new_record = nil
-    local cont = false
+    local cont_prev = false
     for _, record in ipairs(self.records) do
-        if not cont then
+        if not cont_prev then
             new_record = Record.grid.new(record.row)
             records[#records + 1] = new_record
         else
             Record.grid.concat(new_record, record)
         end
-        cont = record._has_continuation
+        cont_prev = record._has_continuation
+        new_record._has_continuation = cont_prev
     end
     self.records = records
 end
@@ -124,7 +125,7 @@ end
 ---@self Block
 local function ensure_table_attr(self)
     if #self.attr.columns == 0 then
-        self.attr = Attr.new_merged_attr(self.records)
+        self.attr = Attr.grid.new_merged_attr(self.records)
     end
 end
 
@@ -239,11 +240,14 @@ function M.grid:to_flat()
 end
 
 ---@self Block_grid
-function M.grid:from_vim()
+---@param no_unwrap boolean
+function M.grid:from_vim(no_unwrap)
     ensure_table_attr(self)
     remove_padding(self)
     apply_column_count(self, #self.attr.columns)
-    unwrap(self)
+    if not no_unwrap then
+        unwrap(self)
+    end
 end
 
 --- Normalize all rows in a grid block to have the same number of columns.
@@ -251,8 +255,8 @@ end
 function M.grid:to_vim()
     wrap_lf(self)
     ensure_table_attr(self)
-    wrap_width(self)
     apply_column_count(self, #self.attr.columns)
+    wrap_width(self)
     apply_column_widths(self)
 end
 

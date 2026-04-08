@@ -7,6 +7,6 @@ let outfile = 'gen.csv'
 edit $TIRENVI_ROOT/tests/data/complex.csv
 Tir toggle
 Tir toggle
-Tir hbar
+Tir _hbar
 
 call RunTest({})

@@ -51,10 +51,9 @@ end
 ---@param bufnr number
 ---@param i_start integer
 ---@param i_end integer
----@param strict boolean
 ---@param lines string[]
 ---@param no_undo boolean|nil
-local function set_lines(bufnr, i_start, i_end, strict, lines, no_undo)
+local function set_lines(bufnr, i_start, i_end, lines, no_undo)
 	M.clear_cache()
 	local undolevels = bo[bufnr].undolevels
 	if no_undo then
@@ -63,7 +62,9 @@ local function set_lines(bufnr, i_start, i_end, strict, lines, no_undo)
 			bo[bufnr].undolevels = -1
 		end
 	end
-	api.nvim_buf_set_lines(bufnr, i_start, i_end, strict, lines)
+	i_start = math.max(i_start, 0)
+	M.set_undo_tree_last(bufnr)
+	api.nvim_buf_set_lines(bufnr, i_start, i_end, false, lines)
 	fix_cursor_utf8()
 	bo[bufnr].undolevels = undolevels
 end
@@ -156,14 +157,12 @@ end
 ---@param i_start integer
 ---@param i_end integer integer
 ---@param lines string[]
----@param strict boolean|nil
 ---@param no_undo boolean|nil
-function M.set_lines(bufnr, i_start, i_end, lines, strict, no_undo)
-	strict = strict == true
-	log.debug("=== set_lines(%d, %d)[1]%s [%d]%s", i_start, i_end, lines[1], #lines, lines[#lines])
+function M.set_lines(bufnr, i_start, i_end, lines, no_undo)
+	log.debug("=== set_lines(%d, %d)[1]%s [%d]%s", i_start, i_end, tostring(lines[1]), #lines, tostring(lines[#lines]))
 	log.debug(M.get_state(bufnr))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
-	local ok, err = pcall(set_lines, bufnr, i_start, i_end, strict, lines, no_undo)
+	local ok, err = pcall(set_lines, bufnr, i_start, i_end, lines, no_undo)
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) - 1)
 	assert(M.get(bufnr, M.IKEY.PATCH_DEPTH) == 0)
 	if not ok then
