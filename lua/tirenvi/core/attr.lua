@@ -127,4 +127,12 @@ function M.grid:set_width(icol, width)
     self.columns[icol].width = math.max(width, 2)
 end
 
+---@self Attr
+---@param widths integer[]
+function M:set_widths(widths)
+    for icol, width in ipairs(widths) do
+        M.grid.set_width(self, icol, width)
+    end
+end
+
 return M

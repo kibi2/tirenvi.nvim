@@ -174,13 +174,24 @@ function M:reset_attr()
 end
 
 ---@self Blocks
----@return integer[]
+---@return integer[][]
 function M:get_widths()
 	local widths = {}
 	for _, block in ipairs(self) do
 		widths[#widths + 1] = Block[block.kind].get_widths(block)
 	end
 	return widths
+end
+
+---@self Blocks
+---@param widths integer[][]
+function M:set_widths(widths)
+	if not widths then
+		return
+	end
+	for iblock, block in ipairs(self) do
+		Block[block.kind].set_widths(block, widths[iblock])
+	end
 end
 
 --- Convert NDJSON records into normalized blocks.

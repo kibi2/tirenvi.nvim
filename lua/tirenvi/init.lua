@@ -30,16 +30,28 @@ local function store_widths(bufnr, blocks)
 	buffer.set(bufnr, buffer.IKEY.WIDTHS, Blocks.get_widths(blocks))
 end
 
+---@param bufnr number
+---@param blocks Blocks
+local function restore_widths(bufnr, blocks)
+	local widths = buffer.get(bufnr, buffer.IKEY.WIDTHS)
+	Blocks.set_widths(blocks, widths)
+	buffer.set(bufnr, buffer.IKEY.WIDTHS, nil)
+end
+
 ---@param bufnr number Buffer number.
+---@param is_toggle boolean|nil
 ---@return nil
-local function to_flat(bufnr)
+local function to_flat(bufnr, is_toggle)
+	is_toggle = is_toggle or false
 	if not buf_state.is_tir_vim(bufnr) then
 		return
 	end
 	local parser = util.get_parser(bufnr)
 	local vi_lines = buffer.get_lines(bufnr, 0, -1)
 	local blocks = vim_parser.parse(vi_lines)
-	store_widths(bufnr, blocks)
+	if is_toggle then
+		store_widths(bufnr, blocks)
+	end
 	log.debug(blocks[1].records)
 	local fl_lines = flat_parser.unparse(blocks, parser)
 	ui.set_lines(bufnr, 0, -1, fl_lines)
@@ -53,6 +65,7 @@ local function from_flat(bufnr, no_undo)
 	local parser = util.get_parser(bufnr)
 	util.assert_no_reserved_marks(fl_lines)
 	local blocks = flat_parser.parse(fl_lines, parser)
+	restore_widths(bufnr, blocks)
 	local vi_lines = vim_parser.unparse(blocks)
 	ui.set_lines(bufnr, 0, -1, vi_lines, no_undo)
 end
@@ -175,7 +188,7 @@ end
 ---@param bufnr number Buffer number.
 ---@return nil
 function M.disable(bufnr)
-	to_flat(bufnr)
+	to_flat(bufnr, true)
 end
 
 ---@param bufnr number Buffer number.

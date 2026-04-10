@@ -123,7 +123,7 @@ function M.set_undo_tree_last(bufnr)
 end
 
 ---@param bufnr number
----@return {[string]: boolean|integer|string|integer[]|nil}
+---@return {[string]: boolean|integer|string|integer[][]|nil}
 function M.get_state(bufnr)
 	bufnr = bufnr or api.nvim_get_current_buf()
 	if not b[bufnr].tirenvi then
@@ -141,14 +141,14 @@ end
 
 ---@param bufnr number
 ---@param key string
----@return boolean|integer|string|integer[]|nil
+---@return any
 function M.get(bufnr, key)
 	return M.get_state(bufnr)[key]
 end
 
 ---@param bufnr number
 ---@param key string
----@param val boolean|integer|string|integer[]|nil
+---@param val boolean|integer|string|integer[][]|nil
 function M.set(bufnr, key, val)
 	bufnr = bufnr or api.nvim_get_current_buf()
 	local state = M.get_state(bufnr)
