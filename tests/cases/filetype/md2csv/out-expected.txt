@@ -9,4 +9,3 @@ gfm
 | Carol | 27 | Nagoya |
 markdown
 
-

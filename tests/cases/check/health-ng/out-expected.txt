@@ -11,7 +11,7 @@
 - ❌ ERROR Could not parse tir-pukiwiki version string: 0.
 - ❌ ERROR foo not found in PATH
 - ❌ ERROR tir-csv >= 1.1.4 required, but 0.1.4 found
-- ❌ ERROR tir-gfm-lite >= 0.2 required, but 0.1.5 found
+- ❌ ERROR tir-gfm-lite >= 0.2 required, but 0.1.6 found
 === DISPLAY ===
 ==============================================================================
 tirenvi ~

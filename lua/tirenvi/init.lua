@@ -24,6 +24,12 @@ M.motion = require("tirenvi.editor.motion")
 
 -- private helpers
 
+---@param bufnr number
+---@param blocks Blocks
+local function store_widths(bufnr, blocks)
+	buffer.set(bufnr, buffer.IKEY.WIDTHS, Blocks.get_widths(blocks))
+end
+
 ---@param bufnr number Buffer number.
 ---@return nil
 local function to_flat(bufnr)
@@ -33,6 +39,7 @@ local function to_flat(bufnr)
 	local parser = util.get_parser(bufnr)
 	local vi_lines = buffer.get_lines(bufnr, 0, -1)
 	local blocks = vim_parser.parse(vi_lines)
+	store_widths(bufnr, blocks)
 	log.debug(blocks[1].records)
 	local fl_lines = flat_parser.unparse(blocks, parser)
 	ui.set_lines(bufnr, 0, -1, fl_lines)
