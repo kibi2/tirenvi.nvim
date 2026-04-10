@@ -13,7 +13,7 @@
 ## implement
 
 * branch name: feat/persist-column-width-on-toggle
-* PR: #53
+* PR: kibi2/tirenvi.nvim#53
 
 | No | Preconditions | Action | Expected | Date | Notes | Commit Message |
 | --- | --- | --- | --- | --- | --- | --- |
