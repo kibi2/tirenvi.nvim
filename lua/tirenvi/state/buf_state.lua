@@ -1,7 +1,7 @@
 local config = require("tirenvi.config")
 local log = require("tirenvi.util.log")
 local errors = require("tirenvi.util.errors")
-local util = require("tirenvi.util.util")
+local config = require("tirenvi.config")
 local buffer = require("tirenvi.state.buffer")
 local tir_vim = require("tirenvi.core.tir_vim")
 
@@ -18,9 +18,20 @@ local function ensure_has_parser(bufnr)
 		log.debug("buftype:%s", bo[bufnr].buftype)
 		return false
 	end
-	local parser = util.get_parser(bufnr)
-	assert(parser ~= nil, "If no parser exists, an error is raised inside get_parser_name.")
-	return true
+
+	local filetype = buffer.get(bufnr, buffer.IKEY.FILETYPE)
+	if not filetype then
+		return false
+	end
+
+	local parser = config.parser_map[filetype]
+	if not parser then
+		return false
+	end
+
+	-- For passive checks (autocmd gating), missing executables should only
+	-- skip processing rather than raise user-facing notifications.
+	return fn.executable(parser.executable) == 1
 end
 
 --- has pipe markers. for example, it may be a tir-vim buffer.

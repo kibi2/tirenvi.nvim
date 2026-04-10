@@ -120,7 +120,8 @@ function M.get_parser(bufnr)
 	bufnr = bufnr or vim.api.nvim_get_current_buf()
 	local parser = get_parser_for_file(bufnr)
 	if parser == nil then
-		error(errors.new_domain_error(""))
+		local filetype = buffer.get(bufnr, buffer.IKEY.FILETYPE)
+		error(errors.new_domain_error(errors.no_parser_error(filetype)))
 	end
 	if fn.executable(parser.executable) ~= 1 then
 		error(errors.new_domain_error(errors.not_found_parser_error(parser)))
