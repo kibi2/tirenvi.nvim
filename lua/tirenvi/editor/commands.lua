@@ -78,8 +78,8 @@ end
 local commands = {
 	toggle = cmd_toggle,
 	redraw = cmd_redraw,
-	_hbar = cmd_hbar,
 	width = cmd_width,
+	_hbar = cmd_hbar,
 }
 
 

@@ -84,38 +84,72 @@ local function get_current_col()
 end
 
 ---@param line_provider LineProvider
----@param operator string
-local function change_width(line_provider, operator, count)
+---@param irow integer
+---@return number
+---@return integer
+---@return integer
+---@return Block_grid
+local function get_block(line_provider, irow)
 	local bufnr = api.nvim_get_current_buf()
-	local irow, icol = get_current_col()
-	if not irow or not icol then
-		return
-	end
 	local top = tir_vim.get_block_top_nrow(line_provider, irow)
 	local bottom = tir_vim.get_block_bottom_nrow(line_provider, irow)
 	local lines = buffer.get_lines(bufnr, top - 1, bottom)
 	local blocks = vim_parser.parse(lines)
 	local block = blocks[1]
 	assert(block.kind == "grid")
-	local old_width = block.attr.columns[icol].width
+	return bufnr, top, bottom, block
+end
+
+---@param operator string
+---@param count integer
+---@param old_width integer
+---@return integer|nil
+local function get_new_width(operator, count, old_width)
 	if operator == "=" then
-		if count <= 0 then
-			return
+		if count == 0 then
+			return nil
 		end
-		Attr.grid.set_width(block.attr, icol, count)
+		return count
 	elseif operator == "+" then
 		if count == 0 then
 			count = 1
 		end
-		Attr.grid.set_width(block.attr, icol, old_width + count)
+		return old_width + count
 	elseif operator == "-" then
 		if count == 0 then
 			count = 1
 		end
-		Attr.grid.set_width(block.attr, icol, old_width - count)
+		return old_width - count
+	else
+		return nil
 	end
-	local vi_lines = vim_parser.unparse(blocks)
+end
+
+---@param line_provider LineProvider
+---@param operator string
+---@param count integer
+---@param irow integer
+---@param icol integer
+local function change_1table_width(line_provider, operator, count, irow, icol)
+	local bufnr, top, bottom, block = get_block(line_provider, irow)
+	local old_width = block.attr.columns[icol].width
+	local new_width = get_new_width(operator, count, old_width)
+	if not new_width then
+		return
+	end
+	Attr.grid.set_width(block.attr, icol, new_width)
+	local vi_lines = vim_parser.unparse({ block })
 	ui.set_lines(bufnr, top - 1, bottom, vi_lines)
+end
+
+---@param line_provider LineProvider
+---@param operator string
+local function change_width(line_provider, operator, count)
+	local irow, icol = get_current_col()
+	if not irow or not icol then
+		return
+	end
+	change_1table_width(line_provider, operator, count, irow, icol)
 end
 
 local warned = false
