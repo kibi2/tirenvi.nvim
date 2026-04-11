@@ -1,5 +1,19 @@
 #!/usr/bin/env bash
 
+# Usage:
+#   ./run.sh                 # run all tests
+#   ./run.sh file/csv        # run tests matching pattern
+#   ./run.sh --update        # generate expected outputs (for new tests)
+#
+# Environment variables:
+#   FAIL_FAST=1              # stop on first failure
+#   NO_COLOR=1               # disable colored output
+#
+# Notes:
+# - Tests are located under tests/cases/
+# - Each test must have run.sh or run.vim
+# - --update does NOT overwrite existing out-expected.txt
+
 set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
@@ -33,6 +47,11 @@ UPDATE=0
 FAIL_FAST=${FAIL_FAST:-0}
 
 PATTERNS=""
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+  sed -n '2,15p' "$0"
+  exit 0
+fi
 
 for arg in "$@"; do
   if [ "$arg" = "--update" ]; then
