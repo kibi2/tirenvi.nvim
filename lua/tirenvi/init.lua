@@ -221,7 +221,6 @@ function M.redraw(bufnr)
 	bufnr = bufnr or api.nvim_get_current_buf()
 	local old_lines = buffer.get_lines(bufnr, 0, -1)
 	local blocks = vim_parser.parse(old_lines)
-	Blocks.reset_attr(blocks)
 	local vi_lines = vim_parser.unparse(blocks)
 	if table.concat(old_lines, "\n") ~= table.concat(vi_lines, "\n") then
 		log.debug({ vi_lines[1], vi_lines[2] })

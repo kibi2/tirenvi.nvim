@@ -59,11 +59,6 @@ end
 local function get_rect(opts)
 	local row_start = opts.line1
 	local row_end   = opts.line2
-	local pos_start = vim.fn.getpos("'<")
-	local pos_end   = vim.fn.getpos("'>")
-	-- 	local is_visual_range =
-	-- 		(opts.range > 0)
-	-- 		and (pos_start[2] == row_start and pos_end[2] == row_end)
 	local is_block  = (vim.fn.visualmode() == "\22")
 	local col_start, col_end
 	if opts.range > 0 then

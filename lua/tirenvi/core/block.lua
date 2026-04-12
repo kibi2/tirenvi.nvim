@@ -75,7 +75,7 @@ local function wrap_width(self)
 end
 
 ---@param self Block_grid
-local function apply_column_widths(self)
+local function fill_padding(self)
     for _, record in ipairs(self.records) do
         Record.grid.fill_padding(record, self.attr.columns)
     end
@@ -115,18 +115,11 @@ local function apply_column_count(self, ncol)
     end
 end
 
-local function derive_column_count(self)
-    local ncol = 0
-    for _, record in ipairs(self.records) do
-        ncol = math.max(ncol, #record.row)
-    end
-    return ncol
-end
-
 ---@self Block
 local function ensure_table_attr(self)
     if #self.attr.columns == 0 then
-        Attr.grid.new_merged_attr(self.attr, self.records)
+        local ncol = Record.get_max_col(self.records)
+        Attr.grid.new_max_width(self.attr, ncol, self.records)
     else
         Attr.grid.auto_width(self.attr, self.records)
     end
@@ -304,7 +297,7 @@ end
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 function M.grid:from_flat()
-    local ncol = derive_column_count(self)
+    local ncol = Record.get_max_col(self.records)
     apply_column_count(self, ncol)
     apply_replacements(self, ESCAPE_MAP)
 end
@@ -315,7 +308,8 @@ function M.grid:to_flat()
 end
 
 ---@self Block_grid
----@param no_unwrap boolean
+---@param no_unwrap boolean  -- If true, skip unwrapping.
+-- Prevents line count changes that would break put(); used for repair.
 function M.grid:from_vim(no_unwrap)
     ensure_table_attr(self)
     remove_padding(self)
@@ -332,7 +326,7 @@ function M.grid:to_vim()
     ensure_table_attr(self)
     apply_column_count(self, #self.attr.columns)
     wrap_width(self)
-    apply_column_widths(self)
+    fill_padding(self)
 end
 
 return M

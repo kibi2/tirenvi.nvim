@@ -58,9 +58,8 @@ end
 ---@param bufnr number
 ---@param start_row integer
 ---@param end_row integer
----@param attr_prev Attr|nil
 ---@return Blocks
-local function get_blocks(bufnr, start_row, end_row, attr_prev)
+local function get_blocks(bufnr, start_row, end_row)
 	local vi_lines = buffer.get_lines(bufnr, start_row, end_row)
 	local line_prev = buffer.get_line(bufnr, start_row - 1)
 	fix_empty_line_after_table(vi_lines, line_prev)
@@ -89,7 +88,7 @@ end
 local function get_repaired_lines(bufnr, start_row, end_row)
 	log.debug("===-===-===-=== validation start (%d, %d) ===-===-===-===", start_row, end_row)
 	local attr_prev, attr_next = get_reference_attrs(bufnr, start_row, end_row)
-	local blocks = get_blocks(bufnr, start_row, end_row, attr_prev)
+	local blocks = get_blocks(bufnr, start_row, end_row)
 	log.debug(#blocks ~= 0 and blocks[1].records)
 	local parser = util.get_parser(bufnr)
 	local allow_plain = parser.allow_plain

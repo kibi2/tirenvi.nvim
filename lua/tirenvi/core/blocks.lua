@@ -232,7 +232,8 @@ end
 
 --- Convert NDJSON records into normalized blocks.
 ---@param records Record[]
----@param no_unwrap boolean
+---@param no_unwrap boolean  -- If true, skip unwrapping.
+-- Prevents line count changes that would break put(); used for repair.
 ---@return Blocks
 function M.new_from_vim(records, no_unwrap)
 	local self = build_blocks(records)

@@ -65,7 +65,8 @@ end
 -----------------------------------------------------------------------
 
 ---@param vi_lines string[]
----@param no_unwrap boolean|nil
+---@param no_unwrap boolean|nil  -- If true, skip unwrapping.
+-- Prevents line count changes that would break put(); used for repair.
 ---@return Blocks
 function M.parse(vi_lines, no_unwrap)
 	no_unwrap = no_unwrap or false

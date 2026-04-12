@@ -1,5 +1,6 @@
 === MESSAGE ===
 
 === DISPLAY ===
-│a⠀⠀⠀│b⠀│
-│ADDc│d⠀│
+│a⠀│b⠀│
+┊AD┊d⠀┊
+│Dc│⠀⠀│

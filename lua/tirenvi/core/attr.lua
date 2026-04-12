@@ -32,7 +32,7 @@ local function get_max_width(records, icol)
         local width = Cell.get_width(record.row[icol])
         max_width = math.max(max_width, width)
     end
-    return max_width
+    return math.max(max_width, 2)
 end
 
 ---@self Attr
@@ -121,20 +121,21 @@ function M.grid.new_from_record(cells)
     return new_from_columns(get_columns(cells))
 end
 
----@param attr Attr
+---@self Attr
+---@param ncol integer
 ---@param records Record_grid[]
-function M.grid.new_merged_attr(attr, records)
-    local new_attr = M.grid.new()
-    for _, record in ipairs(records) do
-        merge(new_attr, M.grid.new_from_record(record.row))
+function M.grid:new_max_width(ncol, records)
+    self.columns = {}
+    for icol = 1, ncol do
+        local width = get_max_width(records, icol)
+        self.columns[icol] = { width = width }
     end
-    attr.columns = new_attr.columns
 end
 
----@param attr Attr
+---@self Attr
 ---@param records Record_grid[]
-function M.grid.auto_width(attr, records)
-    for icol, column in ipairs(attr.columns) do
+function M.grid:auto_width(records)
+    for icol, column in ipairs(self.columns) do
         if column.width == 0 then
             column.width = get_max_width(records, icol)
         end

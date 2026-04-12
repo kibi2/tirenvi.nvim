@@ -119,4 +119,14 @@ function M.grid:concat(record)
     end
 end
 
+---@param records Record_grid[]
+---@return integer
+function M.get_max_col(records)
+    local max_col = 0
+    for _, record in ipairs(records) do
+        max_col = math.max(max_col, #record.row)
+    end
+    return max_col
+end
+
 return M
