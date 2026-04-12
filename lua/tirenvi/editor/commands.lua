@@ -56,6 +56,41 @@ local function cmd_hbar(bufnr, opts)
 	init.hbar(bufnr)
 end
 
+local function get_rect(opts)
+	local row_start = opts.line1
+	local row_end   = opts.line2
+	local pos_start = vim.fn.getpos("'<")
+	local pos_end   = vim.fn.getpos("'>")
+	-- 	local is_visual_range =
+	-- 		(opts.range > 0)
+	-- 		and (pos_start[2] == row_start and pos_end[2] == row_end)
+	local is_block  = (vim.fn.visualmode() == "\22")
+	local col_start, col_end
+	if opts.range > 0 then
+		if is_block then
+			col_start = vim.fn.virtcol("'<")
+			col_end   = vim.fn.virtcol("'>")
+		else
+			col_start = 1
+			col_end   = math.huge
+		end
+	else
+		local col = vim.fn.virtcol(".")
+		col_start = col
+		col_end   = col
+	end
+	return {
+		row = {
+			first = math.min(row_start, row_end),
+			last  = math.max(row_start, row_end),
+		},
+		col = {
+			first = math.min(col_start, col_end),
+			last  = math.max(col_start, col_end),
+		},
+	}
+end
+
 ---@param bufnr number
 ---@param opts {[string]:any}
 ---@return nil
@@ -65,10 +100,12 @@ local function cmd_width(bufnr, opts)
 		}) then
 		return
 	end
-	local operator, num = opts.args:match("^width%s*([=+-]?)(%d*)")
-	num = tonumber(num) or 0
+	local operator, count = opts.args:match("^width%s*([=+-]?)(%d*)")
+	count                 = tonumber(count) or 0
+	local rect            = get_rect(opts)
+	log.debug("row[%d-%d], col[%d-%d]", rect.row.first, rect.row.last, rect.col.first, rect.col.last)
 	local line_provider = LinProvider.new(bufnr)
-	init.width(line_provider, operator, num)
+	init.width(line_provider, rect, operator, count)
 end
 
 ----------------------------------------------------------------------

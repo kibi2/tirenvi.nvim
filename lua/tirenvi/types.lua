@@ -67,10 +67,8 @@
 ---@field no_vscode? boolean
 
 ---@class Rect
----@field start_row integer
----@field end_row integer
----@field start_col integer
----@field end_col integer
+---@field row Range
+---@field col Range
 
 ---@class Range
 ---@field first integer

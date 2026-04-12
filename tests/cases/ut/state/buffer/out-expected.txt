@@ -1,23 +1,23 @@
 === MESSAGE ===
 [TIR][🟧PROBE][[string ":lua"]:14] buffer.get_lines(0, 0, -1)
-[TIR][DEBUG][buffer.lua:84] ===== bufnr=1, start=0, end=21, lines[1]=0, line[21]=20, 
+[TIR][DEBUG][buffer.lua:84] ===== bufnr=1, start=0, end=21, lines[1]=0, line[21]=20
 [TIR][DEBUG][[string ":lua"]:16] <table> { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20" }
 [TIR][DEBUG][[string ":lua"]:18] <table> { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20" }
 [TIR][🟧PROBE][[string ":lua"]:19] buffer.get_lines(0, -100, 100)
 [TIR][DEBUG][[string ":lua"]:21] <table> { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20" }
 [TIR][🟧PROBE][[string ":lua"]:22] clear & buffer.get_lines(0, 9, 13)
-[TIR][DEBUG][buffer.lua:84] ===== bufnr=1, start=6, end=16, lines[1]=6, line[10]=15, 
+[TIR][DEBUG][buffer.lua:84] ===== bufnr=1, start=6, end=16, lines[1]=6, line[10]=15
 [TIR][DEBUG][[string ":lua"]:25] <table> { "9", "10", "11", "12" }
 [TIR][🟧PROBE][[string ":lua"]:26] buffer.get_line(0, 6)
 [TIR][DEBUG][[string ":lua"]:28] 6
 [TIR][🟧PROBE][[string ":lua"]:29] buffer.get_line(0, 2)
-[TIR][DEBUG][buffer.lua:84] ===== bufnr=1, start=0, end=6, lines[1]=0, line[6]=5, 
+[TIR][DEBUG][buffer.lua:84] ===== bufnr=1, start=0, end=6, lines[1]=0, line[6]=5
 [TIR][DEBUG][[string ":lua"]:31] 2
 [TIR][🟧PROBE][[string ":lua"]:32] buffer.get_line(0, 19)
-[TIR][DEBUG][buffer.lua:84] ===== bufnr=1, start=15, end=21, lines[1]=15, line[6]=20, 
+[TIR][DEBUG][buffer.lua:84] ===== bufnr=1, start=15, end=21, lines[1]=15, line[6]=20
 [TIR][DEBUG][[string ":lua"]:34] 19
 [TIR][🟧PROBE][[string ":lua"]:35] buffer.get_line(0, 10)
-[TIR][DEBUG][buffer.lua:84] ===== bufnr=1, start=4, end=11, lines[1]=4, line[7]=10, 
+[TIR][DEBUG][buffer.lua:84] ===== bufnr=1, start=4, end=11, lines[1]=4, line[7]=10
 [TIR][DEBUG][[string ":lua"]:37] 10
 [TIR][🟧PROBE][[string ":lua"]:38] buffer.get_line(0, -1)
 [TIR][DEBUG][[string ":lua"]:40] nil

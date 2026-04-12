@@ -49,31 +49,15 @@ local function special_setup()
         fg = special.fg,
         bg = special.bg,
         underline = true,
+        nocombine = true,
     })
     vim.api.nvim_set_hl(0, "TirenviHbar", {
         underline = true,
         sp = special.fg,
+        nocombine = true,
     })
     vim.api.nvim_set_hl(0, "Conceal", { link = "TirenviPipeNoHbar" })
     safe_link_multi("TirenviSpecialChar", { "NonText", })
-end
-
--- =========================
--- setup
--- =========================
-
-function M.setup()
-    special_setup()
-    diagnostic_setup()
-end
-
----@param bufnr number
----@param i_start integer
----@param i_end integer integer
----@param lines string[]
----@param no_undo boolean|nil
-function M.set_lines(bufnr, i_start, i_end, lines, no_undo)
-    buffer.set_lines(bufnr, i_start, i_end, lines, no_undo)
 end
 
 -- =========================
@@ -90,16 +74,6 @@ local function add_match(winid, group, pattern, priority)
     table.insert(matches[winid], id)
 end
 
----@param winid integer
-function M.clear_matches(winid)
-    local ids = matches[winid]
-    if not ids then return end
-    for _, id in ipairs(ids) do
-        pcall(vim.fn.matchdelete, id)
-    end
-    matches[winid] = nil
-end
-
 local function pat_v(s)
     return "\\V" .. s
 end
@@ -114,6 +88,30 @@ end
 
 local function pat_line_end(pipe)
     return pipe .. "$"
+end
+
+function M.setup()
+    special_setup()
+    diagnostic_setup()
+end
+
+---@param bufnr number
+---@param i_start integer
+---@param i_end integer integer
+---@param lines string[]
+---@param no_undo boolean|nil
+function M.set_lines(bufnr, i_start, i_end, lines, no_undo)
+    buffer.set_lines(bufnr, i_start, i_end, lines, no_undo)
+end
+
+---@param winid integer
+function M.clear_matches(winid)
+    local ids = matches[winid]
+    if not ids then return end
+    for _, id in ipairs(ids) do
+        pcall(vim.fn.matchdelete, id)
+    end
+    matches[winid] = nil
 end
 
 function M.special_apply()
@@ -188,5 +186,9 @@ end
 function M.diagnostic_clear(bufnr)
     render.clear(bufnr)
 end
+
+vim.api.nvim_create_autocmd("ColorScheme", {
+    callback = M.setup
+})
 
 return M

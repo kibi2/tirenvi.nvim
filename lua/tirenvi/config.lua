@@ -36,7 +36,7 @@ local defaults = {
 		file_name = "/tmp/tirenvi.log",
 		use_timestamp = false,
 		monitor = true,
-		probe = true,
+		probe = false,
 	},
 	textobj = {
 		column = "l",

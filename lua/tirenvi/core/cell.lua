@@ -39,6 +39,12 @@ function M.get_widths(cells)
     return widths
 end
 
+---@param self Cell
+---@return integer
+function M.get_width(self)
+    return display_width(self)
+end
+
 ---@param cells Cell[]
 ---@param ncol integer:w
 function M.normalize(cells, ncol)

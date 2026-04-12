@@ -7,14 +7,11 @@
 -- Dependencies
 -----------------------------------------------------------------------
 
-local CONST = require("tirenvi.constants")
-local config = require("tirenvi.config")
 local log = require("tirenvi.util.log")
 local util = require("tirenvi.util.util")
 local buffer = require("tirenvi.state.buffer")
 local buf_state = require("tirenvi.state.buf_state")
 local Blocks = require("tirenvi.core.blocks")
-local Attr = require("tirenvi.core.attr")
 local vim_parser = require("tirenvi.core.vim_parser")
 local flat_parser = require("tirenvi.core.flat_parser")
 local tir_vim = require("tirenvi.core.tir_vim")

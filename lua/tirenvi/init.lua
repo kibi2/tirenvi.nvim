@@ -83,73 +83,53 @@ local function get_current_col()
 	return irow, tir_vim.get_current_col_index(pipe_pos, ibyte)
 end
 
+---@param row Range
+---@return number
+---@return Blocks
+local function get_blocks(row)
+	local bufnr = api.nvim_get_current_buf()
+	local lines = buffer.get_lines(bufnr, row.first - 1, row.last)
+	return bufnr, vim_parser.parse(lines)
+end
+
 ---@param line_provider LineProvider
 ---@param irow integer
----@return number
----@return integer
----@return integer
----@return Block_grid
-local function get_block(line_provider, irow)
-	local bufnr = api.nvim_get_current_buf()
+local function get_range(line_provider, irow)
 	local top = tir_vim.get_block_top_nrow(line_provider, irow)
 	local bottom = tir_vim.get_block_bottom_nrow(line_provider, irow)
-	local lines = buffer.get_lines(bufnr, top - 1, bottom)
-	local blocks = vim_parser.parse(lines)
-	local block = blocks[1]
-	assert(block.kind == "grid")
-	return bufnr, top, bottom, block
+	return top, bottom
+end
+
+---@param line_provider LineProvider
+---@param row Range
+local function expand_rect(line_provider, row)
+	local top, bottom = get_range(line_provider, row.first)
+	row.first = top
+	local irow = bottom + 1
+	while irow <= row.last do
+		_, bottom = get_range(line_provider, irow)
+		irow = bottom + 1
+	end
+	row.last = bottom
 end
 
 ---@param operator string
 ---@param count integer
----@param old_width integer
----@return integer|nil
-local function get_new_width(operator, count, old_width)
-	if operator == "=" then
-		if count == 0 then
-			return nil
-		end
-		return count
-	elseif operator == "+" then
-		if count == 0 then
-			count = 1
-		end
-		return old_width + count
-	elseif operator == "-" then
-		if count == 0 then
-			count = 1
-		end
-		return old_width - count
-	else
-		return nil
-	end
+---@param rect Rect
+local function change_table_width(operator, count, rect)
+	log.debug("row[%d-%d], col[%d-%d]", rect.row.first, rect.row.last, rect.col.first, rect.col.last)
+	local bufnr, blocks = get_blocks(rect.row)
+	Blocks.change_width(blocks, operator, count, rect.col)
+	local vi_lines = vim_parser.unparse(blocks)
+	ui.set_lines(bufnr, rect.row.first - 1, rect.row.last, vi_lines)
 end
 
 ---@param line_provider LineProvider
+---@param rect Rect
 ---@param operator string
----@param count integer
----@param irow integer
----@param icol integer
-local function change_1table_width(line_provider, operator, count, irow, icol)
-	local bufnr, top, bottom, block = get_block(line_provider, irow)
-	local old_width = block.attr.columns[icol].width
-	local new_width = get_new_width(operator, count, old_width)
-	if not new_width then
-		return
-	end
-	Attr.grid.set_width(block.attr, icol, new_width)
-	local vi_lines = vim_parser.unparse({ block })
-	ui.set_lines(bufnr, top - 1, bottom, vi_lines)
-end
-
----@param line_provider LineProvider
----@param operator string
-local function change_width(line_provider, operator, count)
-	local irow, icol = get_current_col()
-	if not irow or not icol then
-		return
-	end
-	change_1table_width(line_provider, operator, count, irow, icol)
+local function change_width(line_provider, rect, operator, count)
+	expand_rect(line_provider, rect.row)
+	change_table_width(operator, count, rect)
 end
 
 local warned = false
@@ -257,11 +237,12 @@ function M.hbar(bufnr)
 end
 
 ---@param line_provider LineProvider
+---@param rect Rect
 ---@param operator string Operator: "", "=", "+", "-"
 ---@param count integer Count for the operator (default: 0)
 ---@return nil
-function M.width(line_provider, operator, count)
-	change_width(line_provider, operator, count)
+function M.width(line_provider, rect, operator, count)
+	change_width(line_provider, rect, operator, count)
 	local command = api.nvim_replace_termcodes(
 		":<C-u>Tir width " .. operator .. count .. "<CR>",
 		true, false, true

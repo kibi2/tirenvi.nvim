@@ -7,7 +7,7 @@ execute "normal d"
 sleep 1m
 call cursor(4, 18)
 call feedkeys("vil", "x")
-execute "normal d"
+execute "normal x"
 sleep 1m
 execute "normal 0"
 sleep 1m

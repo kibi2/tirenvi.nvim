@@ -1,3 +1,4 @@
+local config = require("tirenvi.config")
 local log = require("tirenvi.util.log")
 local errors = require("tirenvi.util.errors")
 local util = require("tirenvi.util.util")
@@ -6,6 +7,7 @@ local tir_vim = require("tirenvi.core.tir_vim")
 
 local M = {}
 
+local api = vim.api
 local fn = vim.fn
 local bo = vim.bo
 --- ensure the buffer has a parser and the parser is executable. for example, it may be a tir-vim buffer.
@@ -99,6 +101,9 @@ end
 ---@param opts Check_options
 ---@return boolean
 function M.should_skip(bufnr, opts)
+	if config.log.buffer_name == api.nvim_buf_get_name(bufnr) then
+		return true
+	end
 	for name, enabled in pairs(opts) do
 		if enabled then
 			local ok = checks[name](bufnr)

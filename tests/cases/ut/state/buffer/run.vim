@@ -10,7 +10,7 @@ lua << EOF
   M.setup({
   	log = {
 		level = levels.DEBUG,
-		output = "print",
+		probe = true, output = "print",
   	},
   })
   buffer.clear_cache()

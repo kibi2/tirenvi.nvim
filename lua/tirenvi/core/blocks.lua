@@ -194,6 +194,16 @@ function M:set_widths(widths)
 	end
 end
 
+---@self Blocks
+---@param operator string
+---@param count integer
+---@param col Range
+function M:change_width(operator, count, col)
+	for _, block in ipairs(self) do
+		Block[block.kind].change_width(block, operator, count, col)
+	end
+end
+
 --- Convert NDJSON records into normalized blocks.
 ---@param ndjsons Ndjson[]
 ---@return Blocks

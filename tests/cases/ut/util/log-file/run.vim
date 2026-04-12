@@ -13,6 +13,7 @@ lua << EOF
 		output = "file",
 		file_name = "./tirenvi.gen",
 		use_timestamp = false,
+		probe = true,
   	},
   })
   log.error("error")

@@ -22,6 +22,19 @@ local function union_range_2(prev, next)
     }
 end
 
+---@param source Range
+---@param target Range
+---@return boolean
+function M.intersect(source, target)
+    if source.last < target.first then
+        return false
+    end
+    if target.last < source.first then
+        return false
+    end
+    return true
+end
+
 ---@param ranges Range[]
 ---@return Range[]
 function M.union(ranges)
