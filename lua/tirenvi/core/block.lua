@@ -57,19 +57,10 @@ local function serialize_records(self)
 end
 
 ---@param self Block_grid
-local function wrap_lf(self)
+local function wrap(self)
     local records = {}
     for _, record in ipairs(self.records) do
-        util.extend(records, Record.grid.wrap_lf(record))
-    end
-    self.records = records
-end
-
----@param self Block_grid
-local function wrap_width(self)
-    local records = {}
-    for _, record in ipairs(self.records) do
-        util.extend(records, Record.grid.wrap_width(record, self.attr.columns))
+        util.extend(records, Record.grid.wrap(record, self.attr.columns))
     end
     self.records = records
 end
@@ -322,10 +313,9 @@ end
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 function M.grid:to_vim()
-    wrap_lf(self)
     ensure_table_attr(self)
     apply_column_count(self, #self.attr.columns)
-    wrap_width(self)
+    wrap(self)
     fill_padding(self)
 end
 

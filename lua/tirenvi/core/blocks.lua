@@ -6,10 +6,8 @@
 ---   - Column expansion is applied only to grid blocks.
 
 local CONST = require("tirenvi.constants")
-local Record = require("tirenvi.core.record")
 local Attr = require("tirenvi.core.attr")
 local util = require("tirenvi.util.util")
-local config = require("tirenvi.config")
 local Block = require("tirenvi.core.block")
 local log = require("tirenvi.util.log")
 

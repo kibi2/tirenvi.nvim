@@ -9,8 +9,6 @@ local padding = config.marks.padding
 local escaped_padding = vim.pesc(padding)
 local lf = config.marks.lf
 
-local multiline_lf = true
-
 -----------------------------------------------------------------------
 -- Private helpers
 -----------------------------------------------------------------------
@@ -23,6 +21,8 @@ local function display_width(self)
     end
     return fn.strdisplaywidth(self)
 end
+
+local lf_len = display_width(config.marks.lf)
 
 -----------------------------------------------------------------------
 -- Public API
@@ -42,7 +42,19 @@ end
 ---@param self Cell
 ---@return integer
 function M.get_width(self)
-    return display_width(self)
+    if not self then
+        return 0
+    end
+    local cells = vim.split(self, lf)
+    local max_width = 0
+    for icell, cell in pairs(cells) do
+        local width = display_width(cell)
+        if icell ~= #cells then
+            width = width + lf_len
+        end
+        max_width = math.max(max_width, width)
+    end
+    return max_width
 end
 
 ---@param cells Cell[]
@@ -91,26 +103,10 @@ function M:remove_padding()
 end
 
 ---@param self Cell
+---@param width integer
 ---@param _has_continuation boolean
 ---@return Cell[]
-function M:wrap_lf(_has_continuation)
-    if not multiline_lf then
-        return { self }
-    end
-    local cells = vim.split(self, lf)
-    for irow = 1, #cells - 1 do
-        cells[irow] = cells[irow] .. lf
-    end
-    if #cells > 1 and cells[#cells] == "" and _has_continuation then
-        cells[#cells] = nil
-    end
-    return cells
-end
-
----@param self Cell
----@param width integer
----@return Cell[]
-function M:wrap_width(width)
+function M:wrap(width, _has_continuation)
     local cells = {}
     if not self or self == "" or width <= 0 then
         return { self }
@@ -128,8 +124,13 @@ function M:wrap_width(width)
             current = current .. char
             current_width = current_width + ch_width
         end
+        if char == lf then
+            cells[#cells + 1] = current
+            current = ""
+            current_width = 0
+        end
     end
-    if current ~= "" then
+    if not (current == "" and _has_continuation) then
         cells[#cells + 1] = current
     end
     return cells

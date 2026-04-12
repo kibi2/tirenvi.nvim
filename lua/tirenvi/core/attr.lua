@@ -35,25 +35,6 @@ local function get_max_width(records, icol)
     return math.max(max_width, 2)
 end
 
----@self Attr
----@param source Attr
-local function merge(self, source)
-    ---@type Attr_column[]
-    local mcols = self.columns
-    ---@type Attr_column[]
-    local scols = source.columns
-    local count = math.max(#mcols, #scols)
-    for index = 1, count do
-        local mcol = mcols[index]
-        local scol = scols[index]
-        if not mcol then
-            mcols[index] = scol
-        elseif scol then
-            mcol.width = math.max(mcol.width, scol.width)
-        end
-    end
-end
-
 ---@param columns Attr_column[]
 ---@return Attr
 local function new_from_columns(columns)
