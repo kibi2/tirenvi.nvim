@@ -125,6 +125,7 @@ end
 ---@param last integer|nil
 ---@param new_last integer|nil
 local function repair(bufnr, first, last, new_last)
+	log.debug("===-===-===-=== repair start (%d, %d) ===-===-===-===", first, new_last)
 	local ranges = ui.diagnostic_get(bufnr, first, new_last)
 	ui.diagnostic_clear(bufnr)
 	-- Modifying the buffer in insert mode may corrupt the undo node.

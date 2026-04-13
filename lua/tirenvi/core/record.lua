@@ -22,7 +22,7 @@ M.grid = {}
 function M:apply_column_count(ncol)
     self.row = self.row or {}
     Cell.normalize(self.row, ncol)
-    self.row = Cell.merge_tail(self.row, ncol) -- TODO join
+    self.row = Cell.merge_tail(self.row, ncol)
 end
 
 ---@param vi_line string

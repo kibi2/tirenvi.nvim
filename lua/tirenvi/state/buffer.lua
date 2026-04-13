@@ -81,7 +81,7 @@ local function get_lines_and_cache(bufnr, i_start, i_end)
 	local start = math.max(math.min(start, end_ - 2 * STEP), 0)
 	local lines = api.nvim_buf_get_lines(bufnr, start, end_, false)
 	cache       = { bufnr = bufnr, start = start, lines = lines, }
-	log.debug("===== bufnr=%d, start=%d, end=%d, lines[1]=%s, line[%d]=%s",
+	log.debug("===== cache [%d,] (%d, %d), lines[1]=%s, line[%d]=%s",
 		cache.bufnr, cache.start, cache.start + #cache.lines,
 		tostring(cache.lines[1]), #cache.lines, tostring(cache.lines[#cache.lines]))
 end

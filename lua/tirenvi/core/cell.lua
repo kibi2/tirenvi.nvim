@@ -1,5 +1,6 @@
 local config = require("tirenvi.config")
 local util = require("tirenvi.util.util")
+local log = require("tirenvi.util.log")
 
 local M = {}
 
@@ -70,6 +71,71 @@ function M.normalize(cells, ncol)
     end
 end
 
+---@param cells string[]
+---@param ncol integer
+---@return string[][]
+local function to_2d(cells, ncol)
+    local width = ncol + 1
+    local result = {}
+    local row = {}
+    for _, cell in ipairs(cells) do
+        table.insert(row, cell)
+        if #row == width then
+            table.insert(result, row)
+            row = {}
+        end
+    end
+    if #row > 0 then
+        table.insert(result, row)
+    end
+    return result
+end
+
+local function get_delim_from_cell(cell)
+    if cell == "" then
+        return ""
+    elseif cell:match("^ +$") then
+        return " "
+    else
+        return nil
+    end
+end
+
+---@param cell2d string[][]
+---@return string|nil
+local function get_delim(cell2d)
+    local ncol = #cell2d[1] - 1
+    local ncolp1 = ncol + 1
+    if #cell2d[#cell2d] ~= ncol then
+        return nil
+    end
+    local delm = get_delim_from_cell(cell2d[1][ncolp1])
+    for irow = 2, #cell2d - 1 do
+        if delm ~= get_delim_from_cell(cell2d[irow][ncolp1]) then
+            return nil
+        end
+    end
+    return delm
+end
+
+---@param cells Cell[]
+---@param ncol integer
+---@return Cell[]|nil
+local function join(cells, ncol)
+    local cells2d = to_2d(cells, ncol)
+    local delim = get_delim(cells2d)
+    if not delim then
+        return nil
+    end
+    local join_row = vim.list_slice(cells2d[1], 1, ncol)
+    for irow = 2, #cells2d do
+        for icol = 1, ncol do
+            join_row[icol] = join_row[icol] .. delim .. cells2d[irow][icol]
+        end
+    end
+    return join_row
+end
+
 ---@param cells Cell[]
 ---@param ncol integer
 ---@return Cell[]
@@ -77,8 +143,13 @@ function M.merge_tail(cells, ncol)
     if #cells <= ncol then
         return cells
     end
-    cells[ncol] = table.concat(cells, " ", ncol)
-    return vim.list_slice(cells, 1, ncol)
+    local join_cells = join(cells, ncol)
+    if join_cells then
+        return join_cells
+    else
+        cells[ncol] = table.concat(cells, " ", ncol)
+        return vim.list_slice(cells, 1, ncol)
+    end
 end
 
 ---@param self Cell

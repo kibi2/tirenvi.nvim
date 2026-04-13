@@ -15,6 +15,7 @@ local GROUP_NAME = "tirenvi"
 
 local api = vim.api
 local bo = vim.bo
+local fn = vim.fn
 
 ----------------------------------------------------------------------
 -- Event handlers (private)
@@ -29,7 +30,8 @@ local bo = vim.bo
 ---@param bytecount integer
 local function on_lines(_, bufnr, tick, first, last, new_last, bytecount)
 	buffer.clear_cache()
-	log.debug("===+===+===+===+=== on_lines(%d)(%d-%d) ===+===+===+===+===", bufnr, first, new_last)
+	local seq_last = fn.undotree(bufnr).seq_last
+	log.debug("===+===+===+===+=== on_lines(%d)[%d](%d-%d) ===+===+===+===+===", bufnr, seq_last, first, new_last)
 	init.on_lines(bufnr, first, last, new_last)
 end
 
