@@ -1,4 +1,3 @@
-=== MESSAGE ===
 
 === DISPLAY ===
 1a,2 a, 3a

@@ -36,11 +36,16 @@ function! SafeEdit(path)
   endtry
 endfunction
 
-function! s:CollectMessages()
-  redir => g:msgs
+let s:last_msg_count = 0
+
+function! s:CollectMessages() abort
+  redir => l:msgs
   silent messages
   redir END
-  return split(g:msgs, "\n")
+  let l:lines = split(l:msgs, "\n")
+  let l:new = l:lines[s:last_msg_count :]
+  let s:last_msg_count = len(l:lines)
+  return l:new
 endfunction
 
 function! s:CollectDisplay()
@@ -54,18 +59,21 @@ function! s:CollectFile(path)
   return []
 endfunction
 
-" ----------------------------
-" opts:
-"   file: 'output.csv'
-function! RunTest(opts) abort
-  lua vim.wait(50)
-
+function! s:CollectAll(opts) abort
   let l:out = []
+
+  " DESCRIPTION
+  if has_key(a:opts, 'desc')
+    call add(l:out, '--- ' . a:opts.desc . ' ---')
+  endif
 
   " MESSAGE
   if !has_key(a:opts, 'nomessage')
-    call add(l:out, '=== MESSAGE ===')
-    let l:out += s:CollectMessages()
+    let l:msgs = s:CollectMessages()
+    if !empty(l:msgs)
+      call add(l:out, '=== MESSAGE ===')
+      let l:out += l:msgs
+    endif
   endif
 
   " DISPLAY
@@ -83,6 +91,27 @@ function! RunTest(opts) abort
     endif
   endif
 
-  call writefile(l:out, 'out-actual.txt')
+  return l:out
+endfunction
+
+" ----------------------------
+" opts:
+"   file: 'output.csv'
+"   desc: 'description'
+function! Snapshot(opts) abort
+  lua vim.wait(50)
+  let l:out = s:CollectAll(a:opts)
+  call writefile([''], 'out-actual.txt', 'a')
+  call writefile(l:out, 'out-actual.txt', 'a')
+endfunction
+
+" ----------------------------
+" opts:
+"   file: 'output.csv'
+"   desc: 'description'
+function! RunTest(opts) abort
+  lua vim.wait(50)
+  let l:out = s:CollectAll(a:opts)
+  call writefile(l:out, 'out-actual.txt', 'a')
   qa!
 endfunction

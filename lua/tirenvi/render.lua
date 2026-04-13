@@ -10,6 +10,7 @@ local M = {}
 ---@param last integer
 ---@param id integer
 function M.set_range(bufnr, first, last, id)
+    last = math.max(first, last) -- If a line is deleted, first > last, so we normalize it
     last = math.min(last, buffer.line_count(bufnr) - 1)
     local line = buffer.get_line(bufnr, last)
     local end_col = #line
