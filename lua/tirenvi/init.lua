@@ -9,7 +9,6 @@ local flat_parser = require("tirenvi.core.flat_parser")
 local vim_parser = require("tirenvi.core.vim_parser")
 local tir_vim = require("tirenvi.core.tir_vim")
 local Blocks = require("tirenvi.core.blocks")
-local Attr = require("tirenvi.core.attr")
 local ui = require("tirenvi.ui")
 local notify = require("tirenvi.util.notify")
 

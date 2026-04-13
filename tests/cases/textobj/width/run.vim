@@ -11,15 +11,14 @@ EOF
 
 edit $TIRENVI_ROOT/tests/data/simple.md
 sleep 1m
+execute "normal! dd"
 "                              5, 3, 11
 execute "normal! 1j11l"
 Tir width=8
-sleep 1m
-"                              5, 3, 8
+call Snapshot({'desc': 'width = 5, 3, 8' })
 execute "normal! 0gg2j6l"
 Tir width=5
-sleep 1m
-"                              5, 5, 8
+call Snapshot({'desc': 'width = 5, 5, 8' })
 execute "normal! 0gg4j5l"
 Tir width=9
 sleep 1m
@@ -62,4 +61,4 @@ Tir width=
 sleep 1m
 "                              2, 3, 8
 
-call RunTest({})
+call RunTest({ 'desc': 'width = 2, 3, 8' })
