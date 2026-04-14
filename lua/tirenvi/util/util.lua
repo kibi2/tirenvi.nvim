@@ -25,10 +25,9 @@ local bo = vim.bo
 -- private helpers
 
 --- Get parser configuration for a file.
----@param bufnr number
+---@param filetype string
 ---@return Parser|nil
-local function get_parser_for_file(bufnr)
-	local filetype = buffer.get(bufnr, buffer.IKEY.FILETYPE)
+local function get_parser_for_filetype(filetype)
 	if not filetype then
 		return nil
 	end
@@ -115,17 +114,29 @@ function M.assert_no_reserved_marks(fl_lines)
 end
 
 ---@param bufnr number|nil
----@return Parser
-function M.get_parser(bufnr)
+---@return Parser|nil
+---@return string|nil
+function M.resolve_parser(bufnr)
 	bufnr = bufnr or vim.api.nvim_get_current_buf()
-	local parser = get_parser_for_file(bufnr)
-	if parser == nil then
-		local filetype = buffer.get(bufnr, buffer.IKEY.FILETYPE)
-		error(errors.new_domain_error(errors.no_parser_error(filetype)))
+	local filetype = buffer.get(bufnr, buffer.IKEY.FILETYPE)
+	local parser = get_parser_for_filetype(filetype)
+	if not parser then
+		return nil, errors.no_parser_error(filetype)
 	end
 	if fn.executable(parser.executable) ~= 1 then
-		error(errors.new_domain_error(errors.not_found_parser_error(parser)))
+		return parser, errors.not_found_parser_error(parser)
 	end
+	return parser, nil
+end
+
+---@param bufnr number|nil
+---@return Parser
+function M.get_parser(bufnr)
+	local parser, err = M.resolve_parser(bufnr)
+	if err then
+		error(errors.new_domain_error(err))
+	end
+	---@cast parser Parser	
 	return parser
 end
 
