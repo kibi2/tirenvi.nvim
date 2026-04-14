@@ -3,8 +3,8 @@ local guard = require("tirenvi.util.guard")
 local buffer = require("tirenvi.state.buffer")
 local init = require("tirenvi.init")
 local buf_state = require("tirenvi.state.buf_state")
-local config = require("tirenvi.config")
 local log = require("tirenvi.util.log")
+local util = require("tirenvi.util.util")
 local ui = require("tirenvi.ui")
 
 -- module
@@ -30,6 +30,12 @@ local fn = vim.fn
 ---@param bytecount integer
 local function on_lines(_, bufnr, tick, first, last, new_last, bytecount)
 	buffer.clear_cache()
+	if buf_state.should_skip(bufnr, {
+			supported = true,
+			has_parser = true,
+		}) then
+		return
+	end
 	local seq_last = fn.undotree(bufnr).seq_last
 	log.debug("===+===+===+===+=== on_lines(%d)[%d](%d-%d) ===+===+===+===+===", bufnr, seq_last, first, new_last)
 	init.on_lines(bufnr, first, last, new_last)
@@ -95,46 +101,23 @@ local function debug_entry_point(args)
 	log.debug("===+===+===+===+=== %s(%d)%s ===+===+===+===+===", args.event, args.buf, filetype)
 end
 
----@param filetype string|nil
----@return boolean
-local function is_configured_filetype(filetype)
-	return filetype ~= nil and filetype ~= "" and config.parser_map[filetype] ~= nil
+---@param augroup integer
+---@param bufnr number
+local function clear_buffer_local_autocmds(augroup, bufnr)
+	api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
 end
 
 ---@param augroup integer
 ---@param bufnr number
 local function register_buffer_local_autocmds(augroup, bufnr)
-	if vim.b[bufnr].tirenvi_autocmds_registered then
-		return
-	end
-	vim.b[bufnr].tirenvi_autocmds_registered = true
-
-	api.nvim_create_autocmd("BufReadPost", {
-		group = augroup,
-		buffer = bufnr,
-		callback = guard.guarded(function(args)
-			if
-				buf_state.should_skip(args.buf, {
-					supported = true,
-					no_vscode = true,
-					has_parser = true,
-				})
-			then
-				return
-			end
-			debug_entry_point(args)
-			on_buf_read_post(args)
-		end),
-	})
-
 	api.nvim_create_autocmd("BufWritePre", {
 		group = augroup,
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
-				supported = true,
-				is_tir_vim = true,
-			}) then
+					supported = true,
+					is_tir_vim = true,
+				}) then
 				return
 			end
 			debug_entry_point(args)
@@ -147,8 +130,8 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
-				supported = true,
-			}) then
+					supported = true,
+				}) then
 				return
 			end
 			debug_entry_point(args)
@@ -161,9 +144,9 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
-				supported = true,
-				has_parser = true,
-			}) then
+					supported = true,
+					has_parser = true,
+				}) then
 				return
 			end
 			on_cursor_hold(args)
@@ -175,9 +158,9 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
-				supported = true,
-				has_parser = true,
-			}) then
+					supported = true,
+					has_parser = true,
+				}) then
 				return
 			end
 			debug_entry_point(args)
@@ -191,9 +174,9 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
-				supported = true,
-				has_parser = true,
-			}) then
+					supported = true,
+					has_parser = true,
+				}) then
 				return
 			end
 			debug_entry_point(args)
@@ -210,9 +193,9 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
-				supported = true,
-				is_tir_vim = true,
-			}) then
+					supported = true,
+					is_tir_vim = true,
+				}) then
 				return
 			end
 			debug_entry_point(args)
@@ -225,9 +208,9 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
-				supported = true,
-				is_tir_vim = true,
-			}) then
+					supported = true,
+					is_tir_vim = true,
+				}) then
 				return
 			end
 			ui.special_clear()
@@ -238,40 +221,51 @@ end
 
 local function register_autocmds()
 	local augroup = api.nvim_create_augroup(GROUP_NAME, { clear = true })
+
+	vim.api.nvim_create_autocmd("FileType", {
+		group = augroup,
+		callback = guard.guarded(function(args)
+			if buf_state.should_skip(args.buf, {
+					supported = true,
+				}) then
+				return
+			end
+			debug_entry_point(args)
+			on_filetype(args)
+			clear_buffer_local_autocmds(augroup, args.buf)
+			local _, err = util.resolve_parser(args.buf)
+			if err then
+				-- By leaving the filetype unset, parser resolution will fail immediately.
+				buffer.set(args.buf, buffer.IKEY.FILETYPE, nil)
+				if err.kind == "not_executable" then error(err) end
+				return
+			end
+			register_buffer_local_autocmds(augroup, args.buf)
+		end),
+	})
+
+	api.nvim_create_autocmd("BufReadPost", {
+		group = augroup,
+		callback = guard.guarded(function(args)
+			if
+				buf_state.should_skip(args.buf, {
+					supported = true,
+					no_vscode = true,
+					has_parser = true,
+				})
+			then
+				return
+			end
+			debug_entry_point(args)
+			on_buf_read_post(args)
+		end),
+	})
+
 	vim.api.nvim_create_autocmd("WinClosed", {
 		group = augroup,
 		callback = guard.guarded(function(args)
 			local winid = tonumber(args.match)
 			pcall(ui.clear_matches, winid)
-		end),
-	})
-
-	vim.api.nvim_create_autocmd("FileType", {
-		group = augroup,
-		callback = guard.guarded(function(args)
-			local now_supported = is_configured_filetype(bo[args.buf].filetype)
-			local was_registered = vim.b[args.buf].tirenvi_autocmds_registered == true
-			local active = was_registered or buf_state.is_tir_vim(args.buf)
-
-			if not now_supported and not active then
-				return
-			end
-
-			debug_entry_point(args)
-			on_filetype(args)
-
-			if not now_supported then
-				if vim.b[args.buf].tirenvi_autocmds_registered then
-					api.nvim_clear_autocmds({ group = augroup, buffer = args.buf })
-					vim.b[args.buf].tirenvi_autocmds_registered = nil
-				end
-				return
-			end
-
-			register_buffer_local_autocmds(augroup, args.buf)
-			if not was_registered then
-				on_buf_read_post(args)
-			end
 		end),
 	})
 
