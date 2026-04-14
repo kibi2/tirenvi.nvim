@@ -115,16 +115,16 @@ end
 
 ---@param bufnr number|nil
 ---@return Parser|nil
----@return string|nil
+---@return { tag: table, message: string, kind: string? }|nil
 function M.resolve_parser(bufnr)
 	bufnr = bufnr or vim.api.nvim_get_current_buf()
 	local filetype = buffer.get(bufnr, buffer.IKEY.FILETYPE)
 	local parser = get_parser_for_filetype(filetype)
 	if not parser then
-		return nil, errors.no_parser_error(filetype)
+		return nil, errors.new_domain_error(errors.no_parser_error(filetype), "no_parser")
 	end
 	if fn.executable(parser.executable) ~= 1 then
-		return parser, errors.not_found_parser_error(parser)
+		return parser, errors.new_domain_error(errors.not_found_parser_error(parser), "not_executable")
 	end
 	return parser, nil
 end
@@ -134,7 +134,7 @@ end
 function M.get_parser(bufnr)
 	local parser, err = M.resolve_parser(bufnr)
 	if err then
-		error(errors.new_domain_error(err))
+		error(err)
 	end
 	---@cast parser Parser	
 	return parser
