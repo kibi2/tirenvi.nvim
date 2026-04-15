@@ -30,9 +30,7 @@ local fn = vim.fn
 ---@param bytecount integer
 local function on_lines(_, bufnr, tick, first, last, new_last, bytecount)
 	buffer.clear_cache()
-	if buf_state.should_skip(bufnr) then
-		return
-	end
+	if buf_state.should_skip(bufnr) then return end
 	local seq_last = fn.undotree(bufnr).seq_last
 	log.debug("===+===+===+===+=== on_lines(%d)[%d](%d-%d) ===+===+===+===+===", bufnr, seq_last, first, new_last)
 	init.on_lines(bufnr, first, last, new_last)
@@ -40,9 +38,7 @@ end
 
 ---@param bufnr number
 local function attach_on_lines(bufnr)
-	if buf_state.should_skip(bufnr) then
-		return
-	end
+	if buf_state.should_skip(bufnr) then return end
 	buffer.attach_on_lines(bufnr, on_lines)
 end
 
@@ -108,7 +104,6 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
-					has_parser = false,
 					is_tir_vim = true,
 				}) then
 				return
@@ -122,11 +117,7 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		group = augroup,
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
-			if buf_state.should_skip(args.buf, {
-					has_parser = false,
-				}) then
-				return
-			end
+			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
 			on_buf_write_post(args)
 		end),
@@ -136,9 +127,7 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		group = augroup,
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
-			if buf_state.should_skip(args.buf) then
-				return
-			end
+			if buf_state.should_skip(args.buf) then return end
 			on_cursor_hold(args)
 		end),
 	})
@@ -147,9 +136,7 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		group = augroup,
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
-			if buf_state.should_skip(args.buf) then
-				return
-			end
+			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
 			assert(not buffer.get(args.buf, buffer.IKEY.INSERT_MODE))
 			buffer.set(args.buf, buffer.IKEY.INSERT_MODE, true)
@@ -160,9 +147,7 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		group = augroup,
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
-			if buf_state.should_skip(args.buf) then
-				return
-			end
+			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
 			-- InsertLeave may be triggered without a preceding InsertEnter
 			-- due to the behavior of other plugins (e.g., Telescope).
@@ -176,12 +161,7 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		group = augroup,
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
-			if buf_state.should_skip(args.buf, {
-					has_parser = false,
-					is_tir_vim = true,
-				}) then
-				return
-			end
+			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
 			on_insert_char_pre(args)
 		end),
@@ -191,12 +171,7 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		group = augroup,
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
-			if buf_state.should_skip(args.buf, {
-					has_parser = false,
-					is_tir_vim = true,
-				}) then
-				return
-			end
+			if buf_state.should_skip(args.buf) then return end
 			ui.special_clear()
 			ui.special_apply()
 		end),
@@ -231,11 +206,7 @@ local function register_autocmds()
 	api.nvim_create_autocmd("BufReadPost", {
 		group = augroup,
 		callback = guard.guarded(function(args)
-			if
-				buf_state.should_skip(args.buf)
-			then
-				return
-			end
+			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
 			on_buf_read_post(args)
 		end),

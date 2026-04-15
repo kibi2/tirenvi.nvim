@@ -78,7 +78,7 @@ local checks = {
 	end,
 
 	has_parser = function(bufnr)
-		return ensure_has_parser(bufnr)
+		return buffer.get(bufnr, buffer.IKEY.FILETYPE) ~= nil
 	end,
 
 	no_vscode = function()

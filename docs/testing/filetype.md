@@ -41,6 +41,6 @@
 
 | No | Preconditions | Action | Expected | Date | Notes | Commit Message |
 | --- | --- | --- | --- | --- | --- | --- |
-|  |  | buf_state.should_skip<br>デフォルト値を設ける | 正常動作 |  |  |  |
-|  | should_skip.has_parser |  | parser有無チェック-><br>buffer.IKEY.FILETYPE有無チェック | 2026/4/15 |  |  |
+|  | should_skip.has_parser | デフォルト値を設ける | 正常動作 | 2026/4/15 |  | feat: allow partial should_skip options with default values |
+|  | should_skip.has_parser |  | parser有無チェック-><br>buffer.IKEY.FILETYPE有無チェック | 2026/4/15 |  | refactor: switch parser check to buffer-local filetype flag |
 
