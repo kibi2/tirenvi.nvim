@@ -193,13 +193,9 @@ local function register_autocmds()
 			on_filetype(args)
 			clear_buffer_local_autocmds(augroup, args.buf)
 			local _, err = util.resolve_parser(args.buf)
-			if err then
-				-- By leaving the filetype unset, parser resolution will fail immediately.
-				buffer.set(args.buf, buffer.IKEY.FILETYPE, nil)
-				if err.kind == "not_executable" then error(err) end
-				return
+			if not err then
+				register_buffer_local_autocmds(augroup, args.buf)
 			end
-			register_buffer_local_autocmds(augroup, args.buf)
 		end),
 	})
 

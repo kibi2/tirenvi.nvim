@@ -129,11 +129,11 @@ function M.get_state(bufnr)
 	if not b[bufnr].tirenvi then
 		b[bufnr].tirenvi = {
 			attached = false,
-			buffer_invalid = false,
 			filetype = nil,
 			insert_mode = false,
 			patch_depth = 0,
 			undo_tree_last = -1,
+			widths = nil,
 		}
 	end
 	return b[bufnr].tirenvi

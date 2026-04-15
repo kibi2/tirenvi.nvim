@@ -13,6 +13,7 @@ local errors = require("tirenvi.util.errors")
 local notify = require("tirenvi.util.notify")
 local buf_state = require("tirenvi.state.buf_state")
 local buffer = require("tirenvi.state.buffer")
+local log = require("tirenvi.util.log")
 
 -----------------------------------------------------------------------
 -- Module

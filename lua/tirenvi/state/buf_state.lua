@@ -1,7 +1,6 @@
 local config = require("tirenvi.config")
 local log = require("tirenvi.util.log")
 local errors = require("tirenvi.util.errors")
-local util = require("tirenvi.util.util")
 local buffer = require("tirenvi.state.buffer")
 local tir_vim = require("tirenvi.core.tir_vim")
 
@@ -10,14 +9,6 @@ local M = {}
 local api = vim.api
 local fn = vim.fn
 local bo = vim.bo
-
---- ensure the buffer has a parser and the parser is executable. for example, it may be a tir-vim buffer.
----@param bufnr number
----@return boolean
-local function ensure_has_parser(bufnr)
-	local _, err = util.resolve_parser(bufnr)
-	return err == nil
-end
 
 --- has pipe markers. for example, it may be a tir-vim buffer.
 ---@param bufnr number
@@ -68,7 +59,7 @@ local checks = {
 
 	ensure_tir_vim = function(bufnr)
 		if not M.is_tir_vim(bufnr) then
-			error(errors.ENSURE_TIRVIM_MODE)
+			error(errors.new_domain_error(errors.ERR.ENSURE_TIRVIM_MODE))
 		end
 		return true
 	end,

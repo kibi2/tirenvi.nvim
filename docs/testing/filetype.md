@@ -26,7 +26,7 @@
   * bufferに紐づかないautocmdはglobalに設定する
   * WinClosed, VimLeave など
   * FileType は新しいfiletypeについて判断する必要があるのでglobalに設定する
-  * BufReadPre もglobalにないと呼び出されないのでglobalに設定する
+  * BufReadPost もglobalにないと呼び出されないのでglobalに設定する
 * autocmd, command, などentry pointでの動作
   * b.tirenvi.filetypeがない場合はtirenviは即returnする(should_skip.has_parser)
   * FileType は例外
@@ -43,4 +43,5 @@
 | --- | --- | --- | --- | --- | --- | --- |
 |  | should_skip.has_parser | デフォルト値を設ける | 正常動作 | 2026/4/15 |  | feat: allow partial should_skip options with default values |
 |  | should_skip.has_parser |  | parser有無チェック-><br>buffer.IKEY.FILETYPE有無チェック | 2026/4/15 |  | refactor: switch parser check to buffer-local filetype flag |
+|  | 実行不可のparser | e tests/data/simple.csv | parser実行時にエラー出力 | 2026/4/15 |  | do not raise errors in FileType autocmd; raise errors when the parser is used |
 
