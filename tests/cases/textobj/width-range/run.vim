@@ -17,6 +17,9 @@ call Snapshot({'desc': 'width = 5, 6 / 5, 3, 6' })
 call Snapshot({'desc': 'width = 8, 8 / 5, 3, 6' })
 6,8Tir width-2
 call Snapshot({'desc': 'width = 6, 6 / 3, 2, 4' })
+Tir toggle
+6,8Tir width+2
+call Snapshot({'desc': 'width = 6, 6 / 3, 2, 4' })
 qa!
 
 ===== NG =====

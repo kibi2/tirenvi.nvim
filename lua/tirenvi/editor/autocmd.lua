@@ -38,7 +38,6 @@ end
 
 ---@param bufnr number
 local function attach_on_lines(bufnr)
-	if buf_state.should_skip(bufnr) then return end
 	buffer.attach_on_lines(bufnr, on_lines)
 end
 
@@ -50,7 +49,6 @@ end
 ---@param args table
 local function on_buf_read_post(args)
 	init.import_flat(args.buf)
-	attach_on_lines(args.buf)
 end
 
 ---@param args table
@@ -99,6 +97,8 @@ end
 ---@param augroup integer
 ---@param bufnr number
 local function register_buffer_local_autocmds(augroup, bufnr)
+	attach_on_lines(bufnr)
+
 	api.nvim_create_autocmd("BufWritePre", {
 		group = augroup,
 		buffer = bufnr,
