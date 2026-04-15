@@ -116,7 +116,7 @@ end
 ---@param count integer
 ---@param rect Rect
 local function change_table_width(operator, count, rect)
-	log.debug("row[%d-%d], col[%d-%d]", rect.row.first, rect.row.last, rect.col.first, rect.col.last)
+	log.debug("row%s, col%s", rect.row:short(), rect.col:short())
 	local bufnr, blocks = get_blocks(rect.row)
 	Blocks.change_width(blocks, operator, count, rect.col)
 	local vi_lines = vim_parser.unparse(blocks)

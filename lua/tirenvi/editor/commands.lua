@@ -7,6 +7,7 @@ local init = require("tirenvi.init")
 local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
 local errors = require("tirenvi.util.errors")
+local Range = require("tirenvi.util.range")
 local ui = require("tirenvi.ui")
 
 -- module
@@ -51,6 +52,8 @@ local function cmd_hbar(bufnr, opts)
 	init.hbar(bufnr)
 end
 
+---@param opts {[string]:any}
+---@return Rect
 local function get_rect(opts)
 	local row_start = opts.line1
 	local row_end   = opts.line2
@@ -70,14 +73,8 @@ local function get_rect(opts)
 		col_end   = col
 	end
 	return {
-		row = {
-			first = math.min(row_start, row_end),
-			last  = math.max(row_start, row_end),
-		},
-		col = {
-			first = math.min(col_start, col_end),
-			last  = math.max(col_start, col_end),
-		},
+		row = Range.new(math.min(row_start, row_end), math.max(row_start, row_end)),
+		col = Range.new(math.min(col_start, col_end), math.max(col_start, col_end)),
 	}
 end
 

@@ -1,6 +1,7 @@
 local config = require("tirenvi.config")
 local util = require("tirenvi.util.util")
 local buffer = require("tirenvi.state.buffer")
+local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
 local pipen = config.marks.pipe
@@ -215,10 +216,9 @@ function M.get_block_rect(line_provider, count, is_around, allow_plain)
     local end_index = colIndex + count
     end_index = math.min(end_index, #bbyte_pos)
     return {
-        start_row = trow,
-        end_row   = brow,
-        start_col = tbyte_pos[colIndex] + (is_around and 0 or #pipen),
-        end_col   = bbyte_pos[end_index] - 1
+        row = Range.new(trow, brow),
+        col = Range.new(tbyte_pos[colIndex] + (is_around and 0 or #pipen),
+            bbyte_pos[end_index] - 1),
     }
 end
 

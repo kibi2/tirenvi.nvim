@@ -1,5 +1,5 @@
 local config = require("tirenvi.config")
-local range = require("tirenvi.util.range")
+local Range = require("tirenvi.util.range")
 local render = require("tirenvi.render")
 local buffer = require("tirenvi.state.buffer")
 local tir_vim = require("tirenvi.core.tir_vim")
@@ -149,7 +149,7 @@ end
 ---@param ranges Range[]
 function M.diagnostic_set(bufnr, ranges)
     for index, range in ipairs(ranges) do
-        render.set_range(bufnr, range.first, range.last, index)
+        render.set_range(bufnr, range, index)
     end
 end
 
@@ -177,9 +177,9 @@ function M.diagnostic_get(bufnr, first, last)
     if first then
         ---@cast last integer
         last = expand_continue_lines(bufnr, first, last)
-        ranges[#ranges + 1] = { first = first, last = last - 1 }
+        ranges[#ranges + 1] = Range.new(first, last - 1)
     end
-    return range.union(ranges)
+    return Range.union(ranges)
 end
 
 ---@param bufnr number

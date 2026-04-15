@@ -1,25 +1,25 @@
 local config = require("tirenvi.config")
 local ns = require("tirenvi.ns")
 local buffer = require("tirenvi.state.buffer")
+local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
 local M = {}
 
 ---@param bufnr number
----@param first integer
----@param last integer
+---@param range Range
 ---@param id integer
-function M.set_range(bufnr, first, last, id)
-    last = math.max(first, last) -- If a line is deleted, first > last, so we normalize it
-    last = math.min(last, buffer.line_count(bufnr) - 1)
-    local line = buffer.get_line(bufnr, last)
+function M.set_range(bufnr, range, id)
+    range.last = math.max(range.first, range.last) -- If a line is deleted, first > last, so we normalize it
+    range.last = math.min(range.last, buffer.line_count(bufnr) - 1)
+    local line = buffer.get_line(bufnr, range.last)
     local end_col = #line
     local opts = {
         id = id,
         strict = false,
         right_gravity = false,
         end_right_gravity = true,
-        end_row = last,
+        end_row = range.last,
         end_col = end_col,
         invalidate = false,
     }
@@ -31,7 +31,7 @@ function M.set_range(bufnr, first, last, id)
         opts.sign_text = tostring(id):sub(-2)
         opts.sign_hl_group = "ErrorMsg"
     end
-    vim.api.nvim_buf_set_extmark(bufnr, ns.INVALID, first, 0, opts)
+    vim.api.nvim_buf_set_extmark(bufnr, ns.INVALID, range.first, 0, opts)
 end
 
 ---@param bufnr number
@@ -48,7 +48,7 @@ function M.get_range(bufnr)
     for index = 1, #extmarks do
         local start_row = extmarks[index][2]
         local end_row = extmarks[index][4].end_row
-        ranges[#ranges + 1] = { first = start_row, last = end_row }
+        ranges[#ranges + 1] = Range.new(start_row, end_row)
     end
     return ranges
 end
