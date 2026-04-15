@@ -34,13 +34,11 @@ M.ERR = {
 
 --- Create a domain error object.
 ---@param message string
----@param kind string|nil
----@return { tag: table, message: string, kind: string? }
-function M.new_domain_error(message, kind)
+---@return { tag: table, message: string}
+function M.new_domain_error(message)
 	return {
 		tag = M.DOMAIN_ERROR,
 		message = message,
-		kind = kind,
 	}
 end
 

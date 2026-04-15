@@ -1,7 +1,6 @@
 local config = require("tirenvi.config")
 local log = require("tirenvi.util.log")
 local errors = require("tirenvi.util.errors")
-local util = require("tirenvi.util.util")
 local buffer = require("tirenvi.state.buffer")
 local tir_vim = require("tirenvi.core.tir_vim")
 
@@ -10,18 +9,6 @@ local M = {}
 local api = vim.api
 local fn = vim.fn
 local bo = vim.bo
-
---- ensure the buffer has a parser and the parser is executable. for example, it may be a tir-vim buffer.
----@param bufnr number
----@return boolean
-local function ensure_has_parser(bufnr)
-	if not bo[bufnr].modifiable then
-		log.debug("buftype:%s", bo[bufnr].buftype)
-		return false
-	end
-	local _, err = util.resolve_parser(bufnr)
-	return err == nil
-end
 
 --- has pipe markers. for example, it may be a tir-vim buffer.
 ---@param bufnr number
@@ -67,13 +54,12 @@ end
 
 local checks = {
 	supported = function(bufnr)
-		-- return bo[bufnr].buftype == ""
 		return bo[bufnr].modifiable
 	end,
 
 	ensure_tir_vim = function(bufnr)
 		if not M.is_tir_vim(bufnr) then
-			error(errors.ENSURE_TIRVIM_MODE)
+			error(errors.new_domain_error(errors.ERR.ENSURE_TIRVIM_MODE))
 		end
 		return true
 	end,
@@ -83,7 +69,7 @@ local checks = {
 	end,
 
 	has_parser = function(bufnr)
-		return ensure_has_parser(bufnr)
+		return buffer.get(bufnr, buffer.IKEY.FILETYPE) ~= nil
 	end,
 
 	no_vscode = function()
@@ -96,14 +82,23 @@ function M.is_vscode()
 	return vim.g.vscode ~= nil
 end
 
+local DEFAULT_OPTS = {
+	supported = true,
+	has_parser = true,
+	no_vscode = true,
+	is_tir_vim = false,
+	ensure_tir_vim = false,
+}
+
 --- check if the buffer is supported and valid according to the options. for example, it may be a tir-vim buffer.
 ---@param bufnr number
----@param opts Check_options
+---@param user_opts Check_options|nil
 ---@return boolean
-function M.should_skip(bufnr, opts)
+function M.should_skip(bufnr, user_opts)
 	if config.log.buffer_name == api.nvim_buf_get_name(bufnr) then
 		return true
 	end
+	local opts = vim.tbl_deep_extend("force", DEFAULT_OPTS, user_opts or {})
 	for name, enabled in pairs(opts) do
 		if enabled then
 			local ok = checks[name](bufnr)

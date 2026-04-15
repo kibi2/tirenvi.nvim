@@ -129,11 +129,11 @@ function M.get_state(bufnr)
 	if not b[bufnr].tirenvi then
 		b[bufnr].tirenvi = {
 			attached = false,
-			buffer_invalid = false,
 			filetype = nil,
 			insert_mode = false,
 			patch_depth = 0,
 			undo_tree_last = -1,
+			widths = nil,
 		}
 	end
 	return b[bufnr].tirenvi
@@ -263,7 +263,16 @@ function M.attach_on_lines(bufnr, callback)
 	end
 	log.debug("===+===+=== attach onlines")
 	api.nvim_buf_attach(bufnr, false, {
+		-- NOTE:
+		-- When returning `true` from this callback, the attachment is detached only for
+		-- this handler. In this case, `on_detach` is NOT called automatically, so any
+		-- state (e.g. ATTACHED flag) must be updated manually here.
 		on_lines = function(_, bufnr, tick, first, last, new_last, bytecount)
+			if M.get(bufnr, M.IKEY.FILETYPE) == nil then
+				log.debug("===+===+=== auto detach (no filetype)")
+				M.set(bufnr, M.IKEY.ATTACHED, false)
+				return true -- detach
+			end
 			if M.get(bufnr, M.IKEY.PATCH_DEPTH) > 0 then
 				return
 			end
