@@ -15,10 +15,6 @@ local bo = vim.bo
 ---@param bufnr number
 ---@return boolean
 local function ensure_has_parser(bufnr)
-	if not bo[bufnr].modifiable then
-		log.debug("buftype:%s", bo[bufnr].buftype)
-		return false
-	end
 	local _, err = util.resolve_parser(bufnr)
 	return err == nil
 end
@@ -67,7 +63,6 @@ end
 
 local checks = {
 	supported = function(bufnr)
-		-- return bo[bufnr].buftype == ""
 		return bo[bufnr].modifiable
 	end,
 
@@ -96,14 +91,23 @@ function M.is_vscode()
 	return vim.g.vscode ~= nil
 end
 
+local DEFAULT_OPTS = {
+	supported = true,
+	has_parser = true,
+	no_vscode = true,
+	is_tir_vim = false,
+	ensure_tir_vim = false,
+}
+
 --- check if the buffer is supported and valid according to the options. for example, it may be a tir-vim buffer.
 ---@param bufnr number
----@param opts Check_options
+---@param user_opts Check_options|nil
 ---@return boolean
-function M.should_skip(bufnr, opts)
+function M.should_skip(bufnr, user_opts)
 	if config.log.buffer_name == api.nvim_buf_get_name(bufnr) then
 		return true
 	end
+	local opts = vim.tbl_deep_extend("force", DEFAULT_OPTS, user_opts or {})
 	for name, enabled in pairs(opts) do
 		if enabled then
 			local ok = checks[name](bufnr)
