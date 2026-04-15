@@ -1,6 +1,7 @@
-local M = {}
+---@class Range
+local Range = {}
+Range.__index = Range
 
----@param ranges Range[]
 ---@return Range[]
 local function sort_range(ranges)
     table.sort(ranges, function(prev, next)
@@ -12,24 +13,36 @@ end
 ---@param prev Range
 ---@param next Range
 ---@return Range|nil
-local function union_range_2(prev, next)
+local function union_range(prev, next)
     if prev.last + 1 < next.first then
         return nil
     end
-    return {
-        first = math.min(prev.first, next.first),
-        last  = math.max(prev.last, next.last),
-    }
+    return Range.new(math.min(prev.first, next.first), math.max(prev.last, next.last))
 end
 
----@param source Range
+---@param first integer
+---@param last integer
+---@return Range
+function Range.new(first, last)
+    return setmetatable({
+        first = first,
+        last = last,
+    }, Range)
+end
+
+---@return string
+function Range:short()
+    return string.format("(%d,%d)", self.first, self.last)
+end
+
+---@param self Range
 ---@param target Range
 ---@return boolean
-function M.intersect(source, target)
-    if source.last < target.first then
+function Range:intersect(target)
+    if self.last < target.first then
         return false
     end
-    if target.last < source.first then
+    if target.last < self.first then
         return false
     end
     return true
@@ -37,14 +50,14 @@ end
 
 ---@param ranges Range[]
 ---@return Range[]
-function M.union(ranges)
+function Range.union(ranges)
     if #ranges == 0 then
         return ranges
     end
     ranges = sort_range(ranges)
     local unions = { ranges[1] }
     for index = 2, #ranges do
-        local merged = union_range_2(unions[#unions], ranges[index])
+        local merged = union_range(unions[#unions], ranges[index])
         if merged then
             unions[#unions] = merged
         else
@@ -54,4 +67,4 @@ function M.union(ranges)
     return unions
 end
 
-return M
+return Range

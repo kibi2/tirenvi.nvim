@@ -3,6 +3,7 @@
 -----------------------------------------------------------------------
 
 ----- dependencies
+local Range = require("tirenvi.util.range")
 local log   = require("tirenvi.util.log")
 
 local M     = {}
@@ -162,7 +163,9 @@ end
 ---@param lines string[]
 ---@param no_undo boolean|nil
 function M.set_lines(bufnr, i_start, i_end, lines, no_undo)
-	log.debug("=== set_lines(%d, %d)[1]%s [%d]%s", i_start, i_end, tostring(lines[1]), #lines, tostring(lines[#lines]))
+	local range = Range.new(i_start, i_end)
+	log.debug("=== set_lines%s[1]%s [%d]%s", range:short(), tostring(lines[1]), #lines,
+		tostring(lines[#lines]))
 	log.debug(M.get_state(bufnr))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
 	local ok, err = pcall(set_lines, bufnr, i_start, i_end, lines, no_undo)

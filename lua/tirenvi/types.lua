@@ -70,10 +70,6 @@
 ---@field row Range
 ---@field col Range
 
----@class Range
----@field first integer
----@field last integer
-
 ---@class LineProvider
 ---@field get_line fun(row: integer): string|nil
 ---@field line_count fun(): integer

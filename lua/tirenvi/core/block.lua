@@ -3,7 +3,7 @@ local Record = require("tirenvi.core.record")
 local config = require("tirenvi.config")
 local Attr = require("tirenvi.core.attr")
 local util = require("tirenvi.util.util")
-local range = require("tirenvi.util.range")
+local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -265,8 +265,8 @@ end
 local function change_width(attr, icol, start_col, operator, count, col)
     local column = attr.columns[icol]
     local old_width = column.width
-    local cel_range = { first = start_col, last = start_col + old_width }
-    if range.intersect(cel_range, col) then
+    local cel_range = Range.new(start_col, start_col + old_width)
+    if cel_range:intersect(col) then
         local new_width = get_new_width(operator, count, old_width)
         Attr.grid.set_width(attr, icol, new_width)
     end

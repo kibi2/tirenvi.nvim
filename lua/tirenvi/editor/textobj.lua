@@ -18,10 +18,10 @@ local function setup_vl(line_provider, is_around)
     if not pos then
         return
     end
-    vim.api.nvim_win_set_cursor(0, { pos.start_row, pos.start_col - 1, })
+    vim.api.nvim_win_set_cursor(0, { pos.row.first, pos.col.first - 1, })
     vim.api.nvim_feedkeys(vim.keycode("<C-v>"), "n", false)
     vim.cmd("normal! o")
-    vim.api.nvim_win_set_cursor(0, { pos.end_row, pos.end_col - 1, })
+    vim.api.nvim_win_set_cursor(0, { pos.row.last, pos.col.last - 1, })
 end
 
 local function setup_vil()
