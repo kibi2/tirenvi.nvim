@@ -155,7 +155,7 @@ end
 
 ---@param bufnr number
 ---@param range Range
-local function expand_continue_lines(bufnr, range)
+function M.expand_continue_lines(bufnr, range)
     local lines = buffer.get_lines(bufnr, range.first, range.last)
     ---@type string|nil
     local last_line = lines[#lines]
@@ -173,7 +173,7 @@ end
 function M.diagnostic_get(bufnr, range)
     local ranges = render.get_range(bufnr)
     if range then
-        expand_continue_lines(bufnr, range)
+        M.expand_continue_lines(bufnr, range)
         ranges[#ranges + 1] = range
     end
     return Range.union(ranges)

@@ -16,6 +16,7 @@ local Blocks = require("tirenvi.core.blocks")
 local vim_parser = require("tirenvi.core.vim_parser")
 local flat_parser = require("tirenvi.core.flat_parser")
 local tir_vim = require("tirenvi.core.tir_vim")
+local render = require("tirenvi.render")
 local ui = require("tirenvi.ui")
 
 -----------------------------------------------------------------------
@@ -25,6 +26,7 @@ local ui = require("tirenvi.ui")
 local M = {}
 
 local api = vim.api
+local fn = vim.fn
 -----------------------------------------------------------------------
 -- Private helpers
 -----------------------------------------------------------------------
@@ -126,21 +128,27 @@ end
 ---@param _ integer|nil
 ---@param new_last integer|nil
 local function handle_request(bufnr, first, _, new_last)
-	log.debug("===-===-===-=== repair start (%d, %d) ===-===-===-===", first, new_last)
-	local range = Range.new(first, new_last)
-	local ranges = ui.diagnostic_get(bufnr, range)
-	ui.diagnostic_clear(bufnr)
+	local new_range = Range.new(first, new_last)
 	if buf_state.is_insert_mode(bufnr) or buf_state.is_undo_mode(bufnr) then
 		-- Modifying the buffer in insert mode may corrupt the undo node.
 		-- Therefore, in insert mode, only record the invalid changed region
 		-- and repair it when leaving insert mode.
 		-- Moving the cursor in insert mode may create an invalid table undo node.
 		-- Therefore, when performing undo/redo, skip table validation.
-		ui.diagnostic_set(bufnr, ranges)
+		local merged_ranges = ui.diagnostic_get(bufnr, new_range)
+		ui.diagnostic_clear(bufnr)
+		ui.diagnostic_set(bufnr, merged_ranges)
 	else
+		log.debug("===-===-===-=== repair start (%d, %d) ===-===-===-===", first, new_last)
 		buffer.set_undo_tree_last(bufnr)
 		pcall(vim.cmd, "undojoin")
-		apply_ranges(bufnr, ranges)
+		local ext_ranges = render.get_range(bufnr)
+		ui.diagnostic_clear(bufnr)
+		apply_ranges(bufnr, ext_ranges)
+		if new_range then
+			ui.expand_continue_lines(bufnr, new_range)
+			apply_ranges(bufnr, { new_range })
+		end
 	end
 end
 
