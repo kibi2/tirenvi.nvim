@@ -39,6 +39,12 @@
 * modeline対応
   * # vim: ft=csv
 
+* issues: Bug: produces empty error notifications kibi2/tirenvi.nvim#55 
+* branch: fix: empty notification and buffer-local autocmds
+* branch: refactor/entrypoint-filetype-gating
+* PR: kibi2/tirenvi.nvim#63
+* PR: kibi2/tirenvi.nvim#64
+
 | No | Preconditions | Action | Expected | Date | Notes | Commit Message |
 | --- | --- | --- | --- | --- | --- | --- |
 |  | should_skip.has_parser | デフォルト値を設ける | 正常動作 | 2026/4/15 |  | feat: allow partial should_skip options with default values |
