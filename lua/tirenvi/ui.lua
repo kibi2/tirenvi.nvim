@@ -154,18 +154,17 @@ function M.diagnostic_set(bufnr, ranges)
 end
 
 ---@param bufnr number
----@param first integer
----@param last integer
----@return integer
-local function expand_continue_lines(bufnr, first, last)
-    local lines = buffer.get_lines(bufnr, first, last)
+---@param range Range
+local function expand_continue_lines(bufnr, range)
+    local lines = buffer.get_lines(bufnr, range.first, range.last)
     ---@type string|nil
     local last_line = lines[#lines]
+    local last = range.last
     while tir_vim.is_continue_line(last_line) do
         last_line = buffer.get_line(bufnr, last)
         last = last + 1
     end
-    return last
+    range.last = last - 1
 end
 
 ---@param bufnr number
@@ -176,8 +175,9 @@ function M.diagnostic_get(bufnr, first, last)
     local ranges = render.get_range(bufnr)
     if first then
         ---@cast last integer
-        last = expand_continue_lines(bufnr, first, last)
-        ranges[#ranges + 1] = Range.new(first, last - 1)
+        local range = Range.new(first, last)
+        expand_continue_lines(bufnr, range)
+        ranges[#ranges + 1] = range
     end
     return Range.union(ranges)
 end
