@@ -2,7 +2,7 @@
 local config = require("tirenvi.config")
 local buf_state = require("tirenvi.state.buf_state")
 local util = require("tirenvi.util.util")
-local repair = require("tirenvi.core.repair")
+local reconcile = require("tirenvi.core.reconcile")
 local log = require("tirenvi.util.log")
 local buffer = require("tirenvi.state.buffer")
 local flat_parser = require("tirenvi.core.flat_parser")
@@ -296,12 +296,12 @@ end
 ---@param last integer
 ---@param new_last integer
 function M.on_lines(bufnr, first, last, new_last)
-	repair.repair(bufnr, first, last, new_last)
+	reconcile.handle(bufnr, first, last, new_last)
 end
 
 ---@param bufnr number
 function M.on_insert_leave(bufnr)
-	repair.repair(bufnr)
+	reconcile.handle(bufnr)
 end
 
 ---@param bufnr number

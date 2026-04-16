@@ -73,7 +73,7 @@ end
 ---@param attr_next Attr|nil
 ---@return boolean
 ---@return RefAttrError|nil
-local function apply_reference_attr_single(blocks, attr_prev, attr_next)
+local function apply_reference_attr_1grid(blocks, attr_prev, attr_next)
 	M.merge_blocks(blocks)
 	if Attr.is_conflict(attr_prev, attr_next, false) then
 		log.debug("===-===-===-=== conflict")
@@ -107,7 +107,7 @@ end
 ---@param self Blocks
 ---@param attr_prev Attr|nil
 ---@param attr_next Attr|nil
-local function insert_plain_block(self, attr_prev, attr_next)
+local function ensure_plain_block(self, attr_prev, attr_next)
 	if #self > 1 then
 		return
 	end
@@ -123,7 +123,7 @@ end
 ---@param self Blocks
 ---@param attr_prev Attr|nil
 ---@param attr_next Attr|nil
-local function attach_attr(self, attr_prev, attr_next)
+local function apply_attr(self, attr_prev, attr_next)
 	if #self == 0 then
 		return
 	end
@@ -135,9 +135,9 @@ end
 ---@param attr_prev Attr|nil
 ---@param attr_next Attr|nil
 ---@return boolean
-local function apply_reference_attr_multi(blocks, attr_prev, attr_next)
-	insert_plain_block(blocks, attr_prev, attr_next)
-	attach_attr(blocks, attr_prev, attr_next)
+local function apply_reference_attrs(blocks, attr_prev, attr_next)
+	ensure_plain_block(blocks, attr_prev, attr_next)
+	apply_attr(blocks, attr_prev, attr_next)
 	return true
 end
 
@@ -260,11 +260,11 @@ end
 ---@param allow_plain boolean|nil
 ---@return boolean
 ---@return RefAttrError|nil
-function M:repair(attr_prev, attr_next, allow_plain)
+function M:reconcile(attr_prev, attr_next, allow_plain)
 	if allow_plain then
-		return apply_reference_attr_multi(self, attr_prev, attr_next)
+		return apply_reference_attrs(self, attr_prev, attr_next)
 	else
-		return apply_reference_attr_single(self, attr_prev, attr_next)
+		return apply_reference_attr_1grid(self, attr_prev, attr_next)
 	end
 end
 

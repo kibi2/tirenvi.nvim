@@ -23,6 +23,44 @@
   * apply_, run_ : apply_extmark, ranges, range, line
   * shcdule_ : schedule_flush
 
+## 関数名変更
+
+module name: core/repair -> core/reconcile
+
+| function name | call function | process |
+| --- | --- | --- |
+| M.repair | repair | repair をshedule するだけ |
+| repair | repair_ranges | extmark参照してrangesを取り出す<br>insert/undo mode ならextmarkを付けるだけ<br>call repair_ranges |
+| repair_ranges | get_repaired_lines<br>ui.set_lines | rangeごとにcall get_repaired_lines<br>bufferに修正したtir-vimを書き込む |
+| get_repaired_lines | get_reference_attrs<br>get_blocks<br>Blocks.repair<br>vim_parser.unparse | rang前後の未修正行から列幅attrを参照<br>rangeからBlocksを作成する<br>Blocksを修正する<br>修正したBLocksからtir-vimを作る |
+| get_blocks | <br>fix_empty_line_after_table | rangeからBlocksを作成する<br>新規行が追加された場合plain, gridを判定して調整する |
+| Blocks.repair<br> | apply_reference_attr_multi<br>apply_reference_attr_single | plain混在可blocksにattrを設定する<br>plain混在不可blocksにattrを設定する |
+| apply_reference_attr_multi | insert_plain_block<br>attach_attr | block間の矛盾を解消するblocks にattrを設定する |
+| apply_reference_attr_single | merge_blocks | blocksを一つのblockにするblock にattrを設定する |
+
+| old name | new name |
+| --- | --- |
+| M.repair | reconcile.handle |
+| repair | handle_request |
+| repair_ranges | apply_ranges |
+| get_repaired_lines | reconcile_range |
+| get_reference_attrs | resolve_reference_attrs |
+| get_blocks | build_blocks |
+| fix_empty_line_after_table | normalize_trailing_empty_line |
+| Blocks.repair | Blocks.reconcile |
+| apply_reference_attr_multi | apply_reference_attrs |
+| apply_reference_attr_single | apply_reference_attrs_strict |
+| insert_plain_block | ensure_plain_block |
+| attach_attr | apply_attr |
+| merge_blocks | merge_blocks |
+
+結局repairの処理のメインは
+* 指定したrange(on_linesから渡ってきた修正行)からBlocksを作成する
+* 未修正行(rangeの前後1行を見る)からattrを作成する
+* attrをblockに設定する
+* BlockとBlockの構造に矛盾があればここで対処する(Block内の矛盾はここでは無視)
+* Block内の矛盾はvim_parser.unparseが行う
+
 ## implement
 
 * rangeを準備しておく。最初は空にしておく

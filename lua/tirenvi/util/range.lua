@@ -1,4 +1,6 @@
 ---@class Range
+---@field first integer
+---@field last integer
 local Range = {}
 Range.__index = Range
 
