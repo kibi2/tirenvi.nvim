@@ -1,6 +1,6 @@
 # Test Specification
 
-## Repair
+## Repair -> reconcile
 
 * joinをするとon_linesが2度呼び出される
   * 2度のon_linesをまとめてrepairする処理が必要
@@ -22,6 +22,37 @@
   * enqueue_, mark_
   * apply_, run_ : apply_extmark, ranges, range, line
   * shcdule_ : schedule_flush
+
+## 2種類のranges
+
+* insert/undo modeでの変更は即時修正できないのでextmarksとして覚える -> ext_ranges
+* その他modeでの変更は複数回に渡ってくるのでlocal rangeとして覚える -> local_range
+
+## handle_requset 疑似コード
+
+```
+local local_range = nil
+fucntion handle_request(bufnr, new_range)
+  local ext_ranges = ui.get_ext_ranges() -- get ext_marks 
+  ui.clear_ext_ranges() -- clear ext_marks
+  if insert/undo mode then
+    ui.set_ext_ranges(Range.unions(ext_ranges, new_range) -- set ext_marks
+  elseif not local_range then -- 最初の1回だけ呼び出す
+    vim.schedule(function() run_ext_ranges(bufnr, ext_ranges) end) -- reconcile ext_ranges
+    vim.schedule(function() run_local_range(bufnr) end) -- reconcile local_range
+    local_range = new_range
+  else -- 2回目以降はまとめる
+    local_range = Range.union(local_range, new_range) -- expand cocal_range
+  end
+end
+fucntion run_ext_ranges(bufnr, extranges)
+  apply_rangesbufnr(extranges) -- local_rangeの前にext_rangを処理する。行番号は変えない
+end
+fucntion run_local_range(bufnr)
+  apply_rangesbufnr({local_range}) -- 2回目以降でまとめたrangeに対して1回だけ実行する
+  local_range = nil
+end
+```
 
 ## 関数名変更
 
@@ -71,8 +102,7 @@ module name: core/repair -> core/reconcile
 
 | No | Preconditions | Action | Expected | Date | Notes | Commit Message |
 | --- | --- | --- | --- | --- | --- | --- |
-|  | モジュール名変更 |  | repair -> reconcile | 2026/4/1? |  |  |
-|  | 関数名変更 |  | repair -> hamdle, and more | 2026/4/1? |  |  |
+|     | モジュール名変更<br> 関数名変更 |     | repair -> reconcile<br>repair -> hamdle, and more | 2026/4/16    |     | refactor: rename repair to reconcile and standardize function namin |
 |  | nvim tests/data/simple.md | undo | apply_marks, apply_range を呼び出す | 2026/4/1? | undo 1 node? |  |
 |  | nvim tests/data/simple.md | join | enqueue_repair_range経由でapplyを2回呼び出す | 2026/4/1? |  |  |
 

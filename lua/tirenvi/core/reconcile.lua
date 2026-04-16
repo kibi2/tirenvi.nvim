@@ -128,22 +128,18 @@ local function handle_request(bufnr, first, last, new_last)
 	log.debug("===-===-===-=== repair start (%d, %d) ===-===-===-===", first, new_last)
 	local ranges = ui.diagnostic_get(bufnr, first, new_last)
 	ui.diagnostic_clear(bufnr)
-	-- Modifying the buffer in insert mode may corrupt the undo node.
-	-- Therefore, in insert mode, only record the invalid changed region
-	-- and repair it when leaving insert mode.
-	if buf_state.is_insert_mode(bufnr) then
+	if buf_state.is_insert_mode(bufnr) or buf_state.is_undo_mode(bufnr) then
+		-- Modifying the buffer in insert mode may corrupt the undo node.
+		-- Therefore, in insert mode, only record the invalid changed region
+		-- and repair it when leaving insert mode.
+		-- Moving the cursor in insert mode may create an invalid table undo node.
+		-- Therefore, when performing undo/redo, skip table validation.
 		ui.diagnostic_set(bufnr, ranges)
-		return
+	else
+		buffer.set_undo_tree_last(bufnr)
+		pcall(vim.cmd, "undojoin")
+		apply_ranges(bufnr, ranges)
 	end
-	-- Moving the cursor in insert mode may create an invalid table undo node.
-	-- Therefore, when performing undo/redo, skip table validation.
-	if buf_state.is_undo_mode(bufnr) then
-		ui.diagnostic_set(bufnr, ranges)
-		return
-	end
-	buffer.set_undo_tree_last(bufnr)
-	pcall(vim.cmd, "undojoin")
-	apply_ranges(bufnr, ranges)
 end
 
 -----------------------------------------------------------------------
