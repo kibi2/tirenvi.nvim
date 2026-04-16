@@ -168,14 +168,11 @@ local function expand_continue_lines(bufnr, range)
 end
 
 ---@param bufnr number
----@param first integer|nil
----@param last integer|nil
+---@param range Range|nil
 ---@return Range[]
-function M.diagnostic_get(bufnr, first, last)
+function M.diagnostic_get(bufnr, range)
     local ranges = render.get_range(bufnr)
-    if first then
-        ---@cast last integer
-        local range = Range.new(first, last)
+    if range then
         expand_continue_lines(bufnr, range)
         ranges[#ranges + 1] = range
     end

@@ -9,6 +9,7 @@
 
 local log = require("tirenvi.util.log")
 local util = require("tirenvi.util.util")
+local Range = require("tirenvi.util.range")
 local buffer = require("tirenvi.state.buffer")
 local buf_state = require("tirenvi.state.buf_state")
 local Blocks = require("tirenvi.core.blocks")
@@ -122,11 +123,12 @@ end
 
 ---@param bufnr number
 ---@param first integer|nil
----@param last integer|nil
+---@param _ integer|nil
 ---@param new_last integer|nil
-local function handle_request(bufnr, first, last, new_last)
+local function handle_request(bufnr, first, _, new_last)
 	log.debug("===-===-===-=== repair start (%d, %d) ===-===-===-===", first, new_last)
-	local ranges = ui.diagnostic_get(bufnr, first, new_last)
+	local range = Range.new(first, new_last)
+	local ranges = ui.diagnostic_get(bufnr, range)
 	ui.diagnostic_clear(bufnr)
 	if buf_state.is_insert_mode(bufnr) or buf_state.is_undo_mode(bufnr) then
 		-- Modifying the buffer in insert mode may corrupt the undo node.

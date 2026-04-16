@@ -22,10 +22,13 @@ local function union_range(prev, next)
     return Range.new(math.min(prev.first, next.first), math.max(prev.last, next.last))
 end
 
----@param first integer
----@param last integer
----@return Range
+---@param first integer|nil
+---@param last integer|nil
+---@return Range|nil
 function Range.new(first, last)
+    if not first or not last then
+        return nil
+    end
     return setmetatable({
         first = first,
         last = last,
