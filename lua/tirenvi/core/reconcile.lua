@@ -130,27 +130,6 @@ local function log_watch(bufnr, message)
 end
 
 ---@param bufnr number
----@param ext_ranges Range[]|nil
----@return string
-local function get_status(bufnr, ext_ranges)
-	local message
-	if not ext_ranges then
-		if buf_state.is_insert_mode(bufnr) then
-			message = "INSERT"
-		elseif buf_state.is_undo_mode(bufnr) then
-			message = "UNDO/REDO"
-		end
-	else
-		if #ext_ranges ~= 0 then
-			message = "UNDO/REDO LEAVE"
-		else
-			message = "NORMAL"
-		end
-	end
-	return message
-end
-
----@param bufnr number
 ---@param range Range
 local function expand_continue_lines(bufnr, range)
 	local lines = buffer.get_lines(bufnr, range.first, range.last)
@@ -211,19 +190,21 @@ local function handle_request(bufnr, first, _, new_last)
 	local new_range = Range.new(first, new_last)
 	---@cast new_range Range
 	expand_continue_lines(bufnr, new_range)
-	if buf_state.is_insert_mode(bufnr) or buf_state.is_undo_mode(bufnr) then
+	if buf_state.is_insert_mode(bufnr) then
 		-- Modifying the buffer in insert mode may corrupt the undo node.
 		-- Therefore, in insert mode, only record the invalid changed region
 		-- and repair it when leaving insert mode.
+		log_watch(bufnr, "INSERT")
+		ext_ranges[#ext_ranges + 1] = new_range
+		ui.diagnostic_set(bufnr, Range.union(ext_ranges))
+	elseif buf_state.is_undo_mode(bufnr) then
 		-- Moving the cursor in insert mode may create an invalid table undo node.
 		-- Therefore, when performing undo/redo, skip table validation.
-		log_watch(bufnr, get_status(bufnr))
+		log_watch(bufnr, "UNDO/REDO")
 		ext_ranges[#ext_ranges + 1] = new_range
-		local merged_ranges = Range.union(ext_ranges)
-		ui.diagnostic_set(bufnr, merged_ranges)
+		ui.diagnostic_set(bufnr, Range.union(ext_ranges))
 	else
-		log.debug("===-===-===-=== repair start (%d, %d) ===-===-===-===", first, new_last)
-		log_watch(bufnr, get_status(bufnr))
+		log_watch(bufnr, #ext_ranges ~= 0 and "UNDO/REDO LEAVE" or "NORMAL")
 		apply_extra_range(bufnr, ext_ranges)
 		schedule_new_range(bufnr, new_range)
 	end
