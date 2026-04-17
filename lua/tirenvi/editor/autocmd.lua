@@ -31,8 +31,6 @@ local fn = vim.fn
 local function on_lines(_, bufnr, tick, first, last, new_last, bytecount)
 	buffer.clear_cache()
 	if buf_state.should_skip(bufnr) then return end
-	local seq_last = fn.undotree(bufnr).seq_last
-	log.debug("===+===+===+===+=== on_lines(%d)[%d](%d-%d) ===+===+===+===+===", bufnr, seq_last, first, new_last)
 	init.on_lines(bufnr, first, last, new_last)
 end
 

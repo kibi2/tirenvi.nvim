@@ -82,7 +82,7 @@ local function get_lines_and_cache(bufnr, i_start, i_end)
 	local start = math.max(math.min(start, end_ - 2 * STEP), 0)
 	local lines = api.nvim_buf_get_lines(bufnr, start, end_, false)
 	cache       = { bufnr = bufnr, start = start, lines = lines, }
-	log.debug("===== cache [%d,] (%d, %d), lines[1]=%s, line[%d]=%s",
+	log.debug("===== cache[%d] (%d, %d), lines[1]=%s, line[%d]=%s",
 		cache.bufnr, cache.start, cache.start + #cache.lines,
 		tostring(cache.lines[1]), #cache.lines, tostring(cache.lines[#cache.lines]))
 end
@@ -165,13 +165,13 @@ end
 function M.set_lines(bufnr, i_start, i_end, lines, no_undo)
 	local range = Range.new(i_start, i_end)
 	---@cast range Range
-	log.debug("=== set_lines%s[1]%s [%d]%s", range:short(), tostring(lines[1]), #lines,
-		tostring(lines[#lines]))
 	log.debug(M.get_state(bufnr))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
-	log.watch("UNDO", "before set_lines %d", fn.undotree(bufnr).seq_last)
+	local before = fn.undotree(bufnr).seq_last
 	local ok, err = pcall(set_lines, bufnr, i_start, i_end, lines, no_undo)
-	log.watch("UNDO", "after set_lines %d", fn.undotree(bufnr).seq_last)
+	local after = fn.undotree(bufnr).seq_last
+	log.watch("UNDO", "=== [%d->%d]set_lines%s[1]%s [%d]%s", before, after,
+		range:short(), tostring(lines[1]), #lines, tostring(lines[#lines]))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) - 1)
 	assert(M.get(bufnr, M.IKEY.PATCH_DEPTH) == 0)
 	if not ok then

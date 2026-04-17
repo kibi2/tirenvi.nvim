@@ -89,7 +89,7 @@ end
 ---@param end_row integer
 ---@return string[]
 local function reconcile_range(bufnr, start_row, end_row)
-	log.debug("===-===-===-=== validation start (%d, %d) ===-===-===-===", start_row, end_row)
+	log.debug("===-===-===-=== reconcile start (%d, %d) ===-===-===-===", start_row, end_row)
 	local attr_prev, attr_next = resolve_reference_attrs(bufnr, start_row, end_row)
 	local blocks = build_blocks(bufnr, start_row, end_row)
 	log.debug(#blocks ~= 0 and blocks[1].records)
@@ -123,10 +123,24 @@ local function apply_ranges(bufnr, ranges)
 	end
 end
 
-local function log_watch(bufnr, message)
+local function log_watch(bufnr, message, first, last, new_last, ext_range)
 	local pre = buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST)
 	local next = fn.undotree(bufnr).seq_last
-	log.watch("UNDO", { message, pre, next })
+	local delta = (new_last or 0) - (last or 0)
+	local add = delta > 0 and "+" .. tostring(delta) or ""
+	local remove = delta < 0 and "-" .. tostring(-delta) or ""
+	local update = (last or 0) - (first or 0) > 0 and "u" .. tostring(last - first) or ""
+	local no_ext = ext_range and (#ext_range ~= 0 and "/ext" .. #ext_range or "")
+	local status = string.format(
+		"[tree:%d->%d]%s%s%s%s",
+		pre,
+		next,
+		add,
+		remove,
+		update,
+		no_ext
+	)
+	log.watch("UNDO", message .. status)
 end
 
 ---@param bufnr number
@@ -156,7 +170,7 @@ local local_range = nil
 ---@param bufnr number
 local function apply_local_ranges(bufnr)
 	buffer.set_undo_tree_last(bufnr)
-	pcall(vim.cmd, "undojoin")
+	--pcall(vim.cmd, "undojoin")
 	apply_ranges(bufnr, { local_range })
 	local_range = nil
 end
@@ -177,13 +191,13 @@ end
 
 ---@param bufnr number
 ---@param first integer|nil
----@param _ integer|nil
+---@param last integer|nil
 ---@param new_last integer|nil
-local function handle_request(bufnr, first, _, new_last)
+local function handle_request(bufnr, first, last, new_last)
 	local ext_ranges = render.get_range(bufnr)
 	ui.diagnostic_clear(bufnr)
 	if not first then
-		log_watch(bufnr, "INSERT LEAVE")
+		log_watch(bufnr, "INSERT LEAVE[" .. tostring(#ext_ranges) .. "]")
 		apply_extra_range(bufnr, ext_ranges)
 		return
 	end
@@ -194,18 +208,21 @@ local function handle_request(bufnr, first, _, new_last)
 		-- Modifying the buffer in insert mode may corrupt the undo node.
 		-- Therefore, in insert mode, only record the invalid changed region
 		-- and repair it when leaving insert mode.
-		log_watch(bufnr, "INSERT")
+		log_watch(bufnr, "INSERT", first, last, new_last)
 		ext_ranges[#ext_ranges + 1] = new_range
 		ui.diagnostic_set(bufnr, Range.union(ext_ranges))
 	elseif buf_state.is_undo_mode(bufnr) then
 		-- Moving the cursor in insert mode may create an invalid table undo node.
 		-- Therefore, when performing undo/redo, skip table validation.
-		log_watch(bufnr, "UNDO/REDO")
+		log_watch(bufnr, "UNDO/REDO", first, last, new_last)
 		ext_ranges[#ext_ranges + 1] = new_range
 		ui.diagnostic_set(bufnr, Range.union(ext_ranges))
-	else
-		log_watch(bufnr, #ext_ranges ~= 0 and "UNDO/REDO LEAVE" or "NORMAL")
+	elseif #ext_ranges ~= 0 then
+		log_watch(bufnr, "UNDO/REDO LEAVE", first, last, new_last, ext_ranges)
 		apply_extra_range(bufnr, ext_ranges)
+		schedule_new_range(bufnr, new_range)
+	else
+		log_watch(bufnr, "NORMAL", first, last, new_last, ext_ranges)
 		schedule_new_range(bufnr, new_range)
 	end
 end

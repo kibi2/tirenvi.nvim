@@ -13,8 +13,8 @@ lua << EOF
 		probe = true, output = "print",
   	},
   })
-  buffer.clear_cache()
-  buffer.set_step(3)
+
+
   local lines, line
   log.probe("buffer.get_lines(0, 0, -1)")
   lines = buffer.get_lines(0, 0, -1)
