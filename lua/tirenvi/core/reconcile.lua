@@ -123,6 +123,9 @@ local function apply_ranges(bufnr, ranges)
 	end
 end
 
+---@param bufnr number
+---@param first integer|nil
+---@param ext_ranges Range[]|nil
 local function log_watch(bufnr, first, ext_ranges)
 	local pre = buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST)
 	local next = fn.undotree(bufnr).seq_last
@@ -147,6 +150,45 @@ end
 
 ---@param bufnr number
 ---@param first integer|nil
+local function apply_extra_range(bufnr, first)
+	local ext_ranges = render.get_range(bufnr)
+	ui.diagnostic_clear(bufnr)
+	if #ext_ranges ~= 0 then
+		pcall(vim.cmd, "undojoin")
+		log_watch(bufnr, first, ext_ranges)
+		apply_ranges(bufnr, ext_ranges)
+	end
+end
+
+local local_range = nil
+---@param bufnr number
+local function apply_local_ranges(bufnr)
+	buffer.set_undo_tree_last(bufnr)
+	pcall(vim.cmd, "undojoin")
+	apply_ranges(bufnr, { local_range })
+	local_range = nil
+end
+
+---@param bufnr number
+---@param new_range Range|nil
+local function schedule_new_range(bufnr, new_range)
+	if not new_range then
+		return
+	end
+	ui.expand_continue_lines(bufnr, new_range)
+	if local_range == nil then
+		vim.schedule(function()
+			apply_local_ranges(bufnr)
+		end)
+		local_range = new_range
+	else
+		log.watch(bufnr, { "muli time on_lines", local_range })
+		Range.union({ local_range, new_range })
+	end
+end
+
+---@param bufnr number
+---@param first integer|nil
 ---@param _ integer|nil
 ---@param new_last integer|nil
 local function handle_request(bufnr, first, _, new_last)
@@ -163,16 +205,8 @@ local function handle_request(bufnr, first, _, new_last)
 		ui.diagnostic_set(bufnr, merged_ranges)
 	else
 		log.debug("===-===-===-=== repair start (%d, %d) ===-===-===-===", first, new_last)
-		local ext_ranges = render.get_range(bufnr)
-		log_watch(bufnr, first, ext_ranges)
-		buffer.set_undo_tree_last(bufnr)
-		pcall(vim.cmd, "undojoin")
-		ui.diagnostic_clear(bufnr)
-		apply_ranges(bufnr, ext_ranges)
-		if new_range then
-			ui.expand_continue_lines(bufnr, new_range)
-			apply_ranges(bufnr, { new_range })
-		end
+		apply_extra_range(bufnr, first)
+		schedule_new_range(bufnr, new_range)
 	end
 end
 
