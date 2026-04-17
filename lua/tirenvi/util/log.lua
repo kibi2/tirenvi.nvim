@@ -1,5 +1,6 @@
 local config = require("tirenvi.config")
 local notify = require("tirenvi.util.notify")
+local Range = require("tirenvi.util.range")
 
 local M = {}
 
@@ -74,15 +75,34 @@ local function monitor()
 end
 
 ---@param value any
+---@return any
+local function normalize_for_log(value)
+	local v_type = type(value)
+	if v_type ~= "table" then
+		return value
+	end
+	local mt = getmetatable(value)
+	if mt and mt.__tostring then
+		return tostring(value)
+	end
+	local result = {}
+	for key, val in pairs(value) do
+		result[key] = normalize_for_log(val)
+	end
+	return result
+end
+
+---@param value any
 ---@return string
 local function stringify(value)
 	local v_type = type(value)
 
 	if v_type == "table" then
+		local normalized = normalize_for_log(value)
 		if config.log.single_line then
 			return string.format(
 				"<table> %s",
-				vim.inspect(value, {
+				vim.inspect(normalized, {
 					newline = " ",
 					indent = "",
 					depth = 4,

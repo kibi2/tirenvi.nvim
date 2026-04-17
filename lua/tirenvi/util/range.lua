@@ -35,6 +35,10 @@ function Range.new(first, last)
     }, Range)
 end
 
+function Range:__tostring()
+    return "range" .. self:short()
+end
+
 ---@return string
 function Range:short()
     return string.format("(%d,%d)", self.first, self.last)
