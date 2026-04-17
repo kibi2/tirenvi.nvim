@@ -130,7 +130,7 @@ local function log_watch(bufnr, message, first, last, new_last, ext_range)
 	local add = delta > 0 and "+" .. tostring(delta) or ""
 	local remove = delta < 0 and "-" .. tostring(-delta) or ""
 	local update = (last or 0) - (first or 0) > 0 and "u" .. tostring(last - first) or ""
-	local no_ext = ext_range and (#ext_range ~= 0 and "/ext" .. #ext_range or "")
+	local no_ext = ext_range and (#ext_range ~= 0 and "/ext" .. #ext_range or "") or ""
 	local status = string.format(
 		"[tree:%d->%d]%s%s%s%s",
 		pre,

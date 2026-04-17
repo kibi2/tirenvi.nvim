@@ -64,6 +64,8 @@ local function set_lines(bufnr, i_start, i_end, lines, no_undo)
 		local undotree = fn.undotree(bufnr)
 		if undotree.seq_last == 0 then
 			bo[bufnr].undolevels = -1
+		else
+			pcall(vim.cmd, "undojoin")
 		end
 	end
 	i_start = math.max(i_start, 0)
