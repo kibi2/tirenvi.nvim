@@ -89,7 +89,7 @@ end
 ---@param end_row integer
 ---@return string[]
 local function reconcile_range(bufnr, start_row, end_row)
-	log.debug("===-===-===-=== reconcile start (%d, %d) ===-===-===-===", start_row, end_row)
+	log.debug("===-===-===-=== reconcile start[%d, %d] ===-===-===-===", start_row + 1, end_row)
 	local attr_prev, attr_next = resolve_reference_attrs(bufnr, start_row, end_row)
 	local blocks = build_blocks(bufnr, start_row, end_row)
 	log.debug(#blocks ~= 0 and blocks[1].records)
@@ -119,7 +119,7 @@ local function apply_ranges(bufnr, ranges)
 		local first = ranges[index].first
 		local last = ranges[index].last + 1
 		local new_lines = reconcile_range(bufnr, first, last)
-		buffer.set_lines(bufnr, first, last, new_lines)
+		buffer.set_lines(bufnr, first, last, new_lines, true)
 	end
 end
 
@@ -159,20 +159,23 @@ end
 
 ---@param bufnr number
 ---@param ext_ranges Range
-local function apply_extra_range(bufnr, ext_ranges)
-	if #ext_ranges ~= 0 then
-		pcall(vim.cmd, "undojoin")
-		apply_ranges(bufnr, ext_ranges)
-	end
+local function apply_extra_ranges(bufnr, ext_ranges)
+	apply_ranges(bufnr, ext_ranges)
 end
 
 local local_range = nil
 ---@param bufnr number
 local function apply_local_ranges(bufnr)
-	buffer.set_undo_tree_last(bufnr)
-	--pcall(vim.cmd, "undojoin")
 	apply_ranges(bufnr, { local_range })
 	local_range = nil
+end
+
+---@param bufnr number
+---@param ext_ranges Range
+local function schedule_extra_ranges(bufnr, ext_ranges)
+	vim.schedule(function()
+		apply_extra_ranges(bufnr, ext_ranges)
+	end)
 end
 
 ---@param bufnr number
@@ -198,7 +201,7 @@ local function handle_request(bufnr, first, last, new_last)
 	ui.diagnostic_clear(bufnr)
 	if not first then
 		log_watch(bufnr, "INSERT LEAVE[" .. tostring(#ext_ranges) .. "]")
-		apply_extra_range(bufnr, ext_ranges)
+		schedule_extra_ranges(bufnr, ext_ranges)
 		return
 	end
 	local new_range = Range.new(first, new_last)
@@ -219,7 +222,7 @@ local function handle_request(bufnr, first, last, new_last)
 		ui.diagnostic_set(bufnr, Range.union(ext_ranges))
 	elseif #ext_ranges ~= 0 then
 		log_watch(bufnr, "UNDO/REDO LEAVE", first, last, new_last, ext_ranges)
-		apply_extra_range(bufnr, ext_ranges)
+		schedule_extra_ranges(bufnr, ext_ranges)
 		schedule_new_range(bufnr, new_range)
 	else
 		log_watch(bufnr, "NORMAL", first, last, new_last, ext_ranges)

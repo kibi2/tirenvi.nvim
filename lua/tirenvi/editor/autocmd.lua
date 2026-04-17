@@ -83,7 +83,7 @@ local function on_vim_leave(args) end
 
 local function debug_entry_point(args)
 	local filetype = bo[args.buf].filetype
-	log.debug("===+===+===+===+=== %s(%d)%s ===+===+===+===+===", args.event, args.buf, filetype)
+	log.debug("===+===+===+===+=== %s[#%d]%s ===+===+===+===+===", args.event, args.buf, filetype)
 end
 
 ---@param augroup integer
