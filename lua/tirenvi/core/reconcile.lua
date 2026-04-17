@@ -123,11 +123,26 @@ local function apply_ranges(bufnr, ranges)
 	end
 end
 
-local function log_watch(bufnr)
-	log.watch("UNDO", {
-		buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST),
-		fn.undotree(bufnr).seq_last
-	})
+local function log_watch(bufnr, first, ext_ranges)
+	local pre = buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST)
+	local next = fn.undotree(bufnr).seq_last
+	local message
+	if not ext_ranges then
+		if buf_state.is_insert_mode(bufnr) then
+			message = "INSERT"
+		elseif buf_state.is_undo_mode(bufnr) then
+			message = "UNDO/REDO"
+		end
+	else
+		if not first then
+			message = "INSERT LEAVE"
+		elseif #ext_ranges ~= 0 then
+			message = "UNDO/REDO LEAVE"
+		else
+			message = "NORMAL"
+		end
+	end
+	log.watch("UNDO", { message, pre, next })
 end
 
 ---@param bufnr number
@@ -142,16 +157,16 @@ local function handle_request(bufnr, first, _, new_last)
 		-- and repair it when leaving insert mode.
 		-- Moving the cursor in insert mode may create an invalid table undo node.
 		-- Therefore, when performing undo/redo, skip table validation.
-		log_watch(bufnr)
+		log_watch(bufnr, first)
 		local merged_ranges = ui.diagnostic_get(bufnr, new_range)
 		ui.diagnostic_clear(bufnr)
 		ui.diagnostic_set(bufnr, merged_ranges)
 	else
 		log.debug("===-===-===-=== repair start (%d, %d) ===-===-===-===", first, new_last)
-		log_watch(bufnr)
+		local ext_ranges = render.get_range(bufnr)
+		log_watch(bufnr, first, ext_ranges)
 		buffer.set_undo_tree_last(bufnr)
 		pcall(vim.cmd, "undojoin")
-		local ext_ranges = render.get_range(bufnr)
 		ui.diagnostic_clear(bufnr)
 		apply_ranges(bufnr, ext_ranges)
 		if new_range then

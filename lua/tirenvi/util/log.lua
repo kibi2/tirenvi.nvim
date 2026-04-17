@@ -223,6 +223,17 @@ local unpack = table.unpack or unpack -- Lua 5.1/5.2 compatibility
 local category_hl_map = {}
 local category_match_id = {}
 
+local function apply_log_highlight(bufnr)
+	local winid = vim.fn.bufwinid(bufnr)
+	if winid == -1 then return end
+	vim.api.nvim_win_call(winid, function()
+		vim.fn.clearmatches()
+		for cat, hl in pairs(category_hl_map) do
+			vim.fn.matchadd(hl, "\\[" .. cat .. "\\]")
+		end
+	end)
+end
+
 local function pick_color(cat)
 	local colors = {
 		"#ff6b6b", "#4ecdc4", "#ffe66d",
@@ -274,15 +285,12 @@ local function emit(force, level, opts, fmt, ...)
 	local category = opts and opts.category
 	if category then
 		local bufnr = ensure_log_buf()
-
 		local hl = ensure_category_highlight(category)
 		ensure_match(bufnr, category, hl)
 	end
-
 	local info = debug.getinfo(3, "Sl")
 	local file = info and (info.short_src:match("([^/\\]+)$")) or "?"
 	local line = info and info.currentline or 0
-
 	local args = { ... }
 	local msg
 	local ok, result = pcall(function()
@@ -295,7 +303,6 @@ local function emit(force, level, opts, fmt, ...)
 		local parts = vim.tbl_map(stringify, args)
 		msg = table.concat(parts, " ")
 	end
-
 	local ts = get_timestamp()
 	local mon = get_monitor()
 	local name = level_names[level]
@@ -305,7 +312,6 @@ local function emit(force, level, opts, fmt, ...)
 		name = category
 	end
 	local final = string.format("[%s]%s%s[%s][%s:%d] %s", PREFIX, ts, mon, name, file, line, msg)
-
 	if config.log.output == "buffer" then
 		write_buffer(final)
 	elseif config.log.output == "file" then
@@ -351,5 +357,15 @@ function M.watch(category, ...)
 	end
 	return emit(false, levels.DEBUG, { category = category }, ...)
 end
+
+local aug = vim.api.nvim_create_augroup("TirenviLogHL", { clear = true })
+vim.api.nvim_create_autocmd("WinEnter", {
+	group = aug,
+	callback = function(args)
+		if args.buf == log_bufnr then
+			apply_log_highlight(args.buf)
+		end
+	end,
+})
 
 return M

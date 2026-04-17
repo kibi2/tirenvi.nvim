@@ -296,11 +296,13 @@ end
 ---@param last integer
 ---@param new_last integer
 function M.on_lines(bufnr, first, last, new_last)
+	log.watch("UNDO", "===== ENTRY on_lines")
 	reconcile.handle(bufnr, first, last, new_last)
 end
 
 ---@param bufnr number
 function M.on_insert_leave(bufnr)
+	log.watch("UNDO", "===== ENTRY insert_leave")
 	reconcile.handle(bufnr)
 end
 
