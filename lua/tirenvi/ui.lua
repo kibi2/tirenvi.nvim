@@ -154,17 +154,6 @@ function M.diagnostic_set(bufnr, ranges)
 end
 
 ---@param bufnr number
----@param range Range|nil
----@return Range[]
-function M.diagnostic_get(bufnr, range)
-    local ranges = render.get_range(bufnr)
-    if range then
-        ranges[#ranges + 1] = range
-    end
-    return Range.union(ranges)
-end
-
----@param bufnr number
 function M.diagnostic_clear(bufnr)
     render.clear(bufnr)
 end

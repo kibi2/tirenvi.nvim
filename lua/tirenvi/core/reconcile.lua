@@ -123,12 +123,16 @@ local function apply_ranges(bufnr, ranges)
 	end
 end
 
----@param bufnr number
----@param first integer|nil
----@param ext_ranges Range[]|nil
-local function log_watch(bufnr, first, ext_ranges)
+local function log_watch(bufnr, message)
 	local pre = buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST)
 	local next = fn.undotree(bufnr).seq_last
+	log.watch("UNDO", { message, pre, next })
+end
+
+---@param bufnr number
+---@param ext_ranges Range[]|nil
+---@return string
+local function get_status(bufnr, ext_ranges)
 	local message
 	if not ext_ranges then
 		if buf_state.is_insert_mode(bufnr) then
@@ -137,23 +141,18 @@ local function log_watch(bufnr, first, ext_ranges)
 			message = "UNDO/REDO"
 		end
 	else
-		if not first then
-			message = "INSERT LEAVE"
-		elseif #ext_ranges ~= 0 then
+		if #ext_ranges ~= 0 then
 			message = "UNDO/REDO LEAVE"
 		else
 			message = "NORMAL"
 		end
 	end
-	log.watch("UNDO", { message, pre, next })
+	return message
 end
 
 ---@param bufnr number
----@param range Range|nil
+---@param range Range
 local function expand_continue_lines(bufnr, range)
-	if not range then
-		return
-	end
 	local lines = buffer.get_lines(bufnr, range.first, range.last)
 	---@type string|nil
 	local last_line = lines[#lines]
@@ -166,13 +165,10 @@ local function expand_continue_lines(bufnr, range)
 end
 
 ---@param bufnr number
----@param first integer|nil
-local function apply_extra_range(bufnr, first)
-	local ext_ranges = render.get_range(bufnr)
-	ui.diagnostic_clear(bufnr)
+---@param ext_ranges Range
+local function apply_extra_range(bufnr, ext_ranges)
 	if #ext_ranges ~= 0 then
 		pcall(vim.cmd, "undojoin")
-		log_watch(bufnr, first, ext_ranges)
 		apply_ranges(bufnr, ext_ranges)
 	end
 end
@@ -205,7 +201,15 @@ end
 ---@param _ integer|nil
 ---@param new_last integer|nil
 local function handle_request(bufnr, first, _, new_last)
+	local ext_ranges = render.get_range(bufnr)
+	ui.diagnostic_clear(bufnr)
+	if not first then
+		log_watch(bufnr, "INSERT LEAVE")
+		apply_extra_range(bufnr, ext_ranges)
+		return
+	end
 	local new_range = Range.new(first, new_last)
+	---@cast new_range Range
 	expand_continue_lines(bufnr, new_range)
 	if buf_state.is_insert_mode(bufnr) or buf_state.is_undo_mode(bufnr) then
 		-- Modifying the buffer in insert mode may corrupt the undo node.
@@ -213,16 +217,15 @@ local function handle_request(bufnr, first, _, new_last)
 		-- and repair it when leaving insert mode.
 		-- Moving the cursor in insert mode may create an invalid table undo node.
 		-- Therefore, when performing undo/redo, skip table validation.
-		log_watch(bufnr, first)
-		local merged_ranges = ui.diagnostic_get(bufnr, new_range)
-		ui.diagnostic_clear(bufnr)
+		log_watch(bufnr, get_status(bufnr))
+		ext_ranges[#ext_ranges + 1] = new_range
+		local merged_ranges = Range.union(ext_ranges)
 		ui.diagnostic_set(bufnr, merged_ranges)
 	else
 		log.debug("===-===-===-=== repair start (%d, %d) ===-===-===-===", first, new_last)
-		apply_extra_range(bufnr, first)
-		if new_range then
-			schedule_new_range(bufnr, new_range)
-		end
+		log_watch(bufnr, get_status(bufnr))
+		apply_extra_range(bufnr, ext_ranges)
+		schedule_new_range(bufnr, new_range)
 	end
 end
 
