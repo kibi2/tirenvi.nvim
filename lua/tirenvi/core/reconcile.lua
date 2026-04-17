@@ -123,6 +123,13 @@ local function apply_ranges(bufnr, ranges)
 	end
 end
 
+local function log_watch(bufnr)
+	log.watch("UNDO", {
+		buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST),
+		fn.undotree(bufnr).seq_last
+	})
+end
+
 ---@param bufnr number
 ---@param first integer|nil
 ---@param _ integer|nil
@@ -135,11 +142,13 @@ local function handle_request(bufnr, first, _, new_last)
 		-- and repair it when leaving insert mode.
 		-- Moving the cursor in insert mode may create an invalid table undo node.
 		-- Therefore, when performing undo/redo, skip table validation.
+		log_watch(bufnr)
 		local merged_ranges = ui.diagnostic_get(bufnr, new_range)
 		ui.diagnostic_clear(bufnr)
 		ui.diagnostic_set(bufnr, merged_ranges)
 	else
 		log.debug("===-===-===-=== repair start (%d, %d) ===-===-===-===", first, new_last)
+		log_watch(bufnr)
 		buffer.set_undo_tree_last(bufnr)
 		pcall(vim.cmd, "undojoin")
 		local ext_ranges = render.get_range(bufnr)

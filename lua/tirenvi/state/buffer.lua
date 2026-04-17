@@ -164,6 +164,7 @@ end
 ---@param no_undo boolean|nil
 function M.set_lines(bufnr, i_start, i_end, lines, no_undo)
 	local range = Range.new(i_start, i_end)
+	---@cast range Range
 	log.debug("=== set_lines%s[1]%s [%d]%s", range:short(), tostring(lines[1]), #lines,
 		tostring(lines[#lines]))
 	log.debug(M.get_state(bufnr))
