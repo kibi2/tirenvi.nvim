@@ -149,6 +149,23 @@ local function log_watch(bufnr, first, ext_ranges)
 end
 
 ---@param bufnr number
+---@param range Range|nil
+local function expand_continue_lines(bufnr, range)
+	if not range then
+		return
+	end
+	local lines = buffer.get_lines(bufnr, range.first, range.last)
+	---@type string|nil
+	local last_line = lines[#lines]
+	local last = range.last
+	while tir_vim.is_continue_line(last_line) do
+		last_line = buffer.get_line(bufnr, last)
+		last = last + 1
+	end
+	range.last = last - 1
+end
+
+---@param bufnr number
 ---@param first integer|nil
 local function apply_extra_range(bufnr, first)
 	local ext_ranges = render.get_range(bufnr)
@@ -170,12 +187,8 @@ local function apply_local_ranges(bufnr)
 end
 
 ---@param bufnr number
----@param new_range Range|nil
+---@param new_range Range
 local function schedule_new_range(bufnr, new_range)
-	if not new_range then
-		return
-	end
-	ui.expand_continue_lines(bufnr, new_range)
 	if local_range == nil then
 		vim.schedule(function()
 			apply_local_ranges(bufnr)
@@ -193,6 +206,7 @@ end
 ---@param new_last integer|nil
 local function handle_request(bufnr, first, _, new_last)
 	local new_range = Range.new(first, new_last)
+	expand_continue_lines(bufnr, new_range)
 	if buf_state.is_insert_mode(bufnr) or buf_state.is_undo_mode(bufnr) then
 		-- Modifying the buffer in insert mode may corrupt the undo node.
 		-- Therefore, in insert mode, only record the invalid changed region
@@ -206,7 +220,9 @@ local function handle_request(bufnr, first, _, new_last)
 	else
 		log.debug("===-===-===-=== repair start (%d, %d) ===-===-===-===", first, new_last)
 		apply_extra_range(bufnr, first)
-		schedule_new_range(bufnr, new_range)
+		if new_range then
+			schedule_new_range(bufnr, new_range)
+		end
 	end
 end
 
