@@ -119,7 +119,7 @@ local function apply_ranges(bufnr, ranges)
 		local first = ranges[index].first
 		local last = ranges[index].last + 1
 		local new_lines = reconcile_range(bufnr, first, last)
-		ui.set_lines(bufnr, first, last, new_lines)
+		buffer.set_lines(bufnr, first, last, new_lines)
 	end
 end
 

@@ -53,7 +53,7 @@ local function to_flat(bufnr, is_toggle)
 	end
 	log.debug(blocks[1].records)
 	local fl_lines = flat_parser.unparse(blocks, parser)
-	ui.set_lines(bufnr, 0, -1, fl_lines)
+	buffer.set_lines(bufnr, 0, -1, fl_lines)
 end
 
 ---@param bufnr number Buffer number.
@@ -66,7 +66,7 @@ local function from_flat(bufnr, no_undo)
 	local blocks = flat_parser.parse(fl_lines, parser)
 	restore_widths(bufnr, blocks)
 	local vi_lines = vim_parser.unparse(blocks)
-	ui.set_lines(bufnr, 0, -1, vi_lines, no_undo)
+	buffer.set_lines(bufnr, 0, -1, vi_lines, no_undo)
 end
 
 ---@return integer|nil
@@ -120,7 +120,7 @@ local function change_table_width(operator, count, rect)
 	local bufnr, blocks = get_blocks(rect.row)
 	Blocks.change_width(blocks, operator, count, rect.col)
 	local vi_lines = vim_parser.unparse(blocks)
-	ui.set_lines(bufnr, rect.row.first - 1, rect.row.last, vi_lines)
+	buffer.set_lines(bufnr, rect.row.first - 1, rect.row.last, vi_lines)
 end
 
 ---@param line_provider LineProvider
@@ -223,7 +223,7 @@ function M.redraw(bufnr)
 	local vi_lines = vim_parser.unparse(blocks)
 	if table.concat(old_lines, "\n") ~= table.concat(vi_lines, "\n") then
 		log.debug({ vi_lines[1], vi_lines[2] })
-		ui.set_lines(bufnr, 0, -1, vi_lines)
+		buffer.set_lines(bufnr, 0, -1, vi_lines)
 	end
 end
 
