@@ -72,10 +72,10 @@ local function fill_padding(self)
     end
 end
 
----@self Block_grid
+---@self Block
 local function remove_padding(self)
     for _, record in ipairs(self.records) do
-        Record.grid.remove_padding(record)
+        Record[self.kind].remove_padding(record)
     end
 end
 
@@ -214,12 +214,25 @@ function M.plain:get_widths()
     return {}
 end
 
+---@self Block_plain
+---@param no_unwrap boolean  -- If true, skip unwrapping.
+function M.plain:from_vim(no_unwrap)
+    remove_padding(self)
+end
+
+---@self Block
+function M.plain:to_flat()
+    for _, record in ipairs(self.records) do
+        for key, val in pairs(UNESCAPE_MAP) do
+            record.line = record.line:gsub(key, val)
+        end
+    end
+end
+
 M.plain.set_widths = nop
 M.plain.change_width = nop
 M.plain.set_attr = nop
 M.plain.from_flat = nop
-M.plain.to_flat = nop
-M.plain.from_vim = nop
 M.plain.to_vim = nop
 
 ---@self Block_grid
@@ -266,6 +279,7 @@ local function change_width(attr, icol, start_col, operator, count, col)
     local column = attr.columns[icol]
     local old_width = column.width
     local cel_range = Range.new(start_col, start_col + old_width)
+    ---@cast cel_range Range
     if cel_range:intersect(col) then
         local new_width = get_new_width(operator, count, old_width)
         Attr.grid.set_width(attr, icol, new_width)

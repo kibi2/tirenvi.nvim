@@ -16,11 +16,11 @@ function M.set_range(bufnr, range, id)
     local end_col = #line
     local opts = {
         id = id,
-        strict = false,
-        right_gravity = false,
-        end_right_gravity = true,
         end_row = range.last,
         end_col = end_col,
+        right_gravity = false,
+        end_right_gravity = true,
+        strict = false,
         invalidate = false,
     }
     if vim.log.levels.DEBUG >= config.log.level then

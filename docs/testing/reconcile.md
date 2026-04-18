@@ -14,8 +14,8 @@
 |  |  | 遅延正規化オプションオフ<br>config.table.auto_reconcile | 自動正規化切り替え<br>エコー[Tirenvi] auto-reconcile: ON\|OFF | 2026/4/18 |  | feat: add table.auto_reconcile option |
 |  |  | 遅延正規化コマンドon/off<br>Tir ToggleAutoReconcile<br> | 自動正規化切り替え<br>エコー[Tirenvi] auto-reconcile: ON\|OFF | 2026/4/18 |  | feat: add :Tir auto-reconcile [on\|off] command |
 |  |  | 遅延正規化コマンドon/off<br>Tir ToggleAutoReconcile<br>buffer local | buffer毎に遅延正規化コマンド実行可能 | 2026/4/18 |  | feat: make auto_reconcile buffer-local |
-|   |   |  |   |   |   | feat: add extmark-based table attribute storage  |
-|  |   | 手動正規化コマンド<br>Tir reconcile  |  |  |  |  |
+|  |  |  |  |  |  | feat: add extmark-based table attribute storage |
+|  |  | 手動正規化コマンド<br>Tir reconcile |  |  |  |  |
 
 ## Repair -> reconcile
 
