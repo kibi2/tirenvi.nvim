@@ -4,7 +4,6 @@ local buf_state = require("tirenvi.state.buf_state")
 local buffer = require("tirenvi.state.buffer")
 local LinProvider = require("tirenvi.state.buffer_line_provider")
 local init = require("tirenvi.init")
-local config = require("tirenvi.config")
 local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
 local errors = require("tirenvi.util.errors")
@@ -103,17 +102,17 @@ local function cmd_auto_reconcile(bufnr, opts)
 	if buf_state.should_skip(bufnr) then return end
 	local arg = opts.fargs[2]
 	if arg == nil then
-		config.table.auto_reconcile = not config.table.auto_reconcile
+		buffer.set_auto_reconcile(bufnr, not buffer.get_auto_reconcile(bufnr))
 	elseif arg == "on" then
-		config.table.auto_reconcile = true
+		buffer.set_auto_reconcile(bufnr, true)
 	elseif arg == "off" then
-		config.table.auto_reconcile = false
+		buffer.set_auto_reconcile(bufnr, false)
 	else
 		notify.error("[Tirenvi] invalid argument: " .. arg .. " (expected: on|off)")
 		return
 	end
 	notify.info(string.format("[Tirenvi] auto-reconcile:%s ",
-		config.table.auto_reconcile and "ON" or "OFF"))
+		buffer.get_auto_reconcile(bufnr) and "ON" or "OFF"))
 end
 
 ----------------------------------------------------------------------
