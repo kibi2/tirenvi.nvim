@@ -21,13 +21,13 @@ local fn = vim.fn
 ---@param bufnr number
 ---@param opts {[string]:any}
 ---@return nil
-local function cmd_redraw(bufnr, opts)
+local function cmd_reconcile(bufnr, opts)
 	if buf_state.should_skip(bufnr, {
 			ensure_tir_vim = true,
 		}) then
 		return
 	end
-	init.redraw(bufnr)
+	init.reconcile(bufnr)
 end
 
 ---@param bufnr number
@@ -121,7 +121,8 @@ end
 
 local commands = {
 	toggle = cmd_toggle,
-	redraw = cmd_redraw,
+	redraw = cmd_reconcile,
+	reconcile = cmd_reconcile,
 	width = cmd_width,
 	["auto-reconcile"] = cmd_auto_reconcile,
 	_hbar = cmd_hbar,
