@@ -53,6 +53,12 @@ local function fix_cursor_utf8()
 end
 
 ---@param bufnr number
+local function set_undo_tree_last(bufnr)
+	local next = fn.undotree(bufnr).seq_last
+	M.set(bufnr, M.IKEY.UNDO_TREE_LAST, next)
+end
+
+---@param bufnr number
 ---@param i_start integer
 ---@param i_end integer
 ---@param lines string[]
@@ -64,10 +70,12 @@ local function set_lines(bufnr, i_start, i_end, lines, no_undo)
 		local undotree = fn.undotree(bufnr)
 		if undotree.seq_last == 0 then
 			bo[bufnr].undolevels = -1
+		else
+			pcall(vim.cmd, "undojoin")
 		end
 	end
 	i_start = math.max(i_start, 0)
-	M.set_undo_tree_last(bufnr)
+	set_undo_tree_last(bufnr)
 	api.nvim_buf_set_lines(bufnr, i_start, i_end, false, lines)
 	fix_cursor_utf8()
 	bo[bufnr].undolevels = undolevels
@@ -82,9 +90,9 @@ local function get_lines_and_cache(bufnr, i_start, i_end)
 	local start = math.max(math.min(start, end_ - 2 * STEP), 0)
 	local lines = api.nvim_buf_get_lines(bufnr, start, end_, false)
 	cache       = { bufnr = bufnr, start = start, lines = lines, }
-	log.debug("===== cache [%d,] (%d, %d), lines[1]=%s, line[%d]=%s",
-		cache.bufnr, cache.start, cache.start + #cache.lines,
-		tostring(cache.lines[1]), #cache.lines, tostring(cache.lines[#cache.lines]))
+	log.debug("=== cache[#%d] lines[%d]='%s'...[%d]='%s'", cache.bufnr,
+		cache.start + 1, tostring(cache.lines[1]),
+		cache.start + #cache.lines, tostring(cache.lines[#cache.lines]))
 end
 
 ---@param bufnr number
@@ -116,12 +124,6 @@ end
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
-
----@param bufnr number
-function M.set_undo_tree_last(bufnr)
-	local next = fn.undotree(bufnr).seq_last
-	M.set(bufnr, M.IKEY.UNDO_TREE_LAST, next)
-end
 
 ---@param bufnr number
 ---@return {[string]: boolean|integer|string|integer[][]|nil}
@@ -163,12 +165,13 @@ end
 ---@param lines string[]
 ---@param no_undo boolean|nil
 function M.set_lines(bufnr, i_start, i_end, lines, no_undo)
-	local range = Range.new(i_start, i_end)
-	log.debug("=== set_lines%s[1]%s [%d]%s", range:short(), tostring(lines[1]), #lines,
-		tostring(lines[#lines]))
 	log.debug(M.get_state(bufnr))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
+	local before = fn.undotree(bufnr).seq_last
 	local ok, err = pcall(set_lines, bufnr, i_start, i_end, lines, no_undo)
+	local after = fn.undotree(bufnr).seq_last
+	log.watch("UNDO", "=== [%d->%d]set_lines lines[%d]='%s'...[%d]='%s'", before, after,
+		i_start + 1, tostring(lines[1]), i_end, tostring(lines[#lines]))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) - 1)
 	assert(M.get(bufnr, M.IKEY.PATCH_DEPTH) == 0)
 	if not ok then

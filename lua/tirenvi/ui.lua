@@ -95,15 +95,6 @@ function M.setup()
     diagnostic_setup()
 end
 
----@param bufnr number
----@param i_start integer
----@param i_end integer integer
----@param lines string[]
----@param no_undo boolean|nil
-function M.set_lines(bufnr, i_start, i_end, lines, no_undo)
-    buffer.set_lines(bufnr, i_start, i_end, lines, no_undo)
-end
-
 ---@param winid integer
 function M.clear_matches(winid)
     local ids = matches[winid]
@@ -151,35 +142,6 @@ function M.diagnostic_set(bufnr, ranges)
     for index, range in ipairs(ranges) do
         render.set_range(bufnr, range, index)
     end
-end
-
----@param bufnr number
----@param first integer
----@param last integer
----@return integer
-local function expand_continue_lines(bufnr, first, last)
-    local lines = buffer.get_lines(bufnr, first, last)
-    ---@type string|nil
-    local last_line = lines[#lines]
-    while tir_vim.is_continue_line(last_line) do
-        last_line = buffer.get_line(bufnr, last)
-        last = last + 1
-    end
-    return last
-end
-
----@param bufnr number
----@param first integer|nil
----@param last integer|nil
----@return Range[]
-function M.diagnostic_get(bufnr, first, last)
-    local ranges = render.get_range(bufnr)
-    if first then
-        ---@cast last integer
-        last = expand_continue_lines(bufnr, first, last)
-        ranges[#ranges + 1] = Range.new(first, last - 1)
-    end
-    return Range.union(ranges)
 end
 
 ---@param bufnr number

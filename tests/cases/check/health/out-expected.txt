@@ -9,7 +9,7 @@
 - ✅ OK tir-gfm-lite found
 - ✅ OK tir-gfm-lite version 0.1.6 OK
 - ✅ OK tir-pukiwiki found
-- ✅ OK tir-pukiwiki version 0.1.0 OK
+- ✅ OK tir-pukiwiki version 0.1.1 OK
 === DISPLAY ===
 ==============================================================================
 tirenvi ~

@@ -26,6 +26,9 @@ M.setup({
 	},
 })
 vim.g.tirenvi_initialized = false
+local buffer = require("tirenvi.state.buffer")
+buffer.clear_cache()
+buffer.set_step(3)
 EOF
 
 " ----------------------------

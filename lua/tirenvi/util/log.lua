@@ -1,5 +1,6 @@
 local config = require("tirenvi.config")
 local notify = require("tirenvi.util.notify")
+local Range = require("tirenvi.util.range")
 
 local M = {}
 
@@ -10,7 +11,7 @@ local fn = vim.fn
 local levels = vim.log.levels
 
 local level_names = {}
-local PREFIX = "[TIR]"
+local PREFIX = "TIR"
 local uv = vim.loop
 local queue = {}
 local scheduled = false
@@ -74,15 +75,34 @@ local function monitor()
 end
 
 ---@param value any
+---@return any
+local function normalize_for_log(value)
+	local v_type = type(value)
+	if v_type ~= "table" then
+		return value
+	end
+	local mt = getmetatable(value)
+	if mt and mt.__tostring then
+		return tostring(value)
+	end
+	local result = {}
+	for key, val in pairs(value) do
+		result[key] = normalize_for_log(val)
+	end
+	return result
+end
+
+---@param value any
 ---@return string
 local function stringify(value)
 	local v_type = type(value)
 
 	if v_type == "table" then
+		local normalized = normalize_for_log(value)
 		if config.log.single_line then
 			return string.format(
 				"<table> %s",
-				vim.inspect(value, {
+				vim.inspect(normalized, {
 					newline = " ",
 					indent = "",
 					depth = 4,
@@ -200,24 +220,77 @@ local function write_buffer(msg)
 end
 
 local unpack = table.unpack or unpack -- Lua 5.1/5.2 compatibility
+local category_hl_map = {}
+local category_match_id = {}
 
----@param level integer
+local function apply_log_highlight(bufnr)
+	local winid = vim.fn.bufwinid(bufnr)
+	if winid == -1 then return end
+	vim.api.nvim_win_call(winid, function()
+		vim.fn.clearmatches()
+		for cat, hl in pairs(category_hl_map) do
+			vim.fn.matchadd(hl, "\\[" .. cat .. "\\]")
+		end
+	end)
+end
+
+local function pick_color(cat)
+	local colors = {
+		"#ff6b6b", "#4ecdc4", "#ffe66d",
+		"#c7f464", "#c792ea", "#f78c6c",
+	}
+	local idx = (vim.fn.str2nr(vim.fn.sha256(cat):sub(1, 8), 16) % #colors) + 1
+	return colors[idx]
+end
+
+local function ensure_category_highlight(category)
+	if category_hl_map[category] then
+		return category_hl_map[category]
+	end
+
+	local hl = "TirLog_" .. category
+	local color = pick_color(category)
+
+	vim.api.nvim_set_hl(0, hl, { fg = color, bold = true })
+
+	category_hl_map[category] = hl
+	return hl
+end
+
+local function ensure_match(bufnr, category, hl)
+	if category_match_id[category] then
+		return
+	end
+
+	vim.api.nvim_buf_call(bufnr, function()
+		local pattern = "\\[" .. category .. "\\]"
+		local id = vim.fn.matchadd(hl, pattern)
+		category_match_id[category] = id
+	end)
+end
+
 ---@param force boolean
+---@param level integer
+---@param opts? table
 ---@param fmt any
 ---@param ... unknown
-local function emit(force, level, fmt, ...)
+local function emit(force, level, opts, fmt, ...)
 	monitor()
 	if not force and level < config.log.level then
 		return
 	end
-	if fmt == nil then
+	if opts == nil or fmt == nil then
 		return
 	end
-
+	local category = opts and opts.category
+	if category then
+		local bufnr = ensure_log_buf()
+		local hl = ensure_category_highlight(category)
+		ensure_match(bufnr, category, hl)
+	end
 	local info = debug.getinfo(3, "Sl")
 	local file = info and (info.short_src:match("([^/\\]+)$")) or "?"
 	local line = info and info.currentline or 0
-
 	local args = { ... }
 	local msg
 	local ok, result = pcall(function()
@@ -230,15 +303,15 @@ local function emit(force, level, fmt, ...)
 		local parts = vim.tbl_map(stringify, args)
 		msg = table.concat(parts, " ")
 	end
-
 	local ts = get_timestamp()
 	local mon = get_monitor()
 	local name = level_names[level]
 	if force then
-		name = "🟧PROBE"
+		name = "🟧PRB"
+	elseif category then
+		name = category
 	end
-	local final = string.format("%s%s%s[%s][%s:%d] %s", PREFIX, ts, mon, name, file, line, msg)
-
+	local final = string.format("[%s]%s%s[%s][%s:%d] %s", PREFIX, ts, mon, name, file, line, msg)
 	if config.log.output == "buffer" then
 		write_buffer(final)
 	elseif config.log.output == "file" then
@@ -252,22 +325,22 @@ end
 
 ---@param ... unknown
 function M.debug(...)
-	emit(false, levels.DEBUG, ...)
+	emit(false, levels.DEBUG, {}, ...)
 end
 
 ---@param ... unknown
 function M.info(...)
-	emit(false, levels.INFO, ...)
+	emit(false, levels.INFO, {}, ...)
 end
 
 ---@param ... unknown
 function M.warn(...)
-	emit(false, levels.WARN, ...)
+	emit(false, levels.WARN, {}, ...)
 end
 
 ---@param ... unknown
 function M.error(...)
-	emit(false, levels.ERROR, ...)
+	emit(false, levels.ERROR, {}, ...)
 end
 
 ---@param ... unknown
@@ -275,7 +348,24 @@ function M.probe(...)
 	if not config.log.probe then
 		return
 	end
-	emit(true, levels.ERROR, ...)
+	emit(true, levels.ERROR, {}, ...)
 end
+
+function M.watch(category, ...)
+	if levels.DEBUG < config.log.level then
+		return
+	end
+	return emit(false, levels.DEBUG, { category = category }, ...)
+end
+
+local aug = vim.api.nvim_create_augroup("TirenviLogHL", { clear = true })
+vim.api.nvim_create_autocmd("WinEnter", {
+	group = aug,
+	callback = function(args)
+		if args.buf == log_bufnr then
+			apply_log_highlight(args.buf)
+		end
+	end,
+})
 
 return M
