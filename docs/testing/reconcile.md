@@ -1,5 +1,21 @@
 # Test Specification
 
+## 遅延正規化
+
+- echo, 
+
+## implement
+
+* branch name: feat/tir-width-visual-range
+* PR: kibi2/tirenvi.nvim#
+
+| No | Preconditions | Action | Expected | Date | Notes | Commit Message |
+| --- | --- | --- | --- | --- | --- | --- |
+|  |  | 遅延正規化オプションオフ<br>config.table.auto_reconcile | 自動正規化切り替え<br>エコー[Tirenvi] auto-reconcile: ON | 2026/4/1? |  |  |
+|  |  | 遅延正規化コマンドon/off<br>Tir ToggleAutoReconcile<br><leader>ta | 自動正規化切り替え<br>エコー[Tirenvi] auto-reconcile: ON | 2026/4/1? |  |  |
+|   |   | 手動正規化コマンド<br>Tir reconcile <br><leader>tr |   |   |   |   |
+|  |  |  |  |  |  |  |
+
 ## Repair -> reconcile
 
 * joinをするとon_linesが2度呼び出される
