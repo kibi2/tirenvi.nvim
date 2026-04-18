@@ -1,6 +1,6 @@
 local config = require("tirenvi.config")
 local Range = require("tirenvi.util.range")
-local render = require("tirenvi.render")
+local invalid = require("tirenvi.extmark.invalid")
 local buffer = require("tirenvi.state.buffer")
 local tir_vim = require("tirenvi.core.tir_vim")
 local log = require("tirenvi.util.log")
@@ -140,13 +140,13 @@ end
 ---@param ranges Range[]
 function M.diagnostic_set(bufnr, ranges)
     for index, range in ipairs(ranges) do
-        render.set_range(bufnr, range, index)
+        invalid.set_range(bufnr, range, index)
     end
 end
 
 ---@param bufnr number
 function M.diagnostic_clear(bufnr)
-    render.clear(bufnr)
+    invalid.clear(bufnr)
 end
 
 vim.api.nvim_create_autocmd("ColorScheme", {

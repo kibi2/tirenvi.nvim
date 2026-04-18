@@ -16,7 +16,7 @@ local Blocks = require("tirenvi.core.blocks")
 local vim_parser = require("tirenvi.core.vim_parser")
 local flat_parser = require("tirenvi.core.flat_parser")
 local tir_vim = require("tirenvi.core.tir_vim")
-local render = require("tirenvi.render")
+local invalid = require("tirenvi.extmark.invalid")
 local ui = require("tirenvi.ui")
 
 -----------------------------------------------------------------------
@@ -197,7 +197,7 @@ end
 ---@param last integer|nil
 ---@param new_last integer|nil
 local function handle_request(bufnr, first, last, new_last)
-	local ext_ranges = render.get_range(bufnr)
+	local ext_ranges = invalid.get_range(bufnr)
 	ui.diagnostic_clear(bufnr)
 	if not first then
 		log_watch(bufnr, "INSERT LEAVE[" .. tostring(#ext_ranges) .. "]")

@@ -155,6 +155,9 @@ local function on_tir(opts)
 		return
 	end
 	local command = sub:match("^[A-Za-z_-]+") or ""
+	if command == "width-" then
+		command = "width"
+	end
 	local bufnr = vim.api.nvim_get_current_buf()
 	log.debug("===+===+===+===+=== %s %s[%d] ===+===+===+===+===", opts.name, opts.fargs[1], bufnr)
 	local func = commands[command]
