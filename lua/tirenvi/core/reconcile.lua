@@ -165,7 +165,7 @@ end
 
 local local_range = nil
 ---@param bufnr number
-local function apply_local_ranges(bufnr)
+local function apply_local_range(bufnr)
 	apply_ranges(bufnr, { local_range })
 	local_range = nil
 end
@@ -183,7 +183,7 @@ end
 local function schedule_new_range(bufnr, new_range)
 	if local_range == nil then
 		vim.schedule(function()
-			apply_local_ranges(bufnr)
+			apply_local_range(bufnr)
 		end)
 		local_range = new_range
 	else

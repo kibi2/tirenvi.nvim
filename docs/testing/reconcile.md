@@ -102,7 +102,7 @@ module name: core/repair -> core/reconcile
 
 | No | Preconditions | Action | Expected | Date | Notes | Commit Message |
 | --- | --- | --- | --- | --- | --- | --- |
-|     | モジュール名変更<br> 関数名変更 |     | repair -> reconcile<br>repair -> hamdle, and more | 2026/4/16    |     | refactor: rename repair to reconcile and standardize function namin |
-|  | nvim tests/data/simple.md | undo | apply_marks, apply_range を呼び出す | 2026/4/1? | undo 1 node? |  |
-|  | nvim tests/data/simple.md | join | enqueue_repair_range経由でapplyを2回呼び出す | 2026/4/1? |  |  |
+|  | モジュール名変更<br> 関数名変更 |  | repair -> reconcile<br>repair -> hamdle, and more | 2026/4/16 |  | refactor: rename repair to reconcile and standardize function namin |
+|  | nvim tests/data/simple.md | undo | apply_extra_ranges, apply_local_range を呼び出す | 2026/4/18 |  |  |
+|  | nvim tests/data/simple.md | join | schedule_new_range経由でapplyを2回呼び出す | 2026/4/18 |  |  |
 
