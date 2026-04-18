@@ -4,6 +4,7 @@ local buf_state = require("tirenvi.state.buf_state")
 local buffer = require("tirenvi.state.buffer")
 local LinProvider = require("tirenvi.state.buffer_line_provider")
 local init = require("tirenvi.init")
+local config = require("tirenvi.config")
 local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
 local errors = require("tirenvi.util.errors")
@@ -95,6 +96,26 @@ local function cmd_width(bufnr, opts)
 	init.width(line_provider, rect, operator, count)
 end
 
+---@param bufnr number
+---@param opts {[string]:any}
+---@return nil
+local function cmd_auto_reconcile(bufnr, opts)
+	if buf_state.should_skip(bufnr) then return end
+	local arg = opts.fargs[2]
+	if arg == nil then
+		config.table.auto_reconcile = not config.table.auto_reconcile
+	elseif arg == "on" then
+		config.table.auto_reconcile = true
+	elseif arg == "off" then
+		config.table.auto_reconcile = false
+	else
+		notify.error("[Tirenvi] invalid argument: " .. arg .. " (expected: on|off)")
+		return
+	end
+	notify.info(string.format("[Tirenvi] auto-reconcile:%s ",
+		config.table.auto_reconcile and "ON" or "OFF"))
+end
+
 ----------------------------------------------------------------------
 -- Registration (private)
 ----------------------------------------------------------------------
@@ -103,6 +124,7 @@ local commands = {
 	toggle = cmd_toggle,
 	redraw = cmd_redraw,
 	width = cmd_width,
+	["auto-reconcile"] = cmd_auto_reconcile,
 	_hbar = cmd_hbar,
 }
 
@@ -129,12 +151,11 @@ end
 ---@param opts any
 local function on_tir(opts)
 	local sub = opts.fargs[1]
-	local command = sub:match("^[A-Za-z_]+") or ""
 	if not sub then
 		notify.info(build_usage())
 		return
 	end
-
+	local command = sub:match("^[A-Za-z_-]+") or ""
 	local bufnr = vim.api.nvim_get_current_buf()
 	log.debug("===+===+===+===+=== %s %s[%d] ===+===+===+===+===", opts.name, opts.fargs[1], bufnr)
 	local func = commands[command]
@@ -142,7 +163,6 @@ local function on_tir(opts)
 		notify.error(errors.err_unknown_command(sub))
 		return
 	end
-
 	func(bufnr, opts)
 end
 

@@ -11,10 +11,10 @@
 
 | No | Preconditions | Action | Expected | Date | Notes | Commit Message |
 | --- | --- | --- | --- | --- | --- | --- |
-|  |  | 遅延正規化オプションオフ<br>config.table.auto_reconcile | 自動正規化切り替え<br>エコー[Tirenvi] auto-reconcile: ON | 2026/4/1? |  |  |
-|  |  | 遅延正規化コマンドon/off<br>Tir ToggleAutoReconcile<br><leader>ta | 自動正規化切り替え<br>エコー[Tirenvi] auto-reconcile: ON | 2026/4/1? |  |  |
-|   |   | 手動正規化コマンド<br>Tir reconcile <br><leader>tr |   |   |   |   |
-|  |  |  |  |  |  |  |
+|  |  | 遅延正規化オプションオフ<br>config.table.auto_reconcile | 自動正規化切り替え<br>エコー[Tirenvi] auto-reconcile: ON\|OFF | 2026/4/18 |  | feat: add table.auto_reconcile option |
+|  |  | 遅延正規化コマンドon/off<br>Tir ToggleAutoReconcile<br> | 自動正規化切り替え<br>エコー[Tirenvi] auto-reconcile: ON\|OFF | 2026/4/18 |  |  |
+|   |   | 手動正規化コマンド<br>Tir reconcile <br> |   |   |   |   |
+|  |   |  |  |  |  |  |
 
 ## Repair -> reconcile
 

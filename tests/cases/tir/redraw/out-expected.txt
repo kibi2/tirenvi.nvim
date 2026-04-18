@@ -1,3 +1,11 @@
+=== MESSAGE ===
+[Tirenvi] auto-reconcile:OFF 
+[Tirenvi] auto-reconcile:OFF 
+[Tirenvi] auto-reconcile:ON 
+[Tirenvi] auto-reconcile:ON 
+[Tirenvi] invalid argument: of (expected: on|off)
+[Tirenvi] auto-reconcile:OFF 
+[Tirenvi] auto-reconcile:ON 
 
 === DISPLAY ===
 │a⠀│b⠀│
