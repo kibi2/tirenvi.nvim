@@ -65,13 +65,13 @@ end
 -----------------------------------------------------------------------
 
 ---@param vi_lines string[]
----@param no_unwrap boolean|nil  -- If true, skip unwrapping.
+---@param no_normalize boolean|nil  -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
 ---@return Blocks
-function M.parse(vi_lines, no_unwrap)
-	no_unwrap = no_unwrap or false
+function M.parse(vi_lines, no_normalize)
+	no_normalize = no_normalize or false
 	local records = tir_vim_to_ndjsons(vi_lines)
-	local blocks = Blocks.new_from_vim(records, no_unwrap)
+	local blocks = Blocks.new_from_vim(records, no_normalize)
 	return blocks
 end
 

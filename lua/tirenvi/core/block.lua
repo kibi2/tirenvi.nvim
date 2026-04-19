@@ -216,8 +216,7 @@ function M.plain:get_widths()
 end
 
 ---@self Block_plain
----@param no_unwrap boolean  -- If true, skip unwrapping.
-function M.plain:from_vim(no_unwrap)
+function M.plain:from_vim()
     remove_padding(self)
 end
 
@@ -314,13 +313,13 @@ function M.grid:to_flat()
 end
 
 ---@self Block_grid
----@param no_unwrap boolean  -- If true, skip unwrapping.
+---@param no_normalize boolean  -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
-function M.grid:from_vim(no_unwrap)
+function M.grid:from_vim(no_normalize)
     ensure_table_attr(self)
     remove_padding(self)
-    apply_column_count(self, #self.attr.columns)
-    if not no_unwrap then
+    if not no_normalize then
+        apply_column_count(self, #self.attr.columns)
         unwrap(self)
     end
 end
