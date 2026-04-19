@@ -2,7 +2,7 @@
 
 
 
-- version: 0.2.0
+- version: 0.3.0
 - ⚠️ WARNING vim-repeat not found ('.' repeat disabled)
 - ✅ OK tir-csv found
 - ✅ OK tir-csv version 0.1.4 OK

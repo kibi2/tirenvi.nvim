@@ -6,11 +6,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Neovim](https://img.shields.io/badge/Neovim-0.9+-57A143?logo=neovim)
 
-> Structural TIR editing for Neovim — pure text, always valid.
+> Structural table editing for Neovim — pure text, always valid.
 
 ![demo gif](./demo.gif)
 
-Raw CSV → structured table view → edit → redraw → undo/redo → back to raw.
+Raw Markdown → structured table view → adjust column widths → edit cells → back to raw Markdown (lossless round-trip)
 
 ## Design Philosophy
 
@@ -23,13 +23,13 @@ Raw CSV → structured table view → edit → redraw → undo/redo → back to 
 
 ## Why?
 
-CSV is text.
+CSV and Markdown are text.
 
-But it is also structure.
+But they also represent structure.
 
 Tirenvi lets you edit structured tabular data
 without leaving Vim’s native editing model —
-while guaranteeing structural integrity.
+while preserving structural integrity.
 
 You edit text.
 Tirenvi preserves structure.
@@ -39,7 +39,7 @@ Tirenvi preserves structure.
 At the center is: **TIR — Tabular Intermediate Representation**
 
 ```text
-flat (csv, tsv, ...)
+flat (gfm markdown, csv, tsv, ...)
         ↓ external parser
 TIR (intermediate representation)
         ↓ tirenvi
@@ -63,14 +63,20 @@ Key principles:
 * Transformations are reversible
 * The buffer is always structurally valid
 
+Edit tables directly in Vim — without breaking structure.
+
 ## Features
 
-* Render CSV/TSV into aligned structured view
+* Render CSV/TSV/GFM into an aligned structured view
 * Preserve original file format on save
-* Automatic structural correction
 * Toggle raw ↔ structured view
-* External parser architecture (extensible)
+* Automatic structural correction
+* Multiline cell support with preserved line breaks
+* Column width control with wrapping support
+* Grid-aware join that preserves column structure
+* Column text objects for structural editing
 * Works with all native Vim motions and operators
+* External parser architecture (extensible)
 * No learning curve
 
 ## Structural Integrity Model
@@ -99,6 +105,9 @@ even if they contain temporary structural inconsistencies.
   config = function()
     require("tirenvi").setup()
   end,
+  dependencies = {
+    "tpope/vim-repeat", -- optional
+  },
 }
 ```
 
@@ -113,36 +122,43 @@ Plug 'kibi2/tirenvi.nvim'
 * Neovim >= 0.9
 * UTF-8 environment
 
-Install CSV parser:
+Install parsers:
 
 ```bash
+pip install tir-gfm-lite
 pip install tir-csv
+pip install tir-pukiwiki
 ```
 
 ## Usage
 
-Automatically activates for:
+Automatically activates based on filetype (via parser_map):
 
-* `.csv`
-* `.tsv`
+* `csv`
+* `tsv`
+* `markdown`
+* `pukiwiki`
 
 Custom parser mapping:
 
 ```lua
 require("tirenvi").setup({
   parser_map = {
-    csv = { command = "tir-csv", options = {} },
-    tsv = { command = "tir-csv", options = { "--delimiter", "\t" } },
+    csv = { executable = "tir-csv", required_version = "0.1.4" },
+    tsv = { executable = "tir-csv", options = { "--delimiter", "\t" }, required_version = "0.1.4" },
+    markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = "0.1.5" },
+    pukiwiki = { executable = "tir-pukiwiki", allow_plain = true, required_version = "0.1.1" },
   }
 })
 ```
 
 ## Commands
 
-| Command       | Description                        |
+| Command | Description |
 | ------------- | ---------------------------------- |
-| `:Tir redraw` | Recalculate column widths          |
+| `:Tir redraw` | Recalculate column widths |
 | `:Tir toggle` | Switch raw ↔ structured table view |
+| `:Tir width[=+-][count]` | Adjust column width by count (`=`: set, `+/-`: increment/decrement) |
 
 All native Vim editing works.
 
@@ -158,12 +174,22 @@ Columns are structural units.
 
 To modify a column:
 
-1. Enter Visual Block mode (`<C-v>`)
-2. Select vertically
-3. Apply standard operators (`d`, `p`, etc.)
+1. Select a column using text objects (`vil`, `val`, `v3al`)
+2. Apply standard operators (`d`, `p`, etc.)
+
+```lua
+require("tirenvi").setup({
+  textobj = {
+    column = "l",
+  },
+})
+```
 
 Operations that would break structure
 are automatically corrected.
+
+Column width operations support `.` repeat when
+[`vim-repeat`](https://github.com/tpope/vim-repeat) is installed.
 
 ## Pipe Motions
 
@@ -181,6 +207,9 @@ but target table separators.
 
 `;` and `,` continue to repeat as usual.
 
+Note: There are two types of pipes (continuation and non-continuation),
+so motions may behave differently across lines.
+
 ## What Tirenvi Is Not
 
 * Not a spreadsheet
@@ -192,29 +221,28 @@ It is a structured text editor layer.
 
 ## Roadmap
 
-### Next
+### In Progress
 
-* Markdown (GFM) support
 * Text objects (table, row, column, cell)
-* Column resize command
 
-### Future
+### Planned
 
-* Header pinning
 * Column formatting presets
-* Multi-line cell editing
 * Outline mode
 * Optional non-strict mode (experimental)
 
 ## Comparison
 
-| Feature                   | Tirenvi | csv.vim | Spreadsheet tools |
+| Feature | Tirenvi | csv.vim | Spreadsheet tools |
 | ------------------------- | ------- | ------- | ----------------- |
-| Native Vim editing        | ✅      | ⚠️      | ❌                |
-| Always structurally valid | ✅      | ❌      | ⚠️                |
-| No file format change     | ✅      | ❌      | ❌                |
-| No custom buffer type     | ✅      | ❌      | ❌                |
-| Toggle raw view           | ✅      | ❌      | ❌                |
+| Native Vim editing | ✅ | ⚠️ | ❌ |
+| Always structurally valid | ✅ | ❌ | ⚠️ |
+| No file format change | ✅ | ❌ | ❌ |
+| No custom buffer type | ✅ | ❌ | ❌ |
+| Toggle raw view | ✅ | ❌ | ❌ |
+| Markdown | ✅ | ❌ | ❌ |
+| Automatic wrapping | ✅ | ❌ | ⚠️ |
+| Grid-aware join | ✅ | ❌ | ❌ |
 
 Tirenvi prioritizes **structural safety with Vim purity**.
 
@@ -232,4 +260,3 @@ Please open an issue before major design proposals.
 ## License
 
 MIT License.
-

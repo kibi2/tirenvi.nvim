@@ -1,9 +1,9 @@
-*tirenvi.txt*    tirenvi.nvim — Structural TIR editing for Neovim
+*tirenvi.txt*    tirenvi.nvim — Structural table editing for Neovim
 
 ==============================================================================
 INTRODUCTION                                        *tirenvi*
 
-tirenvi is a Neovim plugin that renders CSV/TSV (and other tabular formats)
+tirenvi is a Neovim plugin that renders tabular text (CSV, TSV, Markdown, etc.)
 as aligned tables — while preserving Vim’s native editing model.
 
 Design principles:
@@ -26,12 +26,14 @@ INSTALLATION                                        *tirenvi-install*
 
 Requirements:
   - Neovim >= 0.9
-  - External parser command (e.g. tir-csv)
+  - External parser command (e.g. tir-csv, tir-gfm-lite)
   - UTF-8 environment recommended
 
-Install tir-csv:
+Install parsers:
 
     pip install tir-csv
+    pip install tir-gfm-lite
+    pip install tir-pukiwiki
 
 Using lazy.nvim:
 
@@ -49,20 +51,35 @@ After installation:
 ============================================================================== 
 USAGE                                               *tirenvi-usage*
 
-tirenvi activates automatically for supported file extensions
-(e.g. .csv, .tsv).
+tirenvi activates automatically based on filetype.
 
 Supported by default:
   - csv
   - tsv
+  - markdown
+  - pukiwiki
+
+Additional formats can be enabled via parser_map.
 
 Commands:
 
-    :Tir redraw     Recalculate column widths
-    :Tir toggle     Toggle raw ↔ structured view
+    :Tir redraw
+        Recalculate column widths
+
+    :Tir toggle
+        Toggle raw ↔ structured view
+
+    :Tir width[=+-][count]
+        Adjust column width
+
+        :Tir width=        Auto-fit column width
+        :Tir width=10      Set column width to 10
+        :Tir width+        Increase width by 1
+        :Tir width+3       Increase width by 3
+        :Tir width-        Decrease width by 1
 
 All normal Vim motions and operators work:
-  dd, yy, p, cw, visual block, :%s, etc.
+  dd, yy, p, cw, visual, :%s, etc.
 
 No special editing mode is required.
 
@@ -93,14 +110,41 @@ to the latest editing state.
 ============================================================================== 
 COLUMN EDITING                                      *tirenvi-column*
 
+Columns are first-class structural units.
+
 To modify a column:
 
-  1. Use Visual Block mode (<C-v>)
-  2. Select vertically across rows
-  3. Apply normal operators (d, p, etc.)
+  1. Select a column using text objects:
+       vil   inner column
+       val   around column
+       v3al  select 3 columns
+
+  2. Apply normal operators (d, c, p, etc.)
+
+Column width can be adjusted with:
+
+    :Tir width[=+-][count]
+
+Column width changes are repeatable with `.`.
 
 Operations that would break structural alignment
-are automatically corrected in the current editing state.
+are automatically corrected.
+
+Column width changes support '.' repeat when vim-repeat is installed.
+
+============================================================================== 
+MULTILINE CELLS                                     *tirenvi-multiline*
+
+Cells can contain line breaks.
+
+tirenvi renders them as multiline cells while preserving
+the original content.
+
+When column width is smaller than content:
+
+  - Cell content is automatically wrapped
+  - Wrapped vs non-wrapped cells are visually distinguishable
+    using underline-based row separators
 
 ============================================================================== 
 PIPE MOTIONS                                        *tirenvi-motion*
@@ -115,9 +159,13 @@ Available Lua functions:
     require("tirenvi").motion.T
 
 They behave like Vim's built-in f/F/t/T,
-but automatically target table separators.
+but target table separators.
 
-After one execution, ';' and ',' repeat still work.
+After one execution, ';' and ',' continue to repeat.
+
+Note:
+  There are two types of pipes (continuation and non-continuation).
+  Motion behavior may differ across lines depending on pipe type.
 
 Example mapping:
 
@@ -131,13 +179,24 @@ Default configuration:
 
     require("tirenvi").setup({
         parser_map = {
-            csv = { command = "tir-csv", options = {} },
-            tsv = { command = "tir-csv",
-                    options = { "--delimiter", "\t" } },
+            csv = {
+                executable = "tir-csv",
+                required_version = "0.1.4",
+            },
+            tsv = {
+                executable = "tir-csv",
+                options = { "--delimiter", "\t" },
+                required_version = "0.1.4",
+            },
+            markdown = {
+                executable = "tir-gfm-lite",
+                allow_plain = true,
+                required_version = "0.1.5",
+            },
         },
     })
 
-parser_map maps file extension → external parser.
+parser_map maps filetype → external parser.
 
 ============================================================================== 
 HOW IT WORKS                                        *tirenvi-architecture*
@@ -148,7 +207,7 @@ Core concept:
 
 Workflow:
 
-  flat format (CSV/TSV/...) → TIR → tir-vim
+  flat format (CSV/TSV/Markdown/...) → TIR → tir-vim
   edit in tir-vim
   tir-vim → TIR → original flat format
 
@@ -159,8 +218,6 @@ Key properties:
   - No shadow state
   - Transformations are reversible
   - Structural validation is automatic
-
-TIR specification will be published separately.
 
 ============================================================================== 
 HEALTHCHECK                                         *tirenvi-health*
