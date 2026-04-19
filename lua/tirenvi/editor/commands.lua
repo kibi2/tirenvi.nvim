@@ -122,9 +122,9 @@ end
 local commands = {
 	toggle = cmd_toggle,
 	redraw = cmd_reconcile,
-	reconcile = cmd_reconcile,
+	_reconcile = cmd_reconcile,
 	width = cmd_width,
-	["auto-reconcile"] = cmd_auto_reconcile,
+	["_auto-reconcile"] = cmd_auto_reconcile,
 	_hbar = cmd_hbar,
 }
 

@@ -62,6 +62,7 @@ local function wrap(self)
     for _, record in ipairs(self.records) do
         util.extend(records, Record.grid.wrap(record, self.attr.columns))
     end
+    records[#records]._has_continuation = false
     self.records = records
 end
 

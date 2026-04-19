@@ -147,6 +147,14 @@ end
 ---@param range Range
 local function expand_continue_lines(bufnr, range)
 	local lines = buffer.get_lines(bufnr, range.first, range.last)
+	local first = range.first - 1
+	---@type string|nil
+	local first_line = buffer.get_line(bufnr, first)
+	while tir_vim.is_continue_line(first_line) do
+		first = first - 1
+		first_line = buffer.get_line(bufnr, first)
+	end
+	range.first = first + 1
 	---@type string|nil
 	local last_line = lines[#lines]
 	local last = range.last
