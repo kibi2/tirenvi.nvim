@@ -28,6 +28,12 @@ local defaults = {
 		markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = "0.1.5" },
 		pukiwiki = { executable = "tir-pukiwiki", allow_plain = true, required_version = "0.1.1" },
 	},
+	textobj = {
+		column = "l",
+	},
+	table = {
+		auto_reconcile = true,
+	},
 	log = {
 		level = levels.WARN,
 		single_line = true,
@@ -37,9 +43,6 @@ local defaults = {
 		use_timestamp = false,
 		monitor = true,
 		probe = false,
-	},
-	textobj = {
-		column = "l",
 	},
 }
 

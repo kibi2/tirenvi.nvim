@@ -1,5 +1,22 @@
 # Test Specification
 
+## 遅延正規化
+
+- echo, 
+
+## implement
+
+* branch name: feat/tir-width-visual-range
+* PR: kibi2/tirenvi.nvim#
+
+| No | Preconditions | Action | Expected | Date | Notes | Commit Message |
+| --- | --- | --- | --- | --- | --- | --- |
+|  |  | 遅延正規化オプションオフ<br>config.table.auto_reconcile | 自動正規化切り替え<br>エコー[Tirenvi] auto-reconcile: ON\|OFF | 2026/4/18 |  | feat: add table.auto_reconcile option |
+|  |  | 遅延正規化コマンドon/off<br>Tir ToggleAutoReconcile<br> | 自動正規化切り替え<br>エコー[Tirenvi] auto-reconcile: ON\|OFF | 2026/4/18 |  | feat: add :Tir auto-reconcile [on\|off] command |
+|  |  | 遅延正規化コマンドon/off<br>Tir ToggleAutoReconcile<br>buffer local | buffer毎に遅延正規化コマンド実行可能 | 2026/4/18 |  | feat: make auto_reconcile buffer-local |
+|  |  |  |  |  |  | feat: add extmark-based table attribute storage |
+|  |  | 手動正規化コマンド<br>Tir reconcile |  |  |  |  |
+
 ## Repair -> reconcile
 
 * joinをするとon_linesが2度呼び出される

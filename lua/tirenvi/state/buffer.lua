@@ -3,21 +3,21 @@
 -----------------------------------------------------------------------
 
 ----- dependencies
-local Range = require("tirenvi.util.range")
-local log   = require("tirenvi.util.log")
+local config = require("tirenvi.config")
+local log    = require("tirenvi.util.log")
 
-local M     = {}
+local M      = {}
 
-local api   = vim.api
-local fn    = vim.fn
-local bo    = vim.bo
-local b     = vim.b
+local api    = vim.api
+local fn     = vim.fn
+local bo     = vim.bo
+local b      = vim.b
 
-local cache = { bufnr = -1, start = -1, lines = {}, }
-local STEP  = 25
+local cache  = { bufnr = -1, start = -1, lines = {}, }
+local STEP   = 25
 
 -- Buffer-local flags.
-M.IKEY      = {
+M.IKEY       = {
 	-- true when in insert mode
 	INSERT_MODE = "insert_mode",
 
@@ -32,6 +32,9 @@ M.IKEY      = {
 
 	-- bo[bufnr].filetype
 	FILETYPE = "filetype",
+
+	-- auto_reconcile flag
+	AUTO_RECONCILE = "auto_reconcile",
 
 	-- grid columns widths [iblock][icol]
 	WIDTHS = "widths",
@@ -76,7 +79,9 @@ local function set_lines(bufnr, i_start, i_end, lines, no_undo)
 	end
 	i_start = math.max(i_start, 0)
 	set_undo_tree_last(bufnr)
-	api.nvim_buf_set_lines(bufnr, i_start, i_end, false, lines)
+	if not no_undo or M.get_auto_reconcile(bufnr) then
+		api.nvim_buf_set_lines(bufnr, i_start, i_end, false, lines)
+	end
 	fix_cursor_utf8()
 	bo[bufnr].undolevels = undolevels
 end
@@ -290,6 +295,23 @@ function M.attach_on_lines(bufnr, callback)
 		end,
 	})
 	M.set(bufnr, M.IKEY.ATTACHED, true)
+end
+
+---@param bufnr number
+---@param value boolean
+function M.set_auto_reconcile(bufnr, value)
+	M.set(bufnr, M.IKEY.AUTO_RECONCILE, value)
+end
+
+---@param bufnr number
+---@return boolean
+function M.get_auto_reconcile(bufnr)
+	local auto_reconcile = M.get(bufnr, M.IKEY.AUTO_RECONCILE)
+	if auto_reconcile == nil then
+		auto_reconcile = config.table.auto_reconcile
+		M.set_auto_reconcile(bufnr, auto_reconcile)
+	end
+	return auto_reconcile
 end
 
 ---@param step integer

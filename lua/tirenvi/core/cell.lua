@@ -23,7 +23,7 @@ local function display_width(self)
     return fn.strdisplaywidth(self)
 end
 
-local lf_len = display_width(config.marks.lf)
+local lf_len = display_width(lf)
 
 -----------------------------------------------------------------------
 -- Public API

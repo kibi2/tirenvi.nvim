@@ -37,6 +37,11 @@ function M.plain:to_grid()
     return M.grid.new({ self.line })
 end
 
+---@param self Record_plain
+function M.plain:remove_padding()
+    self.line = Cell.remove_padding(self.line)
+end
+
 ---@param cells Cell[]|nil
 ---@return Record_grid
 function M.grid.new(cells)

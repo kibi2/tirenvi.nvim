@@ -215,7 +215,7 @@ end
 
 ---@param bufnr number|nil Buffer number.
 ---@return nil
-function M.redraw(bufnr)
+function M.reconcile(bufnr)
 	bufnr = bufnr or api.nvim_get_current_buf()
 	local old_lines = buffer.get_lines(bufnr, 0, -1)
 	local blocks = vim_parser.parse(old_lines)

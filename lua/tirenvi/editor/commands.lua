@@ -21,13 +21,13 @@ local fn = vim.fn
 ---@param bufnr number
 ---@param opts {[string]:any}
 ---@return nil
-local function cmd_redraw(bufnr, opts)
+local function cmd_reconcile(bufnr, opts)
 	if buf_state.should_skip(bufnr, {
 			ensure_tir_vim = true,
 		}) then
 		return
 	end
-	init.redraw(bufnr)
+	init.reconcile(bufnr)
 end
 
 ---@param bufnr number
@@ -95,14 +95,36 @@ local function cmd_width(bufnr, opts)
 	init.width(line_provider, rect, operator, count)
 end
 
+---@param bufnr number
+---@param opts {[string]:any}
+---@return nil
+local function cmd_auto_reconcile(bufnr, opts)
+	if buf_state.should_skip(bufnr) then return end
+	local arg = opts.fargs[2]
+	if arg == nil then
+		buffer.set_auto_reconcile(bufnr, not buffer.get_auto_reconcile(bufnr))
+	elseif arg == "on" then
+		buffer.set_auto_reconcile(bufnr, true)
+	elseif arg == "off" then
+		buffer.set_auto_reconcile(bufnr, false)
+	else
+		notify.error("[Tirenvi] invalid argument: " .. arg .. " (expected: on|off)")
+		return
+	end
+	notify.info(string.format("[Tirenvi] auto-reconcile:%s ",
+		buffer.get_auto_reconcile(bufnr) and "ON" or "OFF"))
+end
+
 ----------------------------------------------------------------------
 -- Registration (private)
 ----------------------------------------------------------------------
 
 local commands = {
 	toggle = cmd_toggle,
-	redraw = cmd_redraw,
+	redraw = cmd_reconcile,
+	_reconcile = cmd_reconcile,
 	width = cmd_width,
+	["_auto-reconcile"] = cmd_auto_reconcile,
 	_hbar = cmd_hbar,
 }
 
@@ -129,12 +151,14 @@ end
 ---@param opts any
 local function on_tir(opts)
 	local sub = opts.fargs[1]
-	local command = sub:match("^[A-Za-z_]+") or ""
 	if not sub then
 		notify.info(build_usage())
 		return
 	end
-
+	local command = sub:match("^[A-Za-z_-]+") or ""
+	if command == "width-" then
+		command = "width"
+	end
 	local bufnr = vim.api.nvim_get_current_buf()
 	log.debug("===+===+===+===+=== %s %s[%d] ===+===+===+===+===", opts.name, opts.fargs[1], bufnr)
 	local func = commands[command]
@@ -142,7 +166,6 @@ local function on_tir(opts)
 		notify.error(errors.err_unknown_command(sub))
 		return
 	end
-
 	func(bufnr, opts)
 end
 

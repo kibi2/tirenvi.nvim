@@ -16,7 +16,7 @@ local Blocks = require("tirenvi.core.blocks")
 local vim_parser = require("tirenvi.core.vim_parser")
 local flat_parser = require("tirenvi.core.flat_parser")
 local tir_vim = require("tirenvi.core.tir_vim")
-local render = require("tirenvi.render")
+local invalid = require("tirenvi.extmark.invalid")
 local ui = require("tirenvi.ui")
 
 -----------------------------------------------------------------------
@@ -45,17 +45,13 @@ local function normalize_trailing_empty_line(vi_lines, line_prev)
 	if not line_prev then
 		return
 	end
-	if #vi_lines == 0 then
-		return
+	for iline = 1, #vi_lines do
+		local pipe = tir_vim.get_pipe_char(line_prev)
+		if vi_lines[iline] == "" and pipe then
+			vi_lines[iline] = pipe .. pipe
+		end
+		line_prev = vi_lines[iline]
 	end
-	if vi_lines[1] ~= "" then
-		return
-	end
-	local pipe = tir_vim.get_pipe_char(line_prev)
-	if not pipe then
-		return
-	end
-	vi_lines[1] = pipe .. pipe
 end
 
 ---@param bufnr number
@@ -88,7 +84,7 @@ end
 ---@param start_row integer
 ---@param end_row integer
 ---@return string[]
-local function reconcile_range(bufnr, start_row, end_row)
+local function apply_range(bufnr, start_row, end_row)
 	log.debug("===-===-===-=== reconcile start[%d, %d] ===-===-===-===", start_row + 1, end_row)
 	local attr_prev, attr_next = resolve_reference_attrs(bufnr, start_row, end_row)
 	local blocks = build_blocks(bufnr, start_row, end_row)
@@ -118,7 +114,7 @@ local function apply_ranges(bufnr, ranges)
 	for index = 1, #ranges do
 		local first = ranges[index].first
 		local last = ranges[index].last + 1
-		local new_lines = reconcile_range(bufnr, first, last)
+		local new_lines = apply_range(bufnr, first, last)
 		buffer.set_lines(bufnr, first, last, new_lines, true)
 	end
 end
@@ -147,10 +143,17 @@ end
 ---@param range Range
 local function expand_continue_lines(bufnr, range)
 	local lines = buffer.get_lines(bufnr, range.first, range.last)
+	local first = range.first - 1
+	local first_line = buffer.get_line(bufnr, first)
+	while tir_vim.is_continue_line(first_line) do
+		first = first - 1
+		first_line = buffer.get_line(bufnr, first)
+	end
+	range.first = first + 1
 	---@type string|nil
 	local last_line = lines[#lines]
 	local last = range.last
-	while tir_vim.is_continue_line(last_line) do
+	while tir_vim.is_continue_line(last_line) or last_line == "" do
 		last_line = buffer.get_line(bufnr, last)
 		last = last + 1
 	end
@@ -197,7 +200,7 @@ end
 ---@param last integer|nil
 ---@param new_last integer|nil
 local function handle_request(bufnr, first, last, new_last)
-	local ext_ranges = render.get_range(bufnr)
+	local ext_ranges = invalid.get_range(bufnr)
 	ui.diagnostic_clear(bufnr)
 	if not first then
 		log_watch(bufnr, "INSERT LEAVE[" .. tostring(#ext_ranges) .. "]")

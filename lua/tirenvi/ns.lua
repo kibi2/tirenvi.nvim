@@ -1,6 +1,6 @@
 local M = {}
 
-M.HIGHLIGHT = vim.api.nvim_create_namespace("tirenvi_highlight")
+M.ATTR = vim.api.nvim_create_namespace("tirenvi_attr")
 M.INVALID = vim.api.nvim_create_namespace("tirenvi_invalid")
 
 return M
