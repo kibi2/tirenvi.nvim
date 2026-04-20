@@ -2,7 +2,7 @@
 
 
 
-- version: 0.2.0
+- version: 0.3.0
 - ⚠️ WARNING Could not parse grep version string.
 - ⚠️ WARNING vim-repeat not found ('.' repeat disabled)
 - ✅ OK grep found

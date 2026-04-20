@@ -1,6 +1,7 @@
 *.swp
 *.log
 .DS_Store
+doc/tags
 
 .luarc.private.json
 
