@@ -34,6 +34,12 @@ local defaults = {
 	table = {
 		auto_reconcile = true,
 	},
+	ui = {
+		conceal = {
+			level = 1,
+			cursor = "nvic",
+		}
+	},
 	log = {
 		level = levels.WARN,
 		single_line = true,
