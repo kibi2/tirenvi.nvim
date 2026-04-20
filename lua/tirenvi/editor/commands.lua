@@ -35,7 +35,6 @@ end
 ---@return nil
 local function cmd_toggle(bufnr, opts)
 	if buf_state.should_skip(bufnr) then return end
-	ui.special_clear()
 	ui.special_apply()
 	init.toggle(bufnr)
 end

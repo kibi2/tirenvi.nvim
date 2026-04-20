@@ -95,8 +95,9 @@ function M.setup()
     diagnostic_setup()
 end
 
----@param winid integer
-function M.clear_matches(winid)
+---@param winid integer|nil
+function M.special_clear(winid)
+    winid = winid or vim.api.nvim_get_current_win()
     local ids = matches[winid]
     if not ids then return end
     for _, id in ipairs(ids) do
@@ -105,9 +106,10 @@ function M.clear_matches(winid)
     matches[winid] = nil
 end
 
-function M.special_apply()
-    local winid = vim.api.nvim_get_current_win()
-    M.clear_matches(winid)
+---@param winid integer|nil
+function M.special_apply(winid)
+    winid = winid or vim.api.nvim_get_current_win()
+    M.special_clear(winid)
     add_match(winid, "TirenviPadding", pat_v(config.marks.padding), 10)
     add_match(winid, "TirenviSpecialChar", pat_v(config.marks.lf), 20)
     add_match(winid, "TirenviSpecialChar", pat_v(config.marks.tab), 20)
@@ -125,11 +127,6 @@ function M.special_apply()
     local pattern = vim.fn.escape(pipec, [[/\]])
     local command = string.format([[syntax match TirPipeC /%s/ conceal cchar=%s]], pattern, pipen)
     vim.cmd(command)
-end
-
-function M.special_clear()
-    local winid = vim.api.nvim_get_current_win()
-    M.clear_matches(winid)
 end
 
 -- =========================
