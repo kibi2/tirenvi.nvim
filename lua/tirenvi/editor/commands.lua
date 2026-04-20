@@ -35,21 +35,8 @@ end
 ---@return nil
 local function cmd_toggle(bufnr, opts)
 	if buf_state.should_skip(bufnr) then return end
-	ui.special_clear()
 	ui.special_apply()
 	init.toggle(bufnr)
-end
-
----@param bufnr number
----@param opts {[string]:any}
----@return nil
-local function cmd_hbar(bufnr, opts)
-	if buf_state.should_skip(bufnr, {
-			ensure_tir_vim = true,
-		}) then
-		return
-	end
-	init.hbar(bufnr)
 end
 
 ---@param opts {[string]:any}
@@ -125,7 +112,6 @@ local commands = {
 	_reconcile = cmd_reconcile,
 	width = cmd_width,
 	["_auto-reconcile"] = cmd_auto_reconcile,
-	_hbar = cmd_hbar,
 }
 
 

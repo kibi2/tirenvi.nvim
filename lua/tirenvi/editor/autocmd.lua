@@ -170,7 +170,6 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
-			ui.special_clear()
 			ui.special_apply()
 		end),
 	})
@@ -210,7 +209,7 @@ local function register_autocmds()
 		group = augroup,
 		callback = guard.guarded(function(args)
 			local winid = tonumber(args.match)
-			pcall(ui.clear_matches, winid)
+			pcall(ui.special_clear, winid)
 		end),
 	})
 

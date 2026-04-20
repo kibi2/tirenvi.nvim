@@ -226,13 +226,6 @@ function M.reconcile(bufnr)
 	end
 end
 
----@param bufnr number Buffer number.
----@return nil
-function M.hbar(bufnr)
-	vim.w.tirenvi_view_nobar = not (vim.w.tirenvi_view_nobar or false)
-	ui.special_apply()
-end
-
 ---@param line_provider LineProvider
 ---@param rect Rect
 ---@param operator string Operator: "", "=", "+", "-"

@@ -95,8 +95,9 @@ function M.setup()
     diagnostic_setup()
 end
 
----@param winid integer
-function M.clear_matches(winid)
+---@param winid integer|nil
+function M.special_clear(winid)
+    winid = winid or vim.api.nvim_get_current_win()
     local ids = matches[winid]
     if not ids then return end
     for _, id in ipairs(ids) do
@@ -105,31 +106,23 @@ function M.clear_matches(winid)
     matches[winid] = nil
 end
 
-function M.special_apply()
-    local winid = vim.api.nvim_get_current_win()
-    M.clear_matches(winid)
+---@param winid integer|nil
+function M.special_apply(winid)
+    winid = winid or vim.api.nvim_get_current_win()
+    M.special_clear(winid)
     add_match(winid, "TirenviPadding", pat_v(config.marks.padding), 10)
     add_match(winid, "TirenviSpecialChar", pat_v(config.marks.lf), 20)
     add_match(winid, "TirenviSpecialChar", pat_v(config.marks.tab), 20)
-    if not vim.w.tirenvi_view_nobar then
-        add_match(winid, "TirenviPipeHbar", pat_v(pipen), 30)
-        add_match(winid, "TirenviHbar", pat_line_inner(pipen), 20)
-        add_match(winid, "TirenviPipeNoHbar", pat_line_start(pipen), 40)
-        add_match(winid, "TirenviPipeNoHbar", pat_line_end(pipen), 40)
-        add_match(winid, "TirenviPipeNoHbar", pat_v(pipec), 30)
-    else
-        add_match(winid, "TirenviPipeNoHbar", pat_v(pipen), 30)
-    end
-    vim.opt_local.conceallevel = 0
-    vim.opt_local.concealcursor = "nc"
+    add_match(winid, "TirenviPipeHbar", pat_v(pipen), 30)
+    add_match(winid, "TirenviHbar", pat_line_inner(pipen), 20)
+    add_match(winid, "TirenviPipeNoHbar", pat_line_start(pipen), 40)
+    add_match(winid, "TirenviPipeNoHbar", pat_line_end(pipen), 40)
+    add_match(winid, "TirenviPipeNoHbar", pat_v(pipec), 30)
+    vim.opt_local.conceallevel = config.ui.conceal.level
+    vim.opt_local.concealcursor = config.ui.conceal.cursor
     local pattern = vim.fn.escape(pipec, [[/\]])
     local command = string.format([[syntax match TirPipeC /%s/ conceal cchar=%s]], pattern, pipen)
     vim.cmd(command)
-end
-
-function M.special_clear()
-    local winid = vim.api.nvim_get_current_win()
-    M.clear_matches(winid)
 end
 
 -- =========================
