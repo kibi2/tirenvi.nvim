@@ -19,7 +19,5 @@ Tir toggle
 sleep 1m
 Tir toggle
 sleep 1m
-Tir _hbar
-sleep 1m
 
 call RunTest({})

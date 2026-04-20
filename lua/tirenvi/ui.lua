@@ -113,15 +113,11 @@ function M.special_apply(winid)
     add_match(winid, "TirenviPadding", pat_v(config.marks.padding), 10)
     add_match(winid, "TirenviSpecialChar", pat_v(config.marks.lf), 20)
     add_match(winid, "TirenviSpecialChar", pat_v(config.marks.tab), 20)
-    if not vim.w.tirenvi_view_nobar then
-        add_match(winid, "TirenviPipeHbar", pat_v(pipen), 30)
-        add_match(winid, "TirenviHbar", pat_line_inner(pipen), 20)
-        add_match(winid, "TirenviPipeNoHbar", pat_line_start(pipen), 40)
-        add_match(winid, "TirenviPipeNoHbar", pat_line_end(pipen), 40)
-        add_match(winid, "TirenviPipeNoHbar", pat_v(pipec), 30)
-    else
-        add_match(winid, "TirenviPipeNoHbar", pat_v(pipen), 30)
-    end
+    add_match(winid, "TirenviPipeHbar", pat_v(pipen), 30)
+    add_match(winid, "TirenviHbar", pat_line_inner(pipen), 20)
+    add_match(winid, "TirenviPipeNoHbar", pat_line_start(pipen), 40)
+    add_match(winid, "TirenviPipeNoHbar", pat_line_end(pipen), 40)
+    add_match(winid, "TirenviPipeNoHbar", pat_v(pipec), 30)
     vim.opt_local.conceallevel = config.ui.conceal.level
     vim.opt_local.concealcursor = config.ui.conceal.cursor
     local pattern = vim.fn.escape(pipec, [[/\]])
