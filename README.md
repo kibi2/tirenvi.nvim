@@ -102,12 +102,12 @@ even if they contain temporary structural inconsistencies.
 ```lua
 {
   "kibi2/tirenvi.nvim",
+  dependencies = {
+    "tpope/vim-repeat", -- optional: enables '.' repeat for column width operations
+  },
   config = function()
     require("tirenvi").setup()
   end,
-  dependencies = {
-    "tpope/vim-repeat", -- optional
-  },
 }
 ```
 
@@ -115,6 +115,9 @@ even if they contain temporary structural inconsistencies.
 
 ```vim
 Plug 'kibi2/tirenvi.nvim'
+
+" Optional: enables '.' repeat for column width operations
+Plug 'tpope/vim-repeat'
 ```
 
 ### Requirements
