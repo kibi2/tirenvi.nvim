@@ -103,4 +103,10 @@ function M.invalid_json_error(js_line, message)
 	return string.format(PREFIX .. "tirenvi: invalid JSON from parser\n%s\nerror: %s", js_line, message)
 end
 
+function M.table_merge_warning(ncol1, ncol2)
+	return string.format(
+		PREFIX .. "Tables were not merged: column counts differ (%d vs %d).\n" ..
+		"Align the column counts to merge them.", ncol1, ncol2)
+end
+
 return M

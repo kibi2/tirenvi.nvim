@@ -9,6 +9,8 @@ local CONST = require("tirenvi.constants")
 local Attr = require("tirenvi.core.attr")
 local util = require("tirenvi.util.util")
 local Block = require("tirenvi.core.block")
+local errors = require("tirenvi.util.errors")
+local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -117,6 +119,10 @@ local function ensure_plain_block(self, attr_prev, attr_next)
 	if not Attr.is_conflict(attr_prev, attr_next, true) then
 		return
 	end
+	notify.warn(errors.table_merge_warning(
+		attr_prev and #attr_prev.columns or 0,
+		attr_next and #attr_next.columns or 0
+	))
 	self[#self + 1] = Block.plain.new()
 end
 
