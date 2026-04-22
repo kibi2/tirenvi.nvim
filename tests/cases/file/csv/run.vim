@@ -8,4 +8,4 @@ execute 'file ' . outfile
 write
 execute 'edit ' . outfile
 
-call RunTest({ 'file': outfile })
+call RunTest({ 'file': outfile, 'nomessage': 'true' })

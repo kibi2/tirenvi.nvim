@@ -7,4 +7,4 @@ edit $TIRENVI_ROOT/tests/data/simple.csv
 execute 'file ' . outfile
 write
 
-call RunTest({ 'file': outfile })
+call RunTest({ 'file': outfile, 'nomessage': 'true' })

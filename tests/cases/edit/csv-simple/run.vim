@@ -6,4 +6,4 @@ execute 'write ' . outfile
 wincmd s
 wincmd c
 
-call RunTest({ 'file': outfile })
+call RunTest({ 'file': outfile, 'nomessage': 'true' })

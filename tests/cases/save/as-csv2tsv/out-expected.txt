@@ -1,5 +1,3 @@
-=== MESSAGE ===
-"gen.tsv" [New] 8L, 36B written
 
 === DISPLAY ===
 │1a│2 a│ 3a│

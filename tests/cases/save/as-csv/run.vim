@@ -19,4 +19,4 @@ Tir width=8
 sleep 1m
 execute 'write ' . outfile
 
-call RunTest({ 'file': outfile })
+call RunTest({ 'file': outfile, 'nomessage': 'true' })
