@@ -1,5 +1,3 @@
-=== MESSAGE ===
-"gen.csv" [New] 2L, 8B written
 
 === DISPLAY ===
 │a⠀│b⠀│

@@ -5,4 +5,4 @@ let outfile = 'gen.csv'
 execute 'edit ' . outfile
 write
 
-call RunTest({ 'file': outfile })
+call RunTest({ 'file': outfile, 'nomessage': 'true' })

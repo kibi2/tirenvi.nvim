@@ -6,4 +6,4 @@ let outfile = 'gen.tsv'
 edit $TIRENVI_ROOT/tests/data/simple.csv
 execute 'write ' . outfile
 
-call RunTest({ 'file': outfile })
+call RunTest({ 'file': outfile, 'nomessage': 'true' })
