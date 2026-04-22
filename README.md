@@ -106,7 +106,7 @@ even if they contain temporary structural inconsistencies.
     "tpope/vim-repeat", -- optional: enables '.' repeat for column width operations
   },
   config = function()
-    require("tirenvi").setup()
+    require("tirenvi").setup {}
   end,
 }
 ```
@@ -149,7 +149,7 @@ require("tirenvi").setup({
   parser_map = {
     csv = { executable = "tir-csv", required_version = "0.1.4" },
     tsv = { executable = "tir-csv", options = { "--delimiter", "\t" }, required_version = "0.1.4" },
-    markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = "0.1.5" },
+    markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = "0.1.6" },
     pukiwiki = { executable = "tir-pukiwiki", allow_plain = true, required_version = "0.1.1" },
   }
 })
@@ -159,7 +159,7 @@ require("tirenvi").setup({
 
 | Command | Description |
 | ------------- | ---------------------------------- |
-| `:Tir redraw` | Recalculate column widths |
+| `:Tir redraw` | Normalize table layout (trim padding and re-align cells) |
 | `:Tir toggle` | Switch raw ↔ structured table view |
 | `:Tir width[=+-][count]` | Adjust column width by count (`=`: set, `+/-`: increment/decrement) |
 
