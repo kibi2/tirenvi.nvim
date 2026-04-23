@@ -8,9 +8,17 @@
 
 > Structural table editing for Neovim — pure text, always valid.
 
+## Markdown (GFM)
+
 ![demo gif](./demo.gif)
 
 Raw Markdown → structured table view → adjust column widths → edit cells → back to raw Markdown (lossless round-trip)
+
+## CSV / TSV
+
+![demo gif](./demo_csv.gif)
+
+Raw CSV → structured table view → adjust column widths → edit cells → back to raw CSV (lossless round-trip)
 
 ## Design Philosophy
 
