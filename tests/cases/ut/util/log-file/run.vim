@@ -12,7 +12,7 @@ lua << EOF
 		level = levels.DEBUG,
 		single_line = false,
 		output = "file",
-		file_name = "./tirenvi.gen",
+		file_name = "./gen.tirenvi",
 		use_timestamp = false,
 		probe = true,
   	},

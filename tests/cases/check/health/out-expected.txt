@@ -11,6 +11,8 @@
 - ✅ OK tir-pukiwiki found
 - ✅ OK tir-pukiwiki version 0.1.1 OK
 === DISPLAY ===
+=== MESSAGE ===
 ==============================================================================
+Running healthchecks...
 tirenvi ~
 tirenvi:                                                                  1 ⚠️

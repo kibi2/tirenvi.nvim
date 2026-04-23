@@ -15,13 +15,6 @@ local M = {}
 ---@field lf string
 ---@field tab string
 
----@class Parser
----@field executable string             Parser executable name
----@field options? string[]             Command-line arguments passed to the parser
----@field required_version? string      Parser required version "major.minor.patch"
----@field _iversion? integer            integer version
----@field allow_plain? boolean          Whether plain blocks are allowed (GFM). If false, only a single table is permitted.
-
 -----------------------------------------------------------------------
 -- Defaults
 -----------------------------------------------------------------------
@@ -80,7 +73,7 @@ end
 ---@param parser_map Parser[]
 local function parse_version(parser_map)
 	for _, parser in pairs(parser_map) do
-		parser._iversion = M.version_to_integer(parser.required_version)
+		parser._required_version_int = M.version_to_integer(parser.required_version)
 	end
 end
 

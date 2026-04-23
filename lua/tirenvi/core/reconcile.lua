@@ -7,7 +7,7 @@
 -- Dependencies
 -----------------------------------------------------------------------
 
-local log = require("tirenvi.util.log")
+local Parser = require("tirenvi.core.parser")
 local util = require("tirenvi.util.util")
 local Range = require("tirenvi.util.range")
 local buffer = require("tirenvi.state.buffer")
@@ -18,6 +18,7 @@ local flat_parser = require("tirenvi.core.flat_parser")
 local tir_vim = require("tirenvi.core.tir_vim")
 local invalid = require("tirenvi.extmark.invalid")
 local ui = require("tirenvi.ui")
+local log = require("tirenvi.util.log")
 
 -----------------------------------------------------------------------
 -- Module
@@ -54,14 +55,14 @@ local function normalize_trailing_empty_line(vi_lines, line_prev)
 	end
 end
 
----@param bufnr number
+---@param context Context
 ---@param start_row integer
 ---@param end_row integer
 ---@return Document
-local function build_blocks(bufnr, start_row, end_row)
-	local allow_plain = util.get_parser(bufnr).allow_plain
-	local vi_lines = buffer.get_lines(bufnr, start_row, end_row)
-	local line_prev = buffer.get_line(bufnr, start_row - 1)
+local function build_blocks(context, start_row, end_row)
+	local allow_plain = context.parser.allow_plain
+	local vi_lines = buffer.get_lines(context.bufnr, start_row, end_row)
+	local line_prev = buffer.get_line(context.bufnr, start_row - 1)
 	normalize_trailing_empty_line(vi_lines, line_prev)
 	return vim_parser.parse(vi_lines, allow_plain, true)
 end
@@ -81,18 +82,17 @@ local function resolve_reference_attrs(bufnr, start_row, end_row)
 	return attr_prev, attr_next
 end
 
----@param bufnr number
+---@param context Context
 ---@param start_row integer
 ---@param end_row integer
 ---@return string[]
-local function apply_range(bufnr, start_row, end_row)
+local function apply_range(context, start_row, end_row)
 	log.debug("===-===-===-=== reconcile start[%d, %d] ===-===-===-===", start_row + 1, end_row)
-	local attr_prev, attr_next = resolve_reference_attrs(bufnr, start_row, end_row)
-	local document = build_blocks(bufnr, start_row, end_row)
+	local attr_prev, attr_next = resolve_reference_attrs(context.bufnr, start_row, end_row)
+	local document = build_blocks(context, start_row, end_row)
 	local blocks = document.blocks
 	log.debug(#blocks ~= 0 and blocks[1].records)
-	local parser = util.get_parser(bufnr)
-	local allow_plain = parser.allow_plain
+	local allow_plain = context.parser.allow_plain
 	log.debug(#blocks ~= 0 and blocks[1].records[1])
 	local success, reason = Blocks.reconcile(blocks, attr_prev, attr_next, allow_plain)
 	log.debug(#blocks ~= 0 and blocks[1].attr)
@@ -100,9 +100,9 @@ local function apply_range(bufnr, start_row, end_row)
 	if not success then
 		log.debug("===-===-===-=== not success: %s", reason)
 		if reason == "grid in plain" then
-			return flat_parser.unparse(document, parser)
+			return flat_parser.unparse(document, context.parser)
 		elseif reason == "conflict" then
-			document = build_blocks(bufnr, 0, -1)
+			document = build_blocks(context, 0, -1)
 		else
 			error("repair: unexpected error: " .. tostring(reason))
 		end
@@ -110,14 +110,14 @@ local function apply_range(bufnr, start_row, end_row)
 	return vim_parser.unparse(document)
 end
 
----@param bufnr number
+---@param context Context
 ---@param ranges Range[]
-local function apply_ranges(bufnr, ranges)
+local function apply_ranges(context, ranges)
 	for index = 1, #ranges do
 		local first = ranges[index].first
 		local last = ranges[index].last + 1
-		local new_lines = apply_range(bufnr, first, last)
-		buffer.set_lines(bufnr, first, last, new_lines, true)
+		local new_lines = apply_range(context, first, last)
+		buffer.set_lines(context.bufnr, first, last, new_lines, true)
 	end
 end
 
@@ -162,51 +162,52 @@ local function expand_continue_lines(bufnr, range)
 	range.last = last - 1
 end
 
----@param bufnr number
+---@param context Context
 ---@param ext_ranges Range
-local function apply_extra_ranges(bufnr, ext_ranges)
-	apply_ranges(bufnr, ext_ranges)
+local function apply_extra_ranges(context, ext_ranges)
+	apply_ranges(context, ext_ranges)
 end
 
 local local_range = nil
----@param bufnr number
-local function apply_local_range(bufnr)
-	apply_ranges(bufnr, { local_range })
+---@param context Context
+local function apply_local_range(context)
+	apply_ranges(context, { local_range })
 	local_range = nil
 end
 
----@param bufnr number
+---@param context Context
 ---@param ext_ranges Range
-local function schedule_extra_ranges(bufnr, ext_ranges)
+local function schedule_extra_ranges(context, ext_ranges)
 	vim.schedule(function()
-		apply_extra_ranges(bufnr, ext_ranges)
+		apply_extra_ranges(context, ext_ranges)
 	end)
 end
 
----@param bufnr number
+---@param context Context
 ---@param new_range Range
-local function schedule_new_range(bufnr, new_range)
+local function schedule_new_range(context, new_range)
 	if local_range == nil then
 		vim.schedule(function()
-			apply_local_range(bufnr)
+			apply_local_range(context)
 		end)
 		local_range = new_range
 	else
-		log.watch(bufnr, { "muli time on_lines", local_range })
+		log.watch(context.bufnr, { "muli time on_lines", local_range })
 		Range.union({ local_range, new_range })
 	end
 end
 
----@param bufnr number
+---@param context Context
 ---@param first integer|nil
 ---@param last integer|nil
 ---@param new_last integer|nil
-local function handle_request(bufnr, first, last, new_last)
+local function handle_request(context, first, last, new_last)
+	local bufnr = context.bufnr
 	local ext_ranges = invalid.get_range(bufnr)
 	ui.diagnostic_clear(bufnr)
 	if not first then
 		log_watch(bufnr, "INSERT LEAVE[" .. tostring(#ext_ranges) .. "]")
-		schedule_extra_ranges(bufnr, ext_ranges)
+		schedule_extra_ranges(context, ext_ranges)
 		return
 	end
 	local new_range = Range.new(first, new_last)
@@ -227,11 +228,11 @@ local function handle_request(bufnr, first, last, new_last)
 		ui.diagnostic_set(bufnr, Range.union(ext_ranges))
 	elseif #ext_ranges ~= 0 then
 		log_watch(bufnr, "UNDO/REDO LEAVE", first, last, new_last, ext_ranges)
-		schedule_extra_ranges(bufnr, ext_ranges)
-		schedule_new_range(bufnr, new_range)
+		schedule_extra_ranges(context, ext_ranges)
+		schedule_new_range(context, new_range)
 	else
 		log_watch(bufnr, "NORMAL", first, last, new_last, ext_ranges)
-		schedule_new_range(bufnr, new_range)
+		schedule_new_range(context, new_range)
 	end
 end
 
@@ -239,12 +240,13 @@ end
 -- Public API
 -----------------------------------------------------------------------
 
----@param bufnr number
+---@param context Context
 ---@param first integer|nil
 ---@param last integer|nil
 ---@param new_last integer|nil
-function M.handle(bufnr, first, last, new_last)
+function M.handle(context, first, last, new_last)
 	-- log.debug(debug.traceback())
+	local bufnr = context.bufnr
 	vim.schedule(function()
 		if not api.nvim_buf_is_valid(bufnr) then
 			return
@@ -254,7 +256,7 @@ function M.handle(bufnr, first, last, new_last)
 		end
 		local ok, err = xpcall(
 			function()
-				handle_request(bufnr, first, last, new_last)
+				handle_request(context, first, last, new_last)
 			end,
 			debug.traceback
 		)

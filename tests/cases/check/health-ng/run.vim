@@ -17,7 +17,8 @@ parser_map = {
 })
 EOF
 
-edit $TIRENVI_ROOT/tests/data/simple.csv
+edit $TIRENVI_ROOT/tests/data/empty.txt
 checkhealth tirenvi
 
-call RunTest({ "nomessage": 'true' })
+call RunTest({})
+--call RunTest({ "nomessage": 'true' })

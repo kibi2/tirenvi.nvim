@@ -1,4 +1,6 @@
 ----- dependencies
+local Context = require("tirenvi.core.context")
+local Parser = require("tirenvi.core.parser")
 local config = require("tirenvi.config")
 local buf_state = require("tirenvi.state.buf_state")
 local util = require("tirenvi.util.util")
@@ -37,36 +39,35 @@ local function restore_widths(bufnr, document)
 	buffer.set(bufnr, buffer.IKEY.WIDTHS, nil)
 end
 
----@param bufnr number Buffer number.
+---@param context Context
 ---@param is_toggle boolean|nil
 ---@return nil
-local function to_flat(bufnr, is_toggle)
+local function to_flat(context, is_toggle)
 	is_toggle = is_toggle or false
-	if not buf_state.is_tir_vim(bufnr) then
+	if not buf_state.is_tir_vim(context.bufnr) then
 		return
 	end
-	local parser = util.get_parser(bufnr)
-	local vi_lines = buffer.get_lines(bufnr, 0, -1)
-	local document = vim_parser.parse(vi_lines, parser.allow_plain)
+	local vi_lines = buffer.get_lines(context.bufnr, 0, -1)
+	local document = vim_parser.parse(vi_lines, context.parser.allow_plain)
 	if is_toggle then
-		store_widths(bufnr, document)
+		store_widths(context.bufnr, document)
 	end
 	log.debug(document.blocks[1].records)
-	local fl_lines = flat_parser.unparse(document, parser)
-	buffer.set_lines(bufnr, 0, -1, fl_lines)
+	local fl_lines = flat_parser.unparse(document, context.parser)
+	buffer.set_lines(context.bufnr, 0, -1, fl_lines)
 end
 
----@param bufnr number Buffer number.
+---@param context Context
 ---@param no_undo boolean|nil
 ---@return nil
-local function from_flat(bufnr, no_undo)
-	local fl_lines = buffer.get_lines(bufnr, 0, -1)
-	local parser = util.get_parser(bufnr)
+local function from_flat(context, no_undo)
+	local fl_lines = buffer.get_lines(context.bufnr, 0, -1)
+	local parser = context.parser
 	util.assert_no_reserved_marks(fl_lines)
 	local document = flat_parser.parse(fl_lines, parser)
-	restore_widths(bufnr, document)
+	restore_widths(context.bufnr, document)
 	local vi_lines = vim_parser.unparse(document)
-	buffer.set_lines(bufnr, 0, -1, vi_lines, no_undo)
+	buffer.set_lines(context.bufnr, 0, -1, vi_lines, no_undo)
 end
 
 ---@return integer|nil
@@ -82,14 +83,12 @@ local function get_current_col()
 	return irow, tir_vim.get_current_col_index(pipe_pos, ibyte)
 end
 
+---@param context Context
 ---@param row Range
----@return number
 ---@return Document
-local function get_blocks(row)
-	local bufnr = api.nvim_get_current_buf()
-	local allow_plain = util.get_parser(bufnr).allow_plain
-	local lines = buffer.get_lines(bufnr, row.first - 1, row.last)
-	return bufnr, vim_parser.parse(lines, allow_plain)
+local function get_blocks(context, row)
+	local lines = buffer.get_lines(context.bufnr, row.first - 1, row.last)
+	return vim_parser.parse(lines, context.parser.allow_plain)
 end
 
 ---@param line_provider LineProvider
@@ -113,23 +112,25 @@ local function expand_rect(line_provider, row)
 	row.last = bottom
 end
 
+---@param context Context
 ---@param operator string
 ---@param count integer
 ---@param rect Rect
-local function change_table_width(operator, count, rect)
+local function change_table_width(context, operator, count, rect)
 	log.debug("row%s, col%s", rect.row:short(), rect.col:short())
-	local bufnr, document = get_blocks(rect.row)
+	local document = get_blocks(context, rect.row)
 	Blocks.change_width(document.blocks, operator, count, rect.col)
 	local vi_lines = vim_parser.unparse(document)
-	buffer.set_lines(bufnr, rect.row.first - 1, rect.row.last, vi_lines)
+	buffer.set_lines(context.bufnr, rect.row.first - 1, rect.row.last, vi_lines)
 end
 
+---@param context Context
 ---@param line_provider LineProvider
 ---@param rect Rect
 ---@param operator string
-local function change_width(line_provider, rect, operator, count)
+local function change_width(context, line_provider, rect, operator, count)
 	expand_rect(line_provider, rect.row)
-	change_table_width(operator, count, rect)
+	change_table_width(context, operator, count, rect)
 end
 
 local warned = false
@@ -165,62 +166,61 @@ function M.setup(opts)
 end
 
 --- Convert current buffer (or specified buffer) from plain format to tir-vim format
----@param bufnr number Buffer number.
+---@param context Context
 ---@return nil
-function M.import_flat(bufnr)
-	from_flat(bufnr, true)
+function M.import_flat(context)
+	from_flat(context, true)
 end
 
----@param bufnr number Buffer number.
+---@param context Context
 ---@return nil
-function M.enable(bufnr)
-	from_flat(bufnr)
+function M.enable(context)
+	from_flat(context)
 end
 
 local buffer_backup
 
 --- Convert current buffer (or specified buffer) from display format back to file format (tsv)
----@param bufnr number Buffer number.
+---@param context Context
 ---@return nil
-function M.export_flat(bufnr)
-	buffer_backup = buffer.get_lines(bufnr, 0, -1)
-	to_flat(bufnr)
+function M.export_flat(context)
+	buffer_backup = buffer.get_lines(context.bufnr, 0, -1)
+	to_flat(context)
 end
 
 --- Convert current buffer (or specified buffer) from plain format to view format
----@param bufnr number Buffer number.
+---@param context Context
 ---@return nil
-function M.restore_tir_vim(bufnr)
+function M.restore_tir_vim(context)
 	if not buffer_backup then
 		return
 	end
-	buffer.set_lines(bufnr, 0, -1, buffer_backup, true)
+	buffer.set_lines(context.bufnr, 0, -1, buffer_backup, true)
 	buffer_backup = nil
 end
 
----@param bufnr number Buffer number.
+---@param context Context
 ---@return nil
-function M.disable(bufnr)
-	to_flat(bufnr, true)
+function M.disable(context)
+	to_flat(context, true)
 end
 
----@param bufnr number Buffer number.
+---@param context Context
 ---@return nil
-function M.toggle(bufnr)
-	if buf_state.is_tir_vim(bufnr) then
-		M.disable(bufnr)
+function M.toggle(context)
+	if buf_state.is_tir_vim(context.bufnr) then
+		M.disable(context)
 	else
-		M.enable(bufnr)
+		M.enable(context)
 	end
 end
 
----@param bufnr number|nil Buffer number.
+---@param context Context
 ---@return nil
-function M.reconcile(bufnr)
-	bufnr = bufnr or api.nvim_get_current_buf()
-	local allow_plain = util.get_parser(bufnr).allow_plain
+function M.reconcile(context)
+	local bufnr = context.bufnr
 	local old_lines = buffer.get_lines(bufnr, 0, -1)
-	local document = vim_parser.parse(old_lines, allow_plain)
+	local document = vim_parser.parse(old_lines, context.parser.allow_plain)
 	local vi_lines = vim_parser.unparse(document)
 	if table.concat(old_lines, "\n") ~= table.concat(vi_lines, "\n") then
 		log.debug({ vi_lines[1], vi_lines[2] })
@@ -228,13 +228,14 @@ function M.reconcile(bufnr)
 	end
 end
 
+---@param context Context	
 ---@param line_provider LineProvider
 ---@param rect Rect
 ---@param operator string Operator: "", "=", "+", "-"
 ---@param count integer Count for the operator (default: 0)
 ---@return nil
-function M.width(line_provider, rect, operator, count)
-	change_width(line_provider, rect, operator, count)
+function M.width(context, line_provider, rect, operator, count)
+	change_width(context, line_provider, rect, operator, count)
 	local command = api.nvim_replace_termcodes(
 		":<C-u>Tir width " .. operator .. count .. "<CR>",
 		true, false, true
@@ -242,17 +243,17 @@ function M.width(line_provider, rect, operator, count)
 	set_repeat(command)
 end
 
----@param bufnr number
-function M.insert_char_in_newline(bufnr)
+---@param context Context
+function M.insert_char_in_newline(context)
 	local winid = api.nvim_get_current_win()
 	local row = api.nvim_win_get_cursor(winid)[1]
-	local line_new = buffer.get_line(bufnr, row - 1)
+	local line_new = buffer.get_line(context.bufnr, row - 1)
 	if line_new ~= "" then
 		return
 	end
-	local line_prev, line_next = buffer.get_lines_around(bufnr, row - 1, row)
+	local line_prev, line_next = buffer.get_lines_around(context.bufnr, row - 1, row)
 	local line_ref = line_prev
-	if not util.get_parser(bufnr).allow_plain then
+	if not context.parser.allow_plain then
 		line_ref = line_ref or line_next
 	end
 	local pipe = tir_vim.get_pipe_char(line_ref)
@@ -287,30 +288,30 @@ function M.keymap_tab()
 	return config.marks.tab
 end
 
----@param bufnr number
+---@param context Context
 ---@param first integer
 ---@param last integer
 ---@param new_last integer
-function M.on_lines(bufnr, first, last, new_last)
-	log.watch("UNDO", "===+=== ENTRY on_lines[#%d][%d,%d,%d]", bufnr, first, last, new_last)
-	reconcile.handle(bufnr, first, last, new_last)
+function M.on_lines(context, first, last, new_last)
+	log.watch("UNDO", "===+=== ENTRY on_lines[#%d][%d,%d,%d]", context.bufnr, first, last, new_last)
+	reconcile.handle(context, first, last, new_last)
 end
 
----@param bufnr number
-function M.on_insert_leave(bufnr)
-	log.watch("UNDO", "===+=== ENTRY insert_leave[#%d]", bufnr)
-	reconcile.handle(bufnr)
+---@param context Context
+function M.on_insert_leave(context)
+	log.watch("UNDO", "===+=== ENTRY insert_leave[#%d]", context.bufnr)
+	reconcile.handle(context)
 end
 
----@param bufnr number
-function M.on_filetype(bufnr)
-	local old_filetype = buffer.get(bufnr, buffer.IKEY.FILETYPE)
-	local new_filetype = bo[bufnr].filetype
+---@param context Context
+function M.on_filetype(context)
+	local old_filetype = buffer.get(context.bufnr, buffer.IKEY.FILETYPE)
+	local new_filetype = bo[context.bufnr].filetype
 	-- log.debug("filetype %s -> %s", tostring(old_filetype), tostring(new_filetype))
 	if old_filetype and old_filetype ~= new_filetype then
-		to_flat(bufnr)
+		to_flat(context)
 	end
-	buffer.set(bufnr, buffer.IKEY.FILETYPE, new_filetype)
+	buffer.set(context.bufnr, buffer.IKEY.FILETYPE, new_filetype)
 end
 
 return M
