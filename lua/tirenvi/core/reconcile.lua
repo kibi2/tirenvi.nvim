@@ -57,12 +57,13 @@ end
 ---@param bufnr number
 ---@param start_row integer
 ---@param end_row integer
----@return Blocks
+---@return Document
 local function build_blocks(bufnr, start_row, end_row)
+	local allow_plain = util.get_parser(bufnr).allow_plain
 	local vi_lines = buffer.get_lines(bufnr, start_row, end_row)
 	local line_prev = buffer.get_line(bufnr, start_row - 1)
 	normalize_trailing_empty_line(vi_lines, line_prev)
-	return vim_parser.parse(vi_lines, true)
+	return vim_parser.parse(vi_lines, allow_plain, true)
 end
 
 ---@param bufnr number
@@ -87,7 +88,8 @@ end
 local function apply_range(bufnr, start_row, end_row)
 	log.debug("===-===-===-=== reconcile start[%d, %d] ===-===-===-===", start_row + 1, end_row)
 	local attr_prev, attr_next = resolve_reference_attrs(bufnr, start_row, end_row)
-	local blocks = build_blocks(bufnr, start_row, end_row)
+	local document = build_blocks(bufnr, start_row, end_row)
+	local blocks = document.blocks
 	log.debug(#blocks ~= 0 and blocks[1].records)
 	local parser = util.get_parser(bufnr)
 	local allow_plain = parser.allow_plain
@@ -98,14 +100,14 @@ local function apply_range(bufnr, start_row, end_row)
 	if not success then
 		log.debug("===-===-===-=== not success: %s", reason)
 		if reason == "grid in plain" then
-			return flat_parser.unparse(blocks, parser)
+			return flat_parser.unparse(document, parser)
 		elseif reason == "conflict" then
-			blocks = build_blocks(bufnr, 0, -1)
+			document = build_blocks(bufnr, 0, -1)
 		else
 			error("repair: unexpected error: " .. tostring(reason))
 		end
 	end
-	return vim_parser.unparse(blocks)
+	return vim_parser.unparse(document)
 end
 
 ---@param bufnr number

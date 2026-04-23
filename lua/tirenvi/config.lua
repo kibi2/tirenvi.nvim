@@ -8,6 +8,20 @@ local levels = vim.log.levels
 
 local M = {}
 
+---@class Marks
+---@field pipe string
+---@field padding string
+---@field pipec string
+---@field lf string
+---@field tab string
+
+---@class Parser
+---@field executable string             Parser executable name
+---@field options? string[]             Command-line arguments passed to the parser
+---@field required_version? string      Parser required version "major.minor.patch"
+---@field _iversion? integer            integer version
+---@field allow_plain? boolean          Whether plain blocks are allowed (GFM). If false, only a single table is permitted.
+
 -----------------------------------------------------------------------
 -- Defaults
 -----------------------------------------------------------------------

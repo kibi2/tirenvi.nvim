@@ -12,6 +12,7 @@
 local log = require("tirenvi.util.log")
 local util = require("tirenvi.util.util")
 local errors = require("tirenvi.util.errors")
+local Document = require("tirenvi.core.document")
 local Blocks = require("tirenvi.core.blocks")
 local config = require("tirenvi.config")
 
@@ -219,20 +220,20 @@ end
 
 ---@param fl_lines string[]
 ---@param parser Parser
----@return Blocks
+---@return Document
 function M.parse(fl_lines, parser)
 	local js_lines = flat_to_js_lines(fl_lines, parser)
 	local ndjsons = js_lines_to_ndjsons(js_lines)
-	local blocks = Blocks.new_from_flat(ndjsons, parser.allow_plain)
-	return blocks
+	local document = Document.new_from_flat(ndjsons, parser.allow_plain)
+	return document
 end
 
 --- Convert display lines back to TSV format
----@param blocks Blocks
+---@param document Document	
 ---@param parser Parser
 ---@return string[]
-function M.unparse(blocks, parser)
-	local ndjsons = Blocks.serialize_to_flat(blocks)
+function M.unparse(document, parser)
+	local ndjsons = Document.serialize_to_flat(document)
 	local js_lines = ndjsons_to_lines(ndjsons)
 	log.debug({ #js_lines, js_lines[1], js_lines[#js_lines] })
 	return js_lines_to_flat(js_lines, parser)

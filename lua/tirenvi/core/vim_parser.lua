@@ -5,6 +5,7 @@
 ----- dependencies
 local config = require("tirenvi.config")
 local CONST = require("tirenvi.constants")
+local Document = require("tirenvi.core.document")
 local Blocks = require("tirenvi.core.blocks")
 local Record = require("tirenvi.core.record")
 local Attr = require("tirenvi.core.attr")
@@ -67,18 +68,17 @@ end
 ---@param vi_lines string[]
 ---@param no_normalize boolean|nil  -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
----@return Blocks
-function M.parse(vi_lines, no_normalize)
+---@return Document
+function M.parse(vi_lines, allow_plain, no_normalize)
 	no_normalize = no_normalize or false
 	local records = tir_vim_to_ndjsons(vi_lines)
-	local blocks = Blocks.new_from_vim(records, no_normalize)
-	return blocks
+	return Document.new_from_vim(records, allow_plain, no_normalize)
 end
 
----@param blocks Blocks
+---@param document Document
 ---@return string[]
-function M.unparse(blocks)
-	local ndjsons = Blocks.serialize_to_vim(blocks)
+function M.unparse(document)
+	local ndjsons = Document.serialize_to_vim(document)
 	return to_lines(ndjsons)
 end
 

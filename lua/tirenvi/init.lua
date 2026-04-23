@@ -24,16 +24,16 @@ M.motion = require("tirenvi.editor.motion")
 -- private helpers
 
 ---@param bufnr number
----@param blocks Blocks
-local function store_widths(bufnr, blocks)
-	buffer.set(bufnr, buffer.IKEY.WIDTHS, Blocks.get_widths(blocks))
+---@param document Document
+local function store_widths(bufnr, document)
+	buffer.set(bufnr, buffer.IKEY.WIDTHS, Blocks.get_widths(document.blocks))
 end
 
 ---@param bufnr number
----@param blocks Blocks
-local function restore_widths(bufnr, blocks)
+---@param document Document
+local function restore_widths(bufnr, document)
 	local widths = buffer.get(bufnr, buffer.IKEY.WIDTHS)
-	Blocks.set_widths(blocks, widths)
+	Blocks.set_widths(document.blocks, widths)
 	buffer.set(bufnr, buffer.IKEY.WIDTHS, nil)
 end
 
@@ -47,12 +47,12 @@ local function to_flat(bufnr, is_toggle)
 	end
 	local parser = util.get_parser(bufnr)
 	local vi_lines = buffer.get_lines(bufnr, 0, -1)
-	local blocks = vim_parser.parse(vi_lines)
+	local document = vim_parser.parse(vi_lines, parser.allow_plain)
 	if is_toggle then
-		store_widths(bufnr, blocks)
+		store_widths(bufnr, document)
 	end
-	log.debug(blocks[1].records)
-	local fl_lines = flat_parser.unparse(blocks, parser)
+	log.debug(document.blocks[1].records)
+	local fl_lines = flat_parser.unparse(document, parser)
 	buffer.set_lines(bufnr, 0, -1, fl_lines)
 end
 
@@ -63,9 +63,9 @@ local function from_flat(bufnr, no_undo)
 	local fl_lines = buffer.get_lines(bufnr, 0, -1)
 	local parser = util.get_parser(bufnr)
 	util.assert_no_reserved_marks(fl_lines)
-	local blocks = flat_parser.parse(fl_lines, parser)
-	restore_widths(bufnr, blocks)
-	local vi_lines = vim_parser.unparse(blocks)
+	local document = flat_parser.parse(fl_lines, parser)
+	restore_widths(bufnr, document)
+	local vi_lines = vim_parser.unparse(document)
 	buffer.set_lines(bufnr, 0, -1, vi_lines, no_undo)
 end
 
@@ -84,11 +84,12 @@ end
 
 ---@param row Range
 ---@return number
----@return Blocks
+---@return Document
 local function get_blocks(row)
 	local bufnr = api.nvim_get_current_buf()
+	local allow_plain = util.get_parser(bufnr).allow_plain
 	local lines = buffer.get_lines(bufnr, row.first - 1, row.last)
-	return bufnr, vim_parser.parse(lines)
+	return bufnr, vim_parser.parse(lines, allow_plain)
 end
 
 ---@param line_provider LineProvider
@@ -117,9 +118,9 @@ end
 ---@param rect Rect
 local function change_table_width(operator, count, rect)
 	log.debug("row%s, col%s", rect.row:short(), rect.col:short())
-	local bufnr, blocks = get_blocks(rect.row)
-	Blocks.change_width(blocks, operator, count, rect.col)
-	local vi_lines = vim_parser.unparse(blocks)
+	local bufnr, document = get_blocks(rect.row)
+	Blocks.change_width(document.blocks, operator, count, rect.col)
+	local vi_lines = vim_parser.unparse(document)
 	buffer.set_lines(bufnr, rect.row.first - 1, rect.row.last, vi_lines)
 end
 
@@ -217,9 +218,10 @@ end
 ---@return nil
 function M.reconcile(bufnr)
 	bufnr = bufnr or api.nvim_get_current_buf()
+	local allow_plain = util.get_parser(bufnr).allow_plain
 	local old_lines = buffer.get_lines(bufnr, 0, -1)
-	local blocks = vim_parser.parse(old_lines)
-	local vi_lines = vim_parser.unparse(blocks)
+	local document = vim_parser.parse(old_lines, allow_plain)
+	local vi_lines = vim_parser.unparse(document)
 	if table.concat(old_lines, "\n") ~= table.concat(vi_lines, "\n") then
 		log.debug({ vi_lines[1], vi_lines[2] })
 		buffer.set_lines(bufnr, 0, -1, vi_lines)

@@ -14,18 +14,12 @@ local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
 
 local M = {}
-M.VERSION = "tir/0.1"
 
 -- constants / defaults
 
 -----------------------------------------------------------------------
 -- Utility
 -----------------------------------------------------------------------
-
----@return Ndjson
-local function new_attr_file()
-	return { kind = CONST.KIND.ATTR_FILE, version = M.VERSION }
-end
 
 -----------------------------------------------------------------------
 -- Block construction
@@ -225,7 +219,7 @@ end
 ---@self Blocks
 ---@return Ndjson[]
 function M:serialize_to_flat()
-	local ndjsons = { new_attr_file() }
+	local ndjsons = {}
 	for _, block in ipairs(self) do
 		local impl = Block[block.kind]
 		impl.to_flat(block)
