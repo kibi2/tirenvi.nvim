@@ -35,7 +35,7 @@ function M.block_top()
 	local cursor = vim.api.nvim_win_get_cursor(0)
 	local row, col = cursor[1], cursor[2]
 	local top
-	if not context.parser or not context.parser.allow_plain then
+	if not Context.is_allow_plain(context) then
 		top = 1
 	else
 		local line_provider = LinProvider.new()
@@ -49,7 +49,7 @@ function M.block_bottom()
 	local cursor = vim.api.nvim_win_get_cursor(0)
 	local row, col = cursor[1], cursor[2]
 	local bottom
-	if not context.parser or not context.parser.allow_plain then
+	if not Context.is_allow_plain(context) then
 		bottom = buffer.line_count(context.bufnr)
 	else
 		local line_provider = LinProvider.new()

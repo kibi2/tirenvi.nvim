@@ -16,7 +16,7 @@ local function setup_vl(line_provider, is_around)
     is_around = is_around or false
     local count = vim.v.count1
     local context = Context.from_buf()
-    local pos = tir_vim.get_block_rect(line_provider, count, is_around, context.parser.allow_plain)
+    local pos = tir_vim.get_block_rect(line_provider, count, is_around, Context.is_allow_plain(context))
     if not pos then
         return
     end

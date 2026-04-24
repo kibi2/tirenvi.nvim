@@ -7,7 +7,7 @@
 -- Dependencies
 -----------------------------------------------------------------------
 
-local Parser = require("tirenvi.core.parser")
+local Context = require("tirenvi.core.context")
 local util = require("tirenvi.util.util")
 local Range = require("tirenvi.util.range")
 local buffer = require("tirenvi.state.buffer")
@@ -60,11 +60,10 @@ end
 ---@param end_row integer
 ---@return Document
 local function build_blocks(context, start_row, end_row)
-	local allow_plain = context.parser.allow_plain
 	local vi_lines = buffer.get_lines(context.bufnr, start_row, end_row)
 	local line_prev = buffer.get_line(context.bufnr, start_row - 1)
 	normalize_trailing_empty_line(vi_lines, line_prev)
-	return vim_parser.parse(vi_lines, allow_plain, true)
+	return vim_parser.parse(vi_lines, Context.is_allow_plain(context), true)
 end
 
 ---@param bufnr number
@@ -92,9 +91,8 @@ local function apply_range(context, start_row, end_row)
 	local document = build_blocks(context, start_row, end_row)
 	local blocks = document.blocks
 	log.debug(#blocks ~= 0 and blocks[1].records)
-	local allow_plain = context.parser.allow_plain
 	log.debug(#blocks ~= 0 and blocks[1].records[1])
-	local success, reason = Blocks.reconcile(blocks, attr_prev, attr_next, allow_plain)
+	local success, reason = Blocks.reconcile(blocks, attr_prev, attr_next, Context.is_allow_plain(context))
 	log.debug(#blocks ~= 0 and blocks[1].attr)
 	log.debug(#blocks ~= 0 and blocks[1].records[1])
 	if not success then

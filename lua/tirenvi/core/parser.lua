@@ -36,7 +36,7 @@ local fn = vim.fn
 -- private helpers
 
 --- Get parser configuration for a file.
----@param filetype string
+---@param filetype string|nil
 ---@return Parser|nil
 local function get_parser_for_filetype(filetype)
     if not filetype then
@@ -161,14 +161,11 @@ function M.check(self)
     return ok, error_code
 end
 
----@param bufnr number|nil
+---@param filetype string|nil
 ---@return Parser|nil
-function M.resolve_parser(bufnr)
-    bufnr = bufnr or vim.api.nvim_get_current_buf()
-    local filetype = buffer.get(bufnr, buffer.IKEY.FILETYPE)
+function M.resolve_parser(filetype)
     local parser = get_parser_for_filetype(filetype)
     if not parser then
-        buffer.set(bufnr, buffer.IKEY.FILETYPE, nil)
         return nil
     end
     _, parser._err_code = M.check(parser)

@@ -48,7 +48,7 @@ local function to_flat(context, is_toggle)
 		return
 	end
 	local vi_lines = buffer.get_lines(context.bufnr, 0, -1)
-	local document = vim_parser.parse(vi_lines, context.parser.allow_plain)
+	local document = vim_parser.parse(vi_lines, Context.is_allow_plain(context))
 	if is_toggle then
 		store_widths(context.bufnr, document)
 	end
@@ -88,7 +88,7 @@ end
 ---@return Document
 local function get_blocks(context, row)
 	local lines = buffer.get_lines(context.bufnr, row.first - 1, row.last)
-	return vim_parser.parse(lines, context.parser.allow_plain)
+	return vim_parser.parse(lines, Context.is_allow_plain(context))
 end
 
 ---@param line_provider LineProvider
@@ -220,7 +220,7 @@ end
 function M.reconcile(context)
 	local bufnr = context.bufnr
 	local old_lines = buffer.get_lines(bufnr, 0, -1)
-	local document = vim_parser.parse(old_lines, context.parser.allow_plain)
+	local document = vim_parser.parse(old_lines, Context.is_allow_plain(context))
 	local vi_lines = vim_parser.unparse(document)
 	if table.concat(old_lines, "\n") ~= table.concat(vi_lines, "\n") then
 		log.debug({ vi_lines[1], vi_lines[2] })
@@ -253,7 +253,7 @@ function M.insert_char_in_newline(context)
 	end
 	local line_prev, line_next = buffer.get_lines_around(context.bufnr, row - 1, row)
 	local line_ref = line_prev
-	if not context.parser.allow_plain then
+	if not Context.is_allow_plain(context) then
 		line_ref = line_ref or line_next
 	end
 	local pipe = tir_vim.get_pipe_char(line_ref)
@@ -304,14 +304,22 @@ function M.on_insert_leave(context)
 end
 
 ---@param context Context
+---@return Context
 function M.on_filetype(context)
 	local old_filetype = buffer.get(context.bufnr, buffer.IKEY.FILETYPE)
 	local new_filetype = bo[context.bufnr].filetype
 	-- log.debug("filetype %s -> %s", tostring(old_filetype), tostring(new_filetype))
-	if old_filetype and old_filetype ~= new_filetype then
-		to_flat(context)
+	if old_filetype and old_filetype == new_filetype then
+		return context
 	end
+	to_flat(context)
 	buffer.set(context.bufnr, buffer.IKEY.FILETYPE, new_filetype)
+	context = Context.from_buf(context.bufnr)
+	-- Check whether the parser is executable at runtime.
+	if not context.parser then
+		buffer.set(context.bufnr, buffer.IKEY.FILETYPE, nil)
+	end
+	return context
 end
 
 return M

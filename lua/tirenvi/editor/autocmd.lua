@@ -42,7 +42,33 @@ end
 
 ---@param context Context
 local function attach_on_lines(context)
-	buffer.attach_on_lines(context.bufnr, on_lines)
+	local bufnr = context.bufnr
+	if buffer.get(bufnr, buffer.IKEY.ATTACHED) then
+		return
+	end
+	log.debug("===+===+=== attach onlines")
+	api.nvim_buf_attach(bufnr, false, {
+		-- NOTE:
+		-- When returning `true` from this callback, the attachment is detached only for
+		-- this handler. In this case, `on_detach` is NOT called automatically, so any
+		-- state (e.g. ATTACHED flag) must be updated manually here.
+		on_lines = function(_, bufnr, tick, first, last, new_last, bytecount)
+			if buffer.get(bufnr, buffer.IKEY.FILETYPE) == nil then
+				log.debug("===+===+=== auto detach (no filetype)")
+				buffer.set(bufnr, buffer.IKEY.ATTACHED, false)
+				return true -- detach
+			end
+			if buffer.get(bufnr, buffer.IKEY.PATCH_DEPTH) > 0 then
+				return
+			end
+			on_lines(_, bufnr, tick, first, last, new_last, bytecount)
+		end,
+		on_detach = function()
+			log.debug("===+===+=== detach onlines")
+			buffer.set(bufnr, buffer.IKEY.ATTACHED, false)
+		end,
+	})
+	buffer.set(bufnr, buffer.IKEY.ATTACHED, true)
 end
 
 ---@param context Context
@@ -76,8 +102,9 @@ local function on_cursor_hold(args)
 end
 
 ---@param context Context
+---@return Context
 local function on_filetype(context)
-	init.on_filetype(context)
+	return init.on_filetype(context)
 end
 
 ---@param args table
@@ -93,9 +120,9 @@ local function debug_entry_point(args)
 end
 
 ---@param augroup integer
----@param bufnr number
-local function clear_buffer_local_autocmds(augroup, bufnr)
-	api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+---@param context Context
+local function clear_buffer_local_autocmds(augroup, context)
+	api.nvim_clear_autocmds({ group = augroup, buffer = context.bufnr })
 end
 
 ---@param augroup integer
@@ -199,12 +226,10 @@ local function register_autocmds()
 			end
 			debug_entry_point(args)
 			local context = get_context(args.bufnr)
-			on_filetype(context)
-			clear_buffer_local_autocmds(augroup, context.bufnr)
-			local parser = Parser.resolve_parser(context.bufnr)
-			if parser and not parser._err_code then
-				register_buffer_local_autocmds(augroup, context)
-			end
+			context = on_filetype(context)
+			clear_buffer_local_autocmds(augroup, context)
+			if buf_state.should_skip(args.buf) then return end
+			register_buffer_local_autocmds(augroup, context)
 		end),
 	})
 
