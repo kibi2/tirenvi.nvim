@@ -1,6 +1,7 @@
+local Context = require("tirenvi.app.context")
 local config = require("tirenvi.config")
 local util = require("tirenvi.util.util")
-local buffer = require("tirenvi.state.buffer")
+local buffer = require("tirenvi.io.buffer")
 local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
@@ -135,18 +136,28 @@ function M.get_current_col_index(byte_pos, icol)
     return nil
 end
 
+---@param context Context
 ---@param line_provider LineProvider
 ---@param irow integer
 ---@return integer
-function M.get_block_top_nrow(line_provider, irow)
-    return find_block_edge(line_provider, irow, -1)
+function M.get_block_top_nrow(context, line_provider, irow, allow_plain)
+    if Context.is_allow_plain(context) then
+        return find_block_edge(line_provider, irow, -1)
+    else
+        return 1
+    end
 end
 
+---@param context Context
 ---@param line_provider LineProvider
 ---@param irow integer
 ---@return integer
-function M.get_block_bottom_nrow(line_provider, irow)
-    return find_block_edge(line_provider, irow, 1)
+function M.get_block_bottom_nrow(context, line_provider, irow)
+    if Context.is_allow_plain(context) then
+        return find_block_edge(line_provider, irow, 1)
+    else
+        return buffer.line_count(context.bufnr)
+    end
 end
 
 ---@param line string
@@ -182,12 +193,12 @@ function M.is_continue_line(line)
     return M.get_pipe_char(line) == pipec
 end
 
+---@param context Context
 ---@param line_provider LineProvider
 ---@param count integer
 ---@param is_around boolean
----@param allow_plain boolean
 ---@return Rect|nil
-function M.get_block_rect(line_provider, count, is_around, allow_plain)
+function M.get_block_rect(context, line_provider, count, is_around)
     -- local mode = vim.fn.mode()
     local irow, icol0 = unpack(api.nvim_win_get_cursor(0))
     local icol = icol0 + 1
@@ -200,15 +211,8 @@ function M.get_block_rect(line_provider, count, is_around, allow_plain)
     if not colIndex then
         return nil
     end
-    local trow
-    local brow
-    if allow_plain then
-        trow = M.get_block_top_nrow(line_provider, irow)
-        brow = M.get_block_bottom_nrow(line_provider, irow)
-    else
-        trow = 1
-        brow = buffer.line_count(0)
-    end
+    local trow = M.get_block_top_nrow(context, line_provider, irow)
+    local brow = M.get_block_bottom_nrow(context, line_provider, irow)
     local tline = line_provider.get_line(trow) or ""
     local bline = line_provider.get_line(brow) or ""
     local tbyte_pos = M.get_pipe_byte_position(tline)

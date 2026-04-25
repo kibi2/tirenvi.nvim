@@ -9,7 +9,6 @@
 -----------------------------------------------------------------------
 
 local config = require("tirenvi.config")
-local buffer = require("tirenvi.state.buffer")
 local errors = require("tirenvi.util.errors")
 local log = require("tirenvi.util.log")
 
@@ -21,18 +20,7 @@ local log = require("tirenvi.util.log")
 local M = {}
 
 local fn = vim.fn
-local bo = vim.bo
 -- private helpers
-
---- Get parser configuration for a file.
----@param filetype string
----@return Parser|nil
-local function get_parser_for_filetype(filetype)
-	if not filetype then
-		return nil
-	end
-	return config.parser_map[filetype]
-end
 
 ---@return {[string]:string}
 local function collect_reserved_chars()
@@ -111,34 +99,6 @@ function M.assert_no_reserved_marks(fl_lines)
 	if #found > 0 then
 		error(errors.new_domain_error(errors.err_no_usable_characters(found)))
 	end
-end
-
----@param bufnr number|nil
----@return Parser|nil
----@return string|nil
-function M.resolve_parser(bufnr)
-	bufnr = bufnr or vim.api.nvim_get_current_buf()
-	local filetype = buffer.get(bufnr, buffer.IKEY.FILETYPE)
-	local parser = get_parser_for_filetype(filetype)
-	if not parser then
-		buffer.set(bufnr, buffer.IKEY.FILETYPE, nil)
-		return nil, errors.no_parser_error(filetype)
-	end
-	if fn.executable(parser.executable) ~= 1 then
-		return parser, errors.not_found_parser_error(parser)
-	end
-	return parser, nil
-end
-
----@param bufnr number|nil
----@return Parser
-function M.get_parser(bufnr)
-	local parser, err = M.resolve_parser(bufnr)
-	if err then
-		error(errors.new_domain_error(err))
-	end
-	---@cast parser Parser	
-	return parser
 end
 
 ---@param line string

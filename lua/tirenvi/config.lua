@@ -8,6 +8,13 @@ local levels = vim.log.levels
 
 local M = {}
 
+---@class Marks
+---@field pipe string
+---@field padding string
+---@field pipec string
+---@field lf string
+---@field tab string
+
 -----------------------------------------------------------------------
 -- Defaults
 -----------------------------------------------------------------------
@@ -25,7 +32,7 @@ local defaults = {
 	parser_map = {
 		csv = { executable = "tir-csv", required_version = "0.1.4" },
 		tsv = { executable = "tir-csv", options = { "--delimiter", "\t" }, required_version = "0.1.4" },
-		markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = "0.1.5" },
+		markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = "0.1.6" },
 		pukiwiki = { executable = "tir-pukiwiki", allow_plain = true, required_version = "0.1.1" },
 	},
 	textobj = {
@@ -66,7 +73,7 @@ end
 ---@param parser_map Parser[]
 local function parse_version(parser_map)
 	for _, parser in pairs(parser_map) do
-		parser._iversion = M.version_to_integer(parser.required_version)
+		parser._required_version_int = M.version_to_integer(parser.required_version)
 	end
 end
 

@@ -1,20 +1,22 @@
+local Parser = require("tirenvi.parser.parser")
+local Context = require("tirenvi.app.context")
 local tir_vim = require("tirenvi.core.tir_vim")
 local config = require("tirenvi.config")
 local util = require("tirenvi.util.util")
-local LinProvider = require("tirenvi.state.buffer_line_provider")
+local LinProvider = require("tirenvi.io.buffer_line_provider")
 local log = require("tirenvi.util.log")
 
 local M = {}
 
 -- private helpers
 
+---@param context Context
 ---@param line_provider LineProvider
 ---@param is_around boolean|nil
-local function setup_vl(line_provider, is_around)
+local function setup_vl(context, line_provider, is_around)
     is_around = is_around or false
     local count = vim.v.count1
-    local parser = util.get_parser()
-    local pos = tir_vim.get_block_rect(line_provider, count, is_around, parser.allow_plain)
+    local pos = tir_vim.get_block_rect(context, line_provider, count, is_around)
     if not pos then
         return
     end
@@ -25,13 +27,15 @@ local function setup_vl(line_provider, is_around)
 end
 
 local function setup_vil()
-    local line_provider = LinProvider.new(0)
-    setup_vl(line_provider)
+    local context = Context.from_buf()
+    local line_provider = LinProvider.new()
+    setup_vl(context, line_provider)
 end
 
 local function setup_val()
-    local line_provider = LinProvider.new(0)
-    setup_vl(line_provider, true)
+    local context = Context.from_buf()
+    local line_provider = LinProvider.new()
+    setup_vl(context, line_provider, true)
 end
 
 -- public API

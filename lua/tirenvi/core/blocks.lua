@@ -14,18 +14,12 @@ local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
 
 local M = {}
-M.VERSION = "tir/0.1"
 
 -- constants / defaults
 
 -----------------------------------------------------------------------
 -- Utility
 -----------------------------------------------------------------------
-
----@return Ndjson
-local function new_attr_file()
-	return { kind = CONST.KIND.ATTR_FILE, version = M.VERSION }
-end
 
 -----------------------------------------------------------------------
 -- Block construction
@@ -70,42 +64,6 @@ end
 ---| "conflict"
 ---| "grid in plain"
 
----@param blocks Blocks
----@param attr_prev Attr|nil
----@param attr_next Attr|nil
----@return boolean
----@return RefAttrError|nil
-local function apply_reference_attr_1grid(blocks, attr_prev, attr_next)
-	M.merge_blocks(blocks)
-	if Attr.is_conflict(attr_prev, attr_next, false) then
-		log.debug("===-===-===-=== conflict")
-		log.debug(blocks[1].records[1])
-		return false, "conflict"
-	end
-	if #blocks == 0 then
-		return true
-	end
-	local attr = not attr_prev and attr_next or attr_prev
-	local block = blocks[1]
-	if not attr then
-		return true
-	elseif not Attr.is_plain(attr) then
-		if block.kind == CONST.KIND.PLAIN then
-			block = Block.plain.to_grid(block)
-			blocks[1] = block
-		end
-	elseif Attr.is_plain(attr) then
-		if block.kind == CONST.KIND.GRID then
-			log.debug("===-===-===-=== grid in plain")
-			log.debug(attr_prev)
-			log.debug(attr_next)
-			return false, "grid in plain"
-		end
-	end
-	Block[block.kind].set_attr(block, attr)
-	return true
-end
-
 ---@param self Blocks
 ---@param attr_prev Attr|nil
 ---@param attr_next Attr|nil
@@ -137,19 +95,55 @@ local function apply_attr(self, attr_prev, attr_next)
 	Block[self[#self].kind].set_attr(self[#self], attr_next)
 end
 
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
+
 ---@param blocks Blocks
 ---@param attr_prev Attr|nil
 ---@param attr_next Attr|nil
 ---@return boolean
-local function apply_reference_attrs(blocks, attr_prev, attr_next)
+---@return RefAttrError|nil
+function M.reconcile_single(blocks, attr_prev, attr_next)
+	M.merge_blocks(blocks)
+	if Attr.is_conflict(attr_prev, attr_next, false) then
+		log.debug("===-===-===-=== conflict")
+		log.debug(blocks[1].records[1])
+		return false, "conflict"
+	end
+	if #blocks == 0 then
+		return true
+	end
+	local attr = not attr_prev and attr_next or attr_prev
+	local block = blocks[1]
+	if not attr then
+		return true
+	elseif not Attr.is_plain(attr) then
+		if block.kind == CONST.KIND.PLAIN then
+			block = Block.plain.to_grid(block)
+			blocks[1] = block
+		end
+	elseif Attr.is_plain(attr) then
+		if block.kind == CONST.KIND.GRID then
+			log.debug("===-===-===-=== grid in plain")
+			log.debug(attr_prev)
+			log.debug(attr_next)
+			return false, "grid in plain"
+		end
+	end
+	Block[block.kind].set_attr(block, attr)
+	return true
+end
+
+---@param blocks Blocks
+---@param attr_prev Attr|nil
+---@param attr_next Attr|nil
+---@return boolean
+function M.reconcile_multi(blocks, attr_prev, attr_next)
 	ensure_plain_block(blocks, attr_prev, attr_next)
 	apply_attr(blocks, attr_prev, attr_next)
 	return true
 end
-
------------------------------------------------------------------------
--- Public API
------------------------------------------------------------------------
 
 ---@param self Blocks
 function M.merge_blocks(self)
@@ -225,7 +219,7 @@ end
 ---@self Blocks
 ---@return Ndjson[]
 function M:serialize_to_flat()
-	local ndjsons = { new_attr_file() }
+	local ndjsons = {}
 	for _, block in ipairs(self) do
 		local impl = Block[block.kind]
 		impl.to_flat(block)
@@ -258,20 +252,6 @@ function M:serialize_to_vim()
 		util.extend(ndjsons, impl.serialize(block))
 	end
 	return ndjsons
-end
-
----@self Blocks
----@param attr_prev Attr|nil
----@param attr_next Attr|nil
----@param allow_plain boolean|nil
----@return boolean
----@return RefAttrError|nil
-function M:reconcile(attr_prev, attr_next, allow_plain)
-	if allow_plain then
-		return apply_reference_attrs(self, attr_prev, attr_next)
-	else
-		return apply_reference_attr_1grid(self, attr_prev, attr_next)
-	end
 end
 
 return M

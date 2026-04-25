@@ -79,13 +79,6 @@ function M.vim_system_error(system, command)
 	)
 end
 
---- No parser configured for extension.
----@param ext string|nil
----@return string
-function M.no_parser_error(ext)
-	return string.format(PREFIX .. "No parser available for extension '%s'.", ext)
-end
-
 --- Parser command not found in PATH.
 ---@param parser Parser
 ---@return string
@@ -93,6 +86,22 @@ function M.not_found_parser_error(parser)
 	return string.format(
 		PREFIX .. "Required command '%s' not found in PATH.\n\n" .. "Use :checkhealth tirenvi for details.",
 		parser.executable
+	)
+end
+
+--- Parser version is too old.
+---@param parser Parser
+---@return string
+function M.outdated_parser_error(parser)
+	return string.format(
+		PREFIX
+		.. "Command '%s' version is too old.\n\n"
+		.. "Required version: %s\n"
+		.. "Installed version: %s\n\n"
+		.. "Use :checkhealth tirenvi for details.",
+		parser.executable,
+		parser.required_version or "unknown",
+		parser._installed_version or "unknown"
 	)
 end
 

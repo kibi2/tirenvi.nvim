@@ -1,11 +1,13 @@
 -- dependencies
-local guard = require("tirenvi.util.guard")
-local buffer = require("tirenvi.state.buffer")
+local Context = require("tirenvi.app.context")
+local Parser = require("tirenvi.parser.parser")
+local buffer = require("tirenvi.io.buffer")
 local init = require("tirenvi.init")
-local buf_state = require("tirenvi.state.buf_state")
-local log = require("tirenvi.util.log")
-local util = require("tirenvi.util.util")
+local buf_state = require("tirenvi.io.buf_state")
 local ui = require("tirenvi.ui")
+local guard = require("tirenvi.util.guard")
+local Range3 = require("tirenvi.util.range3")
+local log = require("tirenvi.util.log")
 
 -- module
 local M = {}
@@ -21,57 +23,87 @@ local fn = vim.fn
 -- Event handlers (private)
 ----------------------------------------------------------------------
 
+local function get_context(bufnr)
+	return Context.from_buf(bufnr)
+end
+
 ---@param _ string
 ---@param bufnr number
 ---@param tick integer
----@param first integer
----@param last integer
----@param new_last integer
+---@param range3 Range3
 ---@param bytecount integer
-local function on_lines(_, bufnr, tick, first, last, new_last, bytecount)
+local function on_lines(_, bufnr, tick, range3, bytecount)
 	buffer.clear_cache()
 	if buf_state.should_skip(bufnr) then return end
-	init.on_lines(bufnr, first, last, new_last)
+	local context = get_context(bufnr)
+	init.on_lines(context, range3)
 end
 
----@param bufnr number
-local function attach_on_lines(bufnr)
-	buffer.attach_on_lines(bufnr, on_lines)
+---@param context Context
+local function attach_on_lines(context)
+	local bufnr = context.bufnr
+	if buffer.get(bufnr, buffer.IKEY.ATTACHED) then
+		return
+	end
+	log.debug("===+===+=== attach onlines")
+	api.nvim_buf_attach(bufnr, false, {
+		-- NOTE:
+		-- When returning `true` from this callback, the attachment is detached only for
+		-- this handler. In this case, `on_detach` is NOT called automatically, so any
+		-- state (e.g. ATTACHED flag) must be updated manually here.
+		on_lines = function(_, bufnr, tick, first, last, new_last, bytecount)
+			if buffer.get(bufnr, buffer.IKEY.FILETYPE) == nil then
+				log.debug("===+===+=== auto detach (no filetype)")
+				buffer.set(bufnr, buffer.IKEY.ATTACHED, false)
+				return true -- detach
+			end
+			if buffer.get(bufnr, buffer.IKEY.PATCH_DEPTH) > 0 then
+				return
+			end
+			on_lines(_, bufnr, tick, Range3.new(first, last, new_last), bytecount)
+		end,
+		on_detach = function()
+			log.debug("===+===+=== detach onlines")
+			buffer.set(bufnr, buffer.IKEY.ATTACHED, false)
+		end,
+	})
+	buffer.set(bufnr, buffer.IKEY.ATTACHED, true)
 end
 
----@param bufnr number
-local function on_insert_leave(bufnr)
-	init.on_insert_leave(bufnr)
+---@param context Context
+local function on_insert_leave(context)
+	init.on_insert_leave(context)
 end
 
----@param args table
-local function on_buf_read_post(args)
-	init.import_flat(args.buf)
+---@param context Context
+local function on_buf_read_post(context)
+	init.import_flat(context)
 end
 
----@param args table
-local function on_buf_write_pre(args)
-	init.export_flat(args.buf)
+---@param context Context
+local function on_buf_write_pre(context)
+	init.export_flat(context)
 end
 
----@param args table
-local function on_buf_write_post(args)
-	init.restore_tir_vim(args.buf)
+---@param context Context
+local function on_buf_write_post(context)
+	init.restore_tir_vim(context)
 end
 
----@param args table
-local function on_insert_char_pre(args)
-	init.insert_char_in_newline(args.buf)
+---@param context Context
+local function on_insert_char_pre(context)
+	init.insert_char_in_newline(context)
 end
 
 ---@param args table
 local function on_cursor_hold(args)
-	attach_on_lines(args.buf)
+	attach_on_lines(args)
 end
 
----@param args table
-local function on_filetype(args)
-	init.on_filetype(args.buf)
+---@param context Context
+---@return Context
+local function on_filetype(context)
+	return init.on_filetype(context)
 end
 
 ---@param args table
@@ -87,19 +119,19 @@ local function debug_entry_point(args)
 end
 
 ---@param augroup integer
----@param bufnr number
-local function clear_buffer_local_autocmds(augroup, bufnr)
-	api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+---@param context Context
+local function clear_buffer_local_autocmds(augroup, context)
+	api.nvim_clear_autocmds({ group = augroup, buffer = context.bufnr })
 end
 
 ---@param augroup integer
----@param bufnr number
-local function register_buffer_local_autocmds(augroup, bufnr)
-	attach_on_lines(bufnr)
+---@param context Context
+local function register_buffer_local_autocmds(augroup, context)
+	attach_on_lines(context)
 
 	api.nvim_create_autocmd("BufWritePre", {
 		group = augroup,
-		buffer = bufnr,
+		buffer = context.bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, {
 					is_tir_vim = true,
@@ -107,23 +139,25 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 				return
 			end
 			debug_entry_point(args)
-			on_buf_write_pre(args)
+			local context = get_context(args.bufnr)
+			on_buf_write_pre(context)
 		end),
 	})
 
 	api.nvim_create_autocmd("BufWritePost", {
 		group = augroup,
-		buffer = bufnr,
+		buffer = context.bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
-			on_buf_write_post(args)
+			local context = get_context(args.bufnr)
+			on_buf_write_post(context)
 		end),
 	})
 
 	api.nvim_create_autocmd("CursorHold", {
 		group = augroup,
-		buffer = bufnr,
+		buffer = context.bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
 			on_cursor_hold(args)
@@ -132,10 +166,11 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 
 	api.nvim_create_autocmd("InsertEnter", {
 		group = augroup,
-		buffer = bufnr,
+		buffer = context.bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
+			local context = get_context(args.bufnr)
 			assert(not buffer.get(args.buf, buffer.IKEY.INSERT_MODE))
 			buffer.set(args.buf, buffer.IKEY.INSERT_MODE, true)
 		end),
@@ -143,31 +178,33 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 
 	api.nvim_create_autocmd("InsertLeave", {
 		group = augroup,
-		buffer = bufnr,
+		buffer = context.bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
+			local context = get_context(args.bufnr)
 			-- InsertLeave may be triggered without a preceding InsertEnter
 			-- due to the behavior of other plugins (e.g., Telescope).
 			-- Do not assert insert_mode here.
 			buffer.set(args.buf, buffer.IKEY.INSERT_MODE, false)
-			on_insert_leave(args.buf)
+			on_insert_leave(context)
 		end),
 	})
 
 	api.nvim_create_autocmd("InsertCharPre", {
 		group = augroup,
-		buffer = bufnr,
+		buffer = context.bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
-			on_insert_char_pre(args)
+			local context = get_context(args.bufnr)
+			on_insert_char_pre(context)
 		end),
 	})
 
 	vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
 		group = augroup,
-		buffer = bufnr,
+		buffer = context.bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
 			ui.special_apply()
@@ -187,12 +224,11 @@ local function register_autocmds()
 				return
 			end
 			debug_entry_point(args)
-			on_filetype(args)
-			clear_buffer_local_autocmds(augroup, args.buf)
-			local _, err = util.resolve_parser(args.buf)
-			if not err then
-				register_buffer_local_autocmds(augroup, args.buf)
-			end
+			local context = get_context(args.bufnr)
+			context = on_filetype(context)
+			clear_buffer_local_autocmds(augroup, context)
+			if buf_state.should_skip(args.buf) then return end
+			register_buffer_local_autocmds(augroup, context)
 		end),
 	})
 
@@ -201,7 +237,8 @@ local function register_autocmds()
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
-			on_buf_read_post(args)
+			local context = get_context(args.bufnr)
+			on_buf_read_post(context)
 		end),
 	})
 

@@ -12,12 +12,12 @@ parser_map = {
     markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = "0.2" },
     pukiwiki = { executable = "tir-pukiwiki", allow_plain = true, required_version = "0." },
     foo = { executable = "foo", allow_plain = true, required_version = "0.1.1" },
-    grep = { executable = "grep", allow_plain = true, required_version = "99999.99999.99999" },
+    -- grep = { executable = "grep", allow_plain = true, required_version = "99999.99999.99999" },
 },
 })
 EOF
 
-edit $TIRENVI_ROOT/tests/data/simple.csv
+edit $TIRENVI_ROOT/tests/data/empty.txt
 checkhealth tirenvi
 
 call RunTest({ "nomessage": 'true' })

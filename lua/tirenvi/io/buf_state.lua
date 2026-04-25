@@ -1,7 +1,7 @@
 local config = require("tirenvi.config")
 local log = require("tirenvi.util.log")
 local errors = require("tirenvi.util.errors")
-local buffer = require("tirenvi.state.buffer")
+local buffer = require("tirenvi.io.buffer")
 local tir_vim = require("tirenvi.core.tir_vim")
 
 local M = {}
@@ -9,6 +9,21 @@ local M = {}
 local api = vim.api
 local fn = vim.fn
 local bo = vim.bo
+
+---@class Check_options
+---@field supported? boolean
+---@field ensure_tir_vim? boolean
+---@field is_tir_vim? boolean
+---@field has_parser? boolean
+---@field no_vscode? boolean
+
+local DEFAULT_OPTS = {
+	supported = true,
+	ensure_tir_vim = false,
+	is_tir_vim = false,
+	has_parser = true,
+	no_vscode = true,
+}
 
 --- has pipe markers. for example, it may be a tir-vim buffer.
 ---@param bufnr number
@@ -81,14 +96,6 @@ local checks = {
 function M.is_vscode()
 	return vim.g.vscode ~= nil
 end
-
-local DEFAULT_OPTS = {
-	supported = true,
-	has_parser = true,
-	no_vscode = true,
-	is_tir_vim = false,
-	ensure_tir_vim = false,
-}
 
 --- check if the buffer is supported and valid according to the options. for example, it may be a tir-vim buffer.
 ---@param bufnr number

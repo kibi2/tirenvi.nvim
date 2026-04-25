@@ -79,7 +79,8 @@ local function set_lines(bufnr, i_start, i_end, lines, no_undo)
 	end
 	i_start = math.max(i_start, 0)
 	set_undo_tree_last(bufnr)
-	if not no_undo or M.get_auto_reconcile(bufnr) then
+	local context = { bufnr = bufnr }
+	if not no_undo or M.get_auto_reconcile(context) then
 		api.nvim_buf_set_lines(bufnr, i_start, i_end, false, lines)
 	end
 	fix_cursor_utf8()
@@ -247,69 +248,19 @@ function M.get_lines_around(bufnr, start, end_)
 	return M.get_line(bufnr, start - 1), M.get_line(bufnr, end_)
 end
 
---- Get absolute file path of the buffer.
----@param bufnr number
----@return string
-function M.get_file_path(bufnr)
-	local file_name = api.nvim_buf_get_name(bufnr)
-	return M.to_file_path(file_name)
-end
-
---- Convert file name to absolute file path. if the file name is empty, return it as is.
----@param file_name string
----@return string
-function M.to_file_path(file_name)
-	local file_path = file_name
-	if file_path ~= "" then
-		file_path = fn.fnamemodify(file_path, ":p")
-	end
-	return file_path
-end
-
----@param bufnr number
----@param callback function
-function M.attach_on_lines(bufnr, callback)
-	if M.get(bufnr, M.IKEY.ATTACHED) then
-		return
-	end
-	log.debug("===+===+=== attach onlines")
-	api.nvim_buf_attach(bufnr, false, {
-		-- NOTE:
-		-- When returning `true` from this callback, the attachment is detached only for
-		-- this handler. In this case, `on_detach` is NOT called automatically, so any
-		-- state (e.g. ATTACHED flag) must be updated manually here.
-		on_lines = function(_, bufnr, tick, first, last, new_last, bytecount)
-			if M.get(bufnr, M.IKEY.FILETYPE) == nil then
-				log.debug("===+===+=== auto detach (no filetype)")
-				M.set(bufnr, M.IKEY.ATTACHED, false)
-				return true -- detach
-			end
-			if M.get(bufnr, M.IKEY.PATCH_DEPTH) > 0 then
-				return
-			end
-			callback(_, bufnr, tick, first, last, new_last, bytecount)
-		end,
-		on_detach = function()
-			log.debug("===+===+=== detach onlines")
-			M.set(bufnr, M.IKEY.ATTACHED, false)
-		end,
-	})
-	M.set(bufnr, M.IKEY.ATTACHED, true)
-end
-
----@param bufnr number
+---@param context Context
 ---@param value boolean
-function M.set_auto_reconcile(bufnr, value)
-	M.set(bufnr, M.IKEY.AUTO_RECONCILE, value)
+function M.set_auto_reconcile(context, value)
+	M.set(context.bufnr, M.IKEY.AUTO_RECONCILE, value)
 end
 
----@param bufnr number
+---@param context Context
 ---@return boolean
-function M.get_auto_reconcile(bufnr)
-	local auto_reconcile = M.get(bufnr, M.IKEY.AUTO_RECONCILE)
+function M.get_auto_reconcile(context)
+	local auto_reconcile = M.get(context.bufnr, M.IKEY.AUTO_RECONCILE)
 	if auto_reconcile == nil then
 		auto_reconcile = config.table.auto_reconcile
-		M.set_auto_reconcile(bufnr, auto_reconcile)
+		M.set_auto_reconcile(context, auto_reconcile)
 	end
 	return auto_reconcile
 end

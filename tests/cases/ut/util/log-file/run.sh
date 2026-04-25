@@ -5,4 +5,5 @@ set -eu
 
 NVIM_TIRENVI_DEV=1 nvim --headless -u NONE -n -S run.vim > stdout.txt 2> stderr.txt
 
-mv tirenvi.gen out-actual.txt
+LC_ALL=C sed -E 's/:[0-9]+]//g' gen.tirenvi > gen.txt
+mv gen.txt out-actual.txt

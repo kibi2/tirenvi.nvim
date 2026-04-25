@@ -3,9 +3,7 @@
 
 
 - version: 0.3.0
-- ⚠️ WARNING Could not parse grep version string.
 - ⚠️ WARNING vim-repeat not found ('.' repeat disabled)
-- ✅ OK grep found
 - ✅ OK tir-csv found
 - ✅ OK tir-gfm-lite found
 - ❌ ERROR Could not parse tir-pukiwiki version string: 0.
@@ -15,4 +13,4 @@
 === DISPLAY ===
 ==============================================================================
 tirenvi ~
-tirenvi:                                                            2 ⚠️  4 ❌
+tirenvi:                                                            1 ⚠️  4 ❌

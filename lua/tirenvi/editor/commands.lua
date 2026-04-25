@@ -1,8 +1,9 @@
 -- dependencies
+local Context = require("tirenvi.app.context")
 local guard = require("tirenvi.util.guard")
-local buf_state = require("tirenvi.state.buf_state")
-local buffer = require("tirenvi.state.buffer")
-local LinProvider = require("tirenvi.state.buffer_line_provider")
+local buf_state = require("tirenvi.io.buf_state")
+local buffer = require("tirenvi.io.buffer")
+local LinProvider = require("tirenvi.io.buffer_line_provider")
 local init = require("tirenvi.init")
 local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
@@ -18,25 +19,25 @@ local fn = vim.fn
 -- Public API
 
 -- Command / Keymap handlers (private)
----@param bufnr number
+---@param context Context
 ---@param opts {[string]:any}
 ---@return nil
-local function cmd_reconcile(bufnr, opts)
-	if buf_state.should_skip(bufnr, {
+local function cmd_reconcile(context, opts)
+	if buf_state.should_skip(context.bufnr, {
 			ensure_tir_vim = true,
 		}) then
 		return
 	end
-	init.reconcile(bufnr)
+	init.reconcile(context)
 end
 
----@param bufnr number
+---@param context Context
 ---@param opts {[string]:any}
 ---@return nil
-local function cmd_toggle(bufnr, opts)
-	if buf_state.should_skip(bufnr) then return end
+local function cmd_toggle(context, opts)
+	if buf_state.should_skip(context.bufnr) then return end
 	ui.special_apply()
-	init.toggle(bufnr)
+	init.toggle(context)
 end
 
 ---@param opts {[string]:any}
@@ -65,11 +66,11 @@ local function get_rect(opts)
 	}
 end
 
----@param bufnr number
+---@param context Context
 ---@param opts {[string]:any}
 ---@return nil
-local function cmd_width(bufnr, opts)
-	if buf_state.should_skip(bufnr, {
+local function cmd_width(context, opts)
+	if buf_state.should_skip(context.bufnr, {
 			ensure_tir_vim = true,
 		}) then
 		return
@@ -78,28 +79,28 @@ local function cmd_width(bufnr, opts)
 	count                 = tonumber(count) or 0
 	local rect            = get_rect(opts)
 	log.debug("row[%d-%d], col[%d-%d]", rect.row.first, rect.row.last, rect.col.first, rect.col.last)
-	local line_provider = LinProvider.new(bufnr)
-	init.width(line_provider, rect, operator, count)
+	local line_provider = LinProvider.new(context)
+	init.width(context, line_provider, rect, operator, count)
 end
 
----@param bufnr number
+---@param context Context
 ---@param opts {[string]:any}
 ---@return nil
-local function cmd_auto_reconcile(bufnr, opts)
-	if buf_state.should_skip(bufnr) then return end
+local function cmd_auto_reconcile(context, opts)
+	if buf_state.should_skip(context.bufnr) then return end
 	local arg = opts.fargs[2]
 	if arg == nil then
-		buffer.set_auto_reconcile(bufnr, not buffer.get_auto_reconcile(bufnr))
+		buffer.set_auto_reconcile(context, not buffer.get_auto_reconcile(context))
 	elseif arg == "on" then
-		buffer.set_auto_reconcile(bufnr, true)
+		buffer.set_auto_reconcile(context, true)
 	elseif arg == "off" then
-		buffer.set_auto_reconcile(bufnr, false)
+		buffer.set_auto_reconcile(context, false)
 	else
 		notify.error("[Tirenvi] invalid argument: " .. arg .. " (expected: on|off)")
 		return
 	end
 	notify.info(string.format("[Tirenvi] auto-reconcile:%s ",
-		buffer.get_auto_reconcile(bufnr) and "ON" or "OFF"))
+		buffer.get_auto_reconcile(context) and "ON" or "OFF"))
 end
 
 ----------------------------------------------------------------------
@@ -145,14 +146,14 @@ local function on_tir(opts)
 	if command == "width-" then
 		command = "width"
 	end
-	local bufnr = vim.api.nvim_get_current_buf()
-	log.debug("===+===+===+===+=== %s %s[%d] ===+===+===+===+===", opts.name, opts.fargs[1], bufnr)
+	local context = Context.from_buf()
+	log.debug("===+===+===+===+=== %s %s[%d] ===+===+===+===+===", opts.name, opts.fargs[1], context.bufnr)
 	local func = commands[command]
 	if not func then
 		notify.error(errors.err_unknown_command(sub))
 		return
 	end
-	func(bufnr, opts)
+	func(context, opts)
 end
 
 local function register_user_command()
@@ -171,24 +172,23 @@ local function register_user_command()
 end
 
 local function register_keymaps()
-	local bufnr = vim.api.nvim_get_current_buf()
 	vim.keymap.set("i", "<CR>", function()
-		return M.keymap_lf(bufnr)
+		return M.keymap_lf()
 	end, {
 		expr = true,
 		buffer = 0,
 	})
 	vim.keymap.set("i", "<Tab>", function()
-		return M.keymap_tab(bufnr)
+		return M.keymap_tab()
 	end, {
 		expr = true,
 		buffer = 0,
 	})
 end
 
----@param bufnr number
 ---@return string
-function M.keymap_lf(bufnr)
+function M.keymap_lf()
+	local bufnr = Context.from_buf().bufnr
 	buffer.clear_cache()
 	log.debug("===+===+===+===+=== keymap_lf %s ===+===+===+===+===", bufnr)
 	if buf_state.should_skip(bufnr, {
@@ -199,9 +199,9 @@ function M.keymap_lf(bufnr)
 	return init.keymap_lf()
 end
 
----@param bufnr number
 ---@return string
-function M.keymap_tab(bufnr)
+function M.keymap_tab()
+	local bufnr = Context.from_buf().bufnr
 	buffer.clear_cache()
 	log.debug("===+===+===+===+=== keymap_tab %s ===+===+===+===+===", bufnr)
 	if buf_state.should_skip(bufnr, {

@@ -272,6 +272,8 @@ function M.grid:set_widths(widths)
 end
 
 ---@self Block_grid
+---@param icol integer
+---@param start_col integer
 ---@param operator string
 ---@param count integer
 ---@param col Range
@@ -279,7 +281,6 @@ local function change_width(attr, icol, start_col, operator, count, col)
     local column = attr.columns[icol]
     local old_width = column.width
     local cel_range = Range.new(start_col, start_col + old_width)
-    ---@cast cel_range Range
     if cel_range:intersect(col) then
         local new_width = get_new_width(operator, count, old_width)
         Attr.grid.set_width(attr, icol, new_width)
