@@ -32,7 +32,7 @@ local defaults = {
 	parser_map = {
 		csv = { executable = "tir-csv", required_version = "0.1.4" },
 		tsv = { executable = "tir-csv", options = { "--delimiter", "\t" }, required_version = "0.1.4" },
-		markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = "0.1.5" },
+		markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = "0.1.6" },
 		pukiwiki = { executable = "tir-pukiwiki", allow_plain = true, required_version = "0.1.1" },
 	},
 	textobj = {
