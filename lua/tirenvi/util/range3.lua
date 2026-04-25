@@ -34,7 +34,6 @@ end
 ---@param self Range3
 ---@return Range
 function M.get_new_range(self)
-    ---@type Range
     return Range.new(self.first, self.new_last)
 end
 

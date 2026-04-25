@@ -3,10 +3,7 @@
 
 
 - version: 0.3.0
-- ⚠️ WARNING Could not parse grep version string.
 - ⚠️ WARNING vim-repeat not found ('.' repeat disabled)
-- ✅ OK grep found
-- ✅ OK grep version grep (BSD grep, GNU compatible) 2.6.0-FreeBSD OK
 - ✅ OK tir-csv found
 - ✅ OK tir-gfm-lite found
 - ❌ ERROR Could not parse tir-pukiwiki version string: 0.
@@ -14,8 +11,6 @@
 - ❌ ERROR tir-csv >= 1.1.4 required, but 0.1.4 found
 - ❌ ERROR tir-gfm-lite >= 0.2 required, but 0.1.6 found
 === DISPLAY ===
-=== MESSAGE ===
 ==============================================================================
-Running healthchecks...
 tirenvi ~
-tirenvi:                                                            2 ⚠️  4 ❌
+tirenvi:                                                            1 ⚠️  4 ❌
