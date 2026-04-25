@@ -1,7 +1,7 @@
 local config = require("tirenvi.config")
 local log = require("tirenvi.util.log")
 local errors = require("tirenvi.util.errors")
-local buffer = require("tirenvi.state.buffer")
+local buffer = require("tirenvi.io.buffer")
 local tir_vim = require("tirenvi.core.tir_vim")
 
 local M = {}

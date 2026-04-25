@@ -1,6 +1,6 @@
 ---@class BufferLineProvider : LineProvider
-local Context = require("tirenvi.core.context")
-local buffer = require("tirenvi.state.buffer")
+local Context = require("tirenvi.app.context")
+local buffer = require("tirenvi.io.buffer")
 
 local M = {}
 

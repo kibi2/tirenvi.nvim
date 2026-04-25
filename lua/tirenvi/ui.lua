@@ -1,8 +1,5 @@
 local config = require("tirenvi.config")
-local Range = require("tirenvi.util.range")
-local invalid = require("tirenvi.extmark.invalid")
-local buffer = require("tirenvi.state.buffer")
-local tir_vim = require("tirenvi.core.tir_vim")
+local invalid = require("tirenvi.io.invalid")
 local log = require("tirenvi.util.log")
 
 local matches = {}

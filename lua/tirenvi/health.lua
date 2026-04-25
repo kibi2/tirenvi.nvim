@@ -1,4 +1,4 @@
-local Parser = require("tirenvi.core.parser")
+local Parser = require("tirenvi.parser.parser")
 local config = require("tirenvi.config")
 local version = require("tirenvi.version")
 local log = require("tirenvi.util.log")

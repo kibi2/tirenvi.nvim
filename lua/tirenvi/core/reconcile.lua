@@ -7,16 +7,18 @@
 -- Dependencies
 -----------------------------------------------------------------------
 
-local Context = require("tirenvi.core.context")
+local Context = require("tirenvi.app.context")
+local Document = require("tirenvi.core.document")
+local Blocks = require("tirenvi.core.blocks")
+local tir_vim = require("tirenvi.core.tir_vim")
 local util = require("tirenvi.util.util")
 local Range = require("tirenvi.util.range")
-local buffer = require("tirenvi.state.buffer")
-local buf_state = require("tirenvi.state.buf_state")
-local Blocks = require("tirenvi.core.blocks")
-local vim_parser = require("tirenvi.core.vim_parser")
-local flat_parser = require("tirenvi.core.flat_parser")
-local tir_vim = require("tirenvi.core.tir_vim")
-local invalid = require("tirenvi.extmark.invalid")
+local Range3 = require("tirenvi.util.range3")
+local buffer = require("tirenvi.io.buffer")
+local buf_state = require("tirenvi.io.buf_state")
+local vim_parser = require("tirenvi.parser.vim_parser")
+local flat_parser = require("tirenvi.parser.flat_parser")
+local invalid = require("tirenvi.io.invalid")
 local ui = require("tirenvi.ui")
 local log = require("tirenvi.util.log")
 
@@ -59,7 +61,7 @@ end
 ---@param start_row integer
 ---@param end_row integer
 ---@return Document
-local function build_blocks(context, start_row, end_row)
+local function build_document(context, start_row, end_row)
 	local vi_lines = buffer.get_lines(context.bufnr, start_row, end_row)
 	local line_prev = buffer.get_line(context.bufnr, start_row - 1)
 	normalize_trailing_empty_line(vi_lines, line_prev)
@@ -88,11 +90,11 @@ end
 local function apply_range(context, start_row, end_row)
 	log.debug("===-===-===-=== reconcile start[%d, %d] ===-===-===-===", start_row + 1, end_row)
 	local attr_prev, attr_next = resolve_reference_attrs(context.bufnr, start_row, end_row)
-	local document = build_blocks(context, start_row, end_row)
+	local document = build_document(context, start_row, end_row)
 	local blocks = document.blocks
 	log.debug(#blocks ~= 0 and blocks[1].records)
 	log.debug(#blocks ~= 0 and blocks[1].records[1])
-	local success, reason = Blocks.reconcile(blocks, attr_prev, attr_next, Context.is_allow_plain(context))
+	local success, reason = Document.reconcile(document, attr_prev, attr_next)
 	log.debug(#blocks ~= 0 and blocks[1].attr)
 	log.debug(#blocks ~= 0 and blocks[1].records[1])
 	if not success then
@@ -100,7 +102,7 @@ local function apply_range(context, start_row, end_row)
 		if reason == "grid in plain" then
 			return flat_parser.unparse(document, context.parser)
 		elseif reason == "conflict" then
-			document = build_blocks(context, 0, -1)
+			document = build_document(context, 0, -1)
 		else
 			error("repair: unexpected error: " .. tostring(reason))
 		end
@@ -119,21 +121,18 @@ local function apply_ranges(context, ranges)
 	end
 end
 
-local function log_watch(bufnr, message, first, last, new_last, ext_range)
+local function log_watch(bufnr, message, range3, ext_range)
+	range3 = range3 or Range3.new(0, 0, 0)
 	local pre = buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST)
 	local next = fn.undotree(bufnr).seq_last
-	local delta = (new_last or 0) - (last or 0)
-	local add = delta > 0 and "+" .. tostring(delta) or ""
-	local remove = delta < 0 and "-" .. tostring(-delta) or ""
-	local update = (new_last or 0) - (first or 0) > 0 and "u" .. tostring(new_last - first) or ""
 	local no_ext = ext_range and (#ext_range ~= 0 and "/ext" .. #ext_range or "") or ""
 	local status = string.format(
 		"[tree:%d->%d]%s%s%s%s",
 		pre,
 		next,
-		add,
-		remove,
-		update,
+		Range3.get_add_str(range3),
+		Range3.get_remove_str(range3),
+		Range3.get_update_str(range3),
 		no_ext
 	)
 	log.watch("UNDO", message .. status)
@@ -196,40 +195,38 @@ local function schedule_new_range(context, new_range)
 end
 
 ---@param context Context
----@param first integer|nil
----@param last integer|nil
----@param new_last integer|nil
-local function handle_request(context, first, last, new_last)
+---@param range3 Range3|nil
+local function handle_request(context, range3)
 	local bufnr = context.bufnr
 	local ext_ranges = invalid.get_range(bufnr)
 	ui.diagnostic_clear(bufnr)
-	if not first then
+	if not range3 then
 		log_watch(bufnr, "INSERT LEAVE[" .. tostring(#ext_ranges) .. "]")
 		schedule_extra_ranges(context, ext_ranges)
 		return
 	end
-	local new_range = Range.new(first, new_last)
+	local new_range = Range3.get_new_range(range3)
 	---@cast new_range Range
 	expand_continue_lines(bufnr, new_range)
 	if buf_state.is_insert_mode(bufnr) then
 		-- Modifying the buffer in insert mode may corrupt the undo node.
 		-- Therefore, in insert mode, only record the invalid changed region
 		-- and repair it when leaving insert mode.
-		log_watch(bufnr, "INSERT", first, last, new_last)
+		log_watch(bufnr, "INSERT", range3)
 		ext_ranges[#ext_ranges + 1] = new_range
 		ui.diagnostic_set(bufnr, Range.union(ext_ranges))
 	elseif buf_state.is_undo_mode(bufnr) then
 		-- Moving the cursor in insert mode may create an invalid table undo node.
 		-- Therefore, when performing undo/redo, skip table validation.
-		log_watch(bufnr, "UNDO/REDO", first, last, new_last)
+		log_watch(bufnr, "UNDO/REDO", range3)
 		ext_ranges[#ext_ranges + 1] = new_range
 		ui.diagnostic_set(bufnr, Range.union(ext_ranges))
 	elseif #ext_ranges ~= 0 then
-		log_watch(bufnr, "UNDO/REDO LEAVE", first, last, new_last, ext_ranges)
+		log_watch(bufnr, "UNDO/REDO LEAVE", range3, ext_ranges)
 		schedule_extra_ranges(context, ext_ranges)
 		schedule_new_range(context, new_range)
 	else
-		log_watch(bufnr, "NORMAL", first, last, new_last, ext_ranges)
+		log_watch(bufnr, "NORMAL", range3, ext_ranges)
 		schedule_new_range(context, new_range)
 	end
 end
@@ -239,10 +236,8 @@ end
 -----------------------------------------------------------------------
 
 ---@param context Context
----@param first integer|nil
----@param last integer|nil
----@param new_last integer|nil
-function M.handle(context, first, last, new_last)
+---@param range3 Range3|nil
+function M.handle(context, range3)
 	-- log.debug(debug.traceback())
 	local bufnr = context.bufnr
 	vim.schedule(function()
@@ -254,7 +249,7 @@ function M.handle(context, first, last, new_last)
 		end
 		local ok, err = xpcall(
 			function()
-				handle_request(context, first, last, new_last)
+				handle_request(context, range3)
 			end,
 			debug.traceback
 		)

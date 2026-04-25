@@ -1,14 +1,15 @@
 ----- dependencies
-local Context = require("tirenvi.core.context")
-local Parser = require("tirenvi.core.parser")
+local Context = require("tirenvi.app.context")
+local Document = require("tirenvi.core.document")
+local Parser = require("tirenvi.parser.parser")
+local flat_parser = require("tirenvi.parser.flat_parser")
+local vim_parser = require("tirenvi.parser.vim_parser")
 local config = require("tirenvi.config")
-local buf_state = require("tirenvi.state.buf_state")
+local buf_state = require("tirenvi.io.buf_state")
 local util = require("tirenvi.util.util")
 local reconcile = require("tirenvi.core.reconcile")
 local log = require("tirenvi.util.log")
-local buffer = require("tirenvi.state.buffer")
-local flat_parser = require("tirenvi.core.flat_parser")
-local vim_parser = require("tirenvi.core.vim_parser")
+local buffer = require("tirenvi.io.buffer")
 local tir_vim = require("tirenvi.core.tir_vim")
 local Blocks = require("tirenvi.core.blocks")
 local ui = require("tirenvi.ui")
@@ -91,22 +92,23 @@ local function get_blocks(context, row)
 	return vim_parser.parse(lines, Context.is_allow_plain(context))
 end
 
+---@param context Context
 ---@param line_provider LineProvider
 ---@param irow integer
-local function get_range(line_provider, irow)
-	local top = tir_vim.get_block_top_nrow(line_provider, irow)
-	local bottom = tir_vim.get_block_bottom_nrow(line_provider, irow)
+local function get_range(context, line_provider, irow)
+	local top = tir_vim.get_block_top_nrow(context, line_provider, irow)
+	local bottom = tir_vim.get_block_bottom_nrow(context, line_provider, irow)
 	return top, bottom
 end
 
 ---@param line_provider LineProvider
 ---@param row Range
-local function expand_rect(line_provider, row)
-	local top, bottom = get_range(line_provider, row.first)
+local function expand_rect(context, line_provider, row)
+	local top, bottom = get_range(context, line_provider, row.first)
 	row.first = top
 	local irow = bottom + 1
 	while irow <= row.last do
-		_, bottom = get_range(line_provider, irow)
+		_, bottom = get_range(context, line_provider, irow)
 		irow = bottom + 1
 	end
 	row.last = bottom
@@ -129,7 +131,7 @@ end
 ---@param rect Rect
 ---@param operator string
 local function change_width(context, line_provider, rect, operator, count)
-	expand_rect(line_provider, rect.row)
+	expand_rect(context, line_provider, rect.row)
 	change_table_width(context, operator, count, rect)
 end
 
@@ -289,12 +291,10 @@ function M.keymap_tab()
 end
 
 ---@param context Context
----@param first integer
----@param last integer
----@param new_last integer
-function M.on_lines(context, first, last, new_last)
-	log.watch("UNDO", "===+=== ENTRY on_lines[#%d][%d,%d,%d]", context.bufnr, first, last, new_last)
-	reconcile.handle(context, first, last, new_last)
+---@param range3 Range3
+function M.on_lines(context, range3)
+	log.watch("UNDO", "===+=== ENTRY on_lines[#%d]%s", context.bufnr, range3)
+	reconcile.handle(context, range3)
 end
 
 ---@param context Context

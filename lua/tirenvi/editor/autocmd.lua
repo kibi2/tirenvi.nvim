@@ -1,12 +1,13 @@
 -- dependencies
-local Context = require("tirenvi.core.context")
-local Parser = require("tirenvi.core.parser")
-local guard = require("tirenvi.util.guard")
-local buffer = require("tirenvi.state.buffer")
+local Context = require("tirenvi.app.context")
+local Parser = require("tirenvi.parser.parser")
+local buffer = require("tirenvi.io.buffer")
 local init = require("tirenvi.init")
-local buf_state = require("tirenvi.state.buf_state")
-local log = require("tirenvi.util.log")
+local buf_state = require("tirenvi.io.buf_state")
 local ui = require("tirenvi.ui")
+local guard = require("tirenvi.util.guard")
+local Range3 = require("tirenvi.util.range3")
+local log = require("tirenvi.util.log")
 
 -- module
 local M = {}
@@ -29,15 +30,13 @@ end
 ---@param _ string
 ---@param bufnr number
 ---@param tick integer
----@param first integer
----@param last integer
----@param new_last integer
+---@param range3 Range3
 ---@param bytecount integer
-local function on_lines(_, bufnr, tick, first, last, new_last, bytecount)
+local function on_lines(_, bufnr, tick, range3, bytecount)
 	buffer.clear_cache()
 	if buf_state.should_skip(bufnr) then return end
 	local context = get_context(bufnr)
-	init.on_lines(context, first, last, new_last)
+	init.on_lines(context, range3)
 end
 
 ---@param context Context
@@ -61,7 +60,7 @@ local function attach_on_lines(context)
 			if buffer.get(bufnr, buffer.IKEY.PATCH_DEPTH) > 0 then
 				return
 			end
-			on_lines(_, bufnr, tick, first, last, new_last, bytecount)
+			on_lines(_, bufnr, tick, Range3.new(first, last, new_last), bytecount)
 		end,
 		on_detach = function()
 			log.debug("===+===+=== detach onlines")

@@ -1,9 +1,9 @@
 -- dependencies
-local Context = require("tirenvi.core.context")
+local Context = require("tirenvi.app.context")
 local guard = require("tirenvi.util.guard")
-local buf_state = require("tirenvi.state.buf_state")
-local buffer = require("tirenvi.state.buffer")
-local LinProvider = require("tirenvi.state.buffer_line_provider")
+local buf_state = require("tirenvi.io.buf_state")
+local buffer = require("tirenvi.io.buffer")
+local LinProvider = require("tirenvi.io.buffer_line_provider")
 local init = require("tirenvi.init")
 local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")

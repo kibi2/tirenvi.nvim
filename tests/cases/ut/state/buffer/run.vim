@@ -5,7 +5,7 @@ edit input.txt
 lua << EOF
   local M = require("tirenvi")
   local log = require("tirenvi.util.log")
-  local buffer = require("tirenvi.state.buffer")
+  local buffer = require("tirenvi.io.buffer")
   local levels = vim.log.levels
   M.setup({
   	log = {

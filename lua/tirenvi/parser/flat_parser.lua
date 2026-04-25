@@ -10,7 +10,7 @@
 
 ----- dependencies
 local Document = require("tirenvi.core.document")
-local Parser = require("tirenvi.core.parser")
+local Parser = require("tirenvi.parser.parser")
 local util = require("tirenvi.util.util")
 local errors = require("tirenvi.util.errors")
 local log = require("tirenvi.util.log")

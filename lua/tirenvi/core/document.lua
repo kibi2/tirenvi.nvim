@@ -106,4 +106,17 @@ function M:serialize_to_vim()
     return ndjsons
 end
 
+---@param self Document
+---@param attr_prev Attr|nil
+---@param attr_next Attr|nil
+---@return boolean
+---@return RefAttrError|nil
+function M:reconcile(attr_prev, attr_next)
+    if self.attr.allow_plain then
+        return Blocks.reconcile_multi(self.blocks, attr_prev, attr_next)
+    else
+        return Blocks.reconcile_single(self.blocks, attr_prev, attr_next)
+    end
+end
+
 return M
