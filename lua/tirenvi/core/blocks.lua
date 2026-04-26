@@ -7,8 +7,9 @@
 
 local CONST = require("tirenvi.constants")
 local Attr = require("tirenvi.core.attr")
-local util = require("tirenvi.util.util")
 local Block = require("tirenvi.core.block")
+local util = require("tirenvi.util.util")
+local Range = require("tirenvi.util.range")
 local errors = require("tirenvi.util.errors")
 local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
@@ -274,6 +275,19 @@ function M:serialize_to_vim()
 		util.extend(ndjsons, impl.serialize(block))
 	end
 	return ndjsons
+end
+
+---@self Blocks
+function M:rebuild_attr_range()
+	local first = 1
+	for iblock, block in ipairs(self) do
+		local attr = block.attr or Attr.new()
+		block.attr = attr
+		attr.id    = iblock
+		local last = first + #block.records - 1
+		attr.range = Range.new(first, last)
+		first      = last + 1
+	end
 end
 
 return M

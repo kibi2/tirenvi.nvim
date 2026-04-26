@@ -37,8 +37,11 @@ local M = {}
 
 ---@class Attr_doc
 ---@field allow_plain boolean
+---@field attrs Attr[]
 
 ---@class Attr
+---@field id integer
+---@field range Range
 ---@field columns Attr_column[]
 
 ---@class Attr_column
@@ -87,13 +90,14 @@ function M:serialize_to_flat()
 end
 
 ---@param records Record[]
+---@param attrs Attr[]
 ---@param allow_plain boolean
 ---@param no_normalize boolean  -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
 ---@return Document
-function M.new_from_vim(records, allow_plain, no_normalize)
+function M.new_from_vim(records, attrs, allow_plain, no_normalize)
     local self = {}
-    self.attr = { allow_plain = allow_plain }
+    self.attr = { allow_plain = allow_plain, block_attrs = attrs }
     self.blocks = Blocks.new_from_vim(records, no_normalize)
     return self
 end
@@ -120,8 +124,15 @@ function M:reconcile(attr_prev, attr_next)
 end
 
 ---@param self Document
-function M:get_attrs()
+function M:collect_attrs()
     return Blocks.get_attrs(self.blocks)
+end
+
+---@param self Document
+function M:rebuild_attr_range()
+    Blocks.rebuild_attr_range(self.blocks)
+    self.attr.attrs = M.collect_attrs(self)
+    -- TODO: rebuild_attrs() -- attrs + collect_attrs -> merge
 end
 
 return M

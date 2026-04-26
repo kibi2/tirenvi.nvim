@@ -69,7 +69,7 @@ local function build_document(context, start_row, end_row)
 	local vi_lines = reader.read(request)
 	local line_prev = buffer.get_line(context.bufnr, start_row - 1)
 	normalize_trailing_empty_line(vi_lines, line_prev)
-	return vim_parser.parse(vi_lines, Context.is_allow_plain(context), true)
+	return vim_parser.parse(request, true)
 end
 
 ---@param bufnr number
