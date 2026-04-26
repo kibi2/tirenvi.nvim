@@ -8,6 +8,7 @@
 -----------------------------------------------------------------------
 
 local Context = require("tirenvi.app.context")
+local Request = require("tirenvi.app.request")
 local Document = require("tirenvi.core.document")
 local Blocks = require("tirenvi.core.blocks")
 local tir_vim = require("tirenvi.core.tir_vim")
@@ -117,7 +118,8 @@ local function apply_ranges(context, ranges)
 	for index = 1, #ranges do
 		local range = Range.new(ranges[index].first, ranges[index].last + 1)
 		local new_lines = apply_range(context, range.first, range.last)
-		writer.write(context.bufnr, range, new_lines, true)
+		local request = Request.from_lines(context, range, new_lines, true)
+		writer.write(request)
 	end
 end
 
