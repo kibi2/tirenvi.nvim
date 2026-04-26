@@ -203,6 +203,18 @@ function M:set_widths(widths)
 end
 
 ---@self Blocks
+---@param attrs Attr[]
+function M:set_attrs(attrs)
+	if not attrs or #self ~= #attrs then
+		return
+	end
+	for iblock, block in ipairs(self) do
+		--Block[block.kind].set_widths(block, widths[iblock])
+		Block[block.kind].set_attr(block, attrs[iblock])
+	end
+end
+
+---@self Blocks
 ---@param operator string
 ---@param count integer
 ---@param col Range

@@ -6,10 +6,10 @@ local Parser = require("tirenvi.parser.parser")
 local flat_parser = require("tirenvi.parser.flat_parser")
 local vim_parser = require("tirenvi.parser.vim_parser")
 local config = require("tirenvi.config")
-local buf_state = require("tirenvi.io.buf_state")
 local reconcile = require("tirenvi.core.reconcile")
-local log = require("tirenvi.util.log")
+local buf_state = require("tirenvi.io.buf_state")
 local buffer = require("tirenvi.io.buffer")
+local attr_store = require("tirenvi.io.attr_store")
 local writer = require("tirenvi.io.writer")
 local reader = require("tirenvi.io.reader")
 local tir_vim = require("tirenvi.core.tir_vim")
@@ -18,6 +18,7 @@ local ui = require("tirenvi.ui")
 local Range = require("tirenvi.util.range")
 local util = require("tirenvi.util.util")
 local notify = require("tirenvi.util.notify")
+local log = require("tirenvi.util.log")
 
 -- module
 local M = {}
@@ -36,12 +37,10 @@ local function store_widths(bufnr, document)
 	buffer.set(bufnr, buffer.IKEY.WIDTHS, Blocks.get_widths(document.blocks))
 end
 
----@param bufnr number
+---@param request Request
 ---@param document Document
-local function restore_widths(bufnr, document)
-	local widths = buffer.get(bufnr, buffer.IKEY.WIDTHS)
-	Blocks.set_widths(document.blocks, widths)
-	buffer.set(bufnr, buffer.IKEY.WIDTHS, nil)
+local function set_attrs(request, document)
+	Blocks.set_attrs(document.blocks, request.attrs)
 end
 
 ---@param context Context
@@ -55,9 +54,6 @@ local function to_flat(context, is_toggle)
 		return
 	end
 	local document = vim_parser.parse(vi_lines, Context.is_allow_plain(context))
-	if is_toggle then
-		store_widths(context.bufnr, document)
-	end
 	log.debug(document.blocks[1].records)
 	local fl_lines = flat_parser.unparse(document, context.parser)
 	local request = Request.from_lines(context, Range.new(0, -1), fl_lines)
@@ -74,7 +70,7 @@ local function from_flat(context, no_undo)
 	local parser = context.parser
 	util.assert_no_reserved_marks(fl_lines)
 	local document = flat_parser.parse(fl_lines, parser)
-	restore_widths(context.bufnr, document)
+	set_attrs(request, document)
 	local vi_lines = vim_parser.unparse(document)
 	local request = Request.from_lines(context, Range.new(0, -1), vi_lines, no_undo)
 	writer.write(request)
@@ -340,8 +336,8 @@ function M.on_filetype(context)
 	end
 	to_flat(context)
 	buffer.set(context.bufnr, buffer.IKEY.FILETYPE, new_filetype)
+	attr_store.clear(context)
 	context = Context.from_buf(context.bufnr)
-	-- Check whether the parser is executable at runtime.
 	if not context.parser then
 		buffer.set(context.bufnr, buffer.IKEY.FILETYPE, nil)
 	end
