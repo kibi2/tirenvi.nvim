@@ -182,6 +182,16 @@ function M:get_widths()
 end
 
 ---@self Blocks
+---@return Attr[]
+function M:get_attrs()
+	local attrs = {}
+	for _, block in ipairs(self) do
+		attrs[#attrs + 1] = block.attr or Attr.new()
+	end
+	return attrs
+end
+
+---@self Blocks
 ---@param widths integer[][]
 function M:set_widths(widths)
 	if not widths then

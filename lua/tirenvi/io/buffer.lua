@@ -38,6 +38,9 @@ M.IKEY       = {
 
 	-- grid columns widths [iblock][icol]
 	WIDTHS = "widths",
+
+	-- block attrs
+	ATTRS = "attrs",
 }
 
 -----------------------------------------------------------------------

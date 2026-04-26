@@ -59,6 +59,7 @@ local function to_flat(context, is_toggle)
 	log.debug(document.blocks[1].records)
 	local fl_lines = flat_parser.unparse(document, context.parser)
 	local request = Request.from_lines(context, Range.new(0, -1), fl_lines)
+	request.attrs = Document.get_attrs(document)
 	writer.write(request)
 end
 

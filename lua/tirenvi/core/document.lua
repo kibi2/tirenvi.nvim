@@ -119,4 +119,9 @@ function M:reconcile(attr_prev, attr_next)
     end
 end
 
+---@param self Document
+function M:get_attrs()
+    return Blocks.get_attrs(self.blocks)
+end
+
 return M
