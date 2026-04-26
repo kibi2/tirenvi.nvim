@@ -1,5 +1,6 @@
 ----- dependencies
 local Context = require("tirenvi.app.context")
+local Request = require("tirenvi.app.request")
 local Document = require("tirenvi.core.document")
 local Parser = require("tirenvi.parser.parser")
 local flat_parser = require("tirenvi.parser.flat_parser")
@@ -57,7 +58,8 @@ local function to_flat(context, is_toggle)
 	end
 	log.debug(document.blocks[1].records)
 	local fl_lines = flat_parser.unparse(document, context.parser)
-	writer.write(context.bufnr, Range.new(0, -1), fl_lines)
+	local request = Request.from_lines(context, Range.new(0, -1), fl_lines)
+	writer.write(request)
 end
 
 ---@param context Context
@@ -70,7 +72,8 @@ local function from_flat(context, no_undo)
 	local document = flat_parser.parse(fl_lines, parser)
 	restore_widths(context.bufnr, document)
 	local vi_lines = vim_parser.unparse(document)
-	writer.write(context.bufnr, Range.new(0, -1), vi_lines, no_undo)
+	local request = Request.from_lines(context, Range.new(0, -1), vi_lines, no_undo)
+	writer.write(request)
 end
 
 ---@return integer|nil
@@ -132,7 +135,8 @@ local function change_table_width(context, operator, count, rect)
 	end
 	Blocks.change_width(document.blocks, operator, count, rect.col)
 	local vi_lines = vim_parser.unparse(document)
-	writer.write(context.bufnr, Range.new(rect.row.first - 1, rect.row.last), vi_lines)
+	local request = Request.from_lines(context, Range.new(rect.row.first - 1, rect.row.last), vi_lines)
+	writer.write(request)
 	return true
 end
 
@@ -211,7 +215,8 @@ function M.restore_tir_vim(context)
 	if not buffer_backup then
 		return
 	end
-	writer.write(context.bufnr, Range.new(0, -1), buffer_backup, true)
+	local request = Request.from_lines(context, Range.new(0, -1), buffer_backup, true)
+	writer.write(request)
 	buffer_backup = nil
 end
 
@@ -241,7 +246,8 @@ function M.reconcile(context)
 	local vi_lines = vim_parser.unparse(document)
 	if table.concat(old_lines, "\n") ~= table.concat(vi_lines, "\n") then
 		log.debug({ vi_lines[1], vi_lines[2] })
-		writer.write(bufnr, Range.new(0, -1), vi_lines)
+		local request = Request.from_lines(context, Range.new(0, -1), vi_lines)
+		writer.write(request)
 	end
 end
 
