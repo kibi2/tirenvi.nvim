@@ -12,12 +12,13 @@ local M = {}
 
 -- Public API
 
----@param request Request
+---@param ctx Context
+---@param req Request
 ---@return string[]
-function M.read(request)
-    attr_store.read(request)
-    request.lines = buffer.get_lines(request.context.bufnr, request.range.first, request.range.last)
-    return request.lines
+function M.read(ctx, req)
+    attr_store.read(ctx, req)
+    req.lines = buffer.get_lines(ctx.bufnr, req.range.first, req.range.last)
+    return req.lines
 end
 
 return M

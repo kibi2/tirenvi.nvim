@@ -136,27 +136,27 @@ function M.get_current_col_index(byte_pos, icol)
     return nil
 end
 
----@param context Context
+---@param ctx Context
 ---@param line_provider LineProvider
 ---@param irow integer
 ---@return integer
-function M.get_block_top_nrow(context, line_provider, irow, allow_plain)
-    if Context.is_allow_plain(context) then
+function M.get_block_top_nrow(ctx, line_provider, irow, allow_plain)
+    if Context.is_allow_plain(ctx) then
         return find_block_edge(line_provider, irow, -1)
     else
         return 1
     end
 end
 
----@param context Context
+---@param ctx Context
 ---@param line_provider LineProvider
 ---@param irow integer
 ---@return integer
-function M.get_block_bottom_nrow(context, line_provider, irow)
-    if Context.is_allow_plain(context) then
+function M.get_block_bottom_nrow(ctx, line_provider, irow)
+    if Context.is_allow_plain(ctx) then
         return find_block_edge(line_provider, irow, 1)
     else
-        return buffer.line_count(context.bufnr)
+        return buffer.line_count(ctx.bufnr)
     end
 end
 
@@ -204,12 +204,12 @@ function M.is_continue_line(line)
     return M.get_pipe_char(line) == pipec
 end
 
----@param context Context
+---@param ctx Context
 ---@param line_provider LineProvider
 ---@param count integer
 ---@param is_around boolean
 ---@return Rect|nil
-function M.get_block_rect(context, line_provider, count, is_around)
+function M.get_block_rect(ctx, line_provider, count, is_around)
     -- local mode = vim.fn.mode()
     local irow, icol0 = unpack(api.nvim_win_get_cursor(0))
     local icol = icol0 + 1
@@ -222,8 +222,8 @@ function M.get_block_rect(context, line_provider, count, is_around)
     if not colIndex then
         return nil
     end
-    local trow = M.get_block_top_nrow(context, line_provider, irow)
-    local brow = M.get_block_bottom_nrow(context, line_provider, irow)
+    local trow = M.get_block_top_nrow(ctx, line_provider, irow)
+    local brow = M.get_block_bottom_nrow(ctx, line_provider, irow)
     local tline = line_provider.get_line(trow) or ""
     local bline = line_provider.get_line(brow) or ""
     local tbyte_pos = M.get_pipe_byte_position(tline)

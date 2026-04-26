@@ -11,24 +11,26 @@ local M = {}
 
 -- Public API
 
----@param request Request
-function M.write(request)
-    if not request.attrs then
+---@param ctx Context
+---@param req Request
+function M.write(ctx, req)
+    if not req.attrs then
         log.probe("nil")
         return
     end
-    log.probe(request.attrs)
-    buffer.set(request.context.bufnr, buffer.IKEY.ATTRS, request.attrs)
+    log.probe(req.attrs)
+    buffer.set(ctx.bufnr, buffer.IKEY.ATTRS, req.attrs)
 end
 
----@param request Request
-function M.read(request)
-    request.attrs = buffer.get(request.context.bufnr, buffer.IKEY.ATTRS)
+---@param ctx Context
+---@param req Request
+function M.read(ctx, req)
+    req.attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
 end
 
----@param context Context
-function M.clear(context)
-    buffer.set(context.bufnr, buffer.IKEY.ATTRS, nil)
+---@param ctx Context
+function M.clear(ctx)
+    buffer.set(ctx.bufnr, buffer.IKEY.ATTRS, nil)
 end
 
 return M

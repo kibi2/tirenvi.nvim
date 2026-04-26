@@ -12,10 +12,11 @@ local M = {}
 
 -- Public API
 
----@param request Request
-function M.write(request)
-    buffer.set_lines(request.context.bufnr, request.range.first, request.range.last, request.lines, request.no_undo)
-    attr_store.write(request)
+---@param ctx Context
+---@param req Request
+function M.write(ctx, req)
+    buffer.set_lines(ctx.bufnr, req.range.first, req.range.last, req.lines, req.no_undo)
+    attr_store.write(ctx, req)
 end
 
 return M
