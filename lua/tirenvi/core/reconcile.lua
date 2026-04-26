@@ -17,6 +17,7 @@ local Range = require("tirenvi.util.range")
 local Range3 = require("tirenvi.util.range3")
 local buffer = require("tirenvi.io.buffer")
 local writer = require("tirenvi.io.writer")
+local reader = require("tirenvi.io.reader")
 local buf_state = require("tirenvi.io.buf_state")
 local vim_parser = require("tirenvi.parser.vim_parser")
 local flat_parser = require("tirenvi.parser.flat_parser")
@@ -64,7 +65,8 @@ end
 ---@param end_row integer
 ---@return Document
 local function build_document(context, start_row, end_row)
-	local vi_lines = buffer.get_lines(context.bufnr, start_row, end_row)
+	local request = Request.from_range(context, Range.new(start_row, end_row))
+	local vi_lines = reader.read(request)
 	local line_prev = buffer.get_line(context.bufnr, start_row - 1)
 	normalize_trailing_empty_line(vi_lines, line_prev)
 	return vim_parser.parse(vi_lines, Context.is_allow_plain(context), true)
@@ -143,7 +145,9 @@ end
 ---@param bufnr number
 ---@param range Range
 local function expand_continue_lines(bufnr, range)
-	local lines = buffer.get_lines(bufnr, range.first, range.last)
+	local context = Context.from_buf(bufnr)
+	local request = Request.from_range(context, range)
+	local lines = reader.read(request)
 	local first = range.first - 1
 	local first_line = buffer.get_line(bufnr, first)
 	while tir_vim.is_continue_line(first_line) do
