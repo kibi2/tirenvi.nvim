@@ -11,6 +11,7 @@ local reconcile = require("tirenvi.core.reconcile")
 local log = require("tirenvi.util.log")
 local buffer = require("tirenvi.io.buffer")
 local writer = require("tirenvi.io.writer")
+local reader = require("tirenvi.io.reader")
 local tir_vim = require("tirenvi.core.tir_vim")
 local Blocks = require("tirenvi.core.blocks")
 local ui = require("tirenvi.ui")
@@ -48,7 +49,8 @@ end
 ---@return nil
 local function to_flat(context, is_toggle)
 	is_toggle = is_toggle or false
-	local vi_lines = buffer.get_lines(context.bufnr, 0, -1)
+	local request = Request.from_range(context, Range.new(0, -1))
+	local vi_lines = reader.read(request)
 	if not tir_vim.has_pipe(vi_lines) then
 		return
 	end
@@ -67,7 +69,8 @@ end
 ---@param no_undo boolean|nil
 ---@return nil
 local function from_flat(context, no_undo)
-	local fl_lines = buffer.get_lines(context.bufnr, 0, -1)
+	local request = Request.from_range(context, Range.new(0, -1))
+	local fl_lines = reader.read(request)
 	local parser = context.parser
 	util.assert_no_reserved_marks(fl_lines)
 	local document = flat_parser.parse(fl_lines, parser)
@@ -94,7 +97,8 @@ end
 ---@param row Range
 ---@return Document|nil
 local function get_blocks(context, row)
-	local lines = buffer.get_lines(context.bufnr, row.first - 1, row.last)
+	local request = Request.from_range(context, Range.new(row.first - 1, row.last))
+	local lines = reader.read(request)
 	if not tir_vim.has_pipe(lines) then
 		return nil
 	end
@@ -201,7 +205,8 @@ local buffer_backup
 ---@param context Context
 ---@return nil
 function M.export_flat(context)
-	buffer_backup = buffer.get_lines(context.bufnr, 0, -1)
+	local request = Request.from_range(context, Range.new(0, -1))
+	buffer_backup = reader.read(request)
 	if not tir_vim.has_pipe(buffer_backup) then
 		buffer_backup = nil
 		return
@@ -230,7 +235,8 @@ end
 ---@param context Context
 ---@return nil
 function M.toggle(context)
-	local lines = buffer.get_lines(context.bufnr, 0, -1)
+	local request = Request.from_range(context, Range.new(0, -1))
+	local lines = reader.read(request)
 	if tir_vim.has_pipe(lines) then
 		M.disable(context)
 	else
@@ -242,7 +248,8 @@ end
 ---@return nil
 function M.reconcile(context)
 	local bufnr = context.bufnr
-	local old_lines = buffer.get_lines(bufnr, 0, -1)
+	local request = Request.from_range(context, Range.new(0, -1))
+	local old_lines = reader.read(request)
 	local document = vim_parser.parse(old_lines, Context.is_allow_plain(context))
 	local vi_lines = vim_parser.unparse(document)
 	if table.concat(old_lines, "\n") ~= table.concat(vi_lines, "\n") then
