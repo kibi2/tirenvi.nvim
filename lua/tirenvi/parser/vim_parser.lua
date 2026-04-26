@@ -10,6 +10,7 @@ local Blocks = require("tirenvi.core.blocks")
 local Record = require("tirenvi.core.record")
 local Attr = require("tirenvi.core.attr")
 local tir_vim = require("tirenvi.core.tir_vim")
+local Context = require("tirenvi.app.context")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -65,20 +66,24 @@ end
 -- Public API
 -----------------------------------------------------------------------
 
----@param vi_lines string[]
+---@param request Request
 ---@param no_normalize boolean|nil  -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
 ---@return Document
-function M.parse(vi_lines, allow_plain, no_normalize)
+function M.parse(request, no_normalize)
 	no_normalize = no_normalize or false
-	local records = tir_vim_to_ndjsons(vi_lines)
-	return Document.new_from_vim(records, allow_plain, no_normalize)
+	local allow_plain = Context.is_allow_plain(request.context)
+	local records = tir_vim_to_ndjsons(request.lines)
+	log.probe(request.attrs)
+	return Document.new_from_vim(records, request.attrs, allow_plain, no_normalize)
 end
 
 ---@param document Document
 ---@return string[]
 function M.unparse(document)
 	local ndjsons = Document.serialize_to_vim(document)
+	Document.rebuild_attr_range(document)
+	log.probe(Document.collect_attrs(document))
 	return to_lines(ndjsons)
 end
 

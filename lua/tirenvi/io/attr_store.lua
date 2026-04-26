@@ -14,8 +14,10 @@ local M = {}
 ---@param request Request
 function M.write(request)
     if not request.attrs then
+        log.probe("nil")
         return
     end
+    log.probe(request.attrs)
     buffer.set(request.context.bufnr, buffer.IKEY.ATTRS, request.attrs)
 end
 

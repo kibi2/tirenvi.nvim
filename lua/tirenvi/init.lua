@@ -1,6 +1,7 @@
 ----- dependencies
 local Context = require("tirenvi.app.context")
 local Request = require("tirenvi.app.request")
+local pipeline = require("tirenvi.app.pipeline")
 local Document = require("tirenvi.core.document")
 local Parser = require("tirenvi.parser.parser")
 local flat_parser = require("tirenvi.parser.flat_parser")
@@ -40,6 +41,7 @@ end
 ---@param request Request
 ---@param document Document
 local function set_attrs(request, document)
+	-- TODO: Document
 	Blocks.set_attrs(document.blocks, request.attrs)
 end
 
@@ -53,11 +55,10 @@ local function to_flat(context, is_toggle)
 	if not tir_vim.has_pipe(vi_lines) then
 		return
 	end
-	local document = vim_parser.parse(vi_lines, Context.is_allow_plain(context))
+	local document = vim_parser.parse(request)
 	log.debug(document.blocks[1].records)
 	local fl_lines = flat_parser.unparse(document, context.parser)
 	local request = Request.from_lines(context, Range.new(0, -1), fl_lines)
-	request.attrs = Document.get_attrs(document)
 	writer.write(request)
 end
 
@@ -65,15 +66,7 @@ end
 ---@param no_undo boolean|nil
 ---@return nil
 local function from_flat(context, no_undo)
-	local request = Request.from_range(context, Range.new(0, -1))
-	local fl_lines = reader.read(request)
-	local parser = context.parser
-	util.assert_no_reserved_marks(fl_lines)
-	local document = flat_parser.parse(fl_lines, parser)
-	set_attrs(request, document)
-	local vi_lines = vim_parser.unparse(document)
-	local request = Request.from_lines(context, Range.new(0, -1), vi_lines, no_undo)
-	writer.write(request)
+	pipeline.from_flat(context, no_undo)
 end
 
 ---@return integer|nil
@@ -98,7 +91,7 @@ local function get_blocks(context, row)
 	if not tir_vim.has_pipe(lines) then
 		return nil
 	end
-	return vim_parser.parse(lines, Context.is_allow_plain(context))
+	return vim_parser.parse(request)
 end
 
 ---@param context Context
@@ -243,10 +236,9 @@ end
 ---@param context Context
 ---@return nil
 function M.reconcile(context)
-	local bufnr = context.bufnr
 	local request = Request.from_range(context, Range.new(0, -1))
 	local old_lines = reader.read(request)
-	local document = vim_parser.parse(old_lines, Context.is_allow_plain(context))
+	local document = vim_parser.parse(request)
 	local vi_lines = vim_parser.unparse(document)
 	if table.concat(old_lines, "\n") ~= table.concat(vi_lines, "\n") then
 		log.debug({ vi_lines[1], vi_lines[2] })
