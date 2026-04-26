@@ -45,10 +45,10 @@ end
 ---@return nil
 local function to_flat(context, is_toggle)
 	is_toggle = is_toggle or false
-	if not buf_state.is_tir_vim(context.bufnr) then
+	local vi_lines = buffer.get_lines(context.bufnr, 0, -1)
+	if not tir_vim.has_pipe(vi_lines) then
 		return
 	end
-	local vi_lines = buffer.get_lines(context.bufnr, 0, -1)
 	local document = vim_parser.parse(vi_lines, Context.is_allow_plain(context))
 	if is_toggle then
 		store_widths(context.bufnr, document)
@@ -86,9 +86,12 @@ end
 
 ---@param context Context
 ---@param row Range
----@return Document
+---@return Document|nil
 local function get_blocks(context, row)
 	local lines = buffer.get_lines(context.bufnr, row.first - 1, row.last)
+	if not tir_vim.has_pipe(lines) then
+		return nil
+	end
 	return vim_parser.parse(lines, Context.is_allow_plain(context))
 end
 
@@ -118,12 +121,17 @@ end
 ---@param operator string
 ---@param count integer
 ---@param rect Rect
+---@return boolean
 local function change_table_width(context, operator, count, rect)
 	log.debug("row%s, col%s", rect.row:short(), rect.col:short())
 	local document = get_blocks(context, rect.row)
+	if not document then
+		return false
+	end
 	Blocks.change_width(document.blocks, operator, count, rect.col)
 	local vi_lines = vim_parser.unparse(document)
 	buffer.set_lines(context.bufnr, rect.row.first - 1, rect.row.last, vi_lines)
+	return true
 end
 
 ---@param context Context
@@ -187,6 +195,10 @@ local buffer_backup
 ---@return nil
 function M.export_flat(context)
 	buffer_backup = buffer.get_lines(context.bufnr, 0, -1)
+	if not tir_vim.has_pipe(buffer_backup) then
+		buffer_backup = nil
+		return
+	end
 	to_flat(context)
 end
 
@@ -210,7 +222,8 @@ end
 ---@param context Context
 ---@return nil
 function M.toggle(context)
-	if buf_state.is_tir_vim(context.bufnr) then
+	local lines = buffer.get_lines(context.bufnr, 0, -1)
+	if tir_vim.has_pipe(lines) then
 		M.disable(context)
 	else
 		M.enable(context)
@@ -238,10 +251,7 @@ end
 ---@return nil
 function M.width(context, line_provider, rect, operator, count)
 	change_width(context, line_provider, rect, operator, count)
-	local command = api.nvim_replace_termcodes(
-		":<C-u>Tir width " .. operator .. count .. "<CR>",
-		true, false, true
-	)
+	local command = util.get_termcodes(":<C-u>Tir width " .. operator .. count .. "<CR>")
 	set_repeat(command)
 end
 
@@ -270,10 +280,10 @@ function M.keymap_lf()
 	local col = fn.col(".")
 	local line = fn.getline(".")
 	if not tir_vim.get_pipe_char(line) then
-		return api.nvim_replace_termcodes("<CR>", true, true, true)
+		return util.get_termcodes("<CR>")
 	end
 	if col == 1 or col > #line then
-		return api.nvim_replace_termcodes("<CR>", true, true, true)
+		return util.get_termcodes("<CR>")
 	end
 	return config.marks.lf
 end
@@ -282,10 +292,10 @@ end
 function M.keymap_tab()
 	local line = fn.getline(".")
 	if not tir_vim.get_pipe_char(line) then
-		return api.nvim_replace_termcodes("<Tab>", true, true, true)
+		return util.get_termcodes("<Tab>")
 	end
 	if bo.expandtab then
-		return api.nvim_replace_termcodes("<Tab>", true, true, true)
+		return util.get_termcodes("<Tab>")
 	end
 	return config.marks.tab
 end

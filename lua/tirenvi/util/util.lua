@@ -19,6 +19,7 @@ local log = require("tirenvi.util.log")
 
 local M = {}
 
+local api = vim.api
 local fn = vim.fn
 -- private helpers
 
@@ -113,6 +114,12 @@ end
 ---@return boolean
 function M.end_with(line, str)
 	return line:sub(- #str) == str
+end
+
+---@param code string
+---@return string
+function M.get_termcodes(code)
+	return api.nvim_replace_termcodes(code, true, false, true)
 end
 
 return M
