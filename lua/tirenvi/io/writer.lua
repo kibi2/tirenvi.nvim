@@ -1,4 +1,5 @@
 local buffer = require("tirenvi.io.buffer")
+local attr_store = require("tirenvi.io.attr_store")
 local log = require("tirenvi.util.log")
 
 local M = {}
