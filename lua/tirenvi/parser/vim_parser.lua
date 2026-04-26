@@ -66,16 +66,16 @@ end
 -- Public API
 -----------------------------------------------------------------------
 
----@param request Request
+---@param req Request
 ---@param no_normalize boolean|nil  -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
 ---@return Document
-function M.parse(request, no_normalize)
+function M.parse(ctx, req, no_normalize)
 	no_normalize = no_normalize or false
-	local allow_plain = Context.is_allow_plain(request.context)
-	local records = tir_vim_to_ndjsons(request.lines)
-	log.probe(request.attrs)
-	return Document.new_from_vim(records, request.attrs, allow_plain, no_normalize)
+	local allow_plain = Context.is_allow_plain(ctx)
+	local records = tir_vim_to_ndjsons(req.lines)
+	log.probe(req.attrs)
+	return Document.new_from_vim(records, req.attrs, allow_plain, no_normalize)
 end
 
 ---@param document Document

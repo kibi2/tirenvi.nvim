@@ -20,21 +20,21 @@ local fn = vim.fn
 -- Public API
 
 -- Command / Keymap handlers (private)
----@param context Context
+---@param ctx Context
 ---@param opts {[string]:any}
 ---@return nil
-local function cmd_reconcile(context, opts)
-	if buf_state.should_skip(context.bufnr) then return end
-	init.reconcile(context)
+local function cmd_reconcile(ctx, opts)
+	if buf_state.should_skip(ctx.bufnr) then return end
+	init.reconcile(ctx)
 end
 
----@param context Context
+---@param ctx Context
 ---@param opts {[string]:any}
 ---@return nil
-local function cmd_toggle(context, opts)
-	if buf_state.should_skip(context.bufnr) then return end
+local function cmd_toggle(ctx, opts)
+	if buf_state.should_skip(ctx.bufnr) then return end
 	ui.special_apply()
-	init.toggle(context)
+	init.toggle(ctx)
 end
 
 ---@param opts {[string]:any}
@@ -63,37 +63,37 @@ local function get_rect(opts)
 	}
 end
 
----@param context Context
+---@param ctx Context
 ---@param opts {[string]:any}
 ---@return nil
-local function cmd_width(context, opts)
-	if buf_state.should_skip(context.bufnr) then return end
+local function cmd_width(ctx, opts)
+	if buf_state.should_skip(ctx.bufnr) then return end
 	local operator, count = opts.args:match("^width%s*([=+-]?)(%d*)")
 	count                 = tonumber(count) or 0
 	local rect            = get_rect(opts)
 	log.debug("row[%d-%d], col[%d-%d]", rect.row.first, rect.row.last, rect.col.first, rect.col.last)
-	local line_provider = LinProvider.new(context)
-	init.width(context, line_provider, rect, operator, count)
+	local line_provider = LinProvider.new(ctx.bufnr)
+	init.width(ctx, line_provider, rect, operator, count)
 end
 
----@param context Context
+---@param ctx Context
 ---@param opts {[string]:any}
 ---@return nil
-local function cmd_auto_reconcile(context, opts)
-	if buf_state.should_skip(context.bufnr) then return end
+local function cmd_auto_reconcile(ctx, opts)
+	if buf_state.should_skip(ctx.bufnr) then return end
 	local arg = opts.fargs[2]
 	if arg == nil then
-		buffer.set_auto_reconcile(context, not buffer.get_auto_reconcile(context))
+		buffer.set_auto_reconcile(ctx.bufnr, not buffer.get_auto_reconcile(ctx.bufnr))
 	elseif arg == "on" then
-		buffer.set_auto_reconcile(context, true)
+		buffer.set_auto_reconcile(ctx.bufnr, true)
 	elseif arg == "off" then
-		buffer.set_auto_reconcile(context, false)
+		buffer.set_auto_reconcile(ctx.bufnr, false)
 	else
 		notify.error("[Tirenvi] invalid argument: " .. arg .. " (expected: on|off)")
 		return
 	end
 	notify.info(string.format("[Tirenvi] auto-reconcile:%s ",
-		buffer.get_auto_reconcile(context) and "ON" or "OFF"))
+		buffer.get_auto_reconcile(ctx.bufnr) and "ON" or "OFF"))
 end
 
 ----------------------------------------------------------------------
@@ -139,14 +139,14 @@ local function on_tir(opts)
 	if command == "width-" then
 		command = "width"
 	end
-	local context = Context.from_buf()
-	log.debug("===+===+===+===+=== %s %s[%d] ===+===+===+===+===", opts.name, opts.fargs[1], context.bufnr)
+	local ctx = Context.from_buf()
+	log.debug("===+===+===+===+=== %s %s[%d] ===+===+===+===+===", opts.name, opts.fargs[1], ctx.bufnr)
 	local func = commands[command]
 	if not func then
 		notify.error(errors.err_unknown_command(sub))
 		return
 	end
-	func(context, opts)
+	func(ctx, opts)
 end
 
 local function register_user_command()

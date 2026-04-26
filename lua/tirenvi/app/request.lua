@@ -11,7 +11,6 @@ local log = require("tirenvi.util.log")
 local M = {}
 
 ---@class Request
----@field context Context
 ---@field range? Range
 ---@field lines? string[]
 ---@field attrs? Attr[]
@@ -23,24 +22,20 @@ local M = {}
 -- Public API
 -----------------------------------------------------------------------
 
----@param context Context
 ---@param range Range
 ---@return Request
-function M.from_range(context, range)
+function M.from_range(range)
     return {
-        context = context,
         range = range,
     }
 end
 
----@param context Context
 ---@param range Range
 ---@param lines string[]
 ---@param no_undo boolean|nil
 ---@return Request
-function M.from_lines(context, range, lines, no_undo)
+function M.from_lines(range, lines, no_undo)
     return {
-        context = context,
         range = range,
         lines = lines,
         no_undo = no_undo or false,

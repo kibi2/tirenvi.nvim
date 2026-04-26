@@ -79,8 +79,7 @@ local function set_lines(bufnr, i_start, i_end, lines, no_undo)
 	end
 	i_start = math.max(i_start, 0)
 	set_undo_tree_last(bufnr)
-	local context = { bufnr = bufnr }
-	if not no_undo or M.get_auto_reconcile(context) then
+	if not no_undo or M.get_auto_reconcile(bufnr) then
 		api.nvim_buf_set_lines(bufnr, i_start, i_end, false, lines)
 	end
 	fix_cursor_utf8()
@@ -248,19 +247,19 @@ function M.get_lines_around(bufnr, start, end_)
 	return M.get_line(bufnr, start - 1), M.get_line(bufnr, end_)
 end
 
----@param context Context
+---@param bufnr number
 ---@param value boolean
-function M.set_auto_reconcile(context, value)
-	M.set(context.bufnr, M.IKEY.AUTO_RECONCILE, value)
+function M.set_auto_reconcile(bufnr, value)
+	M.set(bufnr, M.IKEY.AUTO_RECONCILE, value)
 end
 
----@param context Context
+---@param bufnr number
 ---@return boolean
-function M.get_auto_reconcile(context)
-	local auto_reconcile = M.get(context.bufnr, M.IKEY.AUTO_RECONCILE)
+function M.get_auto_reconcile(bufnr)
+	local auto_reconcile = M.get(bufnr, M.IKEY.AUTO_RECONCILE)
 	if auto_reconcile == nil then
 		auto_reconcile = config.table.auto_reconcile
-		M.set_auto_reconcile(context, auto_reconcile)
+		M.set_auto_reconcile(bufnr, auto_reconcile)
 	end
 	return auto_reconcile
 end

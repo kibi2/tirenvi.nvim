@@ -10,13 +10,13 @@ local M = {}
 
 -- private helpers
 
----@param context Context
+---@param ctx Context
 ---@param line_provider LineProvider
 ---@param is_around boolean|nil
-local function setup_vl(context, line_provider, is_around)
+local function setup_vl(ctx, line_provider, is_around)
     is_around = is_around or false
     local count = vim.v.count1
-    local pos = tir_vim.get_block_rect(context, line_provider, count, is_around)
+    local pos = tir_vim.get_block_rect(ctx, line_provider, count, is_around)
     if not pos then
         return
     end
@@ -27,15 +27,15 @@ local function setup_vl(context, line_provider, is_around)
 end
 
 local function setup_vil()
-    local context = Context.from_buf()
-    local line_provider = LinProvider.new()
-    setup_vl(context, line_provider)
+    local ctx = Context.from_buf()
+    local line_provider = LinProvider.new(ctx.bufnr)
+    setup_vl(ctx, line_provider)
 end
 
 local function setup_val()
-    local context = Context.from_buf()
-    local line_provider = LinProvider.new()
-    setup_vl(context, line_provider, true)
+    local ctx = Context.from_buf()
+    local line_provider = LinProvider.new(ctx.bufnr)
+    setup_vl(ctx, line_provider, true)
 end
 
 -- public API
