@@ -15,6 +15,7 @@ local util = require("tirenvi.util.util")
 local Range = require("tirenvi.util.range")
 local Range3 = require("tirenvi.util.range3")
 local buffer = require("tirenvi.io.buffer")
+local writer = require("tirenvi.io.writer")
 local buf_state = require("tirenvi.io.buf_state")
 local vim_parser = require("tirenvi.parser.vim_parser")
 local flat_parser = require("tirenvi.parser.flat_parser")
@@ -114,10 +115,9 @@ end
 ---@param ranges Range[]
 local function apply_ranges(context, ranges)
 	for index = 1, #ranges do
-		local first = ranges[index].first
-		local last = ranges[index].last + 1
-		local new_lines = apply_range(context, first, last)
-		buffer.set_lines(context.bufnr, first, last, new_lines, true)
+		local range = Range.new(ranges[index].first, ranges[index].last + 1)
+		local new_lines = apply_range(context, range.first, range.last)
+		writer.write(context.bufnr, range, new_lines, true)
 	end
 end
 

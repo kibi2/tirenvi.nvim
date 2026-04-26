@@ -166,18 +166,18 @@ function M.set(bufnr, key, val)
 end
 
 ---@param bufnr number
----@param i_start integer
----@param i_end integer integer
+---@param first integer
+---@param last integer
 ---@param lines string[]
 ---@param no_undo boolean|nil
-function M.set_lines(bufnr, i_start, i_end, lines, no_undo)
+function M.set_lines(bufnr, first, last, lines, no_undo)
 	log.debug(M.get_state(bufnr))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
 	local before = fn.undotree(bufnr).seq_last
-	local ok, err = pcall(set_lines, bufnr, i_start, i_end, lines, no_undo)
+	local ok, err = pcall(set_lines, bufnr, first, last, lines, no_undo)
 	local after = fn.undotree(bufnr).seq_last
 	log.watch("UNDO", "=== [%d->%d]set_lines lines[%d]='%s'...[%d]='%s'", before, after,
-		i_start + 1, tostring(lines[1]), i_end, tostring(lines[#lines]))
+		first + 1, tostring(lines[1]), last, tostring(lines[#lines]))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) - 1)
 	assert(M.get(bufnr, M.IKEY.PATCH_DEPTH) == 0)
 	if not ok then
