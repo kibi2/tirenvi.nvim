@@ -1,6 +1,5 @@
 local config = require("tirenvi.config")
 local notify = require("tirenvi.util.notify")
-local Range = require("tirenvi.util.range")
 
 local M = {}
 
@@ -143,6 +142,37 @@ local function get_bufnr_by_name(name)
 	return nil
 end
 
+local category_hl_map = {}
+local category_match_id = {}
+vim.api.nvim_set_hl(0, "TirLog_Entry", { fg = "#55ffff", bold = true })
+vim.api.nvim_set_hl(0, "TirLog_Error", { fg = "#ffffff", bg = "#ff0000", bold = true })
+
+local function apply_log_highlight(bufnr)
+	local winid = vim.fn.bufwinid(bufnr)
+	if winid == -1 then return end
+	vim.api.nvim_win_call(winid, function()
+		vim.fn.clearmatches()
+		vim.fn.matchadd("TirLog_Entry", "===")
+		vim.fn.matchadd("TirLog_Error", "\\[ERROR\\]")
+		for cat, hl in pairs(category_hl_map) do
+			vim.fn.matchadd(hl, "\\[" .. cat .. "\\]")
+		end
+	end)
+end
+
+local aug = vim.api.nvim_create_augroup("TirenviLogHL", { clear = true })
+local function register_autocmds(bufnr)
+	vim.api.nvim_create_autocmd("BufWinEnter", {
+		group = aug,
+		buffer = bufnr,
+		callback = function(args)
+			--if args.buf == log_bufnr then
+			apply_log_highlight(args.buf)
+			--end
+		end,
+	})
+end
+
 ---@return number
 local function ensure_log_buf()
 	if log_bufnr and api.nvim_buf_is_valid(log_bufnr) then
@@ -159,7 +189,7 @@ local function ensure_log_buf()
 	bo[log_bufnr].buftype = "nofile"
 	bo[log_bufnr].bufhidden = "hide"
 	bo[log_bufnr].swapfile = false
-
+	register_autocmds(log_bufnr)
 	return log_bufnr
 end
 
@@ -220,27 +250,32 @@ local function write_buffer(msg)
 end
 
 local unpack = table.unpack or unpack -- Lua 5.1/5.2 compatibility
-local category_hl_map = {}
-local category_match_id = {}
+local palette = {
+	"#ff5555", "#55aaaa", "#ffff55",
+	"#aaff55", "#aa55ff", "#ffaa55",
+}
 
-local function apply_log_highlight(bufnr)
-	local winid = vim.fn.bufwinid(bufnr)
-	if winid == -1 then return end
-	vim.api.nvim_win_call(winid, function()
-		vim.fn.clearmatches()
-		for cat, hl in pairs(category_hl_map) do
-			vim.fn.matchadd(hl, "\\[" .. cat .. "\\]")
-		end
-	end)
-end
+local assigned = {}
+local used = {}
 
 local function pick_color(cat)
-	local colors = {
-		"#ff6b6b", "#4ecdc4", "#ffe66d",
-		"#c7f464", "#c792ea", "#f78c6c",
-	}
-	local idx = (vim.fn.str2nr(vim.fn.sha256(cat):sub(1, 8), 16) % #colors) + 1
-	return colors[idx]
+	if assigned[cat] then
+		return assigned[cat]
+	end
+	local hash = vim.fn.sha256(cat)
+	local base = (vim.fn.str2nr(hash:sub(1, 8), 16) % #palette) + 1
+	for i = 0, #palette - 1 do
+		local idx = ((base + i - 1) % #palette) + 1
+		local color = palette[idx]
+		if not used[color] then
+			assigned[cat] = color
+			used[color] = true
+			return color
+		end
+	end
+	local color = palette[base]
+	assigned[cat] = color
+	return color
 end
 
 local function ensure_category_highlight(category)
@@ -311,7 +346,7 @@ local function emit(force, level, opts, fmt, ...)
 	elseif category then
 		name = category
 	end
-	local final = string.format("[%s]%s%s[%s][%s:%d] %s", PREFIX, ts, mon, name, file, line, msg)
+	local final = string.format("[%s]%s%s[%s][%s %d] %s", PREFIX, ts, mon, name, file, line, msg)
 	if config.log.output == "buffer" then
 		write_buffer(final)
 	elseif config.log.output == "file" then
@@ -351,21 +386,18 @@ function M.probe(...)
 	emit(true, levels.ERROR, {}, ...)
 end
 
+---@param category string
+---@param ... unknown
 function M.watch(category, ...)
 	if levels.DEBUG < config.log.level then
 		return
 	end
-	return emit(false, levels.DEBUG, { category = category }, ...)
+	emit(false, levels.DEBUG, { category = category }, ...)
 end
 
-local aug = vim.api.nvim_create_augroup("TirenviLogHL", { clear = true })
-vim.api.nvim_create_autocmd("WinEnter", {
-	group = aug,
-	callback = function(args)
-		if args.buf == log_bufnr then
-			apply_log_highlight(args.buf)
-		end
-	end,
-})
+---@return boolean
+function M.is_debug()
+	return levels.DEBUG >= config.log.level
+end
 
 return M

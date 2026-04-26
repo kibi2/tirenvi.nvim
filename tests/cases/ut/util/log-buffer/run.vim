@@ -21,7 +21,7 @@ lua << EOF
   log.info(nil, nil)
   log.debug(4e8)
   log.probe(4e8)
-  log.watch("CATEGORY", "format %d %s %s", 38, "foo", Range.new(12,34))
+  log.watch("CATEGORY", "format %d %s %s", 38, "foo", Range.from_lua(12,34))
 EOF
 
 call RunTest({})

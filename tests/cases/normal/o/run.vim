@@ -15,7 +15,11 @@ sleep 1m
 call Snapshot({})
 
 edit $TIRENVI_ROOT/tests/data/simple.csv
+execute "normal! ggO\<Esc>"
+sleep 1m
 execute "normal! Onew line\<Esc>"
+sleep 1m
+execute "normal! Go\<Esc>"
 sleep 1m
 
 call RunTest({})

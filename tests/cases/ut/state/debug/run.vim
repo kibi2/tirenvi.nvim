@@ -1,0 +1,33 @@
+source $TIRENVI_ROOT/tests/common.vim
+
+edit $TIRENVI_ROOT/tests/data/table2.md
+
+lua << EOF
+  local M = require("tirenvi")
+  local log = require("tirenvi.util.log")
+  local buffer = require("tirenvi.io.buffer")
+  local levels = vim.log.levels
+  M.setup({
+  	log = {
+		level = levels.DEBUG,
+		probe = true, output = "print",
+  	},
+  })
+
+  local Context = require("tirenvi.app.context")
+  local Attrs = require("tirenvi.core.attrs")
+  local Request = require("tirenvi.app.request")
+  local Range = require("tirenvi.util.range")
+  local req_r = Request.from_range(Range.WHOLE)
+  local reader = require("tirenvi.io.reader")
+  local vim_parser = require("tirenvi.parser.vim_parser")
+  local Document = require("tirenvi.core.document")
+	local ctx =  Context.from_buf(bufnr)
+  reader.read(ctx, req_r)
+  log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "UPDATE CHACHED ATTRS:")) 
+  local vim_doc = vim_parser.parse(ctx, req_r, range3)
+  log.watch("ATTR", Document.debug_attrs(vim_doc, "1DOC ATTR:"))
+EOF
+
+
+call RunTest({})

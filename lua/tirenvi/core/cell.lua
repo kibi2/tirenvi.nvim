@@ -5,6 +5,7 @@ local log = require("tirenvi.util.log")
 local M = {}
 
 -- constants / defaults
+M.MIN_WIDTH = 2
 local fn = vim.fn
 local padding = config.marks.padding
 local escaped_padding = vim.pesc(padding)
@@ -21,54 +22,6 @@ local function display_width(self)
         return #self
     end
     return fn.strdisplaywidth(self)
-end
-
-local lf_len = display_width(lf)
-
------------------------------------------------------------------------
--- Public API
------------------------------------------------------------------------
-
----@param cells Cell[]
----@return integer[]
-function M.get_widths(cells)
-    local widths = {}
-    for _, cell in ipairs(cells) do
-        local width = display_width(cell)
-        widths[#widths + 1] = width
-    end
-    return widths
-end
-
----@param self Cell
----@return integer
-function M.get_width(self)
-    if not self then
-        return 0
-    end
-    local cells = vim.split(self, lf)
-    local max_width = 0
-    for icell, cell in pairs(cells) do
-        local width = display_width(cell)
-        if icell ~= #cells then
-            width = width + lf_len
-        end
-        max_width = math.max(max_width, width)
-    end
-    return max_width
-end
-
----@param cells Cell[]
----@param ncol integer:w
-function M.normalize(cells, ncol)
-    for index = 1, ncol do
-        local cell = cells[index]
-        if cell == nil then
-            cells[index] = ""
-        elseif type(cell) ~= "string" then
-            cells[index] = tostring(cell)
-        end
-    end
 end
 
 ---@param cells string[]
@@ -134,6 +87,57 @@ local function join(cells, ncol)
         end
     end
     return join_row
+end
+
+local lf_len = display_width(lf)
+
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
+
+---@param cells Cell[]
+---@return integer[]
+function M.get_widths(cells)
+    local widths = {}
+    for _, cell in ipairs(cells) do
+        local width = M.get_width(cell)
+        widths[#widths + 1] = width
+    end
+    return widths
+end
+
+---@param self Cell
+---@return integer
+function M.get_width(self)
+    if not self then
+        return 0
+    end
+    local cells = { self }
+    if not util.end_with(self, config.marks.padding) then
+        cells = vim.split(self, lf)
+    end
+    local max_width = 0
+    for icell, cell in pairs(cells) do
+        local width = display_width(cell)
+        if icell ~= #cells then
+            width = width + lf_len
+        end
+        max_width = math.max(max_width, width)
+    end
+    return max_width
+end
+
+---@param cells Cell[]
+---@param ncol integer:w
+function M.normalize(cells, ncol)
+    for index = 1, ncol do
+        local cell = cells[index]
+        if cell == nil then
+            cells[index] = ""
+        elseif type(cell) ~= "string" then
+            cells[index] = tostring(cell)
+        end
+    end
 end
 
 ---@param cells Cell[]

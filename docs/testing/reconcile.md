@@ -59,7 +59,7 @@ fucntion handle_request(bufnr, new_range)
     vim.schedule(function() run_local_range(bufnr) end) -- reconcile local_range
     local_range = new_range
   else -- 2回目以降はまとめる
-    local_range = Range.union(local_range, new_range) -- expand cocal_range
+    local_range = Range.union(local_range, new_range) -- expand local_range
   end
 end
 fucntion run_ext_ranges(bufnr, extranges)

@@ -7,8 +7,10 @@
 
 local CONST = require("tirenvi.constants")
 local Attr = require("tirenvi.core.attr")
-local util = require("tirenvi.util.util")
 local Block = require("tirenvi.core.block")
+local Record = require("tirenvi.core.record")
+local util = require("tirenvi.util.util")
+local Range = require("tirenvi.util.range")
 local errors = require("tirenvi.util.errors")
 local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
@@ -21,6 +23,27 @@ local M = {}
 -- Utility
 -----------------------------------------------------------------------
 
+---@param self Blocks
+---@param method string
+---@param ... unknown
+---@return boolean
+local function apply(self, method, ...)
+	local result = true
+	for _, block in ipairs(self) do
+		local common = Block[method]
+		if common then
+			result = common(block, ...) and result
+		end
+
+		local handler = Block[block.kind]
+		local specific = handler[method]
+		if specific then
+			result = specific(block, ...) and result
+		end
+	end
+	return result
+end
+
 -----------------------------------------------------------------------
 -- Block construction
 -----------------------------------------------------------------------
@@ -28,7 +51,7 @@ local M = {}
 --- Split NDJSON records into plain/grid blocks.
 ---@param records Ndjson[]
 ---@return Blocks
-local function build_blocks(records)
+local function build_blocks_from_records(records)
 	local self = {}
 	---@type Block
 	local block = Block.new()
@@ -56,6 +79,53 @@ local function build_blocks(records)
 	return self
 end
 
+--- Split NDJSON records into plain/grid blocks.
+---@param records Ndjson[]
+---@param attrs Attr[]
+---@return Blocks
+local function build_blocks_from_attrs(records, attrs)
+	local self = {}
+	for iattr, attr in ipairs(attrs) do
+		local block = Block.new()
+		Block.set_kind(block, Attr.is_plain(attr) and CONST.KIND.PLAIN or CONST.KIND.GRID)
+		local has_continuation = false
+		for irow = attr.range.first, attr.range.last do
+			local record = records[irow]
+			if not record then
+				log.error(string.format("Record not found for row %d", irow))
+				break
+			end
+			if record.kind == CONST.KIND.ATTR_FILE then
+			elseif record.kind == CONST.KIND.PLAIN or record.kind == CONST.KIND.GRID then
+				record = Record[record.kind].change_kind(record, block.kind)
+				if record.kind == "grid" then
+					Record.apply_column_count(record, #attr.columns)
+					if record._has_continuation == nil then
+						record._has_continuation = has_continuation
+					end
+				end
+				Block.add(block, record)
+				has_continuation = record._has_continuation
+			end
+		end
+		block.attr = vim.deepcopy(attr)
+		self[iattr] = block
+	end
+	return self
+end
+
+--- Split NDJSON records into plain/grid blocks.
+---@param records Ndjson[]
+---@param attrs Attr[]|nil
+---@return Blocks
+local function build_blocks(records, attrs)
+	if attrs then
+		return build_blocks_from_attrs(records, attrs)
+	else
+		return build_blocks_from_records(records)
+	end
+end
+
 -----------------------------------------------------------------------
 -- Attribute handling
 -----------------------------------------------------------------------
@@ -65,85 +135,20 @@ end
 ---| "grid in plain"
 
 ---@param self Blocks
----@param attr_prev Attr|nil
----@param attr_next Attr|nil
-local function ensure_plain_block(self, attr_prev, attr_next)
-	if #self > 1 then
-		return
+---@param first integer
+local function rebuild_attr_range(self, first)
+	for _, block in ipairs(self) do
+		local attr = block.attr or Attr.new()
+		block.attr = attr
+		local last = first + #block.records - 1
+		attr.range = Range.from_lua(first, last)
+		first      = last + 1
 	end
-	if #self == 1 and self[1].kind == CONST.KIND.PLAIN then
-		return
-	end
-	if not Attr.is_conflict(attr_prev, attr_next, true) then
-		return
-	end
-	notify.warn(errors.table_merge_warning(
-		attr_prev and #attr_prev.columns or 0,
-		attr_next and #attr_next.columns or 0
-	))
-	self[#self + 1] = Block.plain.new()
-end
-
----@param self Blocks
----@param attr_prev Attr|nil
----@param attr_next Attr|nil
-local function apply_attr(self, attr_prev, attr_next)
-	if #self == 0 then
-		return
-	end
-	Block[self[1].kind].set_attr(self[1], attr_prev)
-	Block[self[#self].kind].set_attr(self[#self], attr_next)
 end
 
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
-
----@param blocks Blocks
----@param attr_prev Attr|nil
----@param attr_next Attr|nil
----@return boolean
----@return RefAttrError|nil
-function M.reconcile_single(blocks, attr_prev, attr_next)
-	M.merge_blocks(blocks)
-	if Attr.is_conflict(attr_prev, attr_next, false) then
-		log.debug("===-===-===-=== conflict")
-		log.debug(blocks[1].records[1])
-		return false, "conflict"
-	end
-	if #blocks == 0 then
-		return true
-	end
-	local attr = not attr_prev and attr_next or attr_prev
-	local block = blocks[1]
-	if not attr then
-		return true
-	elseif not Attr.is_plain(attr) then
-		if block.kind == CONST.KIND.PLAIN then
-			block = Block.plain.to_grid(block)
-			blocks[1] = block
-		end
-	elseif Attr.is_plain(attr) then
-		if block.kind == CONST.KIND.GRID then
-			log.debug("===-===-===-=== grid in plain")
-			log.debug(attr_prev)
-			log.debug(attr_next)
-			return false, "grid in plain"
-		end
-	end
-	Block[block.kind].set_attr(block, attr)
-	return true
-end
-
----@param blocks Blocks
----@param attr_prev Attr|nil
----@param attr_next Attr|nil
----@return boolean
-function M.reconcile_multi(blocks, attr_prev, attr_next)
-	ensure_plain_block(blocks, attr_prev, attr_next)
-	apply_attr(blocks, attr_prev, attr_next)
-	return true
-end
 
 ---@param self Blocks
 function M.merge_blocks(self)
@@ -165,93 +170,120 @@ function M.merge_blocks(self)
 end
 
 ---@self Blocks
-function M:reset_attr()
+---@return Attr[]
+function M:collect_attrs()
+	local attrs = {}
 	for _, block in ipairs(self) do
-		Block.reset_attr(block)
+		assert(block.attr, "block.attr is nil")
+		attrs[#attrs + 1] = block.attr
 	end
+	return attrs
 end
 
 ---@self Blocks
----@return integer[][]
-function M:get_widths()
-	local widths = {}
-	for _, block in ipairs(self) do
-		widths[#widths + 1] = Block[block.kind].get_widths(block)
-	end
-	return widths
-end
-
----@self Blocks
----@param widths integer[][]
-function M:set_widths(widths)
-	if not widths then
-		return
-	end
-	for iblock, block in ipairs(self) do
-		Block[block.kind].set_widths(block, widths[iblock])
-	end
-end
-
----@self Blocks
----@param operator string
----@param count integer
----@param col Range
-function M:change_width(operator, count, col)
-	for _, block in ipairs(self) do
-		Block[block.kind].change_width(block, operator, count, col)
-	end
+---@param sel Range
+---@param width_op WidthOp
+function M:change_width(sel, width_op)
+	apply(self, "change_width", sel, width_op)
 end
 
 --- Convert NDJSON records into normalized blocks.
 ---@param ndjsons Ndjson[]
+---@param attrs Attr[]|nil
+---@param allow_plain boolean
 ---@return Blocks
-function M.new_from_flat(ndjsons, allow_plain)
-	local self = build_blocks(ndjsons)
-	if not allow_plain then
+function M.new_from_records(ndjsons, allow_plain, attrs)
+	local self = build_blocks(ndjsons, attrs)
+	if not allow_plain and M.has_grid(self) then
 		M.merge_blocks(self)
 	end
-	for _, block in ipairs(self) do
-		Block[block.kind].from_flat(block)
-	end
 	return self
-end
-
----@self Blocks
----@return Ndjson[]
-function M:serialize_to_flat()
-	local ndjsons = {}
-	for _, block in ipairs(self) do
-		local impl = Block[block.kind]
-		impl.to_flat(block)
-		util.extend(ndjsons, impl.serialize(block))
-	end
-	return ndjsons
 end
 
 --- Convert NDJSON records into normalized blocks.
----@param records Record[]
----@param no_normalize boolean  -- If true, skip nomalizing.
--- Prevents line count changes that would break put(); used for repair.
----@return Blocks
-function M.new_from_vim(records, no_normalize)
-	local self = build_blocks(records)
-	for _, block in ipairs(self) do
-		Block[block.kind].from_vim(block, no_normalize)
-	end
-
-	return self
+---@param self Blocks
+function M.from_flat(self)
+	apply(self, "from_flat")
 end
 
 ---@self Blocks
+function M:to_flat()
+	apply(self, "to_flat")
+end
+
+--- Convert NDJSON records into normalized blocks.
+---@param self Blocks
+---@param no_normalize boolean  -- If true, skip nomalizing.
+-- Prevents line count changes that would break put(); used for repair.
+function M.from_vim(self, no_normalize)
+	apply(self, "from_vim", no_normalize)
+end
+
+---@self Blocks
+function M:to_vim()
+	apply(self, "to_vim")
+end
+
+---@self Blocks
+function M:infer_consistent_attr()
+	apply(self, "infer_consistent_attr")
+end
+
+---@self Blocks
+function M:set_auto_attr()
+	apply(self, "set_auto_attr")
+end
+
+---@self Blocks
+---@param first integer
+function M:set_attr_range(first)
+	rebuild_attr_range(self, first)
+end
+
+---@param self Blocks
 ---@return Ndjson[]
-function M:serialize_to_vim()
+function M.serialize(self)
 	local ndjsons = {}
 	for _, block in ipairs(self) do
-		local impl = Block[block.kind]
-		impl.to_vim(block)
-		util.extend(ndjsons, impl.serialize(block))
+		util.extend(ndjsons, Block[block.kind].serialize(block))
 	end
 	return ndjsons
+end
+
+---@self Blocks
+---@param attrs Attr[]
+function M:apply_cached_attr(attrs)
+	apply(self, "apply_cached_attr", attrs)
+end
+
+---@param self Blocks
+---@return boolean
+function M.has_grid(self)
+	for _, block in ipairs(self) do
+		if block.kind == CONST.KIND.GRID then
+			return true
+		end
+	end
+	return false
+end
+
+---@param self Blocks
+function M:insert_empty_lines()
+	local prev_kind = self[#self].kind
+	for iblock = #self - 1, 1, -1 do
+		local block = self[iblock]
+		if block.kind == CONST.KIND.GRID and block.kind == prev_kind then
+			notify.warn(errors.table_merge_warning(block.attr.range.last))
+			table.insert(self, iblock + 1, Block.plain.new())
+		end
+		prev_kind = block.kind
+	end
+end
+
+---@param self Document
+---@return boolean
+function M:has_width()
+	return apply(self, "has_width")
 end
 
 return M

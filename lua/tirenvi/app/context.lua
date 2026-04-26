@@ -4,7 +4,6 @@
 
 local Parser = require("tirenvi.parser.parser")
 local buffer = require("tirenvi.io.buffer")
-local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
 
 -----------------------------------------------------------------------
@@ -27,7 +26,7 @@ local M = {}
 ---@param bufnr number|nil
 ---@return table
 function M.from_buf(bufnr)
-    bufnr = (bufnr ~= nil and bufnr ~= 0) and bufnr or vim.api.nvim_get_current_buf()
+    bufnr = buffer.normalize_bufnr(bufnr)
     local filetype = buffer.get(bufnr, buffer.IKEY.FILETYPE)
     local parser = Parser.resolve_parser(filetype)
     return {
