@@ -36,9 +36,6 @@ M.IKEY       = {
 	-- auto_reconcile flag
 	AUTO_RECONCILE = "auto_reconcile",
 
-	-- grid columns widths [iblock][icol]
-	WIDTHS = "widths",
-
 	-- block attrs
 	ATTRS = "attrs",
 }

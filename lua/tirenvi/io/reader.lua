@@ -13,8 +13,11 @@ local M = {}
 -- Public API
 
 ---@param request Request
+---@return string[]
 function M.read(request)
-    return buffer.get_lines(request.context.bufnr, request.range.first, request.range.last)
+    attr_store.read(request)
+    request.lines = buffer.get_lines(request.context.bufnr, request.range.first, request.range.last)
+    return request.lines
 end
 
 return M

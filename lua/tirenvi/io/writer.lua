@@ -15,6 +15,7 @@ local M = {}
 ---@param request Request
 function M.write(request)
     buffer.set_lines(request.context.bufnr, request.range.first, request.range.last, request.lines, request.no_undo)
+    attr_store.write(request)
 end
 
 return M
