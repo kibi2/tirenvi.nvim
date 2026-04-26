@@ -6,10 +6,11 @@ local buffer = require("tirenvi.io.buffer")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
 local init = require("tirenvi.init")
 local notify = require("tirenvi.util.notify")
-local log = require("tirenvi.util.log")
 local errors = require("tirenvi.util.errors")
 local Range = require("tirenvi.util.range")
+local util = require("tirenvi.util.util")
 local ui = require("tirenvi.ui")
+local log = require("tirenvi.util.log")
 
 -- module
 local M = {}
@@ -23,11 +24,7 @@ local fn = vim.fn
 ---@param opts {[string]:any}
 ---@return nil
 local function cmd_reconcile(context, opts)
-	if buf_state.should_skip(context.bufnr, {
-			ensure_tir_vim = true,
-		}) then
-		return
-	end
+	if buf_state.should_skip(context.bufnr) then return end
 	init.reconcile(context)
 end
 
@@ -70,11 +67,7 @@ end
 ---@param opts {[string]:any}
 ---@return nil
 local function cmd_width(context, opts)
-	if buf_state.should_skip(context.bufnr, {
-			ensure_tir_vim = true,
-		}) then
-		return
-	end
+	if buf_state.should_skip(context.bufnr) then return end
 	local operator, count = opts.args:match("^width%s*([=+-]?)(%d*)")
 	count                 = tonumber(count) or 0
 	local rect            = get_rect(opts)
@@ -191,10 +184,8 @@ function M.keymap_lf()
 	local bufnr = Context.from_buf().bufnr
 	buffer.clear_cache()
 	log.debug("===+===+===+===+=== keymap_lf %s ===+===+===+===+===", bufnr)
-	if buf_state.should_skip(bufnr, {
-			is_tir_vim = true,
-		}) then
-		return api.nvim_replace_termcodes("<CR>", true, true, true)
+	if buf_state.should_skip(bufnr) then
+		return util.get_termcodes("<CR>")
 	end
 	return init.keymap_lf()
 end
@@ -204,10 +195,8 @@ function M.keymap_tab()
 	local bufnr = Context.from_buf().bufnr
 	buffer.clear_cache()
 	log.debug("===+===+===+===+=== keymap_tab %s ===+===+===+===+===", bufnr)
-	if buf_state.should_skip(bufnr, {
-			is_tir_vim = true,
-		}) then
-		return api.nvim_replace_termcodes("<Tab>", true, true, true)
+	if buf_state.should_skip(bufnr) then
+		return util.get_termcodes("<Tab>")
 	end
 	return init.keymap_tab()
 end

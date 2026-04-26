@@ -1,6 +1,5 @@
 -- dependencies
 local Context = require("tirenvi.app.context")
-local Parser = require("tirenvi.parser.parser")
 local buffer = require("tirenvi.io.buffer")
 local init = require("tirenvi.init")
 local buf_state = require("tirenvi.io.buf_state")
@@ -133,11 +132,7 @@ local function register_buffer_local_autocmds(augroup, context)
 		group = augroup,
 		buffer = context.bufnr,
 		callback = guard.guarded(function(args)
-			if buf_state.should_skip(args.buf, {
-					is_tir_vim = true,
-				}) then
-				return
-			end
+			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
 			local context = get_context(args.bufnr)
 			on_buf_write_pre(context)

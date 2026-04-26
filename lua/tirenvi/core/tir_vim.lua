@@ -184,6 +184,17 @@ function M.get_pipe_char(line)
     return nil
 end
 
+---@param lines string[]
+---@return boolean
+function M.has_pipe(lines)
+    for _, line in ipairs(lines) do
+        if M.get_pipe_char(line) then
+            return true
+        end
+    end
+    return false
+end
+
 ---@param line string|nil
 ---@return boolean
 function M.is_continue_line(line)
