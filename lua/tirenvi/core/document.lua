@@ -7,7 +7,10 @@ local M = {}
 
 -- constants / defaults
 
----@class Document
+---@class Document: BaseDocument
+---@class ViewDocument: BaseDocument
+
+---@class BaseDocument
 ---@field attr Attr_doc
 ---@field blocks Blocks
 

@@ -42,8 +42,8 @@ end
 ---@return nil
 function M.from_flat(ctx, no_undo)
     local req = Request.from_range(Range.new(0, -1))
-    local fl_lines = reader.read(ctx, req)
-    util.ensure_no_reserved_marks(fl_lines)
+    reader.read(ctx, req)
+    util.ensure_no_reserved_marks(req.lines)
     local document = flat_parser.parse(ctx, req)
     set_attrs(req, document) -- TODO: -> flat_parser.parse ?
     document_to_vim(ctx, req, document, no_undo)
