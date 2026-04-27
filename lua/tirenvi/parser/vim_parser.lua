@@ -78,11 +78,12 @@ function M.parse(ctx, req, no_normalize)
 	return Document.new_from_vim(records, req.attrs, allow_plain, no_normalize)
 end
 
+---@param req Request
 ---@param document Document
 ---@return string[]
-function M.unparse(document)
+function M.unparse(req, document)
 	local ndjsons = Document.serialize_to_vim(document)
-	Document.rebuild_attr_range(document)
+	Document.rebuild_attr_range(document, req.range.first)
 	log.probe(Document.collect_attrs(document))
 	return to_lines(ndjsons)
 end

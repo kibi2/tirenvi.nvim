@@ -278,8 +278,8 @@ function M:serialize_to_vim()
 end
 
 ---@self Blocks
-function M:rebuild_attr_range()
-	local first = 1
+---@param first integer
+function M:rebuild_attr_range(first)
 	for iblock, block in ipairs(self) do
 		local attr = block.attr or Attr.new()
 		block.attr = attr

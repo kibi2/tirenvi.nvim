@@ -129,8 +129,8 @@ function M:collect_attrs()
 end
 
 ---@param self Document
-function M:rebuild_attr_range()
-    Blocks.rebuild_attr_range(self.blocks)
+function M:rebuild_attr_range(first)
+    Blocks.rebuild_attr_range(self.blocks, first)
     self.attr.attrs = M.collect_attrs(self)
     -- TODO: rebuild_attrs() -- attrs + collect_attrs -> merge
 end
