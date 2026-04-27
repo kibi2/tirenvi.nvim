@@ -25,12 +25,12 @@ local function set_attrs(req, document)
     --Document.set_attrs(document.blocks, req.attrs)
 end
 
-function M.document_to_vim(ctx, req, document)
-    local vi_lines = vim_parser.unparse(document)
-    Document.set_attr_range(req.range.first, document)
-    req.lines = vi_lines
-    req.attrs = document.attr.block_attrs
-    --writer.write(ctx, req)
+local function document_to_vim(ctx, req, document, no_undo)
+    local vi_lines = vim_parser.unparse(req, document)
+    req.lines      = vi_lines
+    req.no_undo    = no_undo or false
+    req.attrs      = document.attr.attrs
+    writer.write(ctx, req)
 end
 
 -----------------------------------------------------------------------
@@ -45,11 +45,8 @@ function M.from_flat(ctx, no_undo)
     local fl_lines = reader.read(ctx, req)
     util.ensure_no_reserved_marks(fl_lines)
     local document = flat_parser.parse(ctx, req)
-    set_attrs(req, document)
-    req.lines   = vim_parser.unparse(document)
-    req.no_undo = no_undo
-    req.attrs   = document.attr.attrs
-    writer.write(ctx, req)
+    set_attrs(req, document) -- TODO: -> flat_parser.parse ?
+    document_to_vim(ctx, req, document, no_undo)
 end
 
 return M

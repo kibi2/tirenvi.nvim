@@ -129,8 +129,8 @@ local function change_table_width(ctx, operator, count, rect)
 		return false
 	end
 	Blocks.change_width(document.blocks, operator, count, rect.col)
-	local vi_lines = vim_parser.unparse(document)
-	local req = Request.from_lines(Range.new(rect.row.first - 1, rect.row.last), vi_lines)
+	local req = Request.from_range(Range.new(rect.row.first - 1, rect.row.last))
+	req.lines = vim_parser.unparse(req, document)
 	writer.write(ctx, req)
 	return true
 end
@@ -240,7 +240,7 @@ function M.reconcile(ctx)
 	local req = Request.from_range(Range.new(0, -1))
 	local old_lines = reader.read(ctx, req)
 	local document = vim_parser.parse(ctx, req)
-	local vi_lines = vim_parser.unparse(document)
+	local vi_lines = vim_parser.unparse(req, document)
 	if table.concat(old_lines, "\n") ~= table.concat(vi_lines, "\n") then
 		log.debug({ vi_lines[1], vi_lines[2] })
 		local req = Request.from_lines(Range.new(0, -1), vi_lines)
