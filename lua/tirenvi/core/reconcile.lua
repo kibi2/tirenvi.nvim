@@ -104,7 +104,7 @@ local function apply_range(ctx, start_row, end_row)
 	if not success then
 		log.debug("===-===-===-=== not success: %s", reason)
 		if reason == "grid in plain" then
-			return flat_parser.unparse(document, ctx.parser)
+			return flat_parser.unparse(ctx, document)
 		elseif reason == "conflict" then
 			document = build_document(ctx, 0, -1)
 		else

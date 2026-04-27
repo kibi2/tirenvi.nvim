@@ -10,6 +10,7 @@
 
 ----- dependencies
 local Document = require("tirenvi.core.document")
+local Context = require("tirenvi.app.context")
 local Parser = require("tirenvi.parser.parser")
 local util = require("tirenvi.util.util")
 local errors = require("tirenvi.util.errors")
@@ -90,25 +91,25 @@ end
 
 -- public API
 
----@param fl_lines string[]
----@param parser Parser
+---@param ctx Context
+---@param req Request
 ---@return Document
-function M.parse(fl_lines, parser)
-	local js_lines = flat_to_js_lines(fl_lines, parser)
+function M.parse(ctx, req)
+	local js_lines = flat_to_js_lines(req.lines, ctx.parser)
 	local ndjsons = js_lines_to_ndjsons(js_lines)
-	local document = Document.new_from_flat(ndjsons, parser.allow_plain)
+	local document = Document.new_from_flat(ndjsons, Context.is_allow_plain(ctx))
 	return document
 end
 
 --- Convert display lines back to TSV format
+---@param ctx Context
 ---@param document Document	
----@param parser Parser
 ---@return string[]
-function M.unparse(document, parser)
+function M.unparse(ctx, document)
 	local ndjsons = Document.serialize_to_flat(document)
 	local js_lines = ndjsons_to_lines(ndjsons)
 	log.debug({ #js_lines, js_lines[1], js_lines[#js_lines] })
-	return js_lines_to_flat(js_lines, parser)
+	return js_lines_to_flat(js_lines, ctx.parser)
 end
 
 return M
