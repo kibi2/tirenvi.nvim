@@ -6,19 +6,24 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Neovim](https://img.shields.io/badge/Neovim-0.9+-57A143?logo=neovim)
 
-> Structural table editing for Neovim — pure text, always valid.
+> Markdown & CSV table editor for Neovim — structural editing, pure text, always valid.
+
+Supports Markdown and CSV out of the box,
+and can be extended to other formats via custom parsers.
 
 ## Markdown (GFM)
 
 ![demo gif](./demo.gif)
 
-Raw Markdown → structured table view → adjust column widths → edit cells → back to raw Markdown (lossless round-trip)
+Edit Markdown tables structurally.
+
+Raw → aligned → edit → back to raw (lossless).
 
 ## CSV / TSV
 
 ![demo gif](./demo_csv.gif)
 
-Raw CSV → structured table view → adjust column widths → edit cells → back to raw CSV (lossless round-trip)
+Raw → aligned → edit → back to raw (lossless).
 
 ## Design Philosophy
 
@@ -31,13 +36,10 @@ Raw CSV → structured table view → adjust column widths → edit cells → ba
 
 ## Why?
 
-CSV and Markdown are text.
+Markdown and CSV are text — but they represent structure.
 
-But they also represent structure.
-
-Tirenvi lets you edit structured tabular data
-without leaving Vim’s native editing model —
-while preserving structural integrity.
+Tirenvi lets you edit tabular data structurally,
+while staying in Vim’s native editing model.
 
 You edit text.
 Tirenvi preserves structure.
