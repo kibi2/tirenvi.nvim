@@ -43,9 +43,8 @@ end
 function M.from_flat(ctx, no_undo)
     local req = Request.from_range(Range.new(0, -1))
     local fl_lines = reader.read(ctx, req)
-    local parser = ctx.parser
-    util.assert_no_reserved_marks(fl_lines)
-    local document = flat_parser.parse(fl_lines, parser)
+    util.ensure_no_reserved_marks(fl_lines)
+    local document = flat_parser.parse(ctx, req)
     set_attrs(req, document)
     req.lines   = vim_parser.unparse(document)
     req.no_undo = no_undo

@@ -95,7 +95,7 @@ end
 
 ---@param fl_lines string[]
 ---@return nil
-function M.assert_no_reserved_marks(fl_lines)
+function M.ensure_no_reserved_marks(fl_lines)
 	local found = find_reserved_marks(fl_lines)
 	if #found > 0 then
 		error(errors.new_domain_error(errors.err_no_usable_characters(found)))

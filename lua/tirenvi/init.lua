@@ -57,7 +57,7 @@ local function to_flat(ctx, is_toggle)
 	end
 	local document = vim_parser.parse(ctx, req)
 	log.debug(document.blocks[1].records)
-	local fl_lines = flat_parser.unparse(document, ctx.parser)
+	local fl_lines = flat_parser.unparse(ctx, document)
 	local req = Request.from_lines(Range.new(0, -1), fl_lines)
 	writer.write(ctx, req)
 end
