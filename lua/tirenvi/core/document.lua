@@ -80,7 +80,8 @@ end
 function M.new_from_flat(ndjsons, allow_plain)
     local self = {}
     self.attr = { allow_plain = allow_plain }
-    self.blocks = Blocks.new_from_flat(ndjsons, true)
+    self.blocks = Blocks.new_from_records(ndjsons, allow_plain)
+    Blocks.from_flat(self.blocks)
     return self
 end
 
@@ -102,7 +103,8 @@ end
 function M.new_from_vim(records, attrs, allow_plain, no_normalize)
     local self = {}
     self.attr = { allow_plain = allow_plain, block_attrs = attrs }
-    self.blocks = Blocks.new_from_vim(records, allow_plain, no_normalize)
+    self.blocks = Blocks.new_from_records(records, allow_plain)
+    Blocks.from_vim(self.blocks, no_normalize)
     return self
 end
 

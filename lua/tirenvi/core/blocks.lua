@@ -227,15 +227,20 @@ end
 --- Convert NDJSON records into normalized blocks.
 ---@param ndjsons Ndjson[]
 ---@return Blocks
-function M.new_from_flat(ndjsons, allow_plain)
+function M.new_from_records(ndjsons, allow_plain)
 	local self = build_blocks(ndjsons)
 	if not allow_plain then
 		M.merge_blocks(self)
 	end
+	return self
+end
+
+--- Convert NDJSON records into normalized blocks.
+---@param self Blocks
+function M.from_flat(self)
 	for _, block in ipairs(self) do
 		Block[block.kind].from_flat(block)
 	end
-	return self
 end
 
 ---@self Blocks
@@ -246,20 +251,13 @@ function M:to_flat()
 end
 
 --- Convert NDJSON records into normalized blocks.
----@param records Record[]
+---@param self Blocks
 ---@param no_normalize boolean  -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
----@return Blocks
-function M.new_from_vim(records, allow_plain, no_normalize)
-	local self = build_blocks(records)
-	if not allow_plain then
-		M.merge_blocks(self)
-	end
+function M.from_vim(self, no_normalize)
 	for _, block in ipairs(self) do
 		Block[block.kind].from_vim(block, no_normalize)
 	end
-
-	return self
 end
 
 ---@self Blocks
