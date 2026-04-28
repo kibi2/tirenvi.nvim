@@ -87,8 +87,9 @@ end
 ---@self Document
 ---@return Ndjson[]
 function M:serialize_to_flat()
+    Blocks.to_flat(self.blocks)
     local ndjsons = { new_attr_file() }
-    util.extend(ndjsons, Blocks.serialize_to_flat(self.blocks))
+    util.extend(ndjsons, Blocks.serialize(self.blocks))
     return ndjsons
 end
 
@@ -101,7 +102,7 @@ end
 function M.new_from_vim(records, attrs, allow_plain, no_normalize)
     local self = {}
     self.attr = { allow_plain = allow_plain, block_attrs = attrs }
-    self.blocks = Blocks.new_from_vim(records, no_normalize)
+    self.blocks = Blocks.new_from_vim(records, allow_plain, no_normalize)
     return self
 end
 

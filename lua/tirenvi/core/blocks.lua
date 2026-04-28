@@ -57,16 +57,6 @@ local function build_blocks(records)
 	return self
 end
 
----@param self Blocks
----@return Ndjson[]
-function M.serialize(self)
-	local ndjsons = {}
-	for _, block in ipairs(self) do
-		util.extend(ndjsons, Block[block.kind].serialize(block))
-	end
-	return ndjsons
-end
-
 -----------------------------------------------------------------------
 -- Attribute handling
 -----------------------------------------------------------------------
@@ -116,7 +106,6 @@ end
 ---@return boolean
 ---@return RefAttrError|nil
 function M.reconcile_single(blocks, attr_prev, attr_next)
-	M.merge_blocks(blocks)
 	if Attr.is_conflict(attr_prev, attr_next, false) then
 		log.debug("===-===-===-=== conflict")
 		log.debug(blocks[1].records[1])
@@ -256,20 +245,16 @@ function M:to_flat()
 	end
 end
 
----@self Blocks
----@return Ndjson[]
-function M:serialize_to_flat()
-	M.to_flat(self)
-	return M.serialize(self)
-end
-
 --- Convert NDJSON records into normalized blocks.
 ---@param records Record[]
 ---@param no_normalize boolean  -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
 ---@return Blocks
-function M.new_from_vim(records, no_normalize)
+function M.new_from_vim(records, allow_plain, no_normalize)
 	local self = build_blocks(records)
+	if not allow_plain then
+		M.merge_blocks(self)
+	end
 	for _, block in ipairs(self) do
 		Block[block.kind].from_vim(block, no_normalize)
 	end
@@ -295,6 +280,16 @@ function M:rebuild_attr_range(first)
 		attr.range = Range.new(first, last)
 		first      = last + 1
 	end
+end
+
+---@param self Blocks
+---@return Ndjson[]
+function M.serialize(self)
+	local ndjsons = {}
+	for _, block in ipairs(self) do
+		util.extend(ndjsons, Block[block.kind].serialize(block))
+	end
+	return ndjsons
 end
 
 return M
