@@ -57,6 +57,16 @@ local function build_blocks(records)
 	return self
 end
 
+---@param self Blocks
+---@return Ndjson[]
+function M.serialize(self)
+	local ndjsons = {}
+	for _, block in ipairs(self) do
+		util.extend(ndjsons, Block[block.kind].serialize(block))
+	end
+	return ndjsons
+end
+
 -----------------------------------------------------------------------
 -- Attribute handling
 -----------------------------------------------------------------------
@@ -240,15 +250,17 @@ function M.new_from_flat(ndjsons, allow_plain)
 end
 
 ---@self Blocks
+function M:to_flat()
+	for _, block in ipairs(self) do
+		Block[block.kind].to_flat(block)
+	end
+end
+
+---@self Blocks
 ---@return Ndjson[]
 function M:serialize_to_flat()
-	local ndjsons = {}
-	for _, block in ipairs(self) do
-		local impl = Block[block.kind]
-		impl.to_flat(block)
-		util.extend(ndjsons, impl.serialize(block))
-	end
-	return ndjsons
+	M.to_flat(self)
+	return M.serialize(self)
 end
 
 --- Convert NDJSON records into normalized blocks.
@@ -266,15 +278,10 @@ function M.new_from_vim(records, no_normalize)
 end
 
 ---@self Blocks
----@return Ndjson[]
-function M:serialize_to_vim()
-	local ndjsons = {}
+function M:to_vim()
 	for _, block in ipairs(self) do
-		local impl = Block[block.kind]
-		impl.to_vim(block)
-		util.extend(ndjsons, impl.serialize(block))
+		Block[block.kind].to_vim(block)
 	end
-	return ndjsons
 end
 
 ---@self Blocks

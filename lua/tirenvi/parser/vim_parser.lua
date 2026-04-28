@@ -82,7 +82,8 @@ end
 ---@param document Document
 ---@return string[]
 function M.unparse(req, document)
-	local ndjsons = Document.serialize_to_vim(document)
+	Document.to_vim(document)
+	local ndjsons = Document.serialize(document)
 	Document.rebuild_attr_range(document, req.range.first)
 	log.probe(Document.collect_attrs(document))
 	return to_lines(ndjsons)

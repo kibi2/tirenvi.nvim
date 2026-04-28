@@ -106,11 +106,14 @@ function M.new_from_vim(records, attrs, allow_plain, no_normalize)
 end
 
 ---@self self
+function M:to_vim()
+    Blocks.to_vim(self.blocks)
+end
+
+---@self self
 ---@return Ndjson[]
-function M:serialize_to_vim()
-    local ndjsons = {}
-    util.extend(ndjsons, Blocks.serialize_to_vim(self.blocks))
-    return ndjsons
+function M:serialize()
+    return Blocks.serialize(self.blocks)
 end
 
 ---@param self Document
