@@ -130,14 +130,12 @@ local function log_watch(bufnr, message, range3, ext_range)
 	range3 = range3 or Range3.new(0, 0, 0)
 	local pre = buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST)
 	local next = fn.undotree(bufnr).seq_last
-	local no_ext = ext_range and (#ext_range ~= 0 and "/ext" .. #ext_range or "") or ""
+	local no_ext = ext_range and (#ext_range ~= 0 and "/ext" .. #ext_range .. ext_range[1]:short() or "") or ""
 	local status = string.format(
-		"[tree:%d->%d]%s%s%s%s",
+		"[tree:%d->%d]%s%s",
 		pre,
 		next,
-		Range3.get_add_str(range3),
-		Range3.get_remove_str(range3),
-		Range3.get_update_str(range3),
+		range3:short(),
 		no_ext
 	)
 	log.watch("UNDO", message .. status)
@@ -208,7 +206,7 @@ local function handle_request(ctx, range3)
 	local ext_ranges = invalid.get_range(bufnr)
 	ui.diagnostic_clear(bufnr)
 	if not range3 then
-		log_watch(bufnr, "INSERT LEAVE[" .. tostring(#ext_ranges) .. "]")
+		log_watch(bufnr, "INSERT LEAVE", nil, ext_ranges)
 		schedule_extra_ranges(ctx, ext_ranges)
 		return
 	end

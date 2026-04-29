@@ -308,7 +308,7 @@ end
 ---@param ctx Context
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
-	log.watch("UNDO", "===+=== ENTRY on_lines[#%d]%s", ctx.bufnr, range3)
+	log.watch("UNDO", "===+=== ENTRY on_lines[#%d]%s", ctx.bufnr, range3:short())
 	reconcile.handle(ctx, range3)
 end
 
