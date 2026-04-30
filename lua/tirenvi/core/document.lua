@@ -8,7 +8,7 @@ local M = {}
 -- constants / defaults
 
 ---@class Document: BaseDocument
----@class ViewDocument: BaseDocument
+---@class VimDocument: BaseDocument
 
 ---@class BaseDocument
 ---@field attr Attr_doc
@@ -85,10 +85,16 @@ function M.new_from_flat(ndjsons, allow_plain)
     return self
 end
 
----@self Document
+---@param self Document
+---@return Document
+function M:to_flat()
+    Blocks.to_flat(self.blocks)
+    return self
+end
+
+---@param self Document
 ---@return Ndjson[]
 function M:serialize_to_flat()
-    Blocks.to_flat(self.blocks)
     local ndjsons = { new_attr_file() }
     util.extend(ndjsons, Blocks.serialize(self.blocks))
     return ndjsons
@@ -108,12 +114,15 @@ function M.new_from_vim(records, attrs, allow_plain, no_normalize)
     return self
 end
 
----@self self
+---@param self Document
+---@return VimDocument
 function M:to_vim()
-    Blocks.to_vim(self.blocks)
+    local vim_doc = vim.deepcopy(self)
+    Blocks.to_vim(vim_doc.blocks)
+    return vim_doc
 end
 
----@self self
+---@param self BaseDocument
 ---@return Ndjson[]
 function M:serialize()
     return Blocks.serialize(self.blocks)

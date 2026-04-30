@@ -106,7 +106,8 @@ end
 ---@param document Document	
 ---@return string[]
 function M.unparse(ctx, document)
-	local ndjsons = Document.serialize_to_flat(document)
+	local flat_doc = Document.to_flat(document)
+	local ndjsons = Document.serialize_to_flat(flat_doc)
 	local js_lines = ndjsons_to_lines(ndjsons)
 	log.debug({ #js_lines, js_lines[1], js_lines[#js_lines] })
 	return js_lines_to_flat(js_lines, ctx.parser)
