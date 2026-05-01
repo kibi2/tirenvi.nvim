@@ -41,7 +41,8 @@ local M = {}
 
 ---@class Attr_doc
 ---@field allow_plain boolean
----@field attrs Attr[]
+---@field attrs_in Attr[]
+---@field attrs_out Attr[]
 
 ---@class Attr
 ---@field id integer
@@ -158,6 +159,11 @@ end
 ---@param self VimDocument
 function M:rebuild_attrs(first)
     Blocks.rebuild_attrs(self.blocks, first)
+end
+
+---@param self VimDocument
+function M:set_attrs_in(attrs)
+    self.attr.attrs_in = attrs
 end
 
 return M
