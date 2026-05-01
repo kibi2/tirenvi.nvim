@@ -1,3 +1,4 @@
+local config = require("tirenvi.config")
 local CONST = require("tirenvi.constants")
 local Cell = require("tirenvi.core.cell")
 local tir_vim = require("tirenvi.core.tir_vim")
@@ -8,6 +9,8 @@ M.plain = {}
 M.grid = {}
 
 -- constants / defaults
+local pipec = config.marks.pipec
+local pipen = config.marks.pipe
 
 -----------------------------------------------------------------------
 -- Private helpers
@@ -16,6 +19,17 @@ M.grid = {}
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
+
+---@param vi_line string
+---@return Record
+function M.from_vi_line(vi_line)
+    local pipe = tir_vim.get_pipe_char(vi_line)
+    if pipe then
+        return M.grid.new_from_vi_line(vi_line, pipe == pipec)
+    else
+        return M.plain.new_from_vi_line(vi_line)
+    end
+end
 
 ---@param self Record_grid
 ---@param ncol integer
@@ -111,6 +125,35 @@ function M.get_max_col(records)
         max_col = math.max(max_col, #record.row)
     end
     return max_col
+end
+
+---@param vi_lines string[]
+---@return Record[]
+function M.from_tir_vim(vi_lines)
+    local records = {}
+    for index = 1, #vi_lines do
+        records[index] = M.from_vi_line(vi_lines[index])
+    end
+    return records
+end
+
+---@param ndjsons Ndjson[]
+---@return string[]
+function M.to_tir_vim(ndjsons)
+    local tir_vim = {}
+    for _, record in ipairs(ndjsons) do
+        local kind = record.kind
+        if kind == CONST.KIND.PLAIN then
+            tir_vim[#tir_vim + 1] = record.line or ""
+        elseif kind == CONST.KIND.GRID then
+            local pipe = record._has_continuation and pipec or pipen
+            local row_items = record.row
+            local row = table.concat(row_items, pipe)
+            row = pipe .. row .. pipe
+            tir_vim[#tir_vim + 1] = row
+        end
+    end
+    return tir_vim
 end
 
 return M

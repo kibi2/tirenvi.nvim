@@ -103,20 +103,27 @@ end
 ---@param records Record[]
 ---@param attrs Attr[]
 ---@param allow_plain boolean
----@param no_normalize boolean  -- If true, skip nomalizing.
--- Prevents line count changes that would break put(); used for repair.
----@return Document
-function M.new_from_vim(records, attrs, allow_plain, no_normalize)
+---@return VimDocument
+function M.new_vim_doc(records, attrs, allow_plain)
     local self = {}
     self.attr = { allow_plain = allow_plain, block_attrs = attrs }
     self.blocks = Blocks.new_from_records(records, allow_plain)
+    return self
+end
+
+---@param vim_doc VimDocument
+---@param no_normalize boolean  -- If true, skip nomalizing.
+-- Prevents line count changes that would break put(); used for repair.
+---@return Document
+function M.from_vim_doc(vim_doc, no_normalize)
+    local self = vim.deepcopy(vim_doc)
     Blocks.from_vim(self.blocks, no_normalize)
     return self
 end
 
 ---@param self Document
 ---@return VimDocument
-function M:to_vim()
+function M:to_vim_doc()
     local vim_doc = vim.deepcopy(self)
     Blocks.to_vim(vim_doc.blocks)
     return vim_doc
@@ -146,11 +153,9 @@ function M:collect_attrs()
     return Blocks.get_attrs(self.blocks)
 end
 
----@param self Document
-function M:rebuild_attr_range(first)
-    Blocks.rebuild_attr_range(self.blocks, first)
-    self.attr.attrs = M.collect_attrs(self)
-    -- TODO: rebuild_attrs() -- attrs + collect_attrs -> merge
+---@param self VimDocument
+function M:rebuild_attrs(first)
+    Blocks.rebuild_attrs(self.blocks, first)
 end
 
 return M

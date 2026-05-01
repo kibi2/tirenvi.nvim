@@ -22,6 +22,24 @@ local M = {}
 -- Utility
 -----------------------------------------------------------------------
 
+---@param self Blocks
+---@param method string
+---@param ... unknown
+local function apply(self, method, ...)
+	for _, block in ipairs(self) do
+		local common = Block[method]
+		if common then
+			common(block, ...)
+		end
+
+		local handler = Block[block.kind]
+		local specific = handler[method]
+		if specific then
+			specific(block, ...)
+		end
+	end
+end
+
 -----------------------------------------------------------------------
 -- Block construction
 -----------------------------------------------------------------------
@@ -96,6 +114,19 @@ local function apply_attr(self, attr_prev, attr_next)
 	Block[self[#self].kind].set_attr(self[#self], attr_next)
 end
 
+---@param self Blocks
+---@param first integer
+local function rebuild_attr_range(self, first)
+	for iblock, block in ipairs(self) do
+		local attr = block.attr or Attr.new()
+		block.attr = attr
+		attr.id    = iblock
+		local last = first + #block.records - 1
+		attr.range = Range.new(first, last)
+		first      = last + 1
+	end
+end
+
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
@@ -166,9 +197,7 @@ end
 
 ---@self Blocks
 function M:reset_attr()
-	for _, block in ipairs(self) do
-		Block.reset_attr(block)
-	end
+	apply(self, "reset_attr")
 end
 
 ---@self Blocks
@@ -219,9 +248,7 @@ end
 ---@param count integer
 ---@param col Range
 function M:change_width(operator, count, col)
-	for _, block in ipairs(self) do
-		Block[block.kind].change_width(block, operator, count, col)
-	end
+	apply(self, "change_width", operator, count, col)
 end
 
 --- Convert NDJSON records into normalized blocks.
@@ -238,16 +265,12 @@ end
 --- Convert NDJSON records into normalized blocks.
 ---@param self Blocks
 function M.from_flat(self)
-	for _, block in ipairs(self) do
-		Block[block.kind].from_flat(block)
-	end
+	apply(self, "from_flat")
 end
 
 ---@self Blocks
 function M:to_flat()
-	for _, block in ipairs(self) do
-		Block[block.kind].to_flat(block)
-	end
+	apply(self, "to_flat")
 end
 
 --- Convert NDJSON records into normalized blocks.
@@ -255,29 +278,19 @@ end
 ---@param no_normalize boolean  -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
 function M.from_vim(self, no_normalize)
-	for _, block in ipairs(self) do
-		Block[block.kind].from_vim(block, no_normalize)
-	end
+	apply(self, "from_vim", no_normalize)
 end
 
 ---@self Blocks
 function M:to_vim()
-	for _, block in ipairs(self) do
-		Block[block.kind].to_vim(block)
-	end
+	apply(self, "to_vim")
 end
 
 ---@self Blocks
 ---@param first integer
-function M:rebuild_attr_range(first)
-	for iblock, block in ipairs(self) do
-		local attr = block.attr or Attr.new()
-		block.attr = attr
-		attr.id    = iblock
-		local last = first + #block.records - 1
-		attr.range = Range.new(first, last)
-		first      = last + 1
-	end
+function M:rebuild_attrs(first)
+	apply(self, "rebuild_attr")
+	rebuild_attr_range(self, first)
 end
 
 ---@param self Blocks

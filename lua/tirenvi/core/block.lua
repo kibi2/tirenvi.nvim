@@ -12,6 +12,24 @@ M.grid = {}
 
 -- constants / defaults
 
+---@param self Block
+---@param method string
+---@param ... unknown
+local function apply(self, method, ...)
+    for _, record in ipairs(self.records) do
+        local common = Record[method]
+        if common then
+            common(record, ...)
+        end
+
+        local handler = Record[record.kind]
+        local specific = handler[method]
+        if specific then
+            specific(record, ...)
+        end
+    end
+end
+
 ---@param map {[string]: string}
 ---@return {[string]: string}
 local function prepare_replace_map(map)
@@ -68,16 +86,12 @@ end
 
 ---@param self Block_grid
 local function fill_padding(self)
-    for _, record in ipairs(self.records) do
-        Record.grid.fill_padding(record, self.attr.columns)
-    end
+    apply(self, "fill_padding", self.attr.columns)
 end
 
 ---@self Block
 local function remove_padding(self)
-    for _, record in ipairs(self.records) do
-        Record[self.kind].remove_padding(record)
-    end
+    apply(self, "remove_padding")
 end
 
 ---@self Block_grid
@@ -102,9 +116,7 @@ end
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 local function apply_column_count(self, ncol)
-    for _, record in ipairs(self.records) do
-        Record.apply_column_count(record, ncol)
-    end
+    apply(self, "apply_column_count", ncol)
 end
 
 ---@self Block
@@ -230,10 +242,7 @@ function M.plain:to_flat()
 end
 
 M.plain.set_widths = nop
-M.plain.change_width = nop
 M.plain.set_attr = nop
-M.plain.from_flat = nop
-M.plain.to_vim = nop
 
 ---@self Block_grid
 ---@return Ndjson[]
@@ -332,6 +341,11 @@ function M.grid:to_vim()
     apply_column_count(self, #self.attr.columns)
     wrap(self)
     fill_padding(self)
+end
+
+---@self Block_grid
+function M.grid:rebuild_attr()
+    -- TODO
 end
 
 return M
