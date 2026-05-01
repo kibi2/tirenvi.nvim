@@ -311,7 +311,7 @@ local function emit(force, level, opts, fmt, ...)
 	elseif category then
 		name = category
 	end
-	local final = string.format("[%s]%s%s[%s][%s:%d] %s", PREFIX, ts, mon, name, file, line, msg)
+	local final = string.format("[%s]%s%s[%s][%s %d] %s", PREFIX, ts, mon, name, file, line, msg)
 	if config.log.output == "buffer" then
 		write_buffer(final)
 	elseif config.log.output == "file" then
