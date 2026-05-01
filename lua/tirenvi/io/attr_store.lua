@@ -15,10 +15,10 @@ local M = {}
 ---@param req Request
 function M.write(ctx, req)
     if not req.attrs then
-        log.probe("nil")
+        log.watch("ATTR", "nil")
         return
     end
-    log.probe(req.attrs)
+    log.watch("ATTR", req.attrs)
     buffer.set(ctx.bufnr, buffer.IKEY.ATTRS, req.attrs)
 end
 
@@ -26,6 +26,7 @@ end
 ---@param req Request
 function M.read(ctx, req)
     req.attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+    log.watch("ATTR", req.attrs)
 end
 
 ---@param ctx Context

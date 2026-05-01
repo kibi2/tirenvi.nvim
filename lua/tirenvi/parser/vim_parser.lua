@@ -31,7 +31,6 @@ local M = {}
 ---@return Document
 function M.parse(ctx, req, no_normalize)
 	local records = Record.from_tir_vim(req.lines)
-	log.probe(req.attrs)
 	local vim_doc = Document.new_vim_doc(records, Context.is_allow_plain(ctx))
 	log.watch("ATTR", "PARSE")
 	Document.rebuild_attrs(vim_doc, req.range.first)
