@@ -33,6 +33,7 @@ local M = {}
 ---@field kind "grid"
 ---@field attr Attr
 ---@field records Record_grid[]
+---@field _attr_build Attr
 
 ---@class Attr_file
 ---@field kind "attr_file"
@@ -45,6 +46,7 @@ local M = {}
 ---@class Attr
 ---@field id integer
 ---@field range Range
+---@field max boolean
 ---@field columns Attr_column[]
 
 ---@class Attr_column

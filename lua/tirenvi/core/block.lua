@@ -345,7 +345,12 @@ end
 
 ---@self Block_grid
 function M.grid:rebuild_attr()
-    -- TODO
+    self.attr_build = Attr.grid.new(self.records[1])
+    self._max = false
+    for irecord = 2, #self.records do
+        Attr.grid.merge(self.attr_build, self.records[irecord].row)
+    end
+    log.watch("ATTR", self.attr_build)
 end
 
 return M

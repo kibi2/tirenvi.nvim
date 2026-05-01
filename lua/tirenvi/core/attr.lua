@@ -38,7 +38,7 @@ end
 ---@param columns Attr_column[]
 ---@return Attr
 local function new_from_columns(columns)
-    return { columns = columns }
+    return { columns = columns, max = false }
 end
 
 -----------------------------------------------------------------------
@@ -139,6 +139,23 @@ end
 function M:set_widths(widths)
     for icol, width in ipairs(widths) do
         M.grid.set_width(self, icol, width)
+    end
+end
+
+---@param self Attr
+---@param cells string[]
+function M.grid:merge(cells)
+    local attr = M.grid.new_from_record(cells)
+    local columns = self.columns
+    if #columns ~= #attr.columns then
+        self.max = true
+    end
+    for icol, column in ipairs(attr.columns) do
+        columns[icol] = columns[icol] or { width = 0 }
+        if columns[icol].width ~= column.width then
+            self.max = true
+            columns[icol].width = math.max(columns[icol].width, column.width)
+        end
     end
 end
 
