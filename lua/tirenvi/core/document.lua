@@ -166,4 +166,9 @@ function M:set_attrs_in(attrs)
     self.attr.attrs_in = attrs
 end
 
+---@param self VimDocument
+function M:apply_attrs()
+    Blocks.apply_attrs(self.blocks, self.attr.attrs_in)
+end
+
 return M

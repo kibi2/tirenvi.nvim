@@ -159,4 +159,11 @@ function M.grid:merge(cells)
     end
 end
 
+---@param self Attr
+---@param attrs Attr[]
+function M.get_attr(self, attrs)
+    -- TODO check range
+    return attrs[self.id]
+end
+
 return M

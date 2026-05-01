@@ -303,4 +303,10 @@ function M.serialize(self)
 	return ndjsons
 end
 
+---@self Blocks
+---@param attrs Attr[]
+function M:apply_attrs(attrs)
+	apply(self, "apply_attrs", attrs)
+end
+
 return M

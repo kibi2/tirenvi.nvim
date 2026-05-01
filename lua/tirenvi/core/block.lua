@@ -353,4 +353,12 @@ function M.grid:rebuild_attr()
     log.watch("ATTR", self.attr_build)
 end
 
+---@self Block_grid
+function M.grid:apply_attr(attrs)
+    self.attr = self.attr_build
+    if self.attr.max then
+        self.attr = Attr.get_attr(self.attr_build, attrs) or self.attr_build
+    end
+end
+
 return M
