@@ -58,7 +58,7 @@ local function to_flat(ctx, is_toggle)
 	local document = vim_parser.parse(ctx, req)
 	log.debug(document.blocks[1].records)
 	local fl_lines = flat_parser.unparse(ctx, document)
-	local req = Request.from_lines(Range.new(0, -1), fl_lines)
+	local req = Request.from_lines(Range.new(0, -1), fl_lines, document.attr.attrs_out)
 	writer.write(ctx, req)
 end
 
@@ -130,7 +130,8 @@ local function change_table_width(ctx, operator, count, rect)
 	end
 	Blocks.change_width(document.blocks, operator, count, rect.col)
 	local req = Request.from_range(Range.new(rect.row.first - 1, rect.row.last))
-	req.lines = vim_parser.unparse(req, document)
+	local lines = vim_parser.unparse(req, document)
+	req = Request.from_lines(req.range, lines, document.attr.attrs_out)
 	writer.write(ctx, req)
 	return true
 end
@@ -211,7 +212,7 @@ function M.restore_tir_vim(ctx)
 	if not buffer_backup then
 		return
 	end
-	local req = Request.from_lines(Range.new(0, -1), buffer_backup, true)
+	local req = Request.from_lines(Range.new(0, -1), buffer_backup, nil, true)
 	writer.write(ctx, req)
 	buffer_backup = nil
 end
@@ -243,7 +244,7 @@ function M.reconcile(ctx)
 	local vi_lines = vim_parser.unparse(req, document)
 	if table.concat(old_lines, "\n") ~= table.concat(vi_lines, "\n") then
 		log.debug({ vi_lines[1], vi_lines[2] })
-		local req = Request.from_lines(Range.new(0, -1), vi_lines)
+		local req = Request.from_lines(Range.new(0, -1), vi_lines, document.attr.attrs_out)
 		writer.write(ctx, req)
 	end
 end

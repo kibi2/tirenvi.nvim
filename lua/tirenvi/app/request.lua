@@ -32,12 +32,14 @@ end
 
 ---@param range Range
 ---@param lines string[]
+---@param attrs Attr[]|nil
 ---@param no_undo boolean|nil
 ---@return Request
-function M.from_lines(range, lines, no_undo)
+function M.from_lines(range, lines, attrs, no_undo)
     return {
         range = range,
         lines = lines,
+        attrs = attrs,
         no_undo = no_undo or false,
     }
 end

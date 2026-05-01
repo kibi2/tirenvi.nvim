@@ -121,7 +121,7 @@ local function apply_ranges(ctx, ranges)
 	for index = 1, #ranges do
 		local range = Range.new(ranges[index].first, ranges[index].last + 1)
 		local new_lines = apply_range(ctx, range.first, range.last)
-		local req = Request.from_lines(range, new_lines, true)
+		local req = Request.from_lines(range, new_lines, nil, true)
 		writer.write(ctx, req)
 	end
 end

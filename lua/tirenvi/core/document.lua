@@ -104,12 +104,11 @@ function M:serialize_to_flat()
 end
 
 ---@param records Record[]
----@param attrs Attr[]
 ---@param allow_plain boolean
 ---@return VimDocument
-function M.new_vim_doc(records, attrs, allow_plain)
+function M.new_vim_doc(records, allow_plain)
     local self = {}
-    self.attr = { allow_plain = allow_plain, block_attrs = attrs }
+    self.attr = { allow_plain = allow_plain }
     self.blocks = Blocks.new_from_records(records, allow_plain)
     return self
 end
@@ -151,7 +150,8 @@ function M:reconcile(attr_prev, attr_next)
     end
 end
 
----@param self Document
+---@param self VimDocument
+---@return Attr[]
 function M:collect_attrs()
     return Blocks.get_attrs(self.blocks)
 end

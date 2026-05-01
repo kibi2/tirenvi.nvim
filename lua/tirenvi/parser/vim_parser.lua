@@ -21,12 +21,6 @@ local M = {}
 -- Private helpers
 -----------------------------------------------------------------------
 
-local function set_attrs(vim_doc, req)
-	Document.rebuild_attrs(vim_doc, req.range.first)
-	Document.set_attrs_in(vim_doc, req.attrs)
-	Document.apply_attrs(vim_doc)
-end
-
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
@@ -38,9 +32,11 @@ end
 function M.parse(ctx, req, no_normalize)
 	local records = Record.from_tir_vim(req.lines)
 	log.probe(req.attrs)
-	local vim_doc = Document.new_vim_doc(records, req.attrs, Context.is_allow_plain(ctx))
+	local vim_doc = Document.new_vim_doc(records, Context.is_allow_plain(ctx))
 	log.watch("ATTR", "PARSE")
-	set_attrs(vim_doc, req)
+	Document.rebuild_attrs(vim_doc, req.range.first)
+	Document.set_attrs_in(vim_doc, req.attrs)
+	Document.apply_attrs(vim_doc)
 	return Document.from_vim_doc(vim_doc, no_normalize or false)
 end
 
@@ -50,7 +46,8 @@ end
 function M.unparse(req, document)
 	local vim_doc = Document.to_vim_doc(document)
 	log.watch("ATTR", "UNPARSE")
-	set_attrs(vim_doc, req)
+	Document.rebuild_attrs(vim_doc, req.range.first)
+	document.attr.attrs_out = Document.collect_attrs(vim_doc)
 	local ndjsons = Document.serialize(vim_doc)
 	return Record.to_tir_vim(ndjsons)
 end

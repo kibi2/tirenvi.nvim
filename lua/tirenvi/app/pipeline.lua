@@ -18,18 +18,13 @@ local M = {}
 
 -- private helpers
 
+---@param ctx Context
 ---@param req Request
 ---@param document Document
-local function set_attrs(req, document)
-    -- TODO: Document
-    --Document.set_attrs(document.blocks, req.attrs)
-end
-
+---@param no_undo boolean|nil
 local function document_to_vim(ctx, req, document, no_undo)
     local vi_lines = vim_parser.unparse(req, document)
-    req.lines      = vi_lines
-    req.no_undo    = no_undo or false
-    req.attrs      = document.attr.attrs
+    local req = Request.from_lines(req.range, vi_lines, document.attr.attrs_out, no_undo or false)
     writer.write(ctx, req)
 end
 
@@ -45,7 +40,6 @@ function M.from_flat(ctx, no_undo)
     reader.read(ctx, req)
     util.ensure_no_reserved_marks(req.lines)
     local document = flat_parser.parse(ctx, req)
-    set_attrs(req, document) -- TODO: -> flat_parser.parse ?
     document_to_vim(ctx, req, document, no_undo)
 end
 
