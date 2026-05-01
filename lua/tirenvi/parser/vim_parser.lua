@@ -16,7 +16,7 @@ local log = require("tirenvi.util.log")
 local M = {}
 
 -- constants / defaults
-local pipec = config.marks.pipec
+
 -----------------------------------------------------------------------
 -- Private helpers
 -----------------------------------------------------------------------

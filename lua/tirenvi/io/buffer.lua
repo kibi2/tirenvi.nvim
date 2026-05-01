@@ -3,21 +3,21 @@
 -----------------------------------------------------------------------
 
 ----- dependencies
-local config = require("tirenvi.config")
-local log    = require("tirenvi.util.log")
+local config        = require("tirenvi.config")
+local log           = require("tirenvi.util.log")
 
-local M      = {}
+local M             = {}
 
-local api    = vim.api
-local fn     = vim.fn
-local bo     = vim.bo
-local b      = vim.b
+local api           = vim.api
+local fn            = vim.fn
+local bo            = vim.bo
+local b             = vim.b
 
-local cache  = { bufnr = -1, start = -1, lines = {}, }
-local STEP   = 25
+local cache         = { bufnr = -1, start = -1, lines = {}, }
+local STEP          = 25
 
 -- Buffer-local flags.
-M.IKEY       = {
+M.IKEY              = {
 	-- true when in insert mode
 	INSERT_MODE = "insert_mode",
 
@@ -38,6 +38,16 @@ M.IKEY       = {
 
 	-- block attrs
 	ATTRS = "attrs",
+}
+
+local initial_value = {
+	[M.IKEY.INSERT_MODE] = false,
+	[M.IKEY.ATTACHED] = false,
+	[M.IKEY.PATCH_DEPTH] = 0,
+	[M.IKEY.UNDO_TREE_LAST] = -1,
+	[M.IKEY.FILETYPE] = nil,
+	[M.IKEY.AUTO_RECONCILE] = nil,
+	[M.IKEY.ATTRS] = nil,
 }
 
 -----------------------------------------------------------------------
@@ -135,14 +145,7 @@ end
 function M.get_state(bufnr)
 	bufnr = bufnr or api.nvim_get_current_buf()
 	if not b[bufnr].tirenvi then
-		b[bufnr].tirenvi = {
-			attached = false,
-			filetype = nil,
-			insert_mode = false,
-			patch_depth = 0,
-			undo_tree_last = -1,
-			widths = nil,
-		}
+		b[bufnr].tirenvi = initial_value
 	end
 	return b[bufnr].tirenvi
 end
