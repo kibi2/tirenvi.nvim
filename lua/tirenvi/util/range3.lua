@@ -7,8 +7,6 @@ Range3.__index = Range3
 
 local Range = require("tirenvi.util.range")
 
-local M = {}
-
 ---@param self Range3
 ---@return integer
 local function get_delta(self)
@@ -47,7 +45,7 @@ end
 ---@param last integer
 ---@param new_last integer
 ---@return Range3
-function M.new(first, last, new_last)
+function Range3.new(first, last, new_last)
     return setmetatable({
         first = first,
         last = last,
@@ -63,8 +61,8 @@ end
 
 ---@param self Range3
 ---@return Range
-function M.get_new_range(self)
+function Range3:get_new_range()
     return Range.new(self.first, self.new_last)
 end
 
-return M
+return Range3

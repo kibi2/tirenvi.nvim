@@ -351,11 +351,13 @@ function M.probe(...)
 	emit(true, levels.ERROR, {}, ...)
 end
 
+---@param category string
+---@param ... unknown
 function M.watch(category, ...)
 	if levels.DEBUG < config.log.level then
 		return
 	end
-	return emit(false, levels.DEBUG, { category = category }, ...)
+	emit(false, levels.DEBUG, { category = category }, ...)
 end
 
 local aug = vim.api.nvim_create_augroup("TirenviLogHL", { clear = true })
