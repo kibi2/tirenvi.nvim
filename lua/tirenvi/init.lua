@@ -46,23 +46,6 @@ local function set_attrs(req, document)
 end
 
 ---@param ctx Context
----@param is_toggle boolean|nil
----@return nil
-local function to_flat(ctx, is_toggle)
-	is_toggle = is_toggle or false
-	local req = Request.from_range(Range.new(0, -1))
-	local vi_lines = reader.read(ctx, req)
-	if not tir_vim.has_pipe(vi_lines) then
-		return
-	end
-	local document = vim_parser.parse(ctx, req)
-	log.debug(document.blocks[1].records)
-	local fl_lines = flat_parser.unparse(ctx, document)
-	local req = Request.from_lines(Range.new(0, -1), fl_lines, document.attr.attrs_out)
-	writer.write(ctx, req)
-end
-
----@param ctx Context
 ---@param no_undo boolean|nil
 ---@return nil
 local function from_flat(ctx, no_undo)
@@ -202,7 +185,7 @@ function M.export_flat(ctx)
 		buffer_backup = nil
 		return
 	end
-	to_flat(ctx)
+	pipeline.to_flat(ctx)
 end
 
 --- Convert current buffer (or specified buffer) from plain format to view format
@@ -220,7 +203,7 @@ end
 ---@param ctx Context
 ---@return nil
 function M.disable(ctx)
-	to_flat(ctx, true)
+	pipeline.to_flat(ctx, true)
 end
 
 ---@param ctx Context
@@ -328,7 +311,7 @@ function M.on_filetype(ctx)
 	if old_filetype and old_filetype == new_filetype then
 		return ctx
 	end
-	to_flat(ctx)
+	pipeline.to_flat(ctx)
 	buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, new_filetype)
 	attr_store.clear(ctx)
 	ctx = Context.from_buf(ctx.bufnr)
