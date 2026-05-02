@@ -163,7 +163,7 @@ end
 ---@param attrs Attr[]
 function M.get_attr(self, attrs)
     -- TODO check range
-    return attrs[self.id]
+    return nil
 end
 
 return M

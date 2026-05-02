@@ -42,7 +42,7 @@ function M.parse(ctx, req, no_normalize)
 end
 
 ---@param document Document
----@param req Request
+---@param req Request|nil
 ---@return string[]
 function M.unparse(document, req)
 	local vim_doc = Document.to_vim_doc(document)

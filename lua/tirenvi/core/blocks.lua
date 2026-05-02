@@ -117,10 +117,9 @@ end
 ---@param self Blocks
 ---@param first integer
 local function rebuild_attr_range(self, first)
-	for iblock, block in ipairs(self) do
+	for _, block in ipairs(self) do
 		local attr = block.attr or Attr.new()
 		block.attr = attr
-		attr.id    = iblock
 		local last = first + #block.records - 1
 		attr.range = Range.new(first, last)
 		first      = last + 1
