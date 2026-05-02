@@ -36,7 +36,8 @@ function M.parse(ctx, req, no_normalize)
 	Document.rebuild_attrs(vim_doc, req.range.first)
 	Document.set_attrs_in(vim_doc, req.attrs)
 	Document.apply_attrs(vim_doc)
-	return Document.from_vim_doc(vim_doc, no_normalize or false)
+	Document.from_vim_doc(vim_doc, no_normalize or false)
+	return vim_doc
 end
 
 ---@param req Request

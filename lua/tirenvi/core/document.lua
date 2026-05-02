@@ -7,10 +7,7 @@ local M = {}
 
 -- constants / defaults
 
----@class Document: BaseDocument
----@class VimDocument: BaseDocument
-
----@class BaseDocument
+---@class Document
 ---@field attr Attr_doc
 ---@field blocks Blocks
 
@@ -105,7 +102,7 @@ end
 
 ---@param records Record[]
 ---@param allow_plain boolean
----@return VimDocument
+---@return Document
 function M.new_vim_doc(records, allow_plain)
     local self = {}
     self.attr = { allow_plain = allow_plain }
@@ -113,25 +110,21 @@ function M.new_vim_doc(records, allow_plain)
     return self
 end
 
----@param vim_doc VimDocument
+---@param self Document
 ---@param no_normalize boolean  -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
----@return Document
-function M.from_vim_doc(vim_doc, no_normalize)
-    local self = vim.deepcopy(vim_doc)
+function M.from_vim_doc(self, no_normalize)
     Blocks.from_vim(self.blocks, no_normalize)
+end
+
+---@param self Document
+---@return Document
+function M:to_vim_doc()
+    Blocks.to_vim(self.blocks)
     return self
 end
 
 ---@param self Document
----@return VimDocument
-function M:to_vim_doc()
-    local vim_doc = vim.deepcopy(self)
-    Blocks.to_vim(vim_doc.blocks)
-    return vim_doc
-end
-
----@param self BaseDocument
 ---@return Ndjson[]
 function M:serialize()
     return Blocks.serialize(self.blocks)
@@ -150,23 +143,23 @@ function M:reconcile(attr_prev, attr_next)
     end
 end
 
----@param self VimDocument
+---@param self Document
 ---@return Attr[]
 function M:collect_attrs()
     return Blocks.get_attrs(self.blocks)
 end
 
----@param self VimDocument
+---@param self Document
 function M:rebuild_attrs(first)
     Blocks.rebuild_attrs(self.blocks, first)
 end
 
----@param self VimDocument
+---@param self Document
 function M:set_attrs_in(attrs)
     self.attr.attrs_in = attrs
 end
 
----@param self VimDocument
+---@param self Document
 function M:apply_attrs()
     Blocks.apply_attrs(self.blocks, self.attr.attrs_in)
 end
