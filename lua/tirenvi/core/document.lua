@@ -67,6 +67,16 @@ local VERSION = "tir/0.1"
 
 -- private helpers
 
+---@param records Record[]
+---@param allow_plain boolean
+---@return Document
+local function new(records, allow_plain)
+    local self = {}
+    self.attr = { allow_plain = allow_plain }
+    self.blocks = Blocks.new_from_records(records, allow_plain)
+    return self
+end
+
 ---@return Ndjson
 local function new_attr_file()
     return { kind = CONST.KIND.ATTR_FILE, version = VERSION }
@@ -77,37 +87,17 @@ end
 ---@param ndjsons Ndjson[]
 ---@param allow_plain boolean
 ---@return Document
-function M.new_from_flat(ndjsons, allow_plain)
-    local self = {}
-    self.attr = { allow_plain = allow_plain }
-    self.blocks = Blocks.new_from_records(ndjsons, allow_plain)
+function M.new_flat_doc(ndjsons, allow_plain)
+    local self = new(ndjsons, allow_plain)
     Blocks.from_flat(self.blocks)
     return self
-end
-
----@param self Document
----@return Document
-function M:to_flat()
-    Blocks.to_flat(self.blocks)
-    return self
-end
-
----@param self Document
----@return Ndjson[]
-function M:serialize_to_flat()
-    local ndjsons = { new_attr_file() }
-    util.extend(ndjsons, Blocks.serialize(self.blocks))
-    return ndjsons
 end
 
 ---@param records Record[]
 ---@param allow_plain boolean
 ---@return Document
 function M.new_vim_doc(records, allow_plain)
-    local self = {}
-    self.attr = { allow_plain = allow_plain }
-    self.blocks = Blocks.new_from_records(records, allow_plain)
-    return self
+    return new(records, allow_plain)
 end
 
 ---@param self Document
@@ -115,6 +105,13 @@ end
 -- Prevents line count changes that would break put(); used for repair.
 function M.from_vim_doc(self, no_normalize)
     Blocks.from_vim(self.blocks, no_normalize)
+end
+
+---@param self Document
+---@return Document
+function M:to_flat_doc()
+    Blocks.to_flat(self.blocks)
+    return self
 end
 
 ---@param self Document
@@ -128,6 +125,14 @@ end
 ---@return Ndjson[]
 function M:serialize()
     return Blocks.serialize(self.blocks)
+end
+
+---@param self Document
+---@return Ndjson[]
+function M:serialize_to_flat()
+    local ndjsons = { new_attr_file() }
+    util.extend(ndjsons, Blocks.serialize(self.blocks))
+    return ndjsons
 end
 
 ---@param self Document

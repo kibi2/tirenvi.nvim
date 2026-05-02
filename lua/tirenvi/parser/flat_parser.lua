@@ -97,7 +97,7 @@ end
 function M.parse(ctx, req)
 	local js_lines = flat_to_js_lines(req.lines, ctx.parser)
 	local ndjsons = js_lines_to_ndjsons(js_lines)
-	local document = Document.new_from_flat(ndjsons, Context.is_allow_plain(ctx))
+	local document = Document.new_flat_doc(ndjsons, Context.is_allow_plain(ctx))
 	return document
 end
 
@@ -106,7 +106,7 @@ end
 ---@param document Document	
 ---@return string[]
 function M.unparse(ctx, document)
-	local flat_doc = Document.to_flat(document)
+	local flat_doc = Document.to_flat_doc(document)
 	local ndjsons = Document.serialize_to_flat(flat_doc)
 	local js_lines = ndjsons_to_lines(ndjsons)
 	log.debug({ #js_lines, js_lines[1], js_lines[#js_lines] })
