@@ -92,9 +92,9 @@ end
 ---@param line_provider LineProvider
 ---@param rect Rect
 ---@param operator string
-local function change_width(ctx, line_provider, rect, operator, count)
+local function cmd_width(ctx, line_provider, rect, operator, count)
 	expand_rect(ctx, line_provider, rect.row)
-	pipeline.change_width(ctx, operator, count, rect)
+	pipeline.cmd_width(ctx, operator, count, rect)
 end
 
 local warned = false
@@ -189,7 +189,7 @@ end
 
 ---@param ctx Context
 function M.reconcile(ctx)
-	pipeline.reconcile(ctx)
+	pipeline.cmd_reconcile(ctx)
 end
 
 ---@param ctx Context	
@@ -199,7 +199,7 @@ end
 ---@param count integer Count for the operator (default: 0)
 ---@return nil
 function M.width(ctx, line_provider, rect, operator, count)
-	change_width(ctx, line_provider, rect, operator, count)
+	cmd_width(ctx, line_provider, rect, operator, count)
 	local command = util.get_termcodes(":<C-u>Tir width " .. operator .. count .. "<CR>")
 	set_repeat(command)
 end

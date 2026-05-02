@@ -93,7 +93,7 @@ end
 ---@param operator string
 ---@param count integer
 ---@param rect Rect
-function M.change_width(ctx, operator, count, rect)
+function M.cmd_width(ctx, operator, count, rect)
     log.debug("row%s, col%s", rect.row:short(), rect.col:short())
     local document, req = vim_to_doc(ctx, Range.new(rect.row.first - 1, rect.row.last))
     if document then
@@ -103,7 +103,7 @@ function M.change_width(ctx, operator, count, rect)
 end
 
 ---@param ctx Context
-function M.reconcile(ctx)
+function M.cmd_reconcile(ctx)
     local document, req = vim_to_doc(ctx, Range.new(0, -1))
     if document then
         doc_to_vim(ctx, req, document)

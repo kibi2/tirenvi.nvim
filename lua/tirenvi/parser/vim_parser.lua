@@ -3,13 +3,9 @@
 -----------------------------------------------------------------------
 
 ----- dependencies
-local config = require("tirenvi.config")
-local CONST = require("tirenvi.constants")
 local Document = require("tirenvi.core.document")
-local Blocks = require("tirenvi.core.blocks")
 local Record = require("tirenvi.core.record")
 local Attr = require("tirenvi.core.attr")
-local tir_vim = require("tirenvi.core.tir_vim")
 local Context = require("tirenvi.app.context")
 local log = require("tirenvi.util.log")
 
@@ -48,7 +44,6 @@ function M.unparse(document, req)
 	local vim_doc = Document.to_vim_doc(document)
 	log.watch("ATTR", "UNPARSE")
 	if req then
-		-- TODO 一部の場合IDの開始番号が必要
 		Document.set_attr_range(vim_doc, req.range.first + 1)
 	end
 	local ndjsons = Document.serialize(vim_doc)
