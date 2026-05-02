@@ -58,7 +58,7 @@ end
 ---@param document Document
 ---@param no_undo boolean|nil
 local function doc_to_vim(ctx, req, document, no_undo)
-    local vi_lines = vim_parser.unparse(document)
+    local vi_lines = vim_parser.unparse(document, req)
     if util.same_str_array(vi_lines, req.lines) then
         return
     end

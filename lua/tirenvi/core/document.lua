@@ -42,10 +42,10 @@ local M = {}
 ---@field attrs_out Attr[]
 
 ---@class Attr
----@field id integer
 ---@field range Range
----@field max boolean
+---@field max boolean -- TODO -> columns_max
 ---@field columns Attr_column[]
+---@field columns_max Attr_column[] -- TODO
 
 ---@class Attr_column
 ---@field width integer                 display width (logical column width)
@@ -158,8 +158,13 @@ function M:collect_attrs()
 end
 
 ---@param self Document
-function M:rebuild_attrs(first)
-    Blocks.rebuild_attrs(self.blocks, first)
+function M:rebuild_attrs()
+    Blocks.rebuild_attrs(self.blocks)
+end
+
+---@param self Document
+function M:set_attr_range(first)
+    Blocks.set_attr_range(self.blocks, first)
 end
 
 ---@param self Document

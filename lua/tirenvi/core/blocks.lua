@@ -287,9 +287,13 @@ function M:to_vim()
 end
 
 ---@self Blocks
----@param first integer
-function M:rebuild_attrs(first)
+function M:rebuild_attrs()
 	apply(self, "rebuild_attr")
+end
+
+---@self Blocks
+---@param first integer
+function M:set_attr_range(first)
 	rebuild_attr_range(self, first)
 end
 

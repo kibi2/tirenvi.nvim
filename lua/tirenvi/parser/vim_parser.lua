@@ -33,18 +33,24 @@ function M.parse(ctx, req, no_normalize)
 	local records = Record.from_tir_vim(req.lines)
 	local vim_doc = Document.new_vim_doc(records, Context.is_allow_plain(ctx))
 	log.watch("ATTR", "PARSE")
-	Document.rebuild_attrs(vim_doc, req.range.first)
+	Document.rebuild_attrs(vim_doc)
 	Document.set_attrs_in(vim_doc, req.attrs)
 	Document.apply_attrs(vim_doc)
+	Document.set_attr_range(vim_doc, req.range.first + 1)
 	Document.from_vim_doc(vim_doc, no_normalize or false)
 	return vim_doc
 end
 
 ---@param document Document
+---@param req Request
 ---@return string[]
-function M.unparse(document)
+function M.unparse(document, req)
 	local vim_doc = Document.to_vim_doc(document)
 	log.watch("ATTR", "UNPARSE")
+	if req then
+		-- TODO 一部の場合IDの開始番号が必要
+		Document.set_attr_range(vim_doc, req.range.first + 1)
+	end
 	local ndjsons = Document.serialize(vim_doc)
 	return Record.to_tir_vim(ndjsons)
 end
