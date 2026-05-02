@@ -194,7 +194,7 @@ local function schedule_new_range(ctx, new_range)
 		end)
 		local_range = new_range
 	else
-		log.watch(ctx.bufnr, { "muli time on_lines", local_range })
+		log.watch("UNDO", ctx.bufnr, { "muli time on_lines", local_range })
 		Range.union({ local_range, new_range })
 	end
 end

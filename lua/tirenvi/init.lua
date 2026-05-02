@@ -85,7 +85,7 @@ end
 ---@param ctx Context
 ---@param row Range
 ---@return Document|nil
-local function get_blocks(ctx, row)
+local function get_document(ctx, row)
 	local req = Request.from_range(Range.new(row.first - 1, row.last))
 	local lines = reader.read(ctx, req)
 	if not tir_vim.has_pipe(lines) then
@@ -124,7 +124,7 @@ end
 ---@return boolean
 local function change_table_width(ctx, operator, count, rect)
 	log.debug("row%s, col%s", rect.row:short(), rect.col:short())
-	local document = get_blocks(ctx, rect.row)
+	local document = get_document(ctx, rect.row)
 	if not document then
 		return false
 	end
