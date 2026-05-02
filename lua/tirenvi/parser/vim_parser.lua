@@ -40,14 +40,11 @@ function M.parse(ctx, req, no_normalize)
 	return vim_doc
 end
 
----@param req Request
 ---@param document Document
 ---@return string[]
-function M.unparse(req, document)
+function M.unparse(document)
 	local vim_doc = Document.to_vim_doc(document)
 	log.watch("ATTR", "UNPARSE")
-	Document.rebuild_attrs(vim_doc, req.range.first)
-	document.attr.attrs_out = Document.collect_attrs(vim_doc)
 	local ndjsons = Document.serialize(vim_doc)
 	return Record.to_tir_vim(ndjsons)
 end

@@ -66,18 +66,6 @@ local function get_current_col()
 end
 
 ---@param ctx Context
----@param row Range
----@return Document|nil
-local function get_document(ctx, row)
-	local req = Request.from_range(Range.new(row.first - 1, row.last))
-	local lines = reader.read(ctx, req)
-	if not tir_vim.has_pipe(lines) then
-		return nil
-	end
-	return vim_parser.parse(ctx, req)
-end
-
----@param ctx Context
 ---@param line_provider LineProvider
 ---@param irow integer
 local function get_range(ctx, line_provider, irow)
@@ -101,31 +89,12 @@ local function expand_rect(ctx, line_provider, row)
 end
 
 ---@param ctx Context
----@param operator string
----@param count integer
----@param rect Rect
----@return boolean
-local function change_table_width(ctx, operator, count, rect)
-	log.debug("row%s, col%s", rect.row:short(), rect.col:short())
-	local document = get_document(ctx, rect.row)
-	if not document then
-		return false
-	end
-	Blocks.change_width(document.blocks, operator, count, rect.col)
-	local req = Request.from_range(Range.new(rect.row.first - 1, rect.row.last))
-	local lines = vim_parser.unparse(req, document)
-	req = Request.from_lines(req.range, lines, document.attr.attrs_out)
-	writer.write(ctx, req)
-	return true
-end
-
----@param ctx Context
 ---@param line_provider LineProvider
 ---@param rect Rect
 ---@param operator string
 local function change_width(ctx, line_provider, rect, operator, count)
 	expand_rect(ctx, line_provider, rect.row)
-	change_table_width(ctx, operator, count, rect)
+	pipeline.change_width(ctx, operator, count, rect)
 end
 
 local warned = false
@@ -219,17 +188,8 @@ function M.toggle(ctx)
 end
 
 ---@param ctx Context
----@return nil
 function M.reconcile(ctx)
-	local req = Request.from_range(Range.new(0, -1))
-	local old_lines = reader.read(ctx, req)
-	local document = vim_parser.parse(ctx, req)
-	local vi_lines = vim_parser.unparse(req, document)
-	if table.concat(old_lines, "\n") ~= table.concat(vi_lines, "\n") then
-		log.debug({ vi_lines[1], vi_lines[2] })
-		local req = Request.from_lines(Range.new(0, -1), vi_lines, document.attr.attrs_out)
-		writer.write(ctx, req)
-	end
+	pipeline.reconcile(ctx)
 end
 
 ---@param ctx Context	

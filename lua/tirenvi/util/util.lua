@@ -122,4 +122,16 @@ function M.get_termcodes(code)
 	return api.nvim_replace_termcodes(code, true, false, true)
 end
 
+function M.same_str_array(source, target)
+	if #source ~= #target then
+		return false
+	end
+	for index = 1, #source do
+		if source[index] ~= target[index] then
+			return false
+		end
+	end
+	return true
+end
+
 return M

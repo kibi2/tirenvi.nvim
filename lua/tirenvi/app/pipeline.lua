@@ -1,6 +1,7 @@
 -----------------------------------------------------------------------
 -- Dependencies
 -----------------------------------------------------------------------
+local Blocks = require("tirenvi.core.blocks")
 local tir_vim = require("tirenvi.core.tir_vim")
 local Request = require("tirenvi.app.request")
 local flat_parser = require("tirenvi.parser.flat_parser")
@@ -20,11 +21,47 @@ local M = {}
 -- private helpers
 
 ---@param ctx Context
+---@param range Range
+---@return Document
+---@return Request
+local function flat_to_doc(ctx, range)
+    local req = Request.from_range(range)
+    reader.read(ctx, req)
+    util.ensure_no_reserved_marks(req.lines)
+    return flat_parser.parse(ctx, req), req
+end
+
+---@param ctx Context
+---@param range Range
+---@param document Document
+local function doc_to_flat(ctx, range, document)
+    local fl_lines = flat_parser.unparse(ctx, document)
+    local req = Request.from_lines(range, fl_lines, document.attr.attrs_out)
+    writer.write(ctx, req)
+end
+
+---@param ctx Context
+---@param range Range
+---@return Document|nil
+---@return Request
+local function vim_to_doc(ctx, range)
+    local req = Request.from_range(range)
+    local lines = reader.read(ctx, req)
+    if not tir_vim.has_pipe(lines) then
+        return nil, req
+    end
+    return vim_parser.parse(ctx, req), req
+end
+
+---@param ctx Context
 ---@param req Request
 ---@param document Document
 ---@param no_undo boolean|nil
-local function document_to_vim(ctx, req, document, no_undo)
-    local vi_lines = vim_parser.unparse(req, document)
+local function doc_to_vim(ctx, req, document, no_undo)
+    local vi_lines = vim_parser.unparse(document)
+    if util.same_str_array(vi_lines, req.lines) then
+        return
+    end
     local req = Request.from_lines(req.range, vi_lines, document.attr.attrs_out, no_undo or false)
     writer.write(ctx, req)
 end
@@ -37,28 +74,40 @@ end
 ---@param no_undo boolean|nil
 ---@return nil
 function M.from_flat(ctx, no_undo)
-    local req = Request.from_range(Range.new(0, -1))
-    reader.read(ctx, req)
-    util.ensure_no_reserved_marks(req.lines)
-    local document = flat_parser.parse(ctx, req)
-    document_to_vim(ctx, req, document, no_undo)
+    local document, req = flat_to_doc(ctx, Range.new(0, -1))
+    doc_to_vim(ctx, req, document, no_undo)
 end
 
 ---@param ctx Context
 ---@param is_toggle boolean|nil
----@return nil
 function M.to_flat(ctx, is_toggle)
     is_toggle = is_toggle or false
-    local req = Request.from_range(Range.new(0, -1))
-    local vi_lines = reader.read(ctx, req)
-    if not tir_vim.has_pipe(vi_lines) then
-        return
+    local document, req = vim_to_doc(ctx, Range.new(0, -1))
+    if document then
+        log.debug(document.blocks[1].records)
+        doc_to_flat(ctx, req.range, document)
     end
-    local document = vim_parser.parse(ctx, req)
-    log.debug(document.blocks[1].records)
-    local fl_lines = flat_parser.unparse(ctx, document)
-    local req = Request.from_lines(Range.new(0, -1), fl_lines, document.attr.attrs_out)
-    writer.write(ctx, req)
+end
+
+---@param ctx Context
+---@param operator string
+---@param count integer
+---@param rect Rect
+function M.change_width(ctx, operator, count, rect)
+    log.debug("row%s, col%s", rect.row:short(), rect.col:short())
+    local document, req = vim_to_doc(ctx, Range.new(rect.row.first - 1, rect.row.last))
+    if document then
+        Blocks.change_width(document.blocks, operator, count, rect.col)
+        doc_to_vim(ctx, req, document)
+    end
+end
+
+---@param ctx Context
+function M.reconcile(ctx)
+    local document, req = vim_to_doc(ctx, Range.new(0, -1))
+    if document then
+        doc_to_vim(ctx, req, document)
+    end
 end
 
 return M

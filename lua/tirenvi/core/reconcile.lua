@@ -93,7 +93,6 @@ end
 ---@return string[]
 local function apply_range(ctx, start_row, end_row)
 	log.debug("===-===-===-=== reconcile start[%d, %d] ===-===-===-===", start_row + 1, end_row)
-	local req = Request.from_range(Range.new(start_row, end_row))
 	local attr_prev, attr_next = resolve_reference_attrs(ctx.bufnr, start_row, end_row)
 	local document = build_document(ctx, start_row, end_row)
 	local blocks = document.blocks
@@ -112,7 +111,7 @@ local function apply_range(ctx, start_row, end_row)
 			error("repair: unexpected error: " .. tostring(reason))
 		end
 	end
-	return vim_parser.unparse(req, document)
+	return vim_parser.unparse(document)
 end
 
 ---@param ctx Context
