@@ -148,9 +148,12 @@ function M:reconcile(attr_prev, attr_next)
     end
 end
 
----@param self Document
----@return Attr[]
+---@param self Document|nil
+---@return Attr[]|nil
 function M:collect_attrs()
+    if not self then
+        return nil
+    end
     return Blocks.get_attrs(self.blocks)
 end
 

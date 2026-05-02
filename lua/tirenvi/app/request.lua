@@ -2,6 +2,7 @@
 -- Dependencies
 -----------------------------------------------------------------------
 
+local Document = require("tirenvi.core.document")
 local log = require("tirenvi.util.log")
 
 -----------------------------------------------------------------------
@@ -32,16 +33,17 @@ end
 
 ---@param range Range
 ---@param lines string[]
----@param attrs Attr[]|nil
+---@param document Document|nil
 ---@param no_undo boolean|nil
 ---@return Request
-function M.from_lines(range, lines, attrs, no_undo)
-    return {
+function M.from_lines(range, lines, document, no_undo)
+    local self = {
         range = range,
         lines = lines,
-        attrs = attrs,
         no_undo = no_undo or false,
     }
+    self.attrs = Document.collect_attrs(document)
+    return self
 end
 
 return M

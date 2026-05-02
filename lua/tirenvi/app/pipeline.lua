@@ -36,7 +36,7 @@ end
 ---@param document Document
 local function doc_to_flat(ctx, range, document)
     local fl_lines = flat_parser.unparse(ctx, document)
-    local req = Request.from_lines(range, fl_lines, document.attr.attrs_out)
+    local req = Request.from_lines(range, fl_lines, document)
     writer.write(ctx, req)
 end
 
@@ -62,7 +62,7 @@ local function doc_to_vim(ctx, req, document, no_undo)
     if util.same_str_array(vi_lines, req.lines) then
         return
     end
-    local req = Request.from_lines(req.range, vi_lines, document.attr.attrs_out, no_undo or false)
+    local req = Request.from_lines(req.range, vi_lines, document, no_undo or false)
     writer.write(ctx, req)
 end
 

@@ -117,6 +117,7 @@ end
 ---@param ctx Context
 ---@param ranges Range[]
 local function apply_ranges(ctx, ranges)
+	-- TODO 上からやっていくと行の増減があるかもしれないので下から修正する
 	for index = 1, #ranges do
 		local range = Range.new(ranges[index].first, ranges[index].last + 1)
 		local new_lines = apply_range(ctx, range.first, range.last)
