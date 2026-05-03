@@ -62,6 +62,7 @@ end
 ---@return string[]
 function M.unparse(document, req)
 	log.watch("ATTR", "UNPARSE")
+	log.probe(document)
 	build_attr_pre(document, req)
 	local vim_doc = Document.to_vim_doc(document)
 	if req then

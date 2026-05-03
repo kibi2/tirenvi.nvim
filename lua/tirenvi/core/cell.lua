@@ -46,7 +46,10 @@ function M.get_width(self)
     if not self then
         return 0
     end
-    local cells = vim.split(self, lf)
+    local cells = { self }
+    if not util.end_with(self, config.marks.padding) then
+        cells = vim.split(self, lf)
+    end
     local max_width = 0
     for icell, cell in pairs(cells) do
         local width = display_width(cell)
