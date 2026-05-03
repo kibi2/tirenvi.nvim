@@ -24,13 +24,15 @@ local M = {}
 ---@class Block_plain
 ---@field kind "plain"
 ---@field attr Attr
+---@field attr_in Attr
 ---@field records Record_plain[]
 
 ---@class Block_grid
 ---@field kind "grid"
 ---@field attr Attr
+---@field attr_in Attr
+---@field attr_max Attr_max
 ---@field records Record_grid[]
----@field _attr_build Attr
 
 ---@class Attr_file
 ---@field kind "attr_file"
@@ -43,9 +45,12 @@ local M = {}
 
 ---@class Attr
 ---@field range Range
----@field max boolean -- TODO -> columns_max
 ---@field columns Attr_column[]
----@field columns_max Attr_column[] -- TODO
+
+---@class Attr_max
+---@field ncol_match boolean
+---@field width_match boolean[]
+---@field columns Attr_column[]
 
 ---@class Attr_column
 ---@field width integer                 display width (logical column width)
@@ -154,7 +159,7 @@ function M:collect_attrs()
     if not self then
         return nil
     end
-    return Blocks.get_attrs(self.blocks)
+    return Blocks.collect_attrs(self.blocks)
 end
 
 ---@param self Document
@@ -168,13 +173,23 @@ function M:set_attr_range(first)
 end
 
 ---@param self Document
-function M:set_attrs_in(attrs)
-    self.attr.attrs_in = attrs
+---@param attrs Attr[]|nil
+function M:apply_attrs_in(attrs)
+    if attrs then
+        Blocks.apply_attrs_in(self.blocks, attrs)
+    end
 end
 
 ---@param self Document
-function M:apply_attrs()
-    Blocks.apply_attrs(self.blocks, self.attr.attrs_in)
+function M:apply_attr()
+    Blocks.apply_attr(self.blocks)
+end
+
+function M:debug_attr(attrs)
+    if not log.is_debug() then
+        return
+    end
+    Blocks.debug_attr(self.blocks)
 end
 
 return M

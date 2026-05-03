@@ -1,4 +1,5 @@
 local Cell = require("tirenvi.core.cell")
+local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -38,7 +39,7 @@ end
 ---@param columns Attr_column[]
 ---@return Attr
 local function new_from_columns(columns)
-    return { columns = columns, max = false }
+    return { columns = columns }
 end
 
 -----------------------------------------------------------------------
@@ -96,6 +97,16 @@ function M.grid.new(record)
     end
 end
 
+---@param record Record_grid|nil
+---@return Attr_column[]
+function M.grid.new2(record)
+    if record then
+        return get_columns(record.row)
+    else
+        return {}
+    end
+end
+
 ---@param cells Cell[]
 ---@return Attr
 function M.grid.new_from_record(cells)
@@ -142,18 +153,20 @@ function M:set_widths(widths)
     end
 end
 
----@param self Attr
+---@param attr_max Attr_max
 ---@param cells string[]
-function M.grid:merge(cells)
+function M.grid.merge(attr_max, cells)
     local attr = M.grid.new_from_record(cells)
-    local columns = self.columns
+    local columns = attr_max.columns
+    local width_match = attr_max.width_match
     if #columns ~= #attr.columns then
-        self.max = true
+        attr_max.ncol_match = false
     end
     for icol, column in ipairs(attr.columns) do
         columns[icol] = columns[icol] or { width = 0 }
+        width_match[icol] = width_match[icol] == nil or width_match[icol]
         if columns[icol].width ~= column.width then
-            self.max = true
+            width_match[icol] = false
             columns[icol].width = math.max(columns[icol].width, column.width)
         end
     end
@@ -161,9 +174,26 @@ end
 
 ---@param self Attr
 ---@param attrs Attr[]
+---@return Attr|nil
 function M.get_attr(self, attrs)
-    -- TODO check range
+    for _, attr in ipairs(attrs) do
+        if Range.intersect(self.range, attr.range) then
+            return attr
+        end
+    end
     return nil
+end
+
+---@param self Attr|nil
+function M.get_width_array(self)
+    if not self then
+        return {}
+    end
+    local widths = {}
+    for _, column in ipairs(self.columns) do
+        widths[#widths + 1] = column.width
+    end
+    return widths
 end
 
 return M

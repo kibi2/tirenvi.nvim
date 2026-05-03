@@ -34,7 +34,7 @@ local lf_len = display_width(lf)
 function M.get_widths(cells)
     local widths = {}
     for _, cell in ipairs(cells) do
-        local width = display_width(cell)
+        local width = M.get_width(cell)
         widths[#widths + 1] = width
     end
     return widths

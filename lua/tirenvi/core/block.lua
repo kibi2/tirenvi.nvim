@@ -337,7 +337,7 @@ end
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 function M.grid:to_vim()
-    ensure_table_attr(self)
+    --ensure_table_attr(self)
     apply_column_count(self, #self.attr.columns)
     wrap(self)
     fill_padding(self)
@@ -345,19 +345,56 @@ end
 
 ---@self Block_grid
 function M.grid:rebuild_attr()
-    self.attr_build = Attr.grid.new(self.records[1])
-    self._max = false
+    self.attr_max = { ncol_match = true, width_match = {}, columns = {} }
+    self.attr_max.columns = Attr.grid.new2(self.records[1])
     for irecord = 2, #self.records do
-        Attr.grid.merge(self.attr_build, self.records[irecord].row)
+        Attr.grid.merge(self.attr_max, self.records[irecord].row)
     end
-    log.watch("ATTR", self.attr_build)
 end
 
----@self Block_grid
-function M.grid:apply_attr(attrs)
-    self.attr = self.attr_build
-    if self.attr.max then
-        self.attr = Attr.get_attr(self.attr_build, attrs) or self.attr_build
+---@self Block
+---@param attrs Attr[]
+function M:apply_attrs_in(attrs)
+    self.attr_in = Attr.get_attr(self.attr, attrs) or self.attr_build
+end
+
+---@self Block
+---@param attr Attr
+function M:apply_attr_in(attr)
+    self.attr_in = attr
+end
+
+---@self Block
+function M.grid:apply_attr()
+    if not Attr.is_plain(self.attr) then
+        return
+    end
+    if self.attr_max.ncol_match then
+        self.attr.columns = vim.deepcopy(self.attr_max.columns)
+    elseif self.attr_in then
+        self.attr.columns = vim.deepcopy(self.attr_in.columns)
+    else
+        self.attr.columns = vim.deepcopy(self.attr_max.columns)
+    end
+    for icol, column in ipairs(self.attr.columns) do
+        if self.attr_max.width_match[icol] then
+            column.width = self.attr_max.columns[icol].width
+        elseif self.attr_in and self.attr_in.columns[icol] then
+            column.width = self.attr_in.columns[icol].width
+        end
+    end
+end
+
+---@self Block
+function M.grid:debug_attr()
+    log.watch("ATTR", { range = self.attr.range, width = Attr.get_width_array(self.attr) })
+    if self.attr_in then
+        log.watch("ATTR", { in_range = self.attr_in.range, in_width = Attr.get_width_array(self.attr_in) })
+    end
+    if self.attr_max then
+        log.watch("ATTR", { ncol_match = self.attr_max.ncol_match })
+        log.watch("ATTR", { max_width = Attr.get_width_array(self.attr_max) })
+        log.watch("ATTR", { width_match = self.attr_max.width_match })
     end
 end
 

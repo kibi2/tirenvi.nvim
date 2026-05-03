@@ -360,8 +360,13 @@ function M.watch(category, ...)
 	emit(false, levels.DEBUG, { category = category }, ...)
 end
 
+---@return boolean
+function M.is_debug()
+	return levels.DEBUG >= config.log.level
+end
+
 local aug = vim.api.nvim_create_augroup("TirenviLogHL", { clear = true })
-vim.api.nvim_create_autocmd("WinEnter", {
+vim.api.nvim_create_autocmd("BufWinEnter", {
 	group = aug,
 	callback = function(args)
 		if args.buf == log_bufnr then

@@ -211,7 +211,7 @@ end
 
 ---@self Blocks
 ---@return Attr[]
-function M:get_attrs()
+function M:collect_attrs()
 	local attrs = {}
 	for _, block in ipairs(self) do
 		attrs[#attrs + 1] = block.attr or Attr.new()
@@ -308,8 +308,29 @@ end
 
 ---@self Blocks
 ---@param attrs Attr[]
-function M:apply_attrs(attrs)
-	apply(self, "apply_attrs", attrs)
+function M:apply_attrs_in(attrs)
+	for iblock, block in ipairs(self) do
+		if block.attr.range then
+			Block.apply_attrs_in(block, attrs)
+		else
+			Block.apply_attr_in(block, attrs[iblock])
+		end
+	end
+end
+
+---@self Blocks
+function M:apply_attr()
+	apply(self, "apply_attr")
+end
+
+---@self Blocks
+function M:debug_attr()
+	for _, block in ipairs(self) do
+		if block.kind == CONST.KIND.GRID then
+			Block.grid.debug_attr(block)
+			return
+		end
+	end
 end
 
 return M
