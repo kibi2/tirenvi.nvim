@@ -79,14 +79,10 @@ end
 ---@return Attr|nil
 local function resolve_reference_attrs(bufnr, start_row, end_row)
 	local line_prev, line_next = buffer.get_lines_around(bufnr, start_row, end_row)
-	log.probe(line_prev)
-	log.probe(line_next)
 	local target = buffer.get_line(bufnr, start_row)
 	log.debug("[prev] %s [target] %s [next] %s", tostring(line_prev), tostring(target), tostring(line_next))
 	local attr_prev = vim_parser.parse_to_attr(line_prev)
 	local attr_next = vim_parser.parse_to_attr(line_next)
-	log.probe(attr_prev)
-	log.probe(attr_next)
 	log.debug({ attr_prev, attr_next })
 	return attr_prev, attr_next
 end
