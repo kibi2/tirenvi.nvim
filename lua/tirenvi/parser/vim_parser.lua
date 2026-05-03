@@ -25,7 +25,7 @@ local function build_attr_pre(document, req)
 	end
 	Document.rebuild_attrs(document)
 	Document.apply_attr(document)
-	Document.debug_attr(document)
+	Document.debug_attr("UNPARSE", document)
 end
 
 ---@param document Document
@@ -35,7 +35,7 @@ local function build_attr_post(document, req)
 	Document.apply_attrs_in(document, req.attrs)
 	Document.rebuild_attrs(document)
 	Document.apply_attr(document)
-	Document.debug_attr(document)
+	Document.debug_attr("PARSE", document)
 end
 
 -----------------------------------------------------------------------
@@ -47,13 +47,10 @@ end
 -- Prevents line count changes that would break put(); used for repair.
 ---@return Document
 function M.parse(ctx, req, no_normalize)
-	log.watch("ATTR", "PARSE")
 	local records = Record.from_tir_vim(req.lines)
 	local vim_doc = Document.new_vim_doc(records, Context.is_allow_plain(ctx))
 	build_attr_post(vim_doc, req)
-	log.watch("ATTR", "fom_vim")
 	Document.from_vim_doc(vim_doc, no_normalize or false)
-	Document.debug_attr(vim_doc)
 	return vim_doc
 end
 
@@ -61,7 +58,6 @@ end
 ---@param req Request|nil
 ---@return string[]
 function M.unparse(document, req)
-	log.watch("ATTR", "UNPARSE")
 	build_attr_pre(document, req)
 	local vim_doc = Document.to_vim_doc(document)
 	if req then

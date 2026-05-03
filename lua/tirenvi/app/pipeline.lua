@@ -1,6 +1,7 @@
 -----------------------------------------------------------------------
 -- Dependencies
 -----------------------------------------------------------------------
+local Document = require("tirenvi.core.document")
 local Blocks = require("tirenvi.core.blocks")
 local tir_vim = require("tirenvi.core.tir_vim")
 local Request = require("tirenvi.app.request")

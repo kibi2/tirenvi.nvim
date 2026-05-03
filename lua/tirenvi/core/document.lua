@@ -185,10 +185,13 @@ function M:apply_attr()
     Blocks.apply_attr(self.blocks)
 end
 
-function M:debug_attr(attrs)
+---@param self Document
+---@param title any
+function M.debug_attr(title, self)
     if not log.is_debug() then
         return
     end
+    log.watch("ATTR", title)
     Blocks.debug_attr(self.blocks)
 end
 

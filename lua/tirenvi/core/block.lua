@@ -355,7 +355,7 @@ end
 ---@self Block
 ---@param attrs Attr[]
 function M:apply_attrs_in(attrs)
-    self.attr_in = Attr.get_attr(self.attr, attrs) or self.attr_build
+    self.attr_in = Attr.get_attr(self.attr, attrs)
 end
 
 ---@self Block
@@ -364,9 +364,18 @@ function M:apply_attr_in(attr)
     self.attr_in = attr
 end
 
+local function auto_width(attr, attr_max)
+    for icol, column in ipairs(attr.columns) do
+        if column.width == 0 then
+            column.width = attr_max.columns[icol].width
+        end
+    end
+end
+
 ---@self Block
 function M.grid:apply_attr()
     if not Attr.is_plain(self.attr) then
+        auto_width(self.attr, self.attr_max)
         return
     end
     if self.attr_max.ncol_match then
@@ -387,6 +396,9 @@ end
 
 ---@self Block
 function M.grid:debug_attr()
+    if not log.is_debug() then
+        return
+    end
     log.watch("ATTR", { range = self.attr.range, width = Attr.get_width_array(self.attr) })
     if self.attr_in then
         log.watch("ATTR", { in_range = self.attr_in.range, in_width = Attr.get_width_array(self.attr_in) })
