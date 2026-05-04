@@ -18,7 +18,7 @@ local function get_columns(cells)
     local columns = {}
     local widths = Cell.get_widths(cells)
     for _, width in ipairs(widths) do
-        width = math.max(width, 2)
+        width = math.max(width, Cell.MIN_WIDTH)
         columns[#columns + 1] = { width = width }
     end
     return columns
@@ -33,7 +33,7 @@ local function get_max_width(records, icol)
         local width = Cell.get_width(record.row[icol])
         max_width = math.max(max_width, width)
     end
-    return math.max(max_width, 2)
+    return math.max(max_width, Cell.MIN_WIDTH)
 end
 
 ---@param columns Attr_column[]
@@ -136,13 +136,10 @@ end
 
 ---@self Attr
 ---@param icol integer
----@param width integer|nil
+---@param width integer
 function M.grid:set_width(icol, width)
-    if not width then
-        return
-    end
     self.columns[icol] = self.columns[icol] or {}
-    self.columns[icol].width = width == 0 and 0 or math.max(width, 2)
+    self.columns[icol].width = width == 0 and 0 or math.max(width, Cell.MIN_WIDTH)
 end
 
 ---@self Attr
@@ -153,7 +150,7 @@ function M:set_widths(widths)
     end
 end
 
----@param attr_max Attr_max
+---@param attr_max Attr_match
 ---@param cells string[]
 function M.grid.merge(attr_max, cells)
     local attr = M.grid.new_from_record(cells)
@@ -184,16 +181,32 @@ function M.get_attr(self, attrs)
     return nil
 end
 
----@param self Attr|nil
-function M.get_width_array(self)
-    if not self then
+---@param columns Attr_column[]
+function M.get_width_array(columns)
+    if not columns then
         return {}
     end
     local widths = {}
-    for _, column in ipairs(self.columns) do
+    for _, column in ipairs(columns) do
         widths[#widths + 1] = column.width
     end
     return widths
+end
+
+---@self Block_grid
+---@param sel Range
+---@param width_op WidthOp
+function M:change_width(attr_match, sel, width_op)
+    local start_col = 1
+    for icol, column in ipairs(self.columns) do
+        local old_width = column.width
+        local cel_range = Range.new(start_col, start_col + old_width)
+        if sel:intersect(cel_range) then
+            local max_width = attr_match.columns_auto[icol].width
+            column.width = width_op:apply(old_width, max_width)
+        end
+        start_col = cel_range.last + 1
+    end
 end
 
 return M

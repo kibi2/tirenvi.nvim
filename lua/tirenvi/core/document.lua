@@ -31,7 +31,7 @@ local M = {}
 ---@field kind "grid"
 ---@field attr Attr
 ---@field attr_in Attr
----@field attr_max Attr_max
+---@field attr_max Attr_match
 ---@field records Record_grid[]
 
 ---@class Attr_file
@@ -47,10 +47,13 @@ local M = {}
 ---@field range Range
 ---@field columns Attr_column[]
 
----@class Attr_max
+---@class Attr_match
 ---@field ncol_match boolean
 ---@field width_match boolean[]
 ---@field columns Attr_column[]
+---@field columns_max Attr_column[]
+---@field columns_min Attr_column[]
+---@field columns_auto Attr_column[]
 
 ---@class Attr_column
 ---@field width integer                 display width (logical column width)

@@ -84,11 +84,11 @@ end
 
 ---@param ctx Context
 ---@param line_provider LineProvider
----@param rect Rect
----@param operator string
-local function cmd_width(ctx, line_provider, rect, operator, count)
-	expand_rect(ctx, line_provider, rect.row)
-	pipeline.cmd_width(ctx, operator, count, rect)
+---@param sel Rect
+---@param width_op WidthOp
+local function cmd_width(ctx, line_provider, sel, width_op)
+	expand_rect(ctx, line_provider, sel.row)
+	pipeline.cmd_width(ctx, sel, width_op)
 end
 
 local warned = false
@@ -188,13 +188,11 @@ end
 
 ---@param ctx Context	
 ---@param line_provider LineProvider
----@param rect Rect
----@param operator string Operator: "", "=", "+", "-"
----@param count integer Count for the operator (default: 0)
----@return nil
-function M.width(ctx, line_provider, rect, operator, count)
-	cmd_width(ctx, line_provider, rect, operator, count)
-	local command = util.get_termcodes(":<C-u>Tir width " .. operator .. count .. "<CR>")
+---@param sel Rect
+---@param width_op WidthOp
+function M.width(ctx, line_provider, sel, width_op)
+	cmd_width(ctx, line_provider, sel, width_op)
+	local command = util.get_termcodes(width_op:to_cmd())
 	set_repeat(command)
 end
 

@@ -91,14 +91,13 @@ function M.to_flat(ctx, is_toggle)
 end
 
 ---@param ctx Context
----@param operator string
----@param count integer
----@param rect Rect
-function M.cmd_width(ctx, operator, count, rect)
-    log.debug("row%s, col%s", rect.row:short(), rect.col:short())
-    local document, req = vim_to_doc(ctx, Range.new(rect.row.first - 1, rect.row.last))
+---@param sel Rect
+---@param width_op WidthOp
+function M.cmd_width(ctx, sel, width_op)
+    log.debug("row%s, col%s", sel.row:short(), sel.col:short())
+    local document, req = vim_to_doc(ctx, Range.new(sel.row.first - 1, sel.row.last))
     if document then
-        Blocks.change_width(document.blocks, operator, count, rect.col)
+        Blocks.change_width(document.blocks, sel.col, width_op)
         doc_to_vim(ctx, req, document)
     end
 end

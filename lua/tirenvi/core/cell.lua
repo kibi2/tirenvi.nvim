@@ -5,6 +5,7 @@ local log = require("tirenvi.util.log")
 local M = {}
 
 -- constants / defaults
+M.MIN_WIDTH = 2
 local fn = vim.fn
 local padding = config.marks.padding
 local escaped_padding = vim.pesc(padding)

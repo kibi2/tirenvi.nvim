@@ -243,11 +243,10 @@ function M:set_attrs(attrs)
 end
 
 ---@self Blocks
----@param operator string
----@param count integer
----@param col Range
-function M:change_width(operator, count, col)
-	apply(self, "change_width", operator, count, col)
+---@param sel Range
+---@param width_op WidthOp
+function M:change_width(sel, width_op)
+	apply(self, "change_width", sel, width_op)
 end
 
 --- Convert NDJSON records into normalized blocks.
