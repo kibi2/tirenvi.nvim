@@ -88,10 +88,10 @@ local function set_lines(bufnr, i_start, i_end, lines, no_undo)
 		end
 	end
 	i_start = math.max(i_start, 0)
-	set_undo_tree_last(bufnr)
 	if not no_undo or M.get_auto_reconcile(bufnr) then
 		api.nvim_buf_set_lines(bufnr, i_start, i_end, false, lines)
 	end
+	set_undo_tree_last(bufnr)
 	fix_cursor_utf8()
 	bo[bufnr].undolevels = undolevels
 end
