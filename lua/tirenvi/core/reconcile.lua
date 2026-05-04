@@ -61,26 +61,24 @@ local function normalize_trailing_empty_line(vi_lines, line_prev)
 end
 
 ---@param ctx Context
----@param start_row integer
----@param end_row integer
+---@param range Range
 ---@return Document
 ---@return Request
-local function build_document(ctx, start_row, end_row)
-	local req = Request.from_range(Range.new(start_row, end_row))
+local function build_document(ctx, range)
+	local req = Request.from_range(range)
 	local vi_lines = reader.read(ctx, req)
-	local line_prev = buffer.get_line(ctx.bufnr, start_row - 1)
+	local line_prev = buffer.get_line(ctx.bufnr, range.first - 1)
 	normalize_trailing_empty_line(vi_lines, line_prev)
 	return vim_parser.parse(ctx, req, true), req
 end
 
 ---@param bufnr number
----@param start_row integer
----@param end_row integer
+---@param range Range
 ---@return Attr|nil
 ---@return Attr|nil
-local function resolve_reference_attrs(bufnr, start_row, end_row)
-	local line_prev, line_next = buffer.get_lines_around(bufnr, start_row, end_row)
-	local target = buffer.get_line(bufnr, start_row)
+local function resolve_reference_attrs(bufnr, range)
+	local line_prev, line_next = buffer.get_lines_around(bufnr, range)
+	local target = buffer.get_line(bufnr, range.first)
 	log.debug("[prev] %s [target] %s [next] %s", tostring(line_prev), tostring(target), tostring(line_next))
 	local attr_prev = vim_parser.parse_to_attr(line_prev)
 	local attr_next = vim_parser.parse_to_attr(line_next)
@@ -89,13 +87,12 @@ local function resolve_reference_attrs(bufnr, start_row, end_row)
 end
 
 ---@param ctx Context
----@param start_row integer
----@param end_row integer
+---@param range Range
 ---@return string[]
-local function apply_range(ctx, start_row, end_row)
-	log.debug("===-===-===-=== reconcile start[%d, %d] ===-===-===-===", start_row + 1, end_row)
-	local attr_prev, attr_next = resolve_reference_attrs(ctx.bufnr, start_row, end_row)
-	local document, req = build_document(ctx, start_row, end_row)
+local function apply_range(ctx, range)
+	log.debug("===-===-===-=== reconcile start%s ===-===-===-===", range:short())
+	local attr_prev, attr_next = resolve_reference_attrs(ctx.bufnr, range)
+	local document, req = build_document(ctx, range)
 	local blocks = document.blocks
 	log.debug(#blocks ~= 0 and blocks[1].records)
 	log.debug(#blocks ~= 0 and blocks[1].records[1])
@@ -107,7 +104,7 @@ local function apply_range(ctx, start_row, end_row)
 		if reason == "grid in plain" then
 			return flat_parser.unparse(ctx, document)
 		elseif reason == "conflict" then
-			document, req = build_document(ctx, 0, -1)
+			document, req = build_document(ctx, Range.new(0, -1))
 		else
 			error("repair: unexpected error: " .. tostring(reason))
 		end
@@ -120,7 +117,7 @@ end
 local function apply_ranges(ctx, ranges)
 	for index = #ranges, 1, -1 do
 		local range = Range.new(ranges[index].first, ranges[index].last + 1)
-		local new_lines = apply_range(ctx, range.first, range.last)
+		local new_lines = apply_range(ctx, range)
 		local req = Request.from_lines(range, new_lines, nil, true)
 		writer.write(ctx, req)
 	end

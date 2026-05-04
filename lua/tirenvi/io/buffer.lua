@@ -241,13 +241,12 @@ function M.line_count(bufnr)
 end
 
 ---@param bufnr number
----@param start integer
----@param end_ integer
+---@param range Range
 ---@return string|nil
 ---@return string|nil
-function M.get_lines_around(bufnr, start, end_)
-	M.get_lines(bufnr, start - 1, end_ + 1)
-	return M.get_line(bufnr, start - 1), M.get_line(bufnr, end_)
+function M.get_lines_around(bufnr, range)
+	M.get_lines(bufnr, range.first - 1, range.last + 1)
+	return M.get_line(bufnr, range.first - 1), M.get_line(bufnr, range.last)
 end
 
 ---@param bufnr number

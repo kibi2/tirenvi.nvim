@@ -204,7 +204,7 @@ function M.insert_char_in_newline(ctx)
 	if line_new ~= "" then
 		return
 	end
-	local line_prev, line_next = buffer.get_lines_around(ctx.bufnr, row - 1, row)
+	local line_prev, line_next = buffer.get_lines_around(ctx.bufnr, Range.new(row - 1, row))
 	local line_ref = line_prev
 	if not Context.is_allow_plain(ctx) then
 		line_ref = line_ref or line_next
