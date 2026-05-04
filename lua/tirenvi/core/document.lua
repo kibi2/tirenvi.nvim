@@ -1,4 +1,5 @@
 local CONST = require("tirenvi.constants")
+local Attr = require("tirenvi.core.attr")
 local Blocks = require("tirenvi.core.blocks")
 local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
@@ -178,6 +179,7 @@ end
 ---@param attrs Attr[]|nil
 function M:apply_attrs_in(attrs)
     if attrs then
+        self.attr.attrs_in = attrs
         Blocks.apply_attrs_in(self.blocks, attrs)
     end
 end
@@ -195,6 +197,7 @@ function M.debug_attr(title, self)
     end
     log.watch("ATTR", title)
     Blocks.debug_attr(self.blocks)
+    log.watch("ATTR", { max = Attr.get_range_and_ncol(self.attr.attrs_in) })
 end
 
 return M

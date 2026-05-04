@@ -150,25 +150,6 @@ function M:set_widths(widths)
     end
 end
 
----@param attr_max Attr_match
----@param cells string[]
-function M.grid.merge(attr_max, cells)
-    local attr = M.grid.new_from_record(cells)
-    local columns = attr_max.columns
-    local width_match = attr_max.width_match
-    if #columns ~= #attr.columns then
-        attr_max.ncol_match = false
-    end
-    for icol, column in ipairs(attr.columns) do
-        columns[icol] = columns[icol] or { width = 0 }
-        width_match[icol] = width_match[icol] == nil or width_match[icol]
-        if columns[icol].width ~= column.width then
-            width_match[icol] = false
-            columns[icol].width = math.max(columns[icol].width, column.width)
-        end
-    end
-end
-
 ---@param self Attr
 ---@param attrs Attr[]
 ---@return Attr|nil
@@ -182,6 +163,7 @@ function M.get_attr(self, attrs)
 end
 
 ---@param columns Attr_column[]
+---@return integer[]
 function M.get_width_array(columns)
     if not columns then
         return {}
@@ -191,6 +173,23 @@ function M.get_width_array(columns)
         widths[#widths + 1] = column.width
     end
     return widths
+end
+
+---@param attrs Attr[]
+---@return string
+function M.get_range_and_ncol(attrs)
+    if not attrs then
+        return ""
+    end
+    local strings = {}
+    for _, attr in ipairs(attrs) do
+        local kind = "p"
+        if #attr.columns ~= 0 then
+            kind = string.format("g%d", #attr.columns)
+        end
+        strings[#strings + 1] = string.format("%s(%d,%d)", kind, attr.range.first, attr.range.last)
+    end
+    return table.concat(strings, " ")
 end
 
 ---@self Block_grid
