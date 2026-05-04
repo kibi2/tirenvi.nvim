@@ -339,7 +339,7 @@ function M.grid:rebuild_attr()
     self.attr_match.columns_max = columns_max
     local width_match = {}
     for icol, column in ipairs(columns_min) do
-        width_match[icol] = column == columns_max[icol]
+        width_match[icol] = column.width == columns_max[icol].width
     end
     self.attr_match.width_match = width_match
     local block = vim.deepcopy(self)
@@ -408,7 +408,6 @@ function M.grid:debug_attr()
     end
     if self.attr_match then
         log.watch("ATTR", { ncol_match = self.attr_match.ncol_match })
-        log.watch("ATTR", { width = Attr.get_width_array(self.attr_match.columns) })
         log.watch("ATTR", { max = Attr.get_width_array(self.attr_match.columns_max) })
         log.watch("ATTR", { min = Attr.get_width_array(self.attr_match.columns_min) })
         log.watch("ATTR", { auto = Attr.get_width_array(self.attr_match.columns_auto) })

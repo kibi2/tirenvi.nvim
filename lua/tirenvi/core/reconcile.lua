@@ -64,12 +64,13 @@ end
 ---@param start_row integer
 ---@param end_row integer
 ---@return Document
+---@return Request
 local function build_document(ctx, start_row, end_row)
 	local req = Request.from_range(Range.new(start_row, end_row))
 	local vi_lines = reader.read(ctx, req)
 	local line_prev = buffer.get_line(ctx.bufnr, start_row - 1)
 	normalize_trailing_empty_line(vi_lines, line_prev)
-	return vim_parser.parse(ctx, req, true)
+	return vim_parser.parse(ctx, req, true), req
 end
 
 ---@param bufnr number
@@ -94,7 +95,7 @@ end
 local function apply_range(ctx, start_row, end_row)
 	log.debug("===-===-===-=== reconcile start[%d, %d] ===-===-===-===", start_row + 1, end_row)
 	local attr_prev, attr_next = resolve_reference_attrs(ctx.bufnr, start_row, end_row)
-	local document = build_document(ctx, start_row, end_row)
+	local document, req = build_document(ctx, start_row, end_row)
 	local blocks = document.blocks
 	log.debug(#blocks ~= 0 and blocks[1].records)
 	log.debug(#blocks ~= 0 and blocks[1].records[1])
@@ -106,12 +107,12 @@ local function apply_range(ctx, start_row, end_row)
 		if reason == "grid in plain" then
 			return flat_parser.unparse(ctx, document)
 		elseif reason == "conflict" then
-			document = build_document(ctx, 0, -1)
+			document, req = build_document(ctx, 0, -1)
 		else
 			error("repair: unexpected error: " .. tostring(reason))
 		end
 	end
-	return vim_parser.unparse(document)
+	return vim_parser.unparse(document, req)
 end
 
 ---@param ctx Context

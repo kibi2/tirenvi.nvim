@@ -50,7 +50,6 @@ local M = {}
 ---@class Attr_match
 ---@field ncol_match boolean
 ---@field width_match boolean[]
----@field columns Attr_column[]
 ---@field columns_max Attr_column[]
 ---@field columns_min Attr_column[]
 ---@field columns_auto Attr_column[]

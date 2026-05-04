@@ -25,44 +25,35 @@ sleep 1m
 "                              9, 5, 8
 execute "normal! 0gg3j9l"
 Tir width+9
-call Snapshot({'desc': '1' })
 sleep 1m
 "                              18, 5, 8
 Tir width+5
-call Snapshot({'desc': '2' })
 sleep 1m
 "                              23, 5, 8
 Tir width+
-call Snapshot({'desc': '3' })
 sleep 1m
 "                              24, 5, 8
 call feedkeys("u", "x")
-call Snapshot({'desc': '4' })
 sleep 1m
 "                              23, 5, 8
 execute "normal! 0gg6j6l"
 Tir width-10
-call Snapshot({'desc': '5' })
 sleep 1m
 "                              13, 5, 8
 execute "normal! 0gg8j1l"
 Tir width=10
-call Snapshot({'desc': '6' })
 sleep 1m
 "                              13, 5, 8
 execute "normal! 0gg3j$"
 Tir width=20
-call Snapshot({'desc': '7' })
 sleep 1m
 "                              13, 5, 8
 call cursor(2, 1)
 Tir width-100
-call Snapshot({'desc': '8' })
 sleep 1m
 "                              2, 5, 8
 call cursor(1, 1)
 Tir width-
-call Snapshot({'desc': '9' })
 sleep 1m
 "                              2, 5, 8
 execute "normal! 0gg3j3l"

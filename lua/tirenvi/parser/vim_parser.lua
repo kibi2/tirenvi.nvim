@@ -55,7 +55,7 @@ function M.parse(ctx, req, no_normalize)
 end
 
 ---@param document Document
----@param req Request|nil
+---@param req Request
 ---@return string[]
 function M.unparse(document, req)
 	build_attr_pre(document, req)
