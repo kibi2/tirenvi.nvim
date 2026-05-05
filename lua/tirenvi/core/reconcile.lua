@@ -67,8 +67,8 @@ end
 local function build_document(ctx, range)
 	local req = Request.from_range(range)
 	local vi_lines = reader.read(ctx, req)
-	local first = range:to_vim()
-	local line_prev = buffer.get_line(ctx.bufnr, first - 1)
+	local prev0 = range:to_vim() - 1
+	local line_prev = buffer.get_line(ctx.bufnr, prev0)
 	normalize_trailing_empty_line(vi_lines, line_prev)
 	return vim_parser.parse(ctx, req, true), req
 end
@@ -78,8 +78,10 @@ end
 ---@return Attr|nil
 ---@return Attr|nil
 local function resolve_reference_attrs(bufnr, range)
-	local line_prev, line_next = buffer.get_lines_around(bufnr, range)
-	local target = buffer.get_line(bufnr, range.first)
+	local range_vim = Range.from_lua(range.first - 1, range.last)
+	local line_prev, line_next = buffer.get_lines_around(bufnr, range_vim)
+	local first0 = range:to_vim()
+	local target = buffer.get_line(bufnr, first0)
 	log.debug("[prev] %s [target] %s [next] %s", tostring(line_prev), tostring(target), tostring(line_next))
 	local attr_prev = vim_parser.parse_to_attr(line_prev)
 	local attr_next = vim_parser.parse_to_attr(line_next)
@@ -93,7 +95,7 @@ end
 local function apply_range(ctx, range)
 	log.debug("===-===-===-=== reconcile start%s ===-===-===-===", range:short())
 	local attr_prev, attr_next = resolve_reference_attrs(ctx.bufnr, range)
-	local range = Range.from_vim(range.first, range.last)
+	local range = Range.from_vim(range.first - 1, range.last)
 	local document, req = build_document(ctx, range)
 	local blocks = document.blocks
 	log.debug(#blocks ~= 0 and blocks[1].records)
@@ -118,9 +120,9 @@ end
 ---@param ranges Range[]
 local function apply_ranges(ctx, ranges)
 	for index = #ranges, 1, -1 do
-		local range = Range.from_lua(ranges[index].first, ranges[index].last + 1)
+		local range = Range.from_vim(ranges[index].first, ranges[index].last + 1)
 		local new_lines = apply_range(ctx, range)
-		local req = Request.from_lines(Range.from_vim(range.first, range.last), new_lines, nil, true)
+		local req = Request.from_lines(range, new_lines, nil, true)
 		writer.write(ctx, req)
 	end
 end

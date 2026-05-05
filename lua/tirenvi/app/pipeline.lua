@@ -92,7 +92,7 @@ end
 ---@param width_op WidthOp
 function M.cmd_width(ctx, sel, width_op)
     log.debug("row%s, col%s", sel.row:short(), sel.col:short())
-    local req = Request.from_range(Range.from_lua(sel.row.first, sel.row.last))
+    local req = Request.from_range(sel.row)
     local document = vim_to_doc(ctx, req)
     if document then
         Blocks.change_width(document.blocks, sel.col, width_op)

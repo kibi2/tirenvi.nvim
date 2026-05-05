@@ -97,27 +97,27 @@ local function set_lines(bufnr, i_start, i_end, lines, no_undo)
 end
 
 ---@param bufnr number
----@param i_start integer
----@param i_end integer integer
-local function get_lines_and_cache(bufnr, i_start, i_end)
-	local start = math.max(i_start, 0)
-	local end_  = math.min(math.max(i_end, start + 2 * STEP), M.line_count(bufnr))
-	local start = math.max(math.min(start, end_ - 2 * STEP), 0)
-	local lines = api.nvim_buf_get_lines(bufnr, start, end_, false)
-	cache       = { bufnr = bufnr, start = start, lines = lines, }
+---@param first integer -- 1-based
+---@param last integer -- 1-based
+local function get_lines_and_cache(bufnr, first, last)
+	local start  = math.max(first - 1, 0)
+	local end0   = math.min(math.max(last, start + 2 * STEP), M.line_count(bufnr))
+	local start0 = math.max(math.min(start, end0 - 2 * STEP), 0)
+	local lines  = api.nvim_buf_get_lines(bufnr, start0, end0, false)
+	cache        = { bufnr = bufnr, start = start0, lines = lines, }
 	log.debug("=== cache[#%d] lines[%d]='%s'...[%d]='%s'", cache.bufnr,
 		cache.start + 1, tostring(cache.lines[1]),
 		cache.start + #cache.lines, tostring(cache.lines[#cache.lines]))
 end
 
 ---@param bufnr number
----@param iline integer
+---@param iline integer -- 1-based
 ---@return string|nil
 local function get_line_from_cache(bufnr, iline)
 	if cache.bufnr ~= bufnr then
 		return nil
 	end
-	return cache.lines[iline - cache.start + 1]
+	return cache.lines[iline - cache.start]
 end
 
 ---@param bufnr number
@@ -207,7 +207,7 @@ function M.get_lines(bufnr, i_start, i_end)
 	if #lines ~= 0 then
 		return lines
 	end
-	get_lines_and_cache(bufnr, i_start - STEP, i_end + STEP)
+	get_lines_and_cache(bufnr, i_start - STEP + 1, i_end + STEP)
 	return get_lines_from_cache(bufnr, i_start, i_end)
 end
 
@@ -215,8 +215,9 @@ end
 ---@param iline integer
 ---@return string|nil
 function M.get_line(bufnr, iline)
+	log.probe(iline)
 	bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
-	local line = get_line_from_cache(bufnr, iline)
+	local line = get_line_from_cache(bufnr, iline + 1)
 	if line then
 		return line
 	end
@@ -224,14 +225,14 @@ function M.get_line(bufnr, iline)
 		M.get_lines(bufnr, iline, iline + 1)
 	elseif iline < cache.start then
 		if iline >= 0 then
-			get_lines_and_cache(bufnr, iline - 2 * STEP, iline + 1)
+			get_lines_and_cache(bufnr, iline - 2 * STEP + 1, iline + 1)
 		end
 	else
 		if iline < M.line_count(bufnr) then
-			get_lines_and_cache(bufnr, iline, iline + 2 * STEP)
+			get_lines_and_cache(bufnr, iline + 1, iline + 2 * STEP)
 		end
 	end
-	return get_line_from_cache(bufnr, iline)
+	return get_line_from_cache(bufnr, iline + 1)
 end
 
 ---@param bufnr number

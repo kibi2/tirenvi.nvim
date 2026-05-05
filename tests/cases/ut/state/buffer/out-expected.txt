@@ -10,19 +10,25 @@
 [TIR][DEBUG][buffer.lua 108] === cache[#1] lines[7]='6'...[16]='15'
 [TIR][DEBUG][[string ":lua"] 25] <table> { "9", "10", "11", "12" }
 [TIR][🟧PRB][[string ":lua"] 26] buffer.get_line(0, 6)
+[TIR][🟧PRB][buffer.lua 218] 6
 [TIR][DEBUG][[string ":lua"] 28] 6
 [TIR][🟧PRB][[string ":lua"] 29] buffer.get_line(0, 2)
+[TIR][🟧PRB][buffer.lua 218] 2
 [TIR][DEBUG][buffer.lua 108] === cache[#1] lines[1]='0'...[6]='5'
 [TIR][DEBUG][[string ":lua"] 31] 2
 [TIR][🟧PRB][[string ":lua"] 32] buffer.get_line(0, 19)
+[TIR][🟧PRB][buffer.lua 218] 19
 [TIR][DEBUG][buffer.lua 108] === cache[#1] lines[16]='15'...[21]='20'
 [TIR][DEBUG][[string ":lua"] 34] 19
 [TIR][🟧PRB][[string ":lua"] 35] buffer.get_line(0, 10)
+[TIR][🟧PRB][buffer.lua 218] 10
 [TIR][DEBUG][buffer.lua 108] === cache[#1] lines[5]='4'...[11]='10'
 [TIR][DEBUG][[string ":lua"] 37] 10
 [TIR][🟧PRB][[string ":lua"] 38] buffer.get_line(0, -1)
+[TIR][🟧PRB][buffer.lua 218] -1
 [TIR][DEBUG][[string ":lua"] 40] nil
 [TIR][🟧PRB][[string ":lua"] 41] buffer.get_line(0, 21)
+[TIR][🟧PRB][buffer.lua 218] 21
 [TIR][DEBUG][[string ":lua"] 43] nil
 
 === DISPLAY ===

@@ -2,15 +2,36 @@
 [TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
 [TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
 [TIR][🟧PRB][writer.lua 18] <table> { 0, -1 }
+[TIR][🟧PRB][buffer.lua 218] 0
 [TIR][🟧PRB][reader.lua 20] <table> { 8, 9 }
+[TIR][🟧PRB][buffer.lua 218] 7
+[TIR][🟧PRB][buffer.lua 218] 7
+[TIR][🟧PRB][buffer.lua 218] 9
+[TIR][🟧PRB][buffer.lua 218] 8
 [TIR][🟧PRB][reader.lua 20] <table> { 8, 9 }
+[TIR][🟧PRB][buffer.lua 218] 7
 [TIR][🟧PRB][writer.lua 18] <table> { 8, 9 }
+[TIR][🟧PRB][buffer.lua 218] 8
 [TIR][🟧PRB][reader.lua 20] <table> { 7, 8 }
+[TIR][🟧PRB][buffer.lua 218] 6
+[TIR][🟧PRB][buffer.lua 218] 6
+[TIR][🟧PRB][buffer.lua 218] 8
+[TIR][🟧PRB][buffer.lua 218] 7
 [TIR][🟧PRB][reader.lua 20] <table> { 7, 8 }
+[TIR][🟧PRB][buffer.lua 218] 6
 [TIR][🟧PRB][writer.lua 18] <table> { 7, 8 }
+[TIR][🟧PRB][buffer.lua 218] 7
 [TIR][🟧PRB][reader.lua 20] <table> { 6, 7 }
+[TIR][🟧PRB][buffer.lua 218] 5
+[TIR][🟧PRB][buffer.lua 218] 4
+[TIR][🟧PRB][buffer.lua 218] 7
+[TIR][🟧PRB][buffer.lua 218] 4
+[TIR][🟧PRB][buffer.lua 218] 8
+[TIR][🟧PRB][buffer.lua 218] 5
 [TIR][🟧PRB][reader.lua 20] <table> { 5, 8 }
+[TIR][🟧PRB][buffer.lua 218] 4
 [TIR][🟧PRB][writer.lua 18] <table> { 5, 8 }
+[TIR][🟧PRB][buffer.lua 218] 6
 
 === DISPLAY ===
 gfm

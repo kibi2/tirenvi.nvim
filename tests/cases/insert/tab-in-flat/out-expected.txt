@@ -2,12 +2,21 @@
 [TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
 [TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
 [TIR][🟧PRB][writer.lua 18] <table> { 0, -1 }
+[TIR][🟧PRB][buffer.lua 218] 0
 [TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
 [TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
 [TIR][🟧PRB][writer.lua 18] <table> { 0, -1 }
+[TIR][🟧PRB][buffer.lua 218] 0
+[TIR][🟧PRB][buffer.lua 218] 0
 [TIR][🟧PRB][reader.lua 20] <table> { 0, 1 }
+[TIR][🟧PRB][buffer.lua 218] -1
+[TIR][🟧PRB][buffer.lua 218] -1
+[TIR][🟧PRB][buffer.lua 218] 1
+[TIR][🟧PRB][buffer.lua 218] 0
 [TIR][🟧PRB][reader.lua 20] <table> { 0, 1 }
+[TIR][🟧PRB][buffer.lua 218] -1
 [TIR][🟧PRB][writer.lua 18] <table> { 0, 1 }
+[TIR][🟧PRB][buffer.lua 218] 0
 
 === DISPLAY ===
 1	a,2 a, 3a
