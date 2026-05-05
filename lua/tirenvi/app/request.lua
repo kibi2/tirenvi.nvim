@@ -12,7 +12,7 @@ local log = require("tirenvi.util.log")
 local M = {}
 
 ---@class Request
----@field range Range|Range_whole
+---@field range RangeLike
 ---@field lines? string[]
 ---@field attrs? Attr[]
 ---@field no_undo? boolean
@@ -23,7 +23,7 @@ local M = {}
 -- Public API
 -----------------------------------------------------------------------
 
----@param range Range|Range_whole
+---@param range RangeLike
 ---@return Request
 function M.from_range(range)
     return {
@@ -31,7 +31,7 @@ function M.from_range(range)
     }
 end
 
----@param range Range|Range_whole
+---@param range RangeLike
 ---@param lines string[]
 ---@param document Document|nil
 ---@param no_undo boolean|nil

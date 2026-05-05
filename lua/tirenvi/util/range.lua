@@ -1,10 +1,13 @@
----@class Range
+---@class RangeLike
+---@field to_vim fun():integer, integer
+
+---@class Range:RangeLike
 ---@field first integer
 ---@field last integer
 local Range = {}
 Range.__index = Range
 
----@class Range_whole
+---@class Range_whole:RangeLike
 Range.WHOLE = setmetatable({}, {
     __index = {
         to_vim = function()
