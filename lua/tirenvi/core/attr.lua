@@ -199,7 +199,7 @@ function M:change_width(attr_match, sel, width_op)
     local start_col = 1
     for icol, column in ipairs(self.columns) do
         local old_width = column.width
-        local cel_range = Range.new(start_col, start_col + old_width)
+        local cel_range = Range.from_lua(start_col, start_col + old_width)
         if sel:intersect(cel_range) then
             local max_width = attr_match.columns_auto[icol].width
             column.width = width_op:apply(old_width, max_width)

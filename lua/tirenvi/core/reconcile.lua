@@ -118,7 +118,7 @@ end
 ---@param ranges Range[]
 local function apply_ranges(ctx, ranges)
 	for index = #ranges, 1, -1 do
-		local range = Range.new(ranges[index].first, ranges[index].last + 1)
+		local range = Range.from_lua(ranges[index].first, ranges[index].last + 1)
 		local new_lines = apply_range(ctx, range)
 		local start0, end0 = range.to_vim(range)
 		local req = Request.from_lines(start0, end0, new_lines, nil, true)
