@@ -61,13 +61,14 @@ local function normalize_trailing_empty_line(vi_lines, line_prev)
 end
 
 ---@param ctx Context
----@param range Range
+---@param start0 integer
+---@param end0 integer
 ---@return Document
 ---@return Request
-local function build_document(ctx, range)
-	local req = Request.from_range(range)
+local function build_document(ctx, start0, end0)
+	local req = Request.from_vim0(start0, end0)
 	local vi_lines = reader.read(ctx, req)
-	local line_prev = buffer.get_line(ctx.bufnr, range.first - 1)
+	local line_prev = buffer.get_line(ctx.bufnr, start0)
 	normalize_trailing_empty_line(vi_lines, line_prev)
 	return vim_parser.parse(ctx, req, true), req
 end
@@ -92,7 +93,8 @@ end
 local function apply_range(ctx, range)
 	log.debug("===-===-===-=== reconcile start%s ===-===-===-===", range:short())
 	local attr_prev, attr_next = resolve_reference_attrs(ctx.bufnr, range)
-	local document, req = build_document(ctx, range)
+	local start0, end0 = range.to_vim(range)
+	local document, req = build_document(ctx, start0, end0)
 	local blocks = document.blocks
 	log.debug(#blocks ~= 0 and blocks[1].records)
 	log.debug(#blocks ~= 0 and blocks[1].records[1])
@@ -104,7 +106,7 @@ local function apply_range(ctx, range)
 		if reason == "grid in plain" then
 			return flat_parser.unparse(ctx, document)
 		elseif reason == "conflict" then
-			document, req = build_document(ctx, Range.new(0, -1))
+			document, req = build_document(ctx, 0, -1)
 		else
 			error("repair: unexpected error: " .. tostring(reason))
 		end
@@ -118,7 +120,8 @@ local function apply_ranges(ctx, ranges)
 	for index = #ranges, 1, -1 do
 		local range = Range.new(ranges[index].first, ranges[index].last + 1)
 		local new_lines = apply_range(ctx, range)
-		local req = Request.from_lines(range, new_lines, nil, true)
+		local start0, end0 = range.to_vim(range)
+		local req = Request.from_lines(start0, end0, new_lines, nil, true)
 		writer.write(ctx, req)
 	end
 end

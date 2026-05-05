@@ -15,7 +15,7 @@ local M = {}
 ---@param ctx Context
 ---@param req Request
 function M.write(ctx, req)
-    buffer.set_lines(ctx.bufnr, req.range.first, req.range.last, req.lines, req.no_undo)
+    buffer.set_lines(ctx.bufnr, req.start0, req.end0, req.lines, req.no_undo)
     attr_store.write(ctx, req)
 end
 

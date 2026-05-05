@@ -31,7 +31,7 @@ end
 ---@param document Document
 ---@param req Request
 local function build_attr_post(document, req)
-	Document.set_attr_range(document, req.range.first + 1)
+	Document.set_attr_range(document, req.start0 + 1)
 	Document.apply_attrs_in(document, req.attrs)
 	Document.rebuild_attrs(document)
 	Document.apply_attr(document)
@@ -61,7 +61,7 @@ function M.unparse(document, req)
 	build_attr_pre(document, req)
 	local vim_doc = Document.to_vim_doc(document)
 	if req then
-		Document.set_attr_range(vim_doc, req.range.first + 1)
+		Document.set_attr_range(vim_doc, req.start0 + 1)
 	end
 	local ndjsons = Document.serialize(vim_doc)
 	return Record.to_tir_vim(ndjsons)
