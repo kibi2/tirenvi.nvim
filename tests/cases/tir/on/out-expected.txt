@@ -1,5 +1,20 @@
 === MESSAGE ===
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][writer.lua 18] <table> { 0, -1 }
+[TIR][🟧PRB][reader.lua 20] <table> { 2, 8 }
+[TIR][🟧PRB][writer.lua 18] <table> { 2, 8 }
 tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
+[TIR][🟧PRB][reader.lua 20] <table> { 2, 10 }
+[TIR][🟧PRB][writer.lua 18] <table> { 2, 10 }
+[TIR][🟧PRB][reader.lua 20] <table> { 2, 10 }
+[TIR][🟧PRB][writer.lua 18] <table> { 2, 10 }
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][writer.lua 18] <table> { 0, -1 }
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][writer.lua 18] <table> { 0, -1 }
 
 === DISPLAY ===
 gfm

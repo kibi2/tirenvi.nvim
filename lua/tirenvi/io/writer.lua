@@ -9,8 +9,6 @@ local M = {}
 
 -- private helpers
 
----@return Ndjson
-
 -- Public API
 
 ---@param ctx Context

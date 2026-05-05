@@ -1,3 +1,5 @@
+=== MESSAGE ===
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
 
 === DISPLAY ===
 

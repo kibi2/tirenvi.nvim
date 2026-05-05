@@ -1,5 +1,11 @@
 === MESSAGE ===
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][writer.lua 18] <table> { 0, -1 }
 block of 7 lines yanked
+[TIR][🟧PRB][reader.lua 20] <table> { 0, 7 }
+[TIR][🟧PRB][reader.lua 20] <table> { 0, 7 }
+[TIR][🟧PRB][writer.lua 18] <table> { 0, 7 }
 
 === DISPLAY ===
 │1a│2 a│ 3a│2 a│

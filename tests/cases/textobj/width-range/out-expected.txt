@@ -1,6 +1,10 @@
 
 --- width = 5, 6 / 5, 3, 6 ---
 === MESSAGE ===
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][writer.lua 18] <table> { 0, -1 }
+[TIR][🟧PRB][reader.lua 20] <table> { 0, 1 }
 tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
 
 === DISPLAY ===
@@ -20,6 +24,9 @@ tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
 
 
 --- width = 8, 8 / 5, 3, 6 ---
+=== MESSAGE ===
+[TIR][🟧PRB][reader.lua 20] <table> { 0, 6 }
+[TIR][🟧PRB][writer.lua 18] <table> { 0, 6 }
 
 === DISPLAY ===
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
@@ -38,6 +45,9 @@ tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
 
 
 --- width = 6, 6 / 3, 2, 4 ---
+=== MESSAGE ===
+[TIR][🟧PRB][reader.lua 20] <table> { 1, 12 }
+[TIR][🟧PRB][writer.lua 18] <table> { 1, 12 }
 
 === DISPLAY ===
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
@@ -61,6 +71,11 @@ tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
 
 
 --- width = 6, 6 / 3, 2, 4 ---
+=== MESSAGE ===
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][writer.lua 18] <table> { 0, -1 }
+[TIR][🟧PRB][reader.lua 20] <table> { 0, 14 }
 
 === DISPLAY ===
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0

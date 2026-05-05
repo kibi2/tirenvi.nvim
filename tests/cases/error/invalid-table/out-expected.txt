@@ -1,3 +1,10 @@
+=== MESSAGE ===
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][writer.lua 18] <table> { 0, -1 }
+[TIR][🟧PRB][reader.lua 20] <table> { 5, 6 }
+[TIR][🟧PRB][reader.lua 20] <table> { 3, 7 }
+[TIR][🟧PRB][writer.lua 18] <table> { 3, 7 }
 
 === DISPLAY ===
 │1a│2 a│ 3a│

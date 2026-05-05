@@ -1,4 +1,15 @@
 === MESSAGE ===
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][writer.lua 18] <table> { 0, -1 }
+[TIR][🟧PRB][reader.lua 20] <table> { 4, 5 }
+[TIR][🟧PRB][reader.lua 20] <table> { 4, 5 }
+[TIR][🟧PRB][reader.lua 20] <table> { 4, 5 }
+[TIR][🟧PRB][reader.lua 20] <table> { 4, 5 }
+[TIR][🟧PRB][reader.lua 20] <table> { 4, 5 }
+[TIR][🟧PRB][writer.lua 18] <table> { 4, 5 }
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][writer.lua 18] <table> { 0, -1 }
 v:true
 false
 

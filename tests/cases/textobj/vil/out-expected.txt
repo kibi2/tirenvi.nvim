@@ -1,3 +1,16 @@
+=== MESSAGE ===
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][writer.lua 18] <table> { 0, -1 }
+[TIR][🟧PRB][reader.lua 20] <table> { 2, 8 }
+[TIR][🟧PRB][reader.lua 20] <table> { 2, 8 }
+[TIR][🟧PRB][writer.lua 18] <table> { 2, 8 }
+[TIR][🟧PRB][reader.lua 20] <table> { 2, 8 }
+[TIR][🟧PRB][reader.lua 20] <table> { 2, 8 }
+[TIR][🟧PRB][writer.lua 18] <table> { 2, 8 }
+[TIR][🟧PRB][reader.lua 20] <table> { 2, 8 }
+[TIR][🟧PRB][reader.lua 20] <table> { 2, 8 }
+[TIR][🟧PRB][writer.lua 18] <table> { 2, 8 }
 
 === DISPLAY ===
 gfm

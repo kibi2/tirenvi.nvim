@@ -1,4 +1,6 @@
 === MESSAGE ===
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
+[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
 tirenvi: Command 'tir-gfm-lite' version is too old.
 
 Required version: 0.2.4
