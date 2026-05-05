@@ -142,7 +142,7 @@ local buffer_backup
 ---@param ctx Context
 ---@return nil
 function M.export_flat(ctx)
-	local req = Request.from_vim0(0, -1)
+	local req = Request.from_range(Range.new(0, -1))
 	buffer_backup = reader.read(ctx, req)
 	if not tir_vim.has_pipe(buffer_backup) then
 		buffer_backup = nil
@@ -158,7 +158,7 @@ function M.restore_tir_vim(ctx)
 	if not buffer_backup then
 		return
 	end
-	local req = Request.from_lines(0, -1, buffer_backup, nil, true)
+	local req = Request.from_lines(Range.new(0, -1), buffer_backup, nil, true)
 	writer.write(ctx, req)
 	buffer_backup = nil
 end
@@ -172,7 +172,7 @@ end
 ---@param ctx Context
 ---@return nil
 function M.toggle(ctx)
-	local req = Request.from_vim0(0, -1)
+	local req = Request.from_range(Range.new(0, -1))
 	local lines = reader.read(ctx, req)
 	if tir_vim.has_pipe(lines) then
 		M.disable(ctx)
@@ -204,7 +204,7 @@ function M.insert_char_in_newline(ctx)
 	if line_new ~= "" then
 		return
 	end
-	local line_prev, line_next = buffer.get_lines_around(ctx.bufnr, Range.from_lua(row - 1, row))
+	local line_prev, line_next = buffer.get_lines_around(ctx.bufnr, Range.new(row - 1, row))
 	local line_ref = line_prev
 	if not Context.is_allow_plain(ctx) then
 		line_ref = line_ref or line_next

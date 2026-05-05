@@ -231,8 +231,8 @@ function M.get_block_rect(ctx, line_provider, count, is_around)
     local end_index = colIndex + count
     end_index = math.min(end_index, #bbyte_pos)
     return {
-        row = Range.from_lua(trow, brow),
-        col = Range.from_lua(tbyte_pos[colIndex] + (is_around and 0 or #pipen),
+        row = Range.new(trow, brow),
+        col = Range.new(tbyte_pos[colIndex] + (is_around and 0 or #pipen),
             bbyte_pos[end_index] - 1),
     }
 end

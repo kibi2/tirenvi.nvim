@@ -1,6 +1,6 @@
 ---@class Range
----@field first integer -- inclusive 1-based
----@field last integer -- inclusive 1-based
+---@field first integer
+---@field last integer
 local Range = {}
 Range.__index = Range
 
@@ -19,7 +19,7 @@ local function union_range(prev, next)
     if prev.last + 1 < next.first then
         return nil
     end
-    return Range.from_lua(math.min(prev.first, next.first), math.max(prev.last, next.last))
+    return Range.new(math.min(prev.first, next.first), math.max(prev.last, next.last))
 end
 
 function Range:__tostring()
@@ -39,39 +39,6 @@ end
 ---@return string
 function Range:short()
     return string.format("(%d,%d)", self.first, self.last)
-end
-
----@param first integer
----@param last integer
----@return Range
-function Range.from_lua(first, last)
-    return Range.new(first, last)
-end
-
----@param first0 integer
----@param last0 integer
----@return Range
-function Range.from_vim(first0, last0)
-    return Range.new(first0 + 1, last0)
-end
-
----@param self Range
----@return integer
----@return integer
-function Range:to_vim()
-    return self.first - 1, self.last
-end
-
----@param self Range
----@return integer
-function Range:len()
-    return self.last - self.first + 1
-end
-
----@param self Range
----@return boolean
-function Range:is_empty()
-    return self:len() == 0
 end
 
 ---@param self Range

@@ -124,8 +124,8 @@ local function get_selection(opts)
 		col_end   = col
 	end
 	return {
-		row = Range.from_lua(math.min(row_start, row_end), math.max(row_start, row_end)),
-		col = Range.from_lua(math.min(col_start, col_end), math.max(col_start, col_end)),
+		row = Range.new(math.min(row_start, row_end), math.max(row_start, row_end)),
+		col = Range.new(math.min(col_start, col_end), math.max(col_start, col_end)),
 	}
 end
 

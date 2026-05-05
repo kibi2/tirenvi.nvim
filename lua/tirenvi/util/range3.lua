@@ -62,7 +62,7 @@ end
 ---@param self Range3
 ---@return Range
 function Range3:get_new_range()
-    return Range.from_lua(self.first, self.new_last)
+    return Range.new(self.first, self.new_last)
 end
 
 return Range3
