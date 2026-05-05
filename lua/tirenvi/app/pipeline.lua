@@ -31,11 +31,10 @@ local function flat_to_doc(ctx, req)
 end
 
 ---@param ctx Context
----@param range Range|Range_whole
 ---@param document Document
-local function doc_to_flat(ctx, range, document)
+local function doc_to_flat(ctx, document)
     local fl_lines = flat_parser.unparse(ctx, document)
-    local req = Request.from_lines(range, fl_lines, document)
+    local req = Request.from_lines(Range.WHOLE, fl_lines, document)
     writer.write(ctx, req)
 end
 
@@ -59,7 +58,7 @@ local function doc_to_vim(ctx, req, document, no_undo)
     if util.same_str_array(vi_lines, req.lines) then
         return
     end
-    local req = Request.from_lines(req.range, vi_lines, document, no_undo or false)
+    req = Request.from_lines(req.range, vi_lines, document, no_undo or false)
     writer.write(ctx, req)
 end
 
@@ -84,7 +83,7 @@ function M.to_flat(ctx, is_toggle)
     local document = vim_to_doc(ctx, req)
     if document then
         log.debug(document.blocks[1].records)
-        doc_to_flat(ctx, req.range, document)
+        doc_to_flat(ctx, document)
     end
 end
 
@@ -93,7 +92,7 @@ end
 ---@param width_op WidthOp
 function M.cmd_width(ctx, sel, width_op)
     log.debug("row%s, col%s", sel.row:short(), sel.col:short())
-    local req = Request.from_range(Range.new(sel.row.first - 1, sel.row.last))
+    local req = Request.from_range(Range.from_lua(sel.row.first, sel.row.last))
     local document = vim_to_doc(ctx, req)
     if document then
         Blocks.change_width(document.blocks, sel.col, width_op)

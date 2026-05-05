@@ -48,6 +48,20 @@ function Range.new(first, last)
     }, Range)
 end
 
+---@param first0 integer
+---@param last0 integer
+---@return Range
+function Range.from_vim(first0, last0)
+    return Range.new(first0 + 1, last0)
+end
+
+---@param first integer
+---@param last integer
+---@return Range
+function Range.from_lua(first, last)
+    return Range.new(first, last)
+end
+
 ---@return string
 function Range:short()
     return string.format("(%d,%d)", self.first, self.last)
@@ -89,7 +103,7 @@ end
 ---@return integer
 ---@return integer
 function Range:to_vim()
-    return self.first, self.last
+    return self.first - 1, self.last
 end
 
 return Range

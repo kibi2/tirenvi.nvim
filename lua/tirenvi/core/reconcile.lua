@@ -65,7 +65,7 @@ end
 ---@return Document
 ---@return Request
 local function build_document(ctx, range)
-	local req = Request.from_range(range)
+	local req = Request.from_range(Range.from_vim(range.first, range.last))
 	local vi_lines = reader.read(ctx, req)
 	local line_prev = buffer.get_line(ctx.bufnr, range.first - 1)
 	normalize_trailing_empty_line(vi_lines, line_prev)
@@ -118,7 +118,7 @@ local function apply_ranges(ctx, ranges)
 	for index = #ranges, 1, -1 do
 		local range = Range.new(ranges[index].first, ranges[index].last + 1)
 		local new_lines = apply_range(ctx, range)
-		local req = Request.from_lines(range, new_lines, nil, true)
+		local req = Request.from_lines(Range.from_vim(range.first, range.last), new_lines, nil, true)
 		writer.write(ctx, req)
 	end
 end
@@ -142,7 +142,7 @@ end
 ---@param range Range
 local function expand_continue_lines(bufnr, range)
 	local ctx = Context.from_buf(bufnr)
-	local req = Request.from_range(range)
+	local req = Request.from_range(Range.from_vim(range.first, range.last))
 	local lines = reader.read(ctx, req)
 	local first = range.first - 1
 	local first_line = buffer.get_line(bufnr, first)

@@ -17,6 +17,7 @@ local M = {}
 ---@param req Request
 function M.write(ctx, req)
     local first, last = Request.vim_range(req)
+    log.probe({ first, last })
     buffer.set_lines(ctx.bufnr, first, last, req.lines, req.no_undo)
     attr_store.write(ctx, req)
 end

@@ -19,6 +19,7 @@ local M = {}
 function M.read(ctx, req)
     attr_store.read(ctx, req)
     local first, last = Request.vim_range(req)
+    log.probe({ first, last })
     req.lines = buffer.get_lines(ctx.bufnr, first, last)
     return req.lines
 end
