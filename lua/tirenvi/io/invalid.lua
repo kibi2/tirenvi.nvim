@@ -48,7 +48,7 @@ function M.get_range(bufnr)
     for index = 1, #extmarks do
         local start_row = extmarks[index][2]
         local end_row = extmarks[index][4].end_row
-        ranges[#ranges + 1] = Range.from_lua(start_row, end_row)
+        ranges[#ranges + 1] = Range.from_vim(start_row, end_row)
     end
     return ranges
 end
