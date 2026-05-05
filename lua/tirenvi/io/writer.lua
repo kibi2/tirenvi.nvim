@@ -1,5 +1,6 @@
 local buffer = require("tirenvi.io.buffer")
 local attr_store = require("tirenvi.io.attr_store")
+local Request = require("tirenvi.app.request")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -15,7 +16,8 @@ local M = {}
 ---@param ctx Context
 ---@param req Request
 function M.write(ctx, req)
-    buffer.set_lines(ctx.bufnr, req.range.first, req.range.last, req.lines, req.no_undo)
+    local first, last = Request.vim_range(req)
+    buffer.set_lines(ctx.bufnr, first, last, req.lines, req.no_undo)
     attr_store.write(ctx, req)
 end
 

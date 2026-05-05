@@ -4,6 +4,15 @@
 local Range = {}
 Range.__index = Range
 
+---@class Range_whole
+Range.WHOLE = setmetatable({}, {
+    __index = {
+        to_vim = function()
+            return 0, -1
+        end
+    }
+})
+
 ---@return Range[]
 local function sort_range(ranges)
     table.sort(ranges, function(prev, next)
@@ -71,6 +80,13 @@ function Range.union(ranges)
         end
     end
     return unions
+end
+
+---@param self Range
+---@return integer
+---@return integer
+function Range:to_vim()
+    return self.first, self.last
 end
 
 return Range

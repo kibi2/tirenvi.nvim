@@ -3,6 +3,7 @@
 -----------------------------------------------------------------------
 
 ----- dependencies
+local Request = require("tirenvi.app.request")
 local Document = require("tirenvi.core.document")
 local Record = require("tirenvi.core.record")
 local Attr = require("tirenvi.core.attr")
@@ -31,7 +32,8 @@ end
 ---@param document Document
 ---@param req Request
 local function build_attr_post(document, req)
-	Document.set_attr_range(document, req.range.first + 1)
+	local first = Request.vim_range(req)
+	Document.set_attr_range(document, first + 1)
 	Document.apply_attrs_in(document, req.attrs)
 	Document.rebuild_attrs(document)
 	Document.apply_attr(document)
@@ -61,7 +63,8 @@ function M.unparse(document, req)
 	build_attr_pre(document, req)
 	local vim_doc = Document.to_vim_doc(document)
 	if req then
-		Document.set_attr_range(vim_doc, req.range.first + 1)
+		local first = Request.vim_range(req)
+		Document.set_attr_range(vim_doc, first + 1)
 	end
 	local ndjsons = Document.serialize(vim_doc)
 	return Record.to_tir_vim(ndjsons)

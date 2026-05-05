@@ -1,5 +1,6 @@
 local buffer = require("tirenvi.io.buffer")
 local attr_store = require("tirenvi.io.attr_store")
+local Request = require("tirenvi.app.request")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -17,7 +18,8 @@ local M = {}
 ---@return string[]
 function M.read(ctx, req)
     attr_store.read(ctx, req)
-    req.lines = buffer.get_lines(ctx.bufnr, req.range.first, req.range.last)
+    local first, last = Request.vim_range(req)
+    req.lines = buffer.get_lines(ctx.bufnr, first, last)
     return req.lines
 end
 
