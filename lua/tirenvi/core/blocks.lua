@@ -121,7 +121,7 @@ local function rebuild_attr_range(self, first)
 		local attr = block.attr or Attr.new()
 		block.attr = attr
 		local last = first + #block.records - 1
-		attr.range = Range.new(first, last)
+		attr.range = Range.from_lua(first, last)
 		first      = last + 1
 	end
 end

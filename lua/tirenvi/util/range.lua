@@ -16,6 +16,16 @@ Range.WHOLE = setmetatable({}, {
     }
 })
 
+---@param first integer
+---@param last integer
+---@return Range
+local function new(first, last)
+    return setmetatable({
+        first = first,
+        last = last,
+    }, Range)
+end
+
 ---@return Range[]
 local function sort_range(ranges)
     table.sort(ranges, function(prev, next)
@@ -31,35 +41,25 @@ local function union_range(prev, next)
     if prev.last + 1 < next.first then
         return nil
     end
-    return Range.new(math.min(prev.first, next.first), math.max(prev.last, next.last))
+    return new(math.min(prev.first, next.first), math.max(prev.last, next.last))
 end
 
 function Range:__tostring()
     return "range" .. self:short()
 end
 
----@param first integer
----@param last integer
----@return Range
-function Range.new(first, last)
-    return setmetatable({
-        first = first,
-        last = last,
-    }, Range)
-end
-
 ---@param first0 integer
 ---@param last0 integer
 ---@return Range
 function Range.from_vim(first0, last0)
-    return Range.new(first0 + 1, last0)
+    return new(first0 + 1, last0)
 end
 
 ---@param first integer
 ---@param last integer
 ---@return Range
 function Range.from_lua(first, last)
-    return Range.new(first, last)
+    return new(first, last)
 end
 
 ---@return string

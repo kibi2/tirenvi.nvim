@@ -61,13 +61,14 @@ local function normalize_trailing_empty_line(vi_lines, line_prev)
 end
 
 ---@param ctx Context
----@param range Range
+---@param range RangeLike
 ---@return Document
 ---@return Request
 local function build_document(ctx, range)
-	local req = Request.from_range(Range.from_vim(range.first, range.last))
+	local req = Request.from_range(range)
 	local vi_lines = reader.read(ctx, req)
-	local line_prev = buffer.get_line(ctx.bufnr, range.first - 1)
+	local first = range:to_vim()
+	local line_prev = buffer.get_line(ctx.bufnr, first - 1)
 	normalize_trailing_empty_line(vi_lines, line_prev)
 	return vim_parser.parse(ctx, req, true), req
 end
@@ -92,6 +93,7 @@ end
 local function apply_range(ctx, range)
 	log.debug("===-===-===-=== reconcile start%s ===-===-===-===", range:short())
 	local attr_prev, attr_next = resolve_reference_attrs(ctx.bufnr, range)
+	local range = Range.from_vim(range.first, range.last)
 	local document, req = build_document(ctx, range)
 	local blocks = document.blocks
 	log.debug(#blocks ~= 0 and blocks[1].records)
@@ -104,7 +106,7 @@ local function apply_range(ctx, range)
 		if reason == "grid in plain" then
 			return flat_parser.unparse(ctx, document)
 		elseif reason == "conflict" then
-			document, req = build_document(ctx, Range.new(0, -1))
+			document, req = build_document(ctx, Range.WHOLE)
 		else
 			error("repair: unexpected error: " .. tostring(reason))
 		end
@@ -116,7 +118,7 @@ end
 ---@param ranges Range[]
 local function apply_ranges(ctx, ranges)
 	for index = #ranges, 1, -1 do
-		local range = Range.new(ranges[index].first, ranges[index].last + 1)
+		local range = Range.from_lua(ranges[index].first, ranges[index].last + 1)
 		local new_lines = apply_range(ctx, range)
 		local req = Request.from_lines(Range.from_vim(range.first, range.last), new_lines, nil, true)
 		writer.write(ctx, req)
