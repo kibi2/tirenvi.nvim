@@ -26,7 +26,7 @@ lua << EOF
   log.debug(lines)
   log.probe("clear & buffer.get_lines(0, 9, 13)")
   buffer.clear_cache()
-  lines = buffer.get_lines(0, 9, 13)
+  lines = buffer.get_lines(0, 10, 13)
   log.debug(lines)
   log.probe("buffer.get_line(0, 7)")
   line = buffer.get_line(0, 7)

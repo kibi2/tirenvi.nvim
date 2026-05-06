@@ -72,11 +72,11 @@ local function set_undo_tree_last(bufnr)
 end
 
 ---@param bufnr number
----@param i_start integer
----@param i_end integer
+---@param first integer -- 1-based
+---@param last integer -- 1-based
 ---@param lines string[]
 ---@param no_undo boolean|nil
-local function set_lines(bufnr, i_start, i_end, lines, no_undo)
+local function set_lines(bufnr, first, last, lines, no_undo)
 	M.clear_cache()
 	local undolevels = bo[bufnr].undolevels
 	if no_undo then
@@ -87,9 +87,9 @@ local function set_lines(bufnr, i_start, i_end, lines, no_undo)
 			pcall(vim.cmd, "undojoin")
 		end
 	end
-	i_start = math.max(i_start, 0)
+	first = math.max(first, 1)
 	if not no_undo or M.get_auto_reconcile(bufnr) then
-		api.nvim_buf_set_lines(bufnr, i_start, i_end, false, lines)
+		api.nvim_buf_set_lines(bufnr, first - 1, last, false, lines)
 	end
 	set_undo_tree_last(bufnr)
 	fix_cursor_utf8()
@@ -168,8 +168,8 @@ function M.set(bufnr, key, val)
 end
 
 ---@param bufnr number
----@param first integer
----@param last integer
+---@param first integer -- 1-based
+---@param last integer -- 1-based
 ---@param lines string[]
 ---@param no_undo boolean|nil
 function M.set_lines(bufnr, first, last, lines, no_undo)
@@ -179,7 +179,7 @@ function M.set_lines(bufnr, first, last, lines, no_undo)
 	local ok, err = pcall(set_lines, bufnr, first, last, lines, no_undo)
 	local after = fn.undotree(bufnr).seq_last
 	log.watch("UNDO", "=== [%d->%d]set_lines lines[%d]='%s'...[%d]='%s'", before, after,
-		first + 1, tostring(lines[1]), last, tostring(lines[#lines]))
+		first, tostring(lines[1]), last, tostring(lines[#lines]))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) - 1)
 	assert(M.get(bufnr, M.IKEY.PATCH_DEPTH) == 0)
 	if not ok then
@@ -192,23 +192,23 @@ function M.clear_cache()
 end
 
 ---@param bufnr number
----@param i_start integer
----@param i_end integer
+---@param first integer -- 1-based
+---@param last integer -- 1-based
 ---@return string[]
-function M.get_lines(bufnr, i_start, i_end)
+function M.get_lines(bufnr, first, last)
 	bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
-	i_start = math.max(0, i_start)
+	first = math.max(1, first)
 	local nline = M.line_count(bufnr)
-	if i_end == -1 then
-		i_end = nline
+	if last == -1 then
+		last = nline
 	end
-	i_end = math.min(nline, i_end)
-	local lines = get_lines_from_cache(bufnr, i_start, i_end)
+	last = math.min(nline, last)
+	local lines = get_lines_from_cache(bufnr, first - 1, last)
 	if #lines ~= 0 then
 		return lines
 	end
-	get_lines_and_cache(bufnr, i_start - STEP + 1, i_end + STEP)
-	return get_lines_from_cache(bufnr, i_start, i_end)
+	get_lines_and_cache(bufnr, first - STEP, last + STEP)
+	return get_lines_from_cache(bufnr, first - 1, last)
 end
 
 ---@param bufnr number
@@ -222,7 +222,7 @@ function M.get_line(bufnr, iline)
 		return line
 	end
 	if cache.bufnr ~= bufnr then
-		M.get_lines(bufnr, iline - 1, iline)
+		M.get_lines(bufnr, iline, iline)
 	elseif iline - 1 < cache.start then
 		if iline >= 1 then
 			get_lines_and_cache(bufnr, iline - 2 * STEP, iline)
@@ -246,7 +246,7 @@ end
 ---@return string|nil
 ---@return string|nil
 function M.get_lines_around(bufnr, range)
-	M.get_lines(bufnr, range.first - 1, range.last + 1)
+	M.get_lines(bufnr, range.first, range.last + 1)
 	return M.get_line(bufnr, range.first), M.get_line(bufnr, range.last + 1)
 end
 
