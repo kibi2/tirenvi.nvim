@@ -121,19 +121,19 @@ local function get_line_from_cache(bufnr, iline)
 end
 
 ---@param bufnr number
----@param i_start integer
----@param i_end integer
+---@param first integer -- 1-based
+---@param last integer -- 1-based
 ---@return string[]
-local function get_lines_from_cache(bufnr, i_start, i_end)
+local function get_lines_from_cache(bufnr, first, last)
 	if cache.bufnr ~= bufnr then
 		return {}
 	end
-	local start = i_start - cache.start + 1
-	local end_ = i_end - cache.start
-	if start < 1 or end_ > #cache.lines then
+	local istart = first - cache.start
+	local ilast = last - cache.start
+	if istart < 1 or ilast > #cache.lines then
 		return {}
 	end
-	return vim.list_slice(cache.lines, start, end_)
+	return vim.list_slice(cache.lines, istart, ilast)
 end
 
 -----------------------------------------------------------------------
@@ -203,16 +203,16 @@ function M.get_lines(bufnr, first, last)
 		last = nline
 	end
 	last = math.min(nline, last)
-	local lines = get_lines_from_cache(bufnr, first - 1, last)
+	local lines = get_lines_from_cache(bufnr, first, last)
 	if #lines ~= 0 then
 		return lines
 	end
 	get_lines_and_cache(bufnr, first - STEP, last + STEP)
-	return get_lines_from_cache(bufnr, first - 1, last)
+	return get_lines_from_cache(bufnr, first, last)
 end
 
 ---@param bufnr number
----@param iline integer
+---@param iline integer -- 1-based
 ---@return string|nil
 function M.get_line(bufnr, iline)
 	log.probe(iline - 1)
@@ -246,8 +246,8 @@ end
 ---@return string|nil
 ---@return string|nil
 function M.get_lines_around(bufnr, range)
-	M.get_lines(bufnr, range.first, range.last + 1)
-	return M.get_line(bufnr, range.first), M.get_line(bufnr, range.last + 1)
+	M.get_lines(bufnr, range.first - 1, range.last + 1)
+	return M.get_line(bufnr, range.first - 1), M.get_line(bufnr, range.last + 1)
 end
 
 ---@param bufnr number

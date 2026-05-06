@@ -78,8 +78,7 @@ end
 ---@return Attr|nil
 ---@return Attr|nil
 local function resolve_reference_attrs(bufnr, range)
-	local range_vim = Range.from_lua(range.first - 1, range.last)
-	local line_prev, line_next = buffer.get_lines_around(bufnr, range_vim)
+	local line_prev, line_next = buffer.get_lines_around(bufnr, range)
 	local first0 = range:to_vim()
 	local target = buffer.get_line(bufnr, first0 + 1)
 	log.debug("[prev] %s [target] %s [next] %s", tostring(line_prev), tostring(target), tostring(line_next))
