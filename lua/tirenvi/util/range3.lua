@@ -16,7 +16,7 @@ end
 ---@param self Range3
 ---@return integer
 local function get_update(self)
-    return math.min(self.new_last, self.last) - self.first
+    return math.min(self.new_last, self.last) - self.first + 1
 end
 
 function Range:__tostring()
@@ -41,9 +41,9 @@ local function get_update_str(self)
     return get_update(self) > 0 and tostring(get_update(self) .. "U") or ""
 end
 
----@param first integer
----@param last integer
----@param new_last integer
+---@param first integer -- 1-based
+---@param last integer -- 1-based
+---@param new_last integer -- 1-based
 ---@return Range3
 function Range3.new(first, last, new_last)
     return setmetatable({

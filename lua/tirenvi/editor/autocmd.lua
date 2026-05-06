@@ -59,7 +59,7 @@ local function attach_on_lines(ctx)
 			if buffer.get(bufnr, buffer.IKEY.PATCH_DEPTH) > 0 then
 				return
 			end
-			on_lines(_, bufnr, tick, Range3.new(first, last, new_last), bytecount)
+			on_lines(_, bufnr, tick, Range3.new(first + 1, last, new_last), bytecount)
 		end,
 		on_detach = function()
 			log.debug("===+===+=== detach onlines")

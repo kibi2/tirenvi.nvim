@@ -145,15 +145,15 @@ end
 ---@param range Range
 local function expand_continue_lines(bufnr, range)
 	local ctx = Context.from_buf(bufnr)
-	local req = Request.from_range(Range.from_vim(range.first, range.last))
+	local req = Request.from_range(range)
 	local lines = reader.read(ctx, req)
-	local first = range.first - 1
-	local first_line = buffer.get_line(bufnr, first + 1)
-	while tir_vim.is_continue_line(first_line) do
-		first = first - 1
-		first_line = buffer.get_line(bufnr, first + 1)
+	local prev = range.first - 1
+	local prev_line = buffer.get_line(bufnr, prev)
+	while tir_vim.is_continue_line(prev_line) do
+		prev = prev - 1
+		prev_line = buffer.get_line(bufnr, prev)
 	end
-	range.first = first + 1
+	range.first = prev + 1
 	---@type string|nil
 	local last_line = lines[#lines]
 	local last = range.last
@@ -213,6 +213,7 @@ local function handle_request(ctx, range3)
 	local new_range = Range3.get_new_range(range3)
 	---@cast new_range Range
 	expand_continue_lines(bufnr, new_range)
+	new_range = Range.from_lua(new_range.first - 1, new_range.last)
 	if buf_state.is_insert_mode(bufnr) then
 		-- Modifying the buffer in insert mode may corrupt the undo node.
 		-- Therefore, in insert mode, only record the invalid changed region
