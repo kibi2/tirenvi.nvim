@@ -10,8 +10,7 @@ local M = {}
 ---@param range Range
 ---@param id integer
 function M.set_range(bufnr, range, id)
-    local start0 = range.first - 1
-    local end0 = range.last
+    local start0, end0 = range:to_vim()
     end0 = math.max(start0, end0) -- If a line is deleted, first > last, so we normalize it
     end0 = math.min(end0, buffer.line_count(bufnr) - 1)
     local line = buffer.get_line(bufnr, end0 + 1)
@@ -33,7 +32,7 @@ function M.set_range(bufnr, range, id)
         opts.sign_text = tostring(id):sub(-2)
         opts.sign_hl_group = "ErrorMsg"
     end
-    vim.api.nvim_buf_set_extmark(bufnr, namespaces.INVALID, range.first - 1, 0, opts)
+    vim.api.nvim_buf_set_extmark(bufnr, namespaces.INVALID, start0, 0, opts)
 end
 
 ---@param bufnr number
@@ -48,9 +47,9 @@ function M.get_range(bufnr)
     )
     local ranges = {}
     for index = 1, #extmarks do
-        local start_row = extmarks[index][2]
-        local end_row = extmarks[index][4].end_row
-        ranges[#ranges + 1] = Range.from_vim(start_row, end_row)
+        local start0 = extmarks[index][2]
+        local end0 = extmarks[index][4].end_row
+        ranges[#ranges + 1] = Range.from_vim(start0, end0)
     end
     return ranges
 end
