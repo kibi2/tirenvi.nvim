@@ -114,6 +114,29 @@ local function apply_range(ctx, range)
 	return vim_parser.unparse(document, req)
 end
 
+---@param bufnr number
+---@param range Range
+local function expand_continue_lines(bufnr, range)
+	local ctx = Context.from_buf(bufnr)
+	local req = Request.from_range(range)
+	local lines = reader.read(ctx, req)
+	local prev = range.first - 1
+	local prev_line = buffer.get_line(bufnr, prev)
+	while tir_vim.is_continue_line(prev_line) do
+		prev = prev - 1
+		prev_line = buffer.get_line(bufnr, prev)
+	end
+	range.first = prev + 1
+	---@type string|nil
+	local last_line = lines[#lines]
+	local last = range.last
+	while tir_vim.is_continue_line(last_line) or last_line == "" do
+		last_line = buffer.get_line(bufnr, last + 1)
+		last = last + 1
+	end
+	range.last = last - 1
+end
+
 ---@param ctx Context
 ---@param ranges Range[]
 local function apply_ranges(ctx, ranges)
@@ -138,29 +161,6 @@ local function log_watch(bufnr, message, range3, ext_range)
 		no_ext
 	)
 	log.watch("UNDO", message .. status)
-end
-
----@param bufnr number
----@param range Range
-local function expand_continue_lines(bufnr, range)
-	local ctx = Context.from_buf(bufnr)
-	local req = Request.from_range(range)
-	local lines = reader.read(ctx, req)
-	local prev = range.first - 1
-	local prev_line = buffer.get_line(bufnr, prev)
-	while tir_vim.is_continue_line(prev_line) do
-		prev = prev - 1
-		prev_line = buffer.get_line(bufnr, prev)
-	end
-	range.first = prev + 1
-	---@type string|nil
-	local last_line = lines[#lines]
-	local last = range.last
-	while tir_vim.is_continue_line(last_line) or last_line == "" do
-		last_line = buffer.get_line(bufnr, last + 1)
-		last = last + 1
-	end
-	range.last = last - 1
 end
 
 ---@param ctx Context

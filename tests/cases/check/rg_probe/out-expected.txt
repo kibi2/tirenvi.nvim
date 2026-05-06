@@ -1,3 +1,0 @@
-/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/io/buffer.lua:	log.probe(iline)
-/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/io/reader.lua:    log.probe({ req.range.first, req.range.last })
-/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/io/writer.lua:    log.probe({ req.range.first, req.range.last })
