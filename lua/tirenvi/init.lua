@@ -26,37 +26,11 @@ M.motion = require("tirenvi.editor.motion")
 
 -- private helpers
 
----@param bufnr number
----@param document Document
-local function store_widths(bufnr, document)
-	buffer.set(bufnr, buffer.IKEY.WIDTHS, Blocks.get_widths(document.blocks))
-end
-
----@param req Request
----@param document Document
-local function set_attrs(req, document)
-	-- TODO: Document
-	Blocks.set_attrs(document.blocks, req.attrs)
-end
-
 ---@param ctx Context
 ---@param no_undo boolean|nil
 ---@return nil
 local function from_flat(ctx, no_undo)
 	pipeline.from_flat(ctx, no_undo)
-end
-
----@return integer|nil
----@return integer|nil
-local function get_current_col()
-	local irow, ibyte0 = unpack(api.nvim_win_get_cursor(0))
-	local ibyte = ibyte0 + 1
-	local cline = buffer.get_line(0, irow) or ""
-	local pipe_pos = tir_vim.get_pipe_byte_position(cline)
-	if #pipe_pos == 0 then
-		return nil, nil
-	end
-	return irow, tir_vim.get_current_col_index(pipe_pos, ibyte)
 end
 
 ---@param ctx Context
@@ -199,12 +173,12 @@ end
 ---@param ctx Context
 function M.insert_char_in_newline(ctx)
 	local winid = api.nvim_get_current_win()
-	local row = api.nvim_win_get_cursor(winid)[1]
-	local line_new = buffer.get_line(ctx.bufnr, row)
+	local irow = buffer.get_cursor(winid)
+	local line_new = buffer.get_line(ctx.bufnr, irow)
 	if line_new ~= "" then
 		return
 	end
-	local line_prev, line_next = buffer.get_lines_around(ctx.bufnr, Range.from_lua(row, row))
+	local line_prev, line_next = buffer.get_lines_around(ctx.bufnr, Range.from_lua(irow, irow))
 	local line_ref = line_prev
 	if not Context.is_allow_plain(ctx) then
 		line_ref = line_ref or line_next

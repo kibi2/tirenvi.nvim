@@ -1,9 +1,7 @@
-local Parser = require("tirenvi.parser.parser")
 local Context = require("tirenvi.app.context")
 local buffer = require("tirenvi.io.buffer")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
 local tir_vim = require("tirenvi.core.tir_vim")
-local util = require("tirenvi.util.util")
 
 local M = {}
 

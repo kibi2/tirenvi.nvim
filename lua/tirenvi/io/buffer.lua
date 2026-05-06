@@ -12,6 +12,7 @@ local api           = vim.api
 local fn            = vim.fn
 local bo            = vim.bo
 local b             = vim.b
+
 local cache         = { bufnr = -1, start = -1, lines = {}, }
 local STEP          = 25
 
@@ -56,12 +57,11 @@ local initial_value = {
 local function fix_cursor_utf8()
 	local winid = api.nvim_get_current_win()
 	local irow, icol = M.get_cursor(winid)
-	local icol0 = icol - 1
 	local line = M.get_line(0, irow)
-	local char_index0 = vim.str_utfindex(line, icol0)
-	local boundary0 = vim.str_byteindex(line, char_index0)
-	if boundary0 ~= icol0 then
-		api.nvim_win_set_cursor(0, { irow, boundary0 })
+	local char_index0 = vim.str_utfindex(line, icol - 1)
+	local boundary = vim.str_byteindex(line, char_index0) + 1
+	if boundary ~= icol then
+		M.set_cursor(0, irow, boundary)
 	end
 end
 

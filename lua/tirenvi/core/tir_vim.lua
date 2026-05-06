@@ -13,12 +13,6 @@ local M = {}
 local api = vim.api
 -- private helpers
 
--- local function str_byteindex(line, char_index)
---     -- local char_index = vim.str_utfindex(str, byte_index)
---     -- vim.fn.strcharpart(str, start, len)
---     return vim.str_byteindex(line, char_index)
--- end
-
 ---@param line string
 ---@return string
 local function remove_start_pipe(line)
