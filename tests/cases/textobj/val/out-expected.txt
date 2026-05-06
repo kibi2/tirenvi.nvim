@@ -1,21 +1,5 @@
 === MESSAGE ===
-[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
-[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
-[TIR][🟧PRB][writer.lua 18] <table> { 0, -1 }
-[TIR][🟧PRB][buffer.lua 218] 0
-[TIR][🟧PRB][buffer.lua 218] 1
-[TIR][🟧PRB][buffer.lua 218] 0
-[TIR][🟧PRB][buffer.lua 218] 6
 block of 7 lines yanked
-[TIR][🟧PRB][reader.lua 20] <table> { 0, 7 }
-[TIR][🟧PRB][buffer.lua 218] -1
-[TIR][🟧PRB][buffer.lua 218] -1
-[TIR][🟧PRB][buffer.lua 218] 7
-[TIR][🟧PRB][buffer.lua 218] 0
-[TIR][🟧PRB][reader.lua 20] <table> { 0, 7 }
-[TIR][🟧PRB][buffer.lua 218] -1
-[TIR][🟧PRB][writer.lua 18] <table> { 0, 7 }
-[TIR][🟧PRB][buffer.lua 218] 0
 
 === DISPLAY ===
 │1a│2 a│ 3a│2 a│

@@ -215,7 +215,6 @@ end
 ---@param iline integer -- 1-based
 ---@return string|nil
 function M.get_line(bufnr, iline)
-	log.probe(iline - 1)
 	bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
 	local line = get_line_from_cache(bufnr, iline)
 	if line then

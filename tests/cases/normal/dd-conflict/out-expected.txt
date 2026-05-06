@@ -1,19 +1,6 @@
 === MESSAGE ===
-[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
-[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
-[TIR][🟧PRB][writer.lua 18] <table> { 0, -1 }
-[TIR][🟧PRB][buffer.lua 218] 0
-[TIR][🟧PRB][reader.lua 20] <table> { 6, 6 }
-[TIR][🟧PRB][buffer.lua 218] 5
-[TIR][🟧PRB][buffer.lua 218] 5
-[TIR][🟧PRB][buffer.lua 218] 6
-[TIR][🟧PRB][buffer.lua 218] 6
-[TIR][🟧PRB][reader.lua 20] <table> { 6, 6 }
-[TIR][🟧PRB][buffer.lua 218] 5
 tirenvi: Tables were not merged: column counts differ (2 vs 3).
 Align the column counts to merge them.
-[TIR][🟧PRB][writer.lua 18] <table> { 6, 6 }
-[TIR][🟧PRB][buffer.lua 218] 7
 
 === DISPLAY ===
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0

@@ -1,6 +1,4 @@
 === MESSAGE ===
-[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
-[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
 tirenvi: Required command 'tir-my-csv' not found in PATH.
 
 Use :checkhealth tirenvi for details.

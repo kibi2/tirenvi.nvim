@@ -1,8 +1,4 @@
 === MESSAGE ===
-[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
-[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
-[TIR][🟧PRB][writer.lua 18] <table> { 0, -1 }
-[TIR][🟧PRB][buffer.lua 218] 0
 [Tirenvi] auto-reconcile:OFF 
 [Tirenvi] auto-reconcile:OFF 
 [Tirenvi] auto-reconcile:ON 
@@ -10,23 +6,6 @@
 [Tirenvi] invalid argument: of (expected: on|off)
 [Tirenvi] auto-reconcile:OFF 
 [Tirenvi] auto-reconcile:ON 
-[TIR][🟧PRB][buffer.lua 218] 1
-[TIR][🟧PRB][buffer.lua 218] 1
-[TIR][🟧PRB][buffer.lua 218] 1
-[TIR][🟧PRB][reader.lua 20] <table> { 1, 2 }
-[TIR][🟧PRB][buffer.lua 218] 0
-[TIR][🟧PRB][reader.lua 20] <table> { 1, 2 }
-[TIR][🟧PRB][buffer.lua 218] 0
-[TIR][🟧PRB][reader.lua 20] <table> { 1, 2 }
-[TIR][🟧PRB][buffer.lua 218] 0
-[TIR][🟧PRB][buffer.lua 218] 0
-[TIR][🟧PRB][buffer.lua 218] 2
-[TIR][🟧PRB][buffer.lua 218] 1
-[TIR][🟧PRB][reader.lua 20] <table> { 1, 2 }
-[TIR][🟧PRB][buffer.lua 218] 0
-[TIR][🟧PRB][writer.lua 18] <table> { 1, 2 }
-[TIR][🟧PRB][buffer.lua 218] 1
-[TIR][🟧PRB][reader.lua 20] <table> { 0, -1 }
 
 === DISPLAY ===
 │a⠀│b⠀│
