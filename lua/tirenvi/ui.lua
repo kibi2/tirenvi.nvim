@@ -1,5 +1,6 @@
 local config = require("tirenvi.config")
 local invalid = require("tirenvi.io.invalid")
+local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
 local matches = {}
@@ -130,7 +131,8 @@ end
 ---@param ranges Range[]
 function M.diagnostic_set(bufnr, ranges)
     for index, range in ipairs(ranges) do
-        invalid.set_range(bufnr, range, index)
+        local range_lua = Range.from_lua(range.first + 1, range.last)
+        invalid.set_range(bufnr, range_lua, index)
     end
 end
 

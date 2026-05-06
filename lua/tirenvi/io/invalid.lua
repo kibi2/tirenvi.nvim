@@ -10,13 +10,15 @@ local M = {}
 ---@param range Range
 ---@param id integer
 function M.set_range(bufnr, range, id)
-    range.last = math.max(range.first, range.last) -- If a line is deleted, first > last, so we normalize it
-    range.last = math.min(range.last, buffer.line_count(bufnr) - 1)
-    local line = buffer.get_line(bufnr, range.last + 1)
+    local start0 = range.first - 1
+    local end0 = range.last
+    end0 = math.max(start0, end0) -- If a line is deleted, first > last, so we normalize it
+    end0 = math.min(end0, buffer.line_count(bufnr) - 1)
+    local line = buffer.get_line(bufnr, end0 + 1)
     local end_col = #line
     local opts = {
         id = id,
-        end_row = range.last,
+        end_row = end0,
         end_col = end_col,
         right_gravity = false,
         end_right_gravity = true,
@@ -31,7 +33,7 @@ function M.set_range(bufnr, range, id)
         opts.sign_text = tostring(id):sub(-2)
         opts.sign_hl_group = "ErrorMsg"
     end
-    vim.api.nvim_buf_set_extmark(bufnr, namespaces.INVALID, range.first, 0, opts)
+    vim.api.nvim_buf_set_extmark(bufnr, namespaces.INVALID, start0, 0, opts)
 end
 
 ---@param bufnr number
