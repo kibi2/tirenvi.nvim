@@ -72,11 +72,10 @@ local function set_undo_tree_last(bufnr)
 end
 
 ---@param bufnr number
----@param first integer -- 1-based
----@param last integer -- 1-based
+---@param range RangeLike
 ---@param lines string[]
 ---@param no_undo boolean|nil
-local function set_lines(bufnr, first, last, lines, no_undo)
+local function set_lines(bufnr, range, lines, no_undo)
 	M.clear_cache()
 	local undolevels = bo[bufnr].undolevels
 	if no_undo then
@@ -87,9 +86,10 @@ local function set_lines(bufnr, first, last, lines, no_undo)
 			pcall(vim.cmd, "undojoin")
 		end
 	end
-	first = math.max(first, 1)
+	local start0, end0 = range:to_vim()
+	start0 = math.max(start0, 0)
 	if not no_undo or M.get_auto_reconcile(bufnr) then
-		api.nvim_buf_set_lines(bufnr, first - 1, last, false, lines)
+		api.nvim_buf_set_lines(bufnr, start0, end0, false, lines)
 	end
 	set_undo_tree_last(bufnr)
 	fix_cursor_utf8()
@@ -168,18 +168,18 @@ function M.set(bufnr, key, val)
 end
 
 ---@param bufnr number
----@param first integer -- 1-based
----@param last integer -- 1-based
+---@param range RangeLike
 ---@param lines string[]
 ---@param no_undo boolean|nil
-function M.set_lines(bufnr, first, last, lines, no_undo)
+function M.set_lines(bufnr, range, lines, no_undo)
 	log.debug(M.get_state(bufnr))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
 	local before = fn.undotree(bufnr).seq_last
-	local ok, err = pcall(set_lines, bufnr, first, last, lines, no_undo)
+	local ok, err = pcall(set_lines, bufnr, range, lines, no_undo)
 	local after = fn.undotree(bufnr).seq_last
+	local start0, end0 = range:to_vim()
 	log.watch("UNDO", "=== [%d->%d]set_lines lines[%d]='%s'...[%d]='%s'", before, after,
-		first, tostring(lines[1]), last, tostring(lines[#lines]))
+		start0, tostring(lines[1]), end0, tostring(lines[#lines]))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) - 1)
 	assert(M.get(bufnr, M.IKEY.PATCH_DEPTH) == 0)
 	if not ok then

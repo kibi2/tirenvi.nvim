@@ -47,8 +47,8 @@ function M.from_lines(range, lines, document, no_undo)
 end
 
 ---@param self Request
----@return integer
----@return integer
+---@return integer -- 0-based
+---@return integer -- 0-based
 function M:vim_range()
     return self.range:to_vim()
 end
