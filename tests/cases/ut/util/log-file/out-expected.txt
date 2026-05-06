@@ -1,8 +1,8 @@
-[TIR][ERROR][[string ":lua"] error
-[TIR][WARN][[string ":lua"] 3.14
-[TIR][DEBUG][[string ":lua"] <boolean> false
-[TIR][🟧PRB][[string ":lua"] -0.003
-[TIR][CATEGORY][? format 38 foo range(12,34)
-[TIR][DEBUG][autocmd.lua ===+===+===+===+=== VimLeavePre[#1]text ===+===+===+===+===
-[TIR][DEBUG][autocmd.lua ===+===+===+===+=== VimLeavePre[#1]text ===+===+===+===+===
-[TIR][DEBUG][autocmd.lua ===+===+===+===+=== VimLeave[#1]text ===+===+===+===+===
+[TIR][ERROR][[string ":lua"] 15] error
+[TIR][WARN][[string ":lua"] 16] 3.14
+[TIR][DEBUG][[string ":lua"] 18] <boolean> false
+[TIR][🟧PRB][[string ":lua"] 19] -0.003
+[TIR][CATEGORY][[string ":lua"] 20] format 38 foo range(12,34)
+[TIR][DEBUG][autocmd.lua 117] ===+===+===+===+=== VimLeavePre[#1]text ===+===+===+===+===
+[TIR][DEBUG][autocmd.lua 117] ===+===+===+===+=== VimLeavePre[#1]text ===+===+===+===+===
+[TIR][DEBUG][autocmd.lua 117] ===+===+===+===+=== VimLeave[#1]text ===+===+===+===+===

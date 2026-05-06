@@ -1,5 +1,6 @@
 local CONST = require("tirenvi.constants")
 local Record = require("tirenvi.core.record")
+local Cell = require("tirenvi.core.cell")
 local config = require("tirenvi.config")
 local Attr = require("tirenvi.core.attr")
 local util = require("tirenvi.util.util")
@@ -11,6 +12,24 @@ M.plain = {}
 M.grid = {}
 
 -- constants / defaults
+
+---@param self Block
+---@param method string
+---@param ... unknown
+local function apply(self, method, ...)
+    for _, record in ipairs(self.records) do
+        local common = Record[method]
+        if common then
+            common(record, ...)
+        end
+
+        local handler = Record[record.kind]
+        local specific = handler[method]
+        if specific then
+            specific(record, ...)
+        end
+    end
+end
 
 ---@param map {[string]: string}
 ---@return {[string]: string}
@@ -68,16 +87,12 @@ end
 
 ---@param self Block_grid
 local function fill_padding(self)
-    for _, record in ipairs(self.records) do
-        Record.grid.fill_padding(record, self.attr.columns)
-    end
+    apply(self, "fill_padding", self.attr.columns)
 end
 
 ---@self Block
 local function remove_padding(self)
-    for _, record in ipairs(self.records) do
-        Record[self.kind].remove_padding(record)
-    end
+    apply(self, "remove_padding")
 end
 
 ---@self Block_grid
@@ -102,9 +117,7 @@ end
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 local function apply_column_count(self, ncol)
-    for _, record in ipairs(self.records) do
-        Record.apply_column_count(record, ncol)
-    end
+    apply(self, "apply_column_count", ncol)
 end
 
 ---@self Block
@@ -129,28 +142,6 @@ local function apply_replacements(self, replace)
             end
             record.row[icol] = cell
         end
-    end
-end
-
----@param operator string
----@param count integer
----@param old_width integer
----@return integer|nil
-local function get_new_width(operator, count, old_width)
-    if operator == "=" then
-        return count
-    elseif operator == "+" then
-        if count == 0 then
-            count = 1
-        end
-        return old_width + count
-    elseif operator == "-" then
-        if count == 0 then
-            count = 1
-        end
-        return old_width - count
-    else
-        return nil
     end
 end
 
@@ -230,10 +221,7 @@ function M.plain:to_flat()
 end
 
 M.plain.set_widths = nop
-M.plain.change_width = nop
 M.plain.set_attr = nop
-M.plain.from_flat = nop
-M.plain.to_vim = nop
 
 ---@self Block_grid
 ---@return Ndjson[]
@@ -272,32 +260,10 @@ function M.grid:set_widths(widths)
 end
 
 ---@self Block_grid
----@param icol integer
----@param start_col integer
----@param operator string
----@param count integer
----@param col Range
-local function change_width(attr, icol, start_col, operator, count, col)
-    local column = attr.columns[icol]
-    local old_width = column.width
-    local cel_range = Range.new(start_col, start_col + old_width)
-    if cel_range:intersect(col) then
-        local new_width = get_new_width(operator, count, old_width)
-        Attr.grid.set_width(attr, icol, new_width)
-    end
-end
-
----@self Block_grid
----@param operator string
----@param count integer
----@param col Range
-function M.grid:change_width(operator, count, col)
-    local start_col = 1
-    for icol, column in ipairs(self.attr.columns) do
-        local old_width = column.width
-        change_width(self.attr, icol, start_col, operator, count, col)
-        start_col = start_col + old_width + 1
-    end
+---@param sel Range
+---@param width_op WidthOp
+function M.grid:change_width(sel, width_op)
+    Attr.change_width(self.attr, self.attr_match, sel, width_op)
 end
 
 --- Normalize all rows in a grid block to have the same number of columns.
@@ -328,10 +294,125 @@ end
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 function M.grid:to_vim()
-    ensure_table_attr(self)
+    --ensure_table_attr(self)
     apply_column_count(self, #self.attr.columns)
     wrap(self)
     fill_padding(self)
+end
+
+---@self Block_grid
+local function rebuild_max_attr(self)
+    local block = vim.deepcopy(self)
+    block.remove_padding()
+    self.attr_match.columns_max = Attr.grid.new(block.records[1])
+    for irecord = 2, #block.records do
+        Attr.grid.merge(block.attr_match, block.records[irecord].row)
+    end
+end
+
+local function build_ncol_match(self)
+    local ncol = #self.records[1]
+    for irecord = 2, #self.records do
+        if ncol ~= #self.records[irecord] then
+            return false
+        end
+    end
+    return true
+end
+
+---@self Block_grid
+function M.grid:rebuild_attr()
+    self.attr_match = {}
+    self.attr_match.ncol_match = build_ncol_match(self)
+    local columns_min = Attr.grid.new2(self.records[1])
+    local columns_max = vim.deepcopy(columns_min)
+    for irec = 2, #self.records do
+        local columns = Attr.grid.new2(self.records[irec])
+        for icol, column in ipairs(columns) do
+            columns_min[icol] = columns_min[icol] or { width = 100000000 }
+            columns_max[icol] = columns_max[icol] or { width = 0 }
+            columns_min[icol].width = math.min(columns_min[icol].width, column.width)
+            columns_max[icol].width = math.max(columns_max[icol].width, column.width)
+        end
+    end
+    self.attr_match.columns_min = columns_min
+    self.attr_match.columns_max = columns_max
+    local width_match = {}
+    for icol, column in ipairs(columns_min) do
+        width_match[icol] = column.width == columns_max[icol].width
+    end
+    self.attr_match.width_match = width_match
+    local block = vim.deepcopy(self)
+    remove_padding(block)
+    local columns_auto = Attr.grid.new2(block.records[1])
+    for irec = 2, #block.records do
+        local columns = Attr.grid.new2(block.records[irec])
+        for icol, column in ipairs(columns) do
+            columns_auto[icol] = columns_auto[icol] or { width = 0 }
+            columns_auto[icol].width = math.max(columns_auto[icol].width, column.width)
+        end
+    end
+    self.attr_match.columns_auto = columns_auto
+end
+
+---@self Block
+---@param attrs Attr[]
+function M:apply_attrs_in(attrs)
+    self.attr_in = Attr.get_attr(self.attr, attrs)
+end
+
+---@self Block
+---@param attr Attr
+function M:apply_attr_in(attr)
+    self.attr_in = attr
+end
+
+local function auto_width(attr, attr_max)
+    for icol, column in ipairs(attr.columns) do
+        if column.width == 0 then
+            column.width = attr_max.columns[icol].width
+        end
+    end
+end
+
+---@self Block_grid
+function M.grid:apply_attr()
+    if not Attr.is_plain(self.attr) then
+        --auto_width(self.attr, self.attr_match)
+        return
+    end
+    if self.attr_match.ncol_match then
+        self.attr.columns = vim.deepcopy(self.attr_match.columns_max)
+    elseif self.attr_in then
+        self.attr.columns = vim.deepcopy(self.attr_in.columns)
+    else
+        self.attr.columns = vim.deepcopy(self.attr_match.columns_auto)
+    end
+    for icol, column in ipairs(self.attr.columns) do
+        if self.attr_match.width_match[icol] then
+            column.width = self.attr_match.columns_max[icol].width
+        elseif self.attr_in and self.attr_in.columns[icol] then
+            column.width = self.attr_in.columns[icol].width
+        end
+    end
+end
+
+---@self Block
+function M.grid:debug_attr()
+    if not log.is_debug() then
+        return
+    end
+    log.watch("ATTR", { range = self.attr.range, width = Attr.get_width_array(self.attr.columns) })
+    if self.attr_in then
+        log.watch("ATTR", { in_range = self.attr_in.range, in_width = Attr.get_width_array(self.attr_in.columns) })
+    end
+    if self.attr_match then
+        log.watch("ATTR", { ncol_match = self.attr_match.ncol_match })
+        log.watch("ATTR", { max = Attr.get_width_array(self.attr_match.columns_max) })
+        log.watch("ATTR", { min = Attr.get_width_array(self.attr_match.columns_min) })
+        log.watch("ATTR", { auto = Attr.get_width_array(self.attr_match.columns_auto) })
+        log.watch("ATTR", { width_match = self.attr_match.width_match })
+    end
 end
 
 return M

@@ -1,41 +1,40 @@
-local Parser = require("tirenvi.parser.parser")
 local Context = require("tirenvi.app.context")
 local tir_vim = require("tirenvi.core.tir_vim")
 local config = require("tirenvi.config")
-local util = require("tirenvi.util.util")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
+local buffer = require("tirenvi.io.buffer")
 local log = require("tirenvi.util.log")
 
 local M = {}
 
 -- private helpers
 
----@param context Context
+---@param ctx Context
 ---@param line_provider LineProvider
 ---@param is_around boolean|nil
-local function setup_vl(context, line_provider, is_around)
+local function setup_vl(ctx, line_provider, is_around)
     is_around = is_around or false
     local count = vim.v.count1
-    local pos = tir_vim.get_block_rect(context, line_provider, count, is_around)
-    if not pos then
+    local rect = tir_vim.get_block_rect(ctx, line_provider, count, is_around)
+    if not rect then
         return
     end
-    vim.api.nvim_win_set_cursor(0, { pos.row.first, pos.col.first - 1, })
+    buffer.set_cursor(0, rect.row.first, rect.col.first)
     vim.api.nvim_feedkeys(vim.keycode("<C-v>"), "n", false)
     vim.cmd("normal! o")
-    vim.api.nvim_win_set_cursor(0, { pos.row.last, pos.col.last - 1, })
+    buffer.set_cursor(0, rect.row.last, rect.col.last)
 end
 
 local function setup_vil()
-    local context = Context.from_buf()
-    local line_provider = LinProvider.new()
-    setup_vl(context, line_provider)
+    local ctx = Context.from_buf()
+    local line_provider = LinProvider.new(ctx.bufnr)
+    setup_vl(ctx, line_provider)
 end
 
 local function setup_val()
-    local context = Context.from_buf()
-    local line_provider = LinProvider.new()
-    setup_vl(context, line_provider, true)
+    local ctx = Context.from_buf()
+    local line_provider = LinProvider.new(ctx.bufnr)
+    setup_vl(ctx, line_provider, true)
 end
 
 -- public API

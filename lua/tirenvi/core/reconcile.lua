@@ -8,6 +8,7 @@
 -----------------------------------------------------------------------
 
 local Context = require("tirenvi.app.context")
+local Request = require("tirenvi.app.request")
 local Document = require("tirenvi.core.document")
 local Blocks = require("tirenvi.core.blocks")
 local tir_vim = require("tirenvi.core.tir_vim")
@@ -15,6 +16,8 @@ local util = require("tirenvi.util.util")
 local Range = require("tirenvi.util.range")
 local Range3 = require("tirenvi.util.range3")
 local buffer = require("tirenvi.io.buffer")
+local writer = require("tirenvi.io.writer")
+local reader = require("tirenvi.io.reader")
 local buf_state = require("tirenvi.io.buf_state")
 local vim_parser = require("tirenvi.parser.vim_parser")
 local flat_parser = require("tirenvi.parser.flat_parser")
@@ -57,25 +60,27 @@ local function normalize_trailing_empty_line(vi_lines, line_prev)
 	end
 end
 
----@param context Context
----@param start_row integer
----@param end_row integer
+---@param ctx Context
+---@param range RangeLike
 ---@return Document
-local function build_document(context, start_row, end_row)
-	local vi_lines = buffer.get_lines(context.bufnr, start_row, end_row)
-	local line_prev = buffer.get_line(context.bufnr, start_row - 1)
+---@return Request
+local function build_document(ctx, range)
+	local req = Request.from_range(range)
+	local vi_lines = reader.read(ctx, req)
+	local prev0 = range:to_lua() - 1
+	local line_prev = buffer.get_line(ctx.bufnr, prev0)
 	normalize_trailing_empty_line(vi_lines, line_prev)
-	return vim_parser.parse(vi_lines, Context.is_allow_plain(context), true)
+	return vim_parser.parse(ctx, req, true), req
 end
 
 ---@param bufnr number
----@param start_row integer
----@param end_row integer
+---@param range Range
 ---@return Attr|nil
 ---@return Attr|nil
-local function resolve_reference_attrs(bufnr, start_row, end_row)
-	local line_prev, line_next = buffer.get_lines_around(bufnr, start_row, end_row)
-	local target = buffer.get_line(bufnr, start_row)
+local function resolve_reference_attrs(bufnr, range)
+	local line_prev, line_next = buffer.get_lines_around(bufnr, range)
+	local first0 = range:to_vim()
+	local target = buffer.get_line(bufnr, first0 + 1)
 	log.debug("[prev] %s [target] %s [next] %s", tostring(line_prev), tostring(target), tostring(line_next))
 	local attr_prev = vim_parser.parse_to_attr(line_prev)
 	local attr_next = vim_parser.parse_to_attr(line_next)
@@ -83,14 +88,13 @@ local function resolve_reference_attrs(bufnr, start_row, end_row)
 	return attr_prev, attr_next
 end
 
----@param context Context
----@param start_row integer
----@param end_row integer
+---@param ctx Context
+---@param range Range
 ---@return string[]
-local function apply_range(context, start_row, end_row)
-	log.debug("===-===-===-=== reconcile start[%d, %d] ===-===-===-===", start_row + 1, end_row)
-	local attr_prev, attr_next = resolve_reference_attrs(context.bufnr, start_row, end_row)
-	local document = build_document(context, start_row, end_row)
+local function apply_range(ctx, range)
+	log.debug("===-===-===-=== reconcile start%s ===-===-===-===", range:short())
+	local attr_prev, attr_next = resolve_reference_attrs(ctx.bufnr, range)
+	local document, req = build_document(ctx, range)
 	local blocks = document.blocks
 	log.debug(#blocks ~= 0 and blocks[1].records)
 	log.debug(#blocks ~= 0 and blocks[1].records[1])
@@ -100,24 +104,47 @@ local function apply_range(context, start_row, end_row)
 	if not success then
 		log.debug("===-===-===-=== not success: %s", reason)
 		if reason == "grid in plain" then
-			return flat_parser.unparse(document, context.parser)
+			return flat_parser.unparse(ctx, document)
 		elseif reason == "conflict" then
-			document = build_document(context, 0, -1)
+			document, req = build_document(ctx, Range.WHOLE)
 		else
 			error("repair: unexpected error: " .. tostring(reason))
 		end
 	end
-	return vim_parser.unparse(document)
+	return vim_parser.unparse(document, req)
 end
 
----@param context Context
+---@param bufnr number
+---@param range Range
+local function expand_continue_lines(bufnr, range)
+	local ctx = Context.from_buf(bufnr)
+	local req = Request.from_range(range)
+	local lines = reader.read(ctx, req)
+	local prev = range.first - 1
+	local prev_line = buffer.get_line(bufnr, prev)
+	while tir_vim.is_continue_line(prev_line) do
+		prev = prev - 1
+		prev_line = buffer.get_line(bufnr, prev)
+	end
+	range.first = prev + 1
+	---@type string|nil
+	local last_line = lines[#lines]
+	local last = range.last
+	while tir_vim.is_continue_line(last_line) or last_line == "" do
+		last_line = buffer.get_line(bufnr, last + 1)
+		last = last + 1
+	end
+	range.last = last - 1
+end
+
+---@param ctx Context
 ---@param ranges Range[]
-local function apply_ranges(context, ranges)
-	for index = 1, #ranges do
-		local first = ranges[index].first
-		local last = ranges[index].last + 1
-		local new_lines = apply_range(context, first, last)
-		buffer.set_lines(context.bufnr, first, last, new_lines, true)
+local function apply_ranges(ctx, ranges)
+	for index = #ranges, 1, -1 do
+		local range = Range.from_vim(ranges[index].first, ranges[index].last + 1)
+		local new_lines = apply_range(ctx, range)
+		local req = Request.from_lines(range, new_lines, nil, true)
+		writer.write(ctx, req)
 	end
 end
 
@@ -125,89 +152,67 @@ local function log_watch(bufnr, message, range3, ext_range)
 	range3 = range3 or Range3.new(0, 0, 0)
 	local pre = buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST)
 	local next = fn.undotree(bufnr).seq_last
-	local no_ext = ext_range and (#ext_range ~= 0 and "/ext" .. #ext_range or "") or ""
+	local no_ext = ext_range and (#ext_range ~= 0 and "/ext" .. #ext_range .. ext_range[1]:short() or "") or ""
 	local status = string.format(
-		"[tree:%d->%d]%s%s%s%s",
+		"[tree:%d->%d]%s%s",
 		pre,
 		next,
-		Range3.get_add_str(range3),
-		Range3.get_remove_str(range3),
-		Range3.get_update_str(range3),
+		range3:short(),
 		no_ext
 	)
 	log.watch("UNDO", message .. status)
 end
 
----@param bufnr number
----@param range Range
-local function expand_continue_lines(bufnr, range)
-	local lines = buffer.get_lines(bufnr, range.first, range.last)
-	local first = range.first - 1
-	local first_line = buffer.get_line(bufnr, first)
-	while tir_vim.is_continue_line(first_line) do
-		first = first - 1
-		first_line = buffer.get_line(bufnr, first)
-	end
-	range.first = first + 1
-	---@type string|nil
-	local last_line = lines[#lines]
-	local last = range.last
-	while tir_vim.is_continue_line(last_line) or last_line == "" do
-		last_line = buffer.get_line(bufnr, last)
-		last = last + 1
-	end
-	range.last = last - 1
-end
-
----@param context Context
+---@param ctx Context
 ---@param ext_ranges Range
-local function apply_extra_ranges(context, ext_ranges)
-	apply_ranges(context, ext_ranges)
+local function apply_extra_ranges(ctx, ext_ranges)
+	apply_ranges(ctx, ext_ranges)
 end
 
 local local_range = nil
----@param context Context
-local function apply_local_range(context)
-	apply_ranges(context, { local_range })
+---@param ctx Context
+local function apply_local_range(ctx)
+	apply_ranges(ctx, { local_range })
 	local_range = nil
 end
 
----@param context Context
+---@param ctx Context
 ---@param ext_ranges Range
-local function schedule_extra_ranges(context, ext_ranges)
+local function schedule_extra_ranges(ctx, ext_ranges)
 	vim.schedule(function()
-		apply_extra_ranges(context, ext_ranges)
+		apply_extra_ranges(ctx, ext_ranges)
 	end)
 end
 
----@param context Context
+---@param ctx Context
 ---@param new_range Range
-local function schedule_new_range(context, new_range)
+local function schedule_new_range(ctx, new_range)
 	if local_range == nil then
 		vim.schedule(function()
-			apply_local_range(context)
+			apply_local_range(ctx)
 		end)
 		local_range = new_range
 	else
-		log.watch(context.bufnr, { "muli time on_lines", local_range })
+		log.watch("UNDO", ctx.bufnr, { "muli time on_lines", local_range })
 		Range.union({ local_range, new_range })
 	end
 end
 
----@param context Context
+---@param ctx Context
 ---@param range3 Range3|nil
-local function handle_request(context, range3)
-	local bufnr = context.bufnr
-	local ext_ranges = invalid.get_range(bufnr)
+local function handle_request(ctx, range3)
+	local bufnr = ctx.bufnr
+	local ext_ranges = invalid.get_ranges(bufnr)
 	ui.diagnostic_clear(bufnr)
 	if not range3 then
-		log_watch(bufnr, "INSERT LEAVE[" .. tostring(#ext_ranges) .. "]")
-		schedule_extra_ranges(context, ext_ranges)
+		log_watch(bufnr, "INSERT LEAVE", nil, ext_ranges)
+		schedule_extra_ranges(ctx, ext_ranges)
 		return
 	end
 	local new_range = Range3.get_new_range(range3)
-	---@cast new_range Range
+	log.watch("INVD", new_range)
 	expand_continue_lines(bufnr, new_range)
+	new_range = Range.from_lua(new_range.first - 1, new_range.last)
 	if buf_state.is_insert_mode(bufnr) then
 		-- Modifying the buffer in insert mode may corrupt the undo node.
 		-- Therefore, in insert mode, only record the invalid changed region
@@ -223,11 +228,11 @@ local function handle_request(context, range3)
 		ui.diagnostic_set(bufnr, Range.union(ext_ranges))
 	elseif #ext_ranges ~= 0 then
 		log_watch(bufnr, "UNDO/REDO LEAVE", range3, ext_ranges)
-		schedule_extra_ranges(context, ext_ranges)
-		schedule_new_range(context, new_range)
+		schedule_extra_ranges(ctx, ext_ranges)
+		schedule_new_range(ctx, new_range)
 	else
 		log_watch(bufnr, "NORMAL", range3, ext_ranges)
-		schedule_new_range(context, new_range)
+		schedule_new_range(ctx, new_range)
 	end
 end
 
@@ -235,11 +240,11 @@ end
 -- Public API
 -----------------------------------------------------------------------
 
----@param context Context
+---@param ctx Context
 ---@param range3 Range3|nil
-function M.handle(context, range3)
+function M.handle(ctx, range3)
 	-- log.debug(debug.traceback())
-	local bufnr = context.bufnr
+	local bufnr = ctx.bufnr
 	vim.schedule(function()
 		if not api.nvim_buf_is_valid(bufnr) then
 			return
@@ -249,7 +254,7 @@ function M.handle(context, range3)
 		end
 		local ok, err = xpcall(
 			function()
-				handle_request(context, range3)
+				handle_request(ctx, range3)
 			end,
 			debug.traceback
 		)

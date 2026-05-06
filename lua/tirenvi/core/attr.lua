@@ -1,4 +1,5 @@
 local Cell = require("tirenvi.core.cell")
+local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -17,7 +18,7 @@ local function get_columns(cells)
     local columns = {}
     local widths = Cell.get_widths(cells)
     for _, width in ipairs(widths) do
-        width = math.max(width, 2)
+        width = math.max(width, Cell.MIN_WIDTH)
         columns[#columns + 1] = { width = width }
     end
     return columns
@@ -32,7 +33,7 @@ local function get_max_width(records, icol)
         local width = Cell.get_width(record.row[icol])
         max_width = math.max(max_width, width)
     end
-    return math.max(max_width, 2)
+    return math.max(max_width, Cell.MIN_WIDTH)
 end
 
 ---@param columns Attr_column[]
@@ -96,6 +97,16 @@ function M.grid.new(record)
     end
 end
 
+---@param record Record_grid|nil
+---@return Attr_column[]
+function M.grid.new2(record)
+    if record then
+        return get_columns(record.row)
+    else
+        return {}
+    end
+end
+
 ---@param cells Cell[]
 ---@return Attr
 function M.grid.new_from_record(cells)
@@ -125,13 +136,10 @@ end
 
 ---@self Attr
 ---@param icol integer
----@param width integer|nil
+---@param width integer
 function M.grid:set_width(icol, width)
-    if not width then
-        return
-    end
     self.columns[icol] = self.columns[icol] or {}
-    self.columns[icol].width = width == 0 and 0 or math.max(width, 2)
+    self.columns[icol].width = width == 0 and 0 or math.max(width, Cell.MIN_WIDTH)
 end
 
 ---@self Attr
@@ -139,6 +147,64 @@ end
 function M:set_widths(widths)
     for icol, width in ipairs(widths) do
         M.grid.set_width(self, icol, width)
+    end
+end
+
+---@param self Attr
+---@param attrs Attr[]
+---@return Attr|nil
+function M.get_attr(self, attrs)
+    for _, attr in ipairs(attrs) do
+        if Range.intersect(self.range, attr.range) then
+            return attr
+        end
+    end
+    return nil
+end
+
+---@param columns Attr_column[]
+---@return integer[]
+function M.get_width_array(columns)
+    if not columns then
+        return {}
+    end
+    local widths = {}
+    for _, column in ipairs(columns) do
+        widths[#widths + 1] = column.width
+    end
+    return widths
+end
+
+---@param attrs Attr[]
+---@return string
+function M.get_range_and_ncol(attrs)
+    if not attrs then
+        return ""
+    end
+    local strings = {}
+    for _, attr in ipairs(attrs) do
+        local kind = "p"
+        if #attr.columns ~= 0 then
+            kind = string.format("g%d", #attr.columns)
+        end
+        strings[#strings + 1] = string.format("%s(%d,%d)", kind, attr.range.first, attr.range.last)
+    end
+    return table.concat(strings, " ")
+end
+
+---@self Block_grid
+---@param sel Range
+---@param width_op WidthOp
+function M:change_width(attr_match, sel, width_op)
+    local start_col = 1
+    for icol, column in ipairs(self.columns) do
+        local old_width = column.width
+        local cel_range = Range.from_lua(start_col, start_col + old_width)
+        if sel:intersect(cel_range) then
+            local max_width = attr_match.columns_auto[icol].width
+            column.width = width_op:apply(old_width, max_width)
+        end
+        start_col = cel_range.last + 1
     end
 end
 

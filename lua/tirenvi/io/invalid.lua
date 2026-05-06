@@ -7,16 +7,41 @@ local log = require("tirenvi.util.log")
 local M = {}
 
 ---@param bufnr number
+---@param ranges Range[]|nil
+function M.set_ranges(bufnr, ranges)
+    buffer.set(bufnr, buffer.IKEY.INVALID, ranges)
+    if not ranges then
+        return
+    end
+    log.watch("INVD", ranges)
+    for irange, range in ipairs(ranges) do
+        M.set_range(bufnr, range, irange)
+    end
+end
+
+---@param bufnr number
+---@return Range[]
+function M.get_ranges(bufnr)
+    local ranges = buffer.get(bufnr, buffer.IKEY.INVALID) or {}
+    local new_ranges = {}
+    for _, range in ipairs(ranges) do
+        new_ranges[#new_ranges + 1] = Range.from_lua(range.first, range.last)
+    end
+    return new_ranges
+end
+
+---@param bufnr number
 ---@param range Range
 ---@param id integer
 function M.set_range(bufnr, range, id)
-    range.last = math.max(range.first, range.last) -- If a line is deleted, first > last, so we normalize it
-    range.last = math.min(range.last, buffer.line_count(bufnr) - 1)
-    local line = buffer.get_line(bufnr, range.last)
+    local start0, end0 = range:to_vim()
+    end0 = math.max(start0, end0) -- If a line is deleted, first > last, so we normalize it
+    end0 = math.min(end0, buffer.line_count(bufnr) - 1)
+    local line = buffer.get_line(bufnr, end0 + 1)
     local end_col = #line
     local opts = {
         id = id,
-        end_row = range.last,
+        end_row = end0,
         end_col = end_col,
         right_gravity = false,
         end_right_gravity = true,
@@ -31,7 +56,7 @@ function M.set_range(bufnr, range, id)
         opts.sign_text = tostring(id):sub(-2)
         opts.sign_hl_group = "ErrorMsg"
     end
-    vim.api.nvim_buf_set_extmark(bufnr, namespaces.INVALID, range.first, 0, opts)
+    vim.api.nvim_buf_set_extmark(bufnr, namespaces.INVALID, start0, 0, opts)
 end
 
 ---@param bufnr number
@@ -46,9 +71,9 @@ function M.get_range(bufnr)
     )
     local ranges = {}
     for index = 1, #extmarks do
-        local start_row = extmarks[index][2]
-        local end_row = extmarks[index][4].end_row
-        ranges[#ranges + 1] = Range.new(start_row, end_row)
+        local start0 = extmarks[index][2]
+        local end0 = extmarks[index][4].end_row
+        ranges[#ranges + 1] = Range.from_vim(start0, end0)
     end
     return ranges
 end
@@ -56,6 +81,7 @@ end
 ---@param bufnr number
 function M.clear(bufnr)
     vim.api.nvim_buf_clear_namespace(bufnr, namespaces.INVALID, 0, -1)
+    M.set_ranges(bufnr, nil)
 end
 
 return M

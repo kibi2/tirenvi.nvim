@@ -95,7 +95,7 @@ end
 
 ---@param fl_lines string[]
 ---@return nil
-function M.assert_no_reserved_marks(fl_lines)
+function M.ensure_no_reserved_marks(fl_lines)
 	local found = find_reserved_marks(fl_lines)
 	if #found > 0 then
 		error(errors.new_domain_error(errors.err_no_usable_characters(found)))
@@ -120,6 +120,18 @@ end
 ---@return string
 function M.get_termcodes(code)
 	return api.nvim_replace_termcodes(code, true, false, true)
+end
+
+function M.same_str_array(source, target)
+	if #source ~= #target then
+		return false
+	end
+	for index = 1, #source do
+		if source[index] ~= target[index] then
+			return false
+		end
+	end
+	return true
 end
 
 return M

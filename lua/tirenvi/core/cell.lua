@@ -5,6 +5,7 @@ local log = require("tirenvi.util.log")
 local M = {}
 
 -- constants / defaults
+M.MIN_WIDTH = 2
 local fn = vim.fn
 local padding = config.marks.padding
 local escaped_padding = vim.pesc(padding)
@@ -34,7 +35,7 @@ local lf_len = display_width(lf)
 function M.get_widths(cells)
     local widths = {}
     for _, cell in ipairs(cells) do
-        local width = display_width(cell)
+        local width = M.get_width(cell)
         widths[#widths + 1] = width
     end
     return widths
@@ -46,7 +47,10 @@ function M.get_width(self)
     if not self then
         return 0
     end
-    local cells = vim.split(self, lf)
+    local cells = { self }
+    if not util.end_with(self, config.marks.padding) then
+        cells = vim.split(self, lf)
+    end
     local max_width = 0
     for icell, cell in pairs(cells) do
         local width = display_width(cell)

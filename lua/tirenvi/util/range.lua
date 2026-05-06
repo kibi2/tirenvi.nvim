@@ -1,8 +1,34 @@
----@class Range
+---@class RangeLike
+---@field to_vim fun():integer, integer
+---@field to_lua fun():integer, integer
+
+---@class Range:RangeLike
 ---@field first integer
 ---@field last integer
 local Range = {}
 Range.__index = Range
+
+---@class Range_whole:RangeLike
+Range.WHOLE = setmetatable({}, {
+    __index = {
+        to_vim = function()
+            return 0, -1
+        end,
+        to_lua = function()
+            return 0, -1
+        end
+    }
+})
+
+---@param first integer
+---@param last integer
+---@return Range
+local function new(first, last)
+    return setmetatable({
+        first = first,
+        last = last,
+    }, Range)
+end
 
 ---@return Range[]
 local function sort_range(ranges)
@@ -19,21 +45,25 @@ local function union_range(prev, next)
     if prev.last + 1 < next.first then
         return nil
     end
-    return Range.new(math.min(prev.first, next.first), math.max(prev.last, next.last))
+    return new(math.min(prev.first, next.first), math.max(prev.last, next.last))
+end
+
+function Range:__tostring()
+    return "range" .. self:short()
+end
+
+---@param first0 integer
+---@param last0 integer
+---@return Range
+function Range.from_vim(first0, last0)
+    return new(first0 + 1, last0)
 end
 
 ---@param first integer
 ---@param last integer
 ---@return Range
-function Range.new(first, last)
-    return setmetatable({
-        first = first,
-        last = last,
-    }, Range)
-end
-
-function Range:__tostring()
-    return "range" .. self:short()
+function Range.from_lua(first, last)
+    return new(first, last)
 end
 
 ---@return string
@@ -71,6 +101,23 @@ function Range.union(ranges)
         end
     end
     return unions
+end
+
+---@param self Range
+---@return integer
+---@return integer
+function Range:to_vim()
+    if self.first == 0 and self.last == -1 then
+        return 0, -1
+    end
+    return self.first - 1, self.last
+end
+
+---@param self Range
+---@return integer
+---@return integer
+function Range:to_lua()
+    return self.first, self.last
 end
 
 return Range

@@ -13,12 +13,6 @@ local M = {}
 local api = vim.api
 -- private helpers
 
--- local function str_byteindex(line, char_index)
---     -- local char_index = vim.str_utfindex(str, byte_index)
---     -- vim.fn.strcharpart(str, start, len)
---     return vim.str_byteindex(line, char_index)
--- end
-
 ---@param line string
 ---@return string
 local function remove_start_pipe(line)
@@ -91,18 +85,6 @@ end
 
 -- public API
 
------@param line string
------@return integer[]
--- function M.get_cell_indexes(line)
---     local ndexes = {}
---     for ichar = 1, #line do
---         if line:sub(ichar, ichar + plen - 1) == pipe then
---             table.insert(ndexes, ichar)
---         end
---     end
---     return {}
--- end
-
 ---@param line string
 ---@return integer[]
 function M.get_pipe_byte_position(line)
@@ -112,17 +94,6 @@ function M.get_pipe_byte_position(line)
     end
     return indexes
 end
-
------@param line string
------@return integer[]
---function M.get_pipe_positions(line)
---    local indexes = M.get_pipe_indexes(line)
---    local positions = {}
---    for _, index in ipairs(indexes) do
---        positions[#positions + 1] = vim.str_utfindex(line, index - 1) + 1
---    end
---    return positions
---end
 
 ---@param byte_pos integer[]
 ---@param icol integer
@@ -136,27 +107,27 @@ function M.get_current_col_index(byte_pos, icol)
     return nil
 end
 
----@param context Context
+---@param ctx Context
 ---@param line_provider LineProvider
 ---@param irow integer
 ---@return integer
-function M.get_block_top_nrow(context, line_provider, irow, allow_plain)
-    if Context.is_allow_plain(context) then
+function M.get_block_top_nrow(ctx, line_provider, irow, allow_plain)
+    if Context.is_allow_plain(ctx) then
         return find_block_edge(line_provider, irow, -1)
     else
         return 1
     end
 end
 
----@param context Context
+---@param ctx Context
 ---@param line_provider LineProvider
 ---@param irow integer
 ---@return integer
-function M.get_block_bottom_nrow(context, line_provider, irow)
-    if Context.is_allow_plain(context) then
+function M.get_block_bottom_nrow(ctx, line_provider, irow)
+    if Context.is_allow_plain(ctx) then
         return find_block_edge(line_provider, irow, 1)
     else
-        return buffer.line_count(context.bufnr)
+        return buffer.line_count(ctx.bufnr)
     end
 end
 
@@ -204,15 +175,13 @@ function M.is_continue_line(line)
     return M.get_pipe_char(line) == pipec
 end
 
----@param context Context
+---@param ctx Context
 ---@param line_provider LineProvider
 ---@param count integer
 ---@param is_around boolean
 ---@return Rect|nil
-function M.get_block_rect(context, line_provider, count, is_around)
-    -- local mode = vim.fn.mode()
-    local irow, icol0 = unpack(api.nvim_win_get_cursor(0))
-    local icol = icol0 + 1
+function M.get_block_rect(ctx, line_provider, count, is_around)
+    local irow, icol = buffer.get_cursor()
     local cline = line_provider.get_line(irow) or ""
     local cbyte_pos = M.get_pipe_byte_position(cline)
     if #cbyte_pos == 0 then
@@ -222,8 +191,8 @@ function M.get_block_rect(context, line_provider, count, is_around)
     if not colIndex then
         return nil
     end
-    local trow = M.get_block_top_nrow(context, line_provider, irow)
-    local brow = M.get_block_bottom_nrow(context, line_provider, irow)
+    local trow = M.get_block_top_nrow(ctx, line_provider, irow)
+    local brow = M.get_block_bottom_nrow(ctx, line_provider, irow)
     local tline = line_provider.get_line(trow) or ""
     local bline = line_provider.get_line(brow) or ""
     local tbyte_pos = M.get_pipe_byte_position(tline)
@@ -231,8 +200,8 @@ function M.get_block_rect(context, line_provider, count, is_around)
     local end_index = colIndex + count
     end_index = math.min(end_index, #bbyte_pos)
     return {
-        row = Range.new(trow, brow),
-        col = Range.new(tbyte_pos[colIndex] + (is_around and 0 or #pipen),
+        row = Range.from_lua(trow, brow),
+        col = Range.from_lua(tbyte_pos[colIndex] + (is_around and 0 or #pipen),
             bbyte_pos[end_index] - 1),
     }
 end

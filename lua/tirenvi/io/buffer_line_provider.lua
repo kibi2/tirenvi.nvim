@@ -1,22 +1,20 @@
----@class BufferLineProvider : LineProvider
-local Context = require("tirenvi.app.context")
 local buffer = require("tirenvi.io.buffer")
 
+---@class BufferLineProvider : LineProvider
 local M = {}
 
----@param context Context|nil
+---@param bufnr number
 ---@return BufferLineProvider
-function M.new(context)
-    context = context or Context.from_buf()
+function M.new(bufnr)
     return {
         get_line = function(row)
             ---@diagnostic disable-next-line: redundant-parameter
-            return buffer.get_line(context.bufnr, row - 1)
+            return buffer.get_line(bufnr, row)
         end,
 
         line_count = function()
             ---@diagnostic disable-next-line: redundant-parameter
-            return buffer.line_count(context.bufnr)
+            return buffer.line_count(bufnr)
         end,
     }
 end
