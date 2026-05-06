@@ -177,9 +177,9 @@ function M.set_lines(bufnr, range, lines, no_undo)
 	local before = fn.undotree(bufnr).seq_last
 	local ok, err = pcall(set_lines, bufnr, range, lines, no_undo)
 	local after = fn.undotree(bufnr).seq_last
-	local start0, end0 = range:to_vim()
+	local first, last = range:to_lua()
 	log.watch("UNDO", "=== [%d->%d]set_lines lines[%d]='%s'...[%d]='%s'", before, after,
-		start0, tostring(lines[1]), end0, tostring(lines[#lines]))
+		first, tostring(lines[1]), last, tostring(lines[#lines]))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) - 1)
 	assert(M.get(bufnr, M.IKEY.PATCH_DEPTH) == 0)
 	if not ok then
