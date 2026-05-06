@@ -91,18 +91,6 @@ end
 
 -- public API
 
------@param line string
------@return integer[]
--- function M.get_cell_indexes(line)
---     local ndexes = {}
---     for ichar = 1, #line do
---         if line:sub(ichar, ichar + plen - 1) == pipe then
---             table.insert(ndexes, ichar)
---         end
---     end
---     return {}
--- end
-
 ---@param line string
 ---@return integer[]
 function M.get_pipe_byte_position(line)
@@ -112,17 +100,6 @@ function M.get_pipe_byte_position(line)
     end
     return indexes
 end
-
------@param line string
------@return integer[]
---function M.get_pipe_positions(line)
---    local indexes = M.get_pipe_indexes(line)
---    local positions = {}
---    for _, index in ipairs(indexes) do
---        positions[#positions + 1] = vim.str_utfindex(line, index - 1) + 1
---    end
---    return positions
---end
 
 ---@param byte_pos integer[]
 ---@param icol integer
@@ -210,9 +187,7 @@ end
 ---@param is_around boolean
 ---@return Rect|nil
 function M.get_block_rect(ctx, line_provider, count, is_around)
-    -- local mode = vim.fn.mode()
-    local irow, icol0 = unpack(api.nvim_win_get_cursor(0))
-    local icol = icol0 + 1
+    local irow, icol = buffer.get_cursor()
     local cline = line_provider.get_line(irow) or ""
     local cbyte_pos = M.get_pipe_byte_position(cline)
     if #cbyte_pos == 0 then

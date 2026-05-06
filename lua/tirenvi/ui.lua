@@ -1,14 +1,16 @@
-local config = require("tirenvi.config")
+local config  = require("tirenvi.config")
 local invalid = require("tirenvi.io.invalid")
-local Range = require("tirenvi.util.range")
-local log = require("tirenvi.util.log")
+local Range   = require("tirenvi.util.range")
+local log     = require("tirenvi.util.log")
 
 local matches = {}
 
-local M = {}
+local M       = {}
 
-local pipen = config.marks.pipe
-local pipec = config.marks.pipec
+local api     = vim.api
+local fn      = vim.fn
+local pipen   = config.marks.pipe
+local pipec   = config.marks.pipec
 
 -- =========================
 -- utils
@@ -18,7 +20,7 @@ local pipec = config.marks.pipec
 ---@return string
 local function get_safe_link_name(targets)
     for _, target in ipairs(targets) do
-        local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = target })
+        local ok, hl = pcall(api.nvim_get_hl, 0, { name = target })
         if ok and hl and next(hl) ~= nil then
             return target
         end
@@ -30,31 +32,31 @@ end
 ---@param targets string[]
 local function safe_link_multi(name, targets)
     local target = get_safe_link_name(targets)
-    vim.api.nvim_set_hl(0, name, { link = target })
+    api.nvim_set_hl(0, name, { link = target })
 end
 
 local function diagnostic_setup()
-    vim.fn.sign_define("TirenviSign", { text = "◆", texthl = "ErrorMsg" })
-    vim.api.nvim_set_hl(0, "TirenviDebugLine", { bg = "#888840" })
+    fn.sign_define("TirenviSign", { text = "◆", texthl = "ErrorMsg" })
+    api.nvim_set_hl(0, "TirenviDebugLine", { bg = "#888840" })
 end
 
 local function special_setup()
-    vim.api.nvim_set_hl(0, "TirenviPadding", {})
+    api.nvim_set_hl(0, "TirenviPadding", {})
     local target = get_safe_link_name({ "@punctuation.special.markdown", "Delimiter", "Special", })
-    local special = vim.api.nvim_get_hl(0, { name = target })
-    vim.api.nvim_set_hl(0, "TirenviPipeNoHbar", { link = target })
-    vim.api.nvim_set_hl(0, "TirenviPipeHbar", {
+    local special = api.nvim_get_hl(0, { name = target })
+    api.nvim_set_hl(0, "TirenviPipeNoHbar", { link = target })
+    api.nvim_set_hl(0, "TirenviPipeHbar", {
         fg = special.fg,
         bg = special.bg,
         underline = true,
         nocombine = true,
     })
-    vim.api.nvim_set_hl(0, "TirenviHbar", {
+    api.nvim_set_hl(0, "TirenviHbar", {
         underline = true,
         sp = special.fg,
         nocombine = true,
     })
-    vim.api.nvim_set_hl(0, "Conceal", { link = "TirenviPipeNoHbar" })
+    api.nvim_set_hl(0, "Conceal", { link = "TirenviPipeNoHbar" })
     safe_link_multi("TirenviSpecialChar", { "NonText", })
 end
 
@@ -67,7 +69,7 @@ end
 ---@param pattern string
 ---@param priority integer
 local function add_match(winid, group, pattern, priority)
-    local id = vim.fn.matchadd(group, pattern, priority)
+    local id = fn.matchadd(group, pattern, priority)
     matches[winid] = matches[winid] or {}
     table.insert(matches[winid], id)
 end
@@ -95,18 +97,18 @@ end
 
 ---@param winid integer|nil
 function M.special_clear(winid)
-    winid = winid or vim.api.nvim_get_current_win()
+    winid = winid or api.nvim_get_current_win()
     local ids = matches[winid]
     if not ids then return end
     for _, id in ipairs(ids) do
-        pcall(vim.fn.matchdelete, id)
+        pcall(fn.matchdelete, id)
     end
     matches[winid] = nil
 end
 
 ---@param winid integer|nil
 function M.special_apply(winid)
-    winid = winid or vim.api.nvim_get_current_win()
+    winid = winid or api.nvim_get_current_win()
     M.special_clear(winid)
     add_match(winid, "TirenviPadding", pat_v(config.marks.padding), 10)
     add_match(winid, "TirenviSpecialChar", pat_v(config.marks.lf), 20)
@@ -118,7 +120,7 @@ function M.special_apply(winid)
     add_match(winid, "TirenviPipeNoHbar", pat_v(pipec), 30)
     vim.opt_local.conceallevel = config.ui.conceal.level
     vim.opt_local.concealcursor = config.ui.conceal.cursor
-    local pattern = vim.fn.escape(pipec, [[/\]])
+    local pattern = fn.escape(pipec, [[/\]])
     local command = string.format([[syntax match TirPipeC /%s/ conceal cchar=%s]], pattern, pipen)
     vim.cmd(command)
 end
@@ -141,7 +143,7 @@ function M.diagnostic_clear(bufnr)
     invalid.clear(bufnr)
 end
 
-vim.api.nvim_create_autocmd("ColorScheme", {
+api.nvim_create_autocmd("ColorScheme", {
     callback = M.setup
 })
 

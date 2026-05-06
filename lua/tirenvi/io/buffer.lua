@@ -12,7 +12,6 @@ local api           = vim.api
 local fn            = vim.fn
 local bo            = vim.bo
 local b             = vim.b
-
 local cache         = { bufnr = -1, start = -1, lines = {}, }
 local STEP          = 25
 
@@ -56,12 +55,13 @@ local initial_value = {
 
 local function fix_cursor_utf8()
 	local winid = api.nvim_get_current_win()
-	local row, col = unpack(api.nvim_win_get_cursor(winid))
-	local line = M.get_line(0, row)
-	local char_index = vim.str_utfindex(line, col)
-	local boundary = vim.str_byteindex(line, char_index)
-	if boundary ~= col then
-		api.nvim_win_set_cursor(0, { row, boundary })
+	local irow, icol = M.get_cursor(winid)
+	local icol0 = icol - 1
+	local line = M.get_line(0, irow)
+	local char_index0 = vim.str_utfindex(line, icol0)
+	local boundary0 = vim.str_byteindex(line, char_index0)
+	if boundary0 ~= icol0 then
+		api.nvim_win_set_cursor(0, { irow, boundary0 })
 	end
 end
 
@@ -270,6 +270,23 @@ end
 ---@param step integer
 function M.set_step(step)
 	STEP = step
+end
+
+---@param winid integer|nil
+---@return integer
+---@return integer
+function M.get_cursor(winid)
+	winid = (winid == nil or winid == 0) and api.nvim_get_current_win() or winid
+	local irow, icol0 = unpack(api.nvim_win_get_cursor(winid))
+	return irow, icol0 + 1
+end
+
+---@param winid integer|nil
+---@param irow integer
+---@param icol integer
+function M.set_cursor(winid, irow, icol)
+	winid = (winid == nil or winid == 0) and api.nvim_get_current_win() or winid
+	vim.api.nvim_win_set_cursor(winid, { irow, icol - 1 })
 end
 
 return M

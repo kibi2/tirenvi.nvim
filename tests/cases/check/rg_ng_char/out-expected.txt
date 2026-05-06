@@ -1,4 +1,4 @@
-/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/ui.lua:    vim.fn.sign_define("TirenviSign", { text = "◆", texthl = "ErrorMsg" })
+/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/ui.lua:    fn.sign_define("TirenviSign", { text = "◆", texthl = "ErrorMsg" })
 /Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/config.lua:		pipe = "│", -- │┆┊┇┃┋▏▕
 /Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/config.lua:		padding = "⠀", --    ·∙⸱␣␠⠀░
 /Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/config.lua:		pipec = "┊", -- 》⇥⇢⋯⋮︙›↠▶¬…
