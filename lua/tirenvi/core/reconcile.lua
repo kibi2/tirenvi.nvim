@@ -202,7 +202,7 @@ end
 ---@param range3 Range3|nil
 local function handle_request(ctx, range3)
 	local bufnr = ctx.bufnr
-	local ext_ranges = invalid.get_range(bufnr)
+	local ext_ranges = invalid.get_ranges(bufnr)
 	ui.diagnostic_clear(bufnr)
 	if not range3 then
 		log_watch(bufnr, "INSERT LEAVE", nil, ext_ranges)

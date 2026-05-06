@@ -120,6 +120,7 @@ markdown
 7 changes; before #6  0 seconds ago
 [TIR][🟧PRB][reader.lua 20] <table> { 1, 8 }
 [TIR][🟧PRB][buffer.lua 218] 0
+[TIR][🟧PRB][buffer.lua 218] 0
 [TIR][🟧PRB][buffer.lua 218] 7
 [TIR][🟧PRB][buffer.lua 218] 6
 [TIR][🟧PRB][buffer.lua 218] 5

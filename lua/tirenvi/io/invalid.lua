@@ -7,6 +7,30 @@ local log = require("tirenvi.util.log")
 local M = {}
 
 ---@param bufnr number
+---@param ranges Range[]|nil
+function M.set_ranges(bufnr, ranges)
+    buffer.set(bufnr, buffer.IKEY.INVALID, ranges)
+    if not ranges then
+        return
+    end
+    log.watch("INVD", ranges)
+    for irange, range in ipairs(ranges) do
+        M.set_range(bufnr, range, irange)
+    end
+end
+
+---@param bufnr number
+---@return Range[]
+function M.get_ranges(bufnr)
+    local ranges = buffer.get(bufnr, buffer.IKEY.INVALID) or {}
+    local new_ranges = {}
+    for _, range in ipairs(ranges) do
+        new_ranges[#new_ranges + 1] = Range.from_lua(range.first, range.last)
+    end
+    return new_ranges
+end
+
+---@param bufnr number
 ---@param range Range
 ---@param id integer
 function M.set_range(bufnr, range, id)
@@ -57,6 +81,7 @@ end
 ---@param bufnr number
 function M.clear(bufnr)
     vim.api.nvim_buf_clear_namespace(bufnr, namespaces.INVALID, 0, -1)
+    M.set_ranges(bufnr, nil)
 end
 
 return M

@@ -134,8 +134,8 @@ end
 function M.diagnostic_set(bufnr, ranges)
     for index, range in ipairs(ranges) do
         local range_lua = Range.from_lua(range.first + 1, range.last)
-        invalid.set_range(bufnr, range_lua, index)
     end
+    invalid.set_ranges(bufnr, ranges)
 end
 
 ---@param bufnr number

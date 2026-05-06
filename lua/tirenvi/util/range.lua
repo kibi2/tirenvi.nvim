@@ -107,6 +107,9 @@ end
 ---@return integer
 ---@return integer
 function Range:to_vim()
+    if self.first == 0 and self.last == -1 then
+        return 0, -1
+    end
     return self.first - 1, self.last
 end
 

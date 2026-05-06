@@ -1,18 +1,15 @@
 -----------------------------------------------------------------------
 -- Module
 -----------------------------------------------------------------------
-
 ----- dependencies
 local config        = require("tirenvi.config")
 local log           = require("tirenvi.util.log")
 
 local M             = {}
-
 local api           = vim.api
 local fn            = vim.fn
 local bo            = vim.bo
 local b             = vim.b
-
 local cache         = { bufnr = -1, start = -1, lines = {}, }
 local STEP          = 25
 
@@ -38,8 +35,10 @@ M.IKEY              = {
 
 	-- block attrs
 	ATTRS = "attrs",
-}
 
+	-- invalid row #
+	INVALID = "invalid",
+}
 local initial_value = {
 	[M.IKEY.INSERT_MODE] = false,
 	[M.IKEY.ATTACHED] = false,
@@ -48,6 +47,7 @@ local initial_value = {
 	[M.IKEY.FILETYPE] = nil,
 	[M.IKEY.AUTO_RECONCILE] = nil,
 	[M.IKEY.ATTRS] = nil,
+	[M.IKEY.INVALID] = nil,
 }
 
 -----------------------------------------------------------------------

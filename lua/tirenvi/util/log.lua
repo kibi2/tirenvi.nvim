@@ -234,13 +234,32 @@ local function apply_log_highlight(bufnr)
 	end)
 end
 
+local palette = {
+	"#ff6b6b", "#4ecdc4", "#ffe66d",
+	"#c7f464", "#c792ea", "#f78c6c",
+}
+
+local assigned = {}
+local used = {}
+
 local function pick_color(cat)
-	local colors = {
-		"#ff6b6b", "#4ecdc4", "#ffe66d",
-		"#c7f464", "#c792ea", "#f78c6c",
-	}
-	local idx = (vim.fn.str2nr(vim.fn.sha256(cat):sub(1, 8), 16) % #colors) + 1
-	return colors[idx]
+	if assigned[cat] then
+		return assigned[cat]
+	end
+	local hash = vim.fn.sha256(cat)
+	local base = (vim.fn.str2nr(hash:sub(1, 8), 16) % #palette) + 1
+	for i = 0, #palette - 1 do
+		local idx = ((base + i - 1) % #palette) + 1
+		local color = palette[idx]
+		if not used[color] then
+			assigned[cat] = color
+			used[color] = true
+			return color
+		end
+	end
+	local color = palette[base]
+	assigned[cat] = color
+	return color
 end
 
 local function ensure_category_highlight(category)
