@@ -68,7 +68,7 @@ local function build_document(ctx, range)
 	local req = Request.from_range(range)
 	local vi_lines = reader.read(ctx, req)
 	local prev0 = range:to_vim() - 1
-	local line_prev = buffer.get_line(ctx.bufnr, prev0)
+	local line_prev = buffer.get_line(ctx.bufnr, prev0 + 1)
 	normalize_trailing_empty_line(vi_lines, line_prev)
 	return vim_parser.parse(ctx, req, true), req
 end
@@ -81,7 +81,7 @@ local function resolve_reference_attrs(bufnr, range)
 	local range_vim = Range.from_lua(range.first - 1, range.last)
 	local line_prev, line_next = buffer.get_lines_around(bufnr, range_vim)
 	local first0 = range:to_vim()
-	local target = buffer.get_line(bufnr, first0)
+	local target = buffer.get_line(bufnr, first0 + 1)
 	log.debug("[prev] %s [target] %s [next] %s", tostring(line_prev), tostring(target), tostring(line_next))
 	local attr_prev = vim_parser.parse_to_attr(line_prev)
 	local attr_next = vim_parser.parse_to_attr(line_next)
@@ -149,17 +149,17 @@ local function expand_continue_lines(bufnr, range)
 	local req = Request.from_range(Range.from_vim(range.first, range.last))
 	local lines = reader.read(ctx, req)
 	local first = range.first - 1
-	local first_line = buffer.get_line(bufnr, first)
+	local first_line = buffer.get_line(bufnr, first + 1)
 	while tir_vim.is_continue_line(first_line) do
 		first = first - 1
-		first_line = buffer.get_line(bufnr, first)
+		first_line = buffer.get_line(bufnr, first + 1)
 	end
 	range.first = first + 1
 	---@type string|nil
 	local last_line = lines[#lines]
 	local last = range.last
 	while tir_vim.is_continue_line(last_line) or last_line == "" do
-		last_line = buffer.get_line(bufnr, last)
+		last_line = buffer.get_line(bufnr, last + 1)
 		last = last + 1
 	end
 	range.last = last - 1

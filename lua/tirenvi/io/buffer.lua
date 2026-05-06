@@ -57,7 +57,7 @@ local initial_value = {
 local function fix_cursor_utf8()
 	local winid = api.nvim_get_current_win()
 	local row, col = unpack(api.nvim_win_get_cursor(winid))
-	local line = M.get_line(0, row - 1)
+	local line = M.get_line(0, row)
 	local char_index = vim.str_utfindex(line, col)
 	local boundary = vim.str_byteindex(line, char_index)
 	if boundary ~= col then
@@ -215,24 +215,24 @@ end
 ---@param iline integer
 ---@return string|nil
 function M.get_line(bufnr, iline)
-	log.probe(iline)
+	log.probe(iline - 1)
 	bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
-	local line = get_line_from_cache(bufnr, iline + 1)
+	local line = get_line_from_cache(bufnr, iline)
 	if line then
 		return line
 	end
 	if cache.bufnr ~= bufnr then
-		M.get_lines(bufnr, iline, iline + 1)
-	elseif iline < cache.start then
-		if iline >= 0 then
-			get_lines_and_cache(bufnr, iline - 2 * STEP + 1, iline + 1)
+		M.get_lines(bufnr, iline - 1, iline)
+	elseif iline - 1 < cache.start then
+		if iline >= 1 then
+			get_lines_and_cache(bufnr, iline - 2 * STEP, iline)
 		end
 	else
-		if iline < M.line_count(bufnr) then
-			get_lines_and_cache(bufnr, iline + 1, iline + 2 * STEP)
+		if iline <= M.line_count(bufnr) then
+			get_lines_and_cache(bufnr, iline, iline + 2 * STEP - 1)
 		end
 	end
-	return get_line_from_cache(bufnr, iline + 1)
+	return get_line_from_cache(bufnr, iline)
 end
 
 ---@param bufnr number
@@ -247,7 +247,7 @@ end
 ---@return string|nil
 function M.get_lines_around(bufnr, range)
 	M.get_lines(bufnr, range.first - 1, range.last + 1)
-	return M.get_line(bufnr, range.first - 1), M.get_line(bufnr, range.last)
+	return M.get_line(bufnr, range.first), M.get_line(bufnr, range.last + 1)
 end
 
 ---@param bufnr number

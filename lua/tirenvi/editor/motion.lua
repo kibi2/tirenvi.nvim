@@ -11,7 +11,7 @@ local M = {}
 local function get_pipe()
 	local ctx = Context.from_buf()
 	local irow = vim.api.nvim_win_get_cursor(0)[1]
-	local line = buffer.get_line(ctx.bufnr, irow - 1)
+	local line = buffer.get_line(ctx.bufnr, irow)
 	return tir_vim.get_pipe_char(line) or ""
 end
 

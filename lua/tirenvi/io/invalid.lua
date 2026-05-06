@@ -12,7 +12,7 @@ local M = {}
 function M.set_range(bufnr, range, id)
     range.last = math.max(range.first, range.last) -- If a line is deleted, first > last, so we normalize it
     range.last = math.min(range.last, buffer.line_count(bufnr) - 1)
-    local line = buffer.get_line(bufnr, range.last)
+    local line = buffer.get_line(bufnr, range.last + 1)
     local end_col = #line
     local opts = {
         id = id,

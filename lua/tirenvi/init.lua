@@ -51,7 +51,7 @@ end
 local function get_current_col()
 	local irow, ibyte0 = unpack(api.nvim_win_get_cursor(0))
 	local ibyte = ibyte0 + 1
-	local cline = buffer.get_line(0, irow - 1) or ""
+	local cline = buffer.get_line(0, irow) or ""
 	local pipe_pos = tir_vim.get_pipe_byte_position(cline)
 	if #pipe_pos == 0 then
 		return nil, nil
@@ -200,7 +200,7 @@ end
 function M.insert_char_in_newline(ctx)
 	local winid = api.nvim_get_current_win()
 	local row = api.nvim_win_get_cursor(winid)[1]
-	local line_new = buffer.get_line(ctx.bufnr, row - 1)
+	local line_new = buffer.get_line(ctx.bufnr, row)
 	if line_new ~= "" then
 		return
 	end
