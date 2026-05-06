@@ -67,8 +67,8 @@ end
 local function build_document(ctx, range)
 	local req = Request.from_range(range)
 	local vi_lines = reader.read(ctx, req)
-	local prev0 = range:to_vim() - 1
-	local line_prev = buffer.get_line(ctx.bufnr, prev0 + 1)
+	local prev0 = range:to_lua() - 1
+	local line_prev = buffer.get_line(ctx.bufnr, prev0)
 	normalize_trailing_empty_line(vi_lines, line_prev)
 	return vim_parser.parse(ctx, req, true), req
 end
@@ -94,7 +94,6 @@ end
 local function apply_range(ctx, range)
 	log.debug("===-===-===-=== reconcile start%s ===-===-===-===", range:short())
 	local attr_prev, attr_next = resolve_reference_attrs(ctx.bufnr, range)
-	local range = Range.from_vim(range.first - 1, range.last)
 	local document, req = build_document(ctx, range)
 	local blocks = document.blocks
 	log.debug(#blocks ~= 0 and blocks[1].records)

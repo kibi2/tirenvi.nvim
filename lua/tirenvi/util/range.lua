@@ -1,5 +1,6 @@
 ---@class RangeLike
 ---@field to_vim fun():integer, integer
+---@field to_lua fun():integer, integer
 
 ---@class Range:RangeLike
 ---@field first integer
@@ -11,6 +12,9 @@ Range.__index = Range
 Range.WHOLE = setmetatable({}, {
     __index = {
         to_vim = function()
+            return 0, -1
+        end,
+        to_lua = function()
             return 0, -1
         end
     }
@@ -104,6 +108,13 @@ end
 ---@return integer
 function Range:to_vim()
     return self.first - 1, self.last
+end
+
+---@param self Range
+---@return integer
+---@return integer
+function Range:to_lua()
+    return self.first, self.last
 end
 
 return Range

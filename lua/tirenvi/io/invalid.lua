@@ -33,7 +33,7 @@ function M.set_range(bufnr, range, id)
         opts.sign_text = tostring(id):sub(-2)
         opts.sign_hl_group = "ErrorMsg"
     end
-    vim.api.nvim_buf_set_extmark(bufnr, namespaces.INVALID, start0, 0, opts)
+    vim.api.nvim_buf_set_extmark(bufnr, namespaces.INVALID, range.first - 1, 0, opts)
 end
 
 ---@param bufnr number
@@ -50,7 +50,7 @@ function M.get_range(bufnr)
     for index = 1, #extmarks do
         local start_row = extmarks[index][2]
         local end_row = extmarks[index][4].end_row
-        ranges[#ranges + 1] = Range.from_lua(start_row, end_row)
+        ranges[#ranges + 1] = Range.from_vim(start_row, end_row)
     end
     return ranges
 end
