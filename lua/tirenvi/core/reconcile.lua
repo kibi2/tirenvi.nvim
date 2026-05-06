@@ -210,7 +210,7 @@ local function handle_request(ctx, range3)
 		return
 	end
 	local new_range = Range3.get_new_range(range3)
-	---@cast new_range Range
+	log.watch("INVD", new_range)
 	expand_continue_lines(bufnr, new_range)
 	new_range = Range.from_lua(new_range.first - 1, new_range.last)
 	if buf_state.is_insert_mode(bufnr) then
