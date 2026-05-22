@@ -2,8 +2,8 @@ local CONST = require("tirenvi.constants")
 local Record = require("tirenvi.core.record")
 local config = require("tirenvi.config")
 local Attr = require("tirenvi.core.attr")
+local Attrs = require("tirenvi.core.attrs")
 local util = require("tirenvi.util.util")
-local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -11,6 +11,24 @@ M.plain = {}
 M.grid = {}
 
 -- constants / defaults
+
+---@param self Block
+---@param method string
+---@param ... unknown
+local function apply(self, method, ...)
+    for _, record in ipairs(self.records) do
+        local common = Record[method]
+        if common then
+            common(record, ...)
+        end
+
+        local handler = Record[record.kind]
+        local specific = handler[method]
+        if specific then
+            specific(record, ...)
+        end
+    end
+end
 
 ---@param map {[string]: string}
 ---@return {[string]: string}
@@ -68,16 +86,12 @@ end
 
 ---@param self Block_grid
 local function fill_padding(self)
-    for _, record in ipairs(self.records) do
-        Record.grid.fill_padding(record, self.attr.columns)
-    end
+    apply(self, "fill_padding", self.attr.columns)
 end
 
 ---@self Block
 local function remove_padding(self)
-    for _, record in ipairs(self.records) do
-        Record[self.kind].remove_padding(record)
-    end
+    apply(self, "remove_padding")
 end
 
 ---@self Block_grid
@@ -102,19 +116,8 @@ end
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 local function apply_column_count(self, ncol)
-    for _, record in ipairs(self.records) do
-        Record.apply_column_count(record, ncol)
-    end
-end
-
----@self Block
-local function ensure_table_attr(self)
-    if #self.attr.columns == 0 then
-        local ncol = Record.get_max_col(self.records)
-        Attr.grid.new_max_width(self.attr, ncol, self.records)
-    else
-        Attr.grid.auto_width(self.attr, self.records)
-    end
+    assert(ncol ~= 0, "column count must be greater than 0")
+    apply(self, "apply_column_count", ncol)
 end
 
 ---@self Block
@@ -132,25 +135,29 @@ local function apply_replacements(self, replace)
     end
 end
 
----@param operator string
----@param count integer
----@param old_width integer
----@return integer|nil
-local function get_new_width(operator, count, old_width)
-    if operator == "=" then
-        return count
-    elseif operator == "+" then
-        if count == 0 then
-            count = 1
+---@param self Block_grid
+local function set_consistent_ncol(self)
+    local ncol = Record.get_consistent_ncol(self.records)
+    Attr.set_ncol(self.attr, ncol)
+end
+
+---@param self Block_grid
+local function set_consistent_width(self)
+    local width_min = Attr.get_width_array(Attr.grid.new(self.records[1]).columns)
+    local width_max = vim.deepcopy(width_min)
+    for irec = 2, #self.records do
+        local widths = Attr.get_width_array(Attr.grid.new(self.records[irec]).columns)
+        for icol, width in ipairs(widths) do
+            width_min[icol] = width_min[icol] or 0
+            width_max[icol] = width_max[icol] or math.huge
+            width_min[icol] = math.min(width_min[icol], width)
+            width_max[icol] = math.max(width_max[icol], width)
         end
-        return old_width + count
-    elseif operator == "-" then
-        if count == 0 then
-            count = 1
+    end
+    for icol = 1, math.min(#self.attr.columns, #width_max) do
+        if width_min[icol] == width_max[icol] then
+            self.attr.columns[icol].width = width_max[icol]
         end
-        return old_width - count
-    else
-        return nil
     end
 end
 
@@ -179,11 +186,6 @@ function M:add(record)
     self.records[#self.records + 1] = record
 end
 
----@self Block
-function M:reset_attr()
-    self.attr = Attr.new()
-end
-
 function M.plain.new()
     local self = M.new()
     M.set_kind(self, CONST.KIND.PLAIN)
@@ -210,12 +212,6 @@ function M.plain:to_grid()
 end
 
 ---@self Block_plain
----@return integer[]
-function M.plain:get_widths()
-    return {}
-end
-
----@self Block_plain
 function M.plain:from_vim()
     remove_padding(self)
 end
@@ -229,11 +225,7 @@ function M.plain:to_flat()
     end
 end
 
-M.plain.set_widths = nop
-M.plain.change_width = nop
-M.plain.set_attr = nop
-M.plain.from_flat = nop
-M.plain.to_vim = nop
+M.plain.inherit_neighbor_attr = nop
 
 ---@self Block_grid
 ---@return Ndjson[]
@@ -247,64 +239,16 @@ function M.grid:to_grid()
     return self
 end
 
----@self Block
----@param attr Attr|nil
-function M.grid:set_attr(attr)
-    if not attr or Attr.is_plain(attr) then
-        return
-    end
-    self.attr = attr
-end
-
 ---@self Block_grid
----@return integer[]
-function M.grid:get_widths()
-    local widths = {}
-    for _, column in ipairs(self.attr.columns) do
-        widths[#widths + 1] = column.width
-    end
-    return widths
-end
-
----@self Block_grid
-function M.grid:set_widths(widths)
-    Attr.set_widths(self.attr, widths)
-end
-
----@self Block_grid
----@param icol integer
----@param start_col integer
----@param operator string
----@param count integer
----@param col Range
-local function change_width(attr, icol, start_col, operator, count, col)
-    local column = attr.columns[icol]
-    local old_width = column.width
-    local cel_range = Range.new(start_col, start_col + old_width)
-    if cel_range:intersect(col) then
-        local new_width = get_new_width(operator, count, old_width)
-        Attr.grid.set_width(attr, icol, new_width)
-    end
-end
-
----@self Block_grid
----@param operator string
----@param count integer
----@param col Range
-function M.grid:change_width(operator, count, col)
-    local start_col = 1
-    for icol, column in ipairs(self.attr.columns) do
-        local old_width = column.width
-        change_width(self.attr, icol, start_col, operator, count, col)
-        start_col = start_col + old_width + 1
-    end
+---@param sel Range
+---@param width_op WidthOp
+function M.grid:change_width(sel, width_op)
+    Attr.change_width(self.attr, self.records, sel, width_op)
 end
 
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 function M.grid:from_flat()
-    local ncol = Record.get_max_col(self.records)
-    apply_column_count(self, ncol)
     apply_replacements(self, ESCAPE_MAP)
 end
 
@@ -313,14 +257,11 @@ function M.grid:to_flat()
     apply_replacements(self, UNESCAPE_MAP)
 end
 
+---@param no_normalize boolean
 ---@self Block_grid
----@param no_normalize boolean  -- If true, skip nomalizing.
--- Prevents line count changes that would break put(); used for repair.
 function M.grid:from_vim(no_normalize)
-    ensure_table_attr(self)
     remove_padding(self)
     if not no_normalize then
-        apply_column_count(self, #self.attr.columns)
         unwrap(self)
     end
 end
@@ -328,10 +269,71 @@ end
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 function M.grid:to_vim()
-    ensure_table_attr(self)
     apply_column_count(self, #self.attr.columns)
     wrap(self)
     fill_padding(self)
+end
+
+---@self Block_grid
+function M.grid:infer_consistent_attr()
+    if #self.attr.columns ~= 0 then
+        return
+    end
+    set_consistent_ncol(self)
+    set_consistent_width(self)
+end
+
+---@self Block_grid
+function M.grid:set_auto_attr()
+    Attr.grid.set_auto_attr(self.attr, self.records)
+end
+
+---@self Block_grid
+---@param attrs Attr[]
+function M.grid:apply_cached_attr(attrs)
+    local attr = Attrs.get_attr(attrs, self.attr)
+    if not attr or not Attr.is_grid(attr) then
+        return
+    end
+    if #self.attr.columns == 0 then
+        self.attr.columns = vim.deepcopy(attr.columns)
+    else
+        for icol, column in ipairs(self.attr.columns) do
+            if column.width <= 0 then
+                column.width = attr.columns[icol].width
+            end
+        end
+    end
+end
+
+---@param self Block_grid
+---@param attrs Attr[]
+---@param irow integer
+function M.grid:inherit_neighbor_attr(attrs, irow)
+    local attr = Attrs.get(attrs, irow)
+    if not attr or not Attr.is_grid(attr) then
+        return
+    end
+    if #self.attr.columns == 0 then
+        self.attr.columns = vim.deepcopy(attr.columns)
+    end
+end
+
+---@self Block_plain
+---@return boolean
+function M.plain:has_width()
+    return true
+end
+
+---@self Block_grid
+---@return boolean
+function M.grid:has_width()
+    for _, column in ipairs(self.attr.columns) do
+        if column.width <= 0 then
+            return false
+        end
+    end
+    return true
 end
 
 return M

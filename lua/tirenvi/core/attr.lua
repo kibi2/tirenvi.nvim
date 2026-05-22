@@ -1,4 +1,6 @@
+local Record = require("tirenvi.core.record")
 local Cell = require("tirenvi.core.cell")
+local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -17,7 +19,7 @@ local function get_columns(cells)
     local columns = {}
     local widths = Cell.get_widths(cells)
     for _, width in ipairs(widths) do
-        width = math.max(width, 2)
+        width = math.max(width, Cell.MIN_WIDTH)
         columns[#columns + 1] = { width = width }
     end
     return columns
@@ -32,10 +34,10 @@ local function get_max_width(records, icol)
         local width = Cell.get_width(record.row[icol])
         max_width = math.max(max_width, width)
     end
-    return math.max(max_width, 2)
+    return math.max(max_width, Cell.MIN_WIDTH)
 end
 
----@param columns Attr_column[]
+---@param columns Attr_column[]|nil
 ---@return Attr
 local function new_from_columns(columns)
     return { columns = columns }
@@ -47,98 +49,130 @@ end
 
 ---@return Attr
 function M.new()
-    return new_from_columns({})
-end
-
----@self Attr
----@return boolean
-function M:is_plain()
-    return #self.columns == 0
-end
-
----@param self Attr|nil
----@param source Attr|nil
----@param allow_plain boolean
----@return boolean
-function M:is_conflict(source, allow_plain)
-    if not self or not source then
-        return false
-    end
-    if #self.columns == #source.columns then
-        return false
-    end
-    if not allow_plain then
-        return true
-    end
-    if #self.columns == 0 or #source.columns == 0 then
-        return false
-    end
-    return true
+    return new_from_columns(nil)
 end
 
 ---@return Attr
 function M.plain.new()
-    return M.plain.new_from_record()
-end
-
----@return Attr
-function M.plain.new_from_record()
-    return new_from_columns({})
+    return new_from_columns(nil)
 end
 
 ---@param record Record_grid|nil
 ---@return Attr
 function M.grid.new(record)
     if record then
-        return M.grid.new_from_record(record.row)
+        return new_from_columns(get_columns(record.row))
     else
         return new_from_columns({})
     end
 end
 
----@param cells Cell[]
----@return Attr
-function M.grid.new_from_record(cells)
-    return new_from_columns(get_columns(cells))
-end
-
 ---@self Attr
----@param ncol integer
 ---@param records Record_grid[]
-function M.grid:new_max_width(ncol, records)
-    self.columns = {}
-    for icol = 1, ncol do
-        local width = get_max_width(records, icol)
-        self.columns[icol] = { width = width }
+function M.grid:set_auto_attr(records)
+    local ncol = #self.columns
+    if ncol == 0 then
+        ncol = Record.get_max_ncol(records)
+        M.set_ncol(self, ncol)
     end
-end
-
----@self Attr
----@param records Record_grid[]
-function M.grid:auto_width(records)
-    for icol, column in ipairs(self.columns) do
-        if column.width == 0 then
+    for icol, column in pairs(self.columns) do
+        if column.width <= 0 then
             column.width = get_max_width(records, icol)
         end
     end
 end
 
----@self Attr
----@param icol integer
----@param width integer|nil
-function M.grid:set_width(icol, width)
-    if not width then
-        return
-    end
-    self.columns[icol] = self.columns[icol] or {}
-    self.columns[icol].width = width == 0 and 0 or math.max(width, 2)
+---@param attr Attr
+---@return string
+function M.get_attr_short(attr)
+    local kind = M.is_plain(attr) and "p" or "g"
+    local range_str = attr.range and string.format("(%d,%d)", attr.range.first, attr.range.last) or "()"
+    return kind .. range_str
 end
 
----@self Attr
----@param widths integer[]
-function M:set_widths(widths)
-    for icol, width in ipairs(widths) do
-        M.grid.set_width(self, icol, width)
+---@param attr Attr
+---@return string
+function M.get_attr_long(attr)
+    local widths = M.get_width_array(attr.columns)
+    local long   = #widths > 0 and string.format("[%s]", table.concat(widths, ",")) or ""
+    return M.get_attr_short(attr) .. long
+end
+
+---@param columns Attr_column[]
+---@return integer[]
+function M.get_width_array(columns)
+    if not columns then
+        return {}
+    end
+    local widths = {}
+    for _, column in ipairs(columns) do
+        widths[#widths + 1] = column.width
+    end
+    return widths
+end
+
+---@param self Attr
+---@param records Record_grid[]
+---@param sel Range
+---@param width_op WidthOp
+function M:change_width(records, sel, width_op)
+    local start_col = 1
+    for icol, column in ipairs(self.columns) do
+        local old_width = column.width
+        local cel_range = Range.from_lua(start_col, start_col + old_width)
+        if Range.intersect(sel, cel_range) then
+            if width_op.kind == "auto" then
+                column.width = get_max_width(records, icol)
+            else
+                column.width = width_op:apply(old_width)
+            end
+        end
+        start_col = cel_range.last + 1
+    end
+end
+
+---@param source Attr
+---@param target Attr
+function M.is_same_columns(source, target)
+    local columns1 = source.columns or {}
+    local columns2 = target.columns or {}
+    if #columns1 ~= #columns2 then
+        return false
+    end
+    for icol = 1, #columns1 do
+        if columns1[icol].width ~= columns2[icol].width then
+            return false
+        end
+    end
+    return true
+end
+
+---@self Attr|nil
+---@return boolean
+function M:is_plain()
+    if not self then
+        return false
+    end
+    return self.columns == nil
+end
+
+---@param self Attr|nil
+---@return boolean
+function M:is_grid()
+    if not self then
+        return false
+    end
+    return not M.is_plain(self)
+end
+
+---@param self Attr
+---@param ncol integer|nil
+function M:set_ncol(ncol)
+    if not ncol then
+        return
+    end
+    for icol = 1, ncol do
+        self.columns[icol] = { width = -1 }
     end
 end
 

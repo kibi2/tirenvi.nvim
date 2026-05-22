@@ -1,8 +1,27 @@
 ---@class Range
 ---@field first integer
 ---@field last integer
-local Range = {}
-Range.__index = Range
+
+local log = require("tirenvi.util.log")
+
+local M   = {}
+local api = vim.api
+
+---@param first integer
+---@param last integer
+---@return Range
+local function new(first, last)
+    if first > last then
+        -- TODO
+        -- log.error("invalid range: first(%d) > last(%d)", first, last)
+    end
+    return {
+        first = first,
+        last = last,
+    }
+end
+
+M.WHOLE = { first = nil, last = nil }
 
 ---@return Range[]
 local function sort_range(ranges)
@@ -19,32 +38,48 @@ local function union_range(prev, next)
     if prev.last + 1 < next.first then
         return nil
     end
-    return Range.new(math.min(prev.first, next.first), math.max(prev.last, next.last))
+    return new(math.min(prev.first, next.first), math.max(prev.last, next.last))
+end
+
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
+
+function M:__tostring()
+    return "range" .. M.short(self)
+end
+
+---@param first0 integer
+---@param last0 integer
+---@return Range
+function M.from_vim(first0, last0)
+    return new(first0 + 1, last0)
 end
 
 ---@param first integer
 ---@param last integer
 ---@return Range
-function Range.new(first, last)
-    return setmetatable({
-        first = first,
-        last = last,
-    }, Range)
+function M.from_lua(first, last)
+    return new(first, last)
 end
 
-function Range:__tostring()
-    return "range" .. self:short()
+---@return boolean
+function M:is_empty()
+    return self.first > self.last
 end
 
 ---@return string
-function Range:short()
+function M:short()
     return string.format("(%d,%d)", self.first, self.last)
 end
 
----@param self Range
----@param target Range
+---@param self Range|nil
+---@param target Range|nil
 ---@return boolean
-function Range:intersect(target)
+function M:intersect(target)
+    if not self or not target then
+        return false
+    end
     if self.last < target.first then
         return false
     end
@@ -54,9 +89,16 @@ function Range:intersect(target)
     return true
 end
 
+---@param self Range
+---@param index integer
+---@return boolean
+function M:contain(index)
+    return self.first <= index and index <= self.last
+end
+
 ---@param ranges Range[]
 ---@return Range[]
-function Range.union(ranges)
+function M.union(ranges)
     if #ranges == 0 then
         return ranges
     end
@@ -73,4 +115,47 @@ function Range.union(ranges)
     return unions
 end
 
-return Range
+---@param ranges Range[]
+---@return Range
+function M.join(ranges)
+    local min = ranges[1].first
+    local max = ranges[1].last
+    for _, ranges in ipairs(ranges) do
+        min = math.min(min, ranges.first)
+        max = math.max(max, ranges.last)
+    end
+    return new(min, max)
+end
+
+---@param self Range
+---@return integer
+---@return integer
+function M:to_vim()
+    if M.is_whole(self) then
+        return 0, api.nvim_buf_line_count(0)
+    end
+    return self.first - 1, self.last
+end
+
+---@param self Range
+---@return integer
+---@return integer
+function M:to_lua()
+    if M.is_whole(self) then
+        return 1, api.nvim_buf_line_count(0)
+    end
+    return self.first, self.last
+end
+
+function M:is_whole()
+    return not self.first or not self.last
+end
+
+---@param first integer
+function M:shift(first)
+    local count = self.last - self.first + 1
+    self.first = first
+    self.last = first + count - 1
+end
+
+return M

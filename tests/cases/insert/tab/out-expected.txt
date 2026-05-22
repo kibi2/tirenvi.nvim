@@ -1,7 +1,7 @@
 === MESSAGE ===
-[TIR][ERROR][[string ":lua"]:5] [CI] key = E2
-[TIR][ERROR][[string ":lua"]:5] [CI] key = 87
-[TIR][ERROR][[string ":lua"]:5] [CI] key = A5
+[TIR][ERROR][[string ":lua"] 5] [CI] key = E2
+[TIR][ERROR][[string ":lua"] 5] [CI] key = 87
+[TIR][ERROR][[string ":lua"] 5] [CI] key = A5
 
 === DISPLAY ===
 │1a│2 a│ 3a│

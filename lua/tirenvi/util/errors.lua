@@ -26,6 +26,7 @@ local PREFIX = "tirenvi: "
 M.ERR = {
 	INVALID_TABLE_MESSAGE = PREFIX .. "This change would break the table structure. Changes have been undone.",
 	ENSURE_TIRVIM_MODE = PREFIX .. "This command is only available in a tir-vim buffer.",
+	TABLE_IS_NOT_ALIGNED = PREFIX .. "Cannot select column: table is not aligned.",
 }
 
 -----------------------------------------------------------------------
@@ -112,10 +113,10 @@ function M.invalid_json_error(js_line, message)
 	return string.format(PREFIX .. "tirenvi: invalid JSON from parser\n%s\nerror: %s", js_line, message)
 end
 
-function M.table_merge_warning(ncol1, ncol2)
+function M.table_merge_warning(irow)
 	return string.format(
-		PREFIX .. "Tables were not merged: column counts differ (%d vs %d).\n" ..
-		"Align the column counts to merge them.", ncol1, ncol2)
+		PREFIX .. "Tables were not merged: talble attribute differ in line %d-%d.\n" ..
+		"Align the table attribute to merge them.", irow, irow + 2)
 end
 
 return M

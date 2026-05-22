@@ -10,6 +10,7 @@
 
 ----- dependencies
 local Document = require("tirenvi.core.document")
+local Context = require("tirenvi.app.context")
 local Parser = require("tirenvi.parser.parser")
 local util = require("tirenvi.util.util")
 local errors = require("tirenvi.util.errors")
@@ -84,31 +85,31 @@ end
 local function js_lines_to_flat(js_lines, parser)
 	local fl_string = Parser.run(parser, "unparse", js_lines)
 	local fl_lines = vim.split(fl_string, "\n")
-	log.debug(util.to_hex(table.concat(fl_lines, "\n")):sub(1, 80) .. " ")
+	--log.debug(util.to_hex(table.concat(fl_lines, "\n")):sub(1, 80) .. " ")
 	return fl_lines
 end
 
 -- public API
 
----@param fl_lines string[]
----@param parser Parser
+---@param ctx Context
+---@param req Request
 ---@return Document
-function M.parse(fl_lines, parser)
-	local js_lines = flat_to_js_lines(fl_lines, parser)
+function M.parse(ctx, req)
+	local js_lines = flat_to_js_lines(req.lines, ctx.parser)
 	local ndjsons = js_lines_to_ndjsons(js_lines)
-	local document = Document.new_from_flat(ndjsons, parser.allow_plain)
-	return document
+	return Document.new_flat_doc(ndjsons, Context.is_allow_plain(ctx))
 end
 
 --- Convert display lines back to TSV format
+---@param ctx Context
 ---@param document Document	
----@param parser Parser
 ---@return string[]
-function M.unparse(document, parser)
-	local ndjsons = Document.serialize_to_flat(document)
+function M.unparse(ctx, document)
+	local flat_doc = Document.to_flat_doc(document)
+	local ndjsons = Document.serialize_to_flat(flat_doc)
 	local js_lines = ndjsons_to_lines(ndjsons)
-	log.debug({ #js_lines, js_lines[1], js_lines[#js_lines] })
-	return js_lines_to_flat(js_lines, parser)
+	log.debug("[%d]='%s'...[%d]='%s'", 1, tostring(js_lines[1]), #js_lines, tostring(js_lines[#js_lines]))
+	return js_lines_to_flat(js_lines, ctx.parser)
 end
 
 return M

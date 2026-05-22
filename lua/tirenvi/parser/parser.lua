@@ -53,10 +53,10 @@ end
 ---@param input string[]
 ---@return Vim_system
 local function vim_system(command, input)
-    log.debug("=== === === [exec] %s === === ===", table.concat(command, " "))
+    log.debug("=== [exec] %s ===", table.concat(command, " "))
     local result = vim.system(command, { stdin = input }):wait()
     if result.stdout and #result.stdout > 0 then
-        log.debug(util.to_hex(result.stdout):sub(1, 80) .. " ")
+        -- log.debug(util.to_hex(result.stdout):sub(1, 80) .. " ")
     end
     return result
 end

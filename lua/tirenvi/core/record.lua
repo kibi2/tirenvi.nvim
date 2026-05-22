@@ -1,3 +1,4 @@
+local config = require("tirenvi.config")
 local CONST = require("tirenvi.constants")
 local Cell = require("tirenvi.core.cell")
 local tir_vim = require("tirenvi.core.tir_vim")
@@ -8,10 +9,23 @@ M.plain = {}
 M.grid = {}
 
 -- constants / defaults
+local pipec = config.marks.pipec
+local pipen = config.marks.pipe
 
 -----------------------------------------------------------------------
 -- Private helpers
 -----------------------------------------------------------------------
+
+---@param vi_line string
+---@return Record
+local function from_vi_line(vi_line)
+    local pipe = tir_vim.get_pipe_char(vi_line)
+    if pipe then
+        return M.grid.new_from_vi_line(vi_line, pipe == pipec)
+    else
+        return M.plain.new_from_vi_line(vi_line)
+    end
+end
 
 -----------------------------------------------------------------------
 -- Public API
@@ -29,6 +43,16 @@ end
 ---@return Record_plain
 function M.plain.new_from_vi_line(vi_line)
     return { kind = CONST.KIND.PLAIN, line = vi_line }
+end
+
+---@param self Record_plain
+---@return Record
+function M.plain:change_kind(kind)
+    if kind == CONST.KIND.PLAIN then
+        return self
+    else
+        return M.plain.to_grid(self)
+    end
 end
 
 ---@param self Record_plain
@@ -57,6 +81,22 @@ function M.grid.new_from_vi_line(vi_line, has_continuation)
     local record = M.grid.new(cells)
     record._has_continuation = has_continuation
     return record
+end
+
+---@param self Record_grid
+---@return Record
+function M.grid:change_kind(kind)
+    if kind == CONST.KIND.PLAIN then
+        return { kind = CONST.KIND.PLAIN, line = table.concat(self.row, " ") }
+    else
+        return self
+    end
+end
+
+---@param self Record_grid
+---@return Record_grid
+function M.grid:to_grid()
+    return self
 end
 
 ---@param self Record_grid
@@ -105,12 +145,53 @@ end
 
 ---@param records Record_grid[]
 ---@return integer
-function M.get_max_col(records)
+function M.get_max_ncol(records)
     local max_col = 0
     for _, record in ipairs(records) do
         max_col = math.max(max_col, #record.row)
     end
     return max_col
+end
+
+---@param vi_lines string[]
+---@return Record[]
+function M.from_tir_vim(vi_lines)
+    local records = {}
+    for index = 1, #vi_lines do
+        records[index] = from_vi_line(vi_lines[index])
+    end
+    return records
+end
+
+---@param ndjsons Ndjson[]
+---@return string[]
+function M.to_tir_vim(ndjsons)
+    local tir_vim = {}
+    for _, record in ipairs(ndjsons) do
+        local kind = record.kind
+        if kind == CONST.KIND.PLAIN then
+            tir_vim[#tir_vim + 1] = record.line or ""
+        elseif kind == CONST.KIND.GRID then
+            local pipe = record._has_continuation and pipec or pipen
+            local row_items = record.row
+            local row = table.concat(row_items, pipe)
+            row = pipe .. row .. pipe
+            tir_vim[#tir_vim + 1] = row
+        end
+    end
+    return tir_vim
+end
+
+---@param self Record_grid[]
+---@return integer|nil
+function M.get_consistent_ncol(self)
+    local ncol = #self[1].row
+    for irecord = 2, #self do
+        if ncol ~= #self[irecord].row then
+            return nil
+        end
+    end
+    return ncol
 end
 
 return M
