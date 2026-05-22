@@ -39,13 +39,23 @@ local function show_debug_marks(bufnr, attr, iattr)
     vim.api.nvim_buf_set_extmark(bufnr, namespaces.ATTR, start0, 0, opts)
 end
 
+---@param bufnr number
+local function set_attrs(bufnr, attrs)
+    M.clear(bufnr)
+    buffer.set(bufnr, buffer.IKEY.ATTRS, attrs)
+    vim.schedule(function()
+        for iattr, attr in ipairs(attrs) do
+            show_debug_marks(bufnr, attr, iattr)
+        end
+    end)
+end
 
 -- Public API
 
 ---@param ctx Context
 ---@param attrs Attr[]
 function M.write(ctx, attrs)
-    M.set_attrs(ctx.bufnr, attrs)
+    set_attrs(ctx.bufnr, attrs)
 end
 
 ---@param ctx Context
@@ -56,23 +66,16 @@ end
 
 ---@param bufnr number
 function M.clear(bufnr)
-    vim.api.nvim_buf_clear_namespace(bufnr, namespaces.ATTR, 0, -1)
     buffer.set(bufnr, buffer.IKEY.ATTRS, nil)
+    vim.schedule(function()
+        vim.api.nvim_buf_clear_namespace(bufnr, namespaces.ATTR, 0, -1)
+    end)
 end
 
 ---@param bufnr number
 ---@return Attr[]|nil
 function M.get_attrs(bufnr)
     return buffer.get(bufnr, buffer.IKEY.ATTRS)
-end
-
----@param bufnr number
-function M.set_attrs(bufnr, attrs)
-    M.clear(bufnr)
-    buffer.set(bufnr, buffer.IKEY.ATTRS, attrs)
-    for iattr, attr in ipairs(attrs) do
-        show_debug_marks(bufnr, attr, iattr)
-    end
 end
 
 return M
