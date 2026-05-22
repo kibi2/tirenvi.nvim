@@ -25,7 +25,7 @@ lua << EOF
 	local ctx =  Context.from_buf(bufnr)
   reader.read(ctx, req_r)
   log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "UPDATE CHACHED ATTRS:")) 
-  local vim_doc = vim_parser.parse(ctx, req_r, range3)
+  local vim_doc = vim_parser.parse_text_driven(ctx, req_r, range3)
   log.watch("ATTR", Document.debug_attrs(vim_doc, "1DOC ATTR:"))
 EOF
 

@@ -81,7 +81,7 @@ end
 ---@param req Request
 ---@param range3 Range3|nil
 ---@return Document
-function M.parse(ctx, req, range3)
+function M.parse_text_driven(ctx, req, range3)
 	local records = Record.from_tir_vim(req.lines)
 	local allow_plain = Context.is_allow_plain(ctx)
 	promote_empty_lines(records, req, allow_plain, range3)
@@ -94,7 +94,7 @@ end
 ---@param ctx Context
 ---@param req Request
 ---@return Document
-function M.parse_format(ctx, req)
+function M.parse_attr_driven(ctx, req)
 	local records = Record.from_tir_vim(req.lines)
 	--local attr = Attrs.slice(req.attrs, req.range) TODO
 	local vim_doc = Document.new_vim_doc(records, Context.is_allow_plain(ctx), req.attrs)
