@@ -168,7 +168,7 @@ local commands = {
 	redraw = cmd_format,
 	_format = cmd_format,
 	width = cmd_width,
-	["_repair"] = cmd_repair,
+	_repair = cmd_repair,
 }
 
 
