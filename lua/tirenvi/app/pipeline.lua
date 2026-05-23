@@ -212,12 +212,9 @@ end
 
 ---@param bufnr number
 ---@param prev_ranges Range[]
----@param range3 Range3|nil
+---@param range3 Range3
 ---@return Range[]
 local function update_ranges(bufnr, prev_ranges, range3)
-    if not range3 then
-        return prev_ranges
-    end
     local ranges1, _, ranges3 = Range.split(prev_ranges, Range.from_lua(range3.first, range3.last))
     Range.shift(ranges3, Range3.get_delta(range3))
     local range2 = get_new_range(bufnr, range3)
@@ -232,16 +229,24 @@ end
 ---@return Range[]
 local function check_invalid(bufnr, new_ranges)
     local inv_ranges = {}
+    for _, range in ipairs(new_ranges) do
+        for irow = range.first, range.last do
+            inv_ranges[#inv_ranges + 1] = Range.from_lua(irow, irow)
+        end
+    end
+    Range.union(inv_ranges)
     return inv_ranges
 end
 
 ---@param ctx Context
----@param range3 Range3|nil
+---@param range3 Range3
 local function update_invalid(ctx, range3)
     local bufnr = ctx.bufnr
     local prev_ranges = invalid.get_ranges(bufnr)
     invalid.clear(bufnr)
-    local inv_ranges = update_ranges(bufnr, prev_ranges, range3)
+    local new_ranges = update_ranges(bufnr, prev_ranges, range3)
+    local inv_ranges = check_invalid(bufnr, new_ranges)
+    -- local inv_ranges = new_ranges
     invalid.set_ranges(bufnr, inv_ranges)
 end
 
