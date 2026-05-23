@@ -11,6 +11,7 @@ local flat_parser = require("tirenvi.parser.flat_parser")
 local vim_parser = require("tirenvi.parser.vim_parser")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
 local buffer = require("tirenvi.io.buffer")
+local buf_state = require("tirenvi.io.buf_state")
 local writer = require("tirenvi.io.writer")
 local attr_store = require("tirenvi.io.attr_store")
 local reader = require("tirenvi.io.reader")
@@ -25,6 +26,8 @@ local log = require("tirenvi.util.log")
 -----------------------------------------------------------------------
 
 local M = {}
+
+local api = vim.api
 
 -- private helpers
 
@@ -242,6 +245,65 @@ local function update_invalid(ctx, range3)
     invalid.set_ranges(bufnr, inv_ranges)
 end
 
+local local_range = nil
+---@param ctx Context
+local function apply_local_range(ctx)
+    ---@cast local_range Range
+    M.cmd_format(ctx, true, true)
+    local_range = nil
+end
+
+---@param ctx Context
+local function schedule_new_range(ctx)
+    local new_ranges = invalid.get_ranges(ctx.bufnr)
+    if #new_ranges == 0 then
+        return
+    end
+    if local_range == nil then
+        local_range = Range.join(new_ranges)
+        vim.schedule(function()
+            apply_local_range(ctx)
+        end)
+    else
+        log.watch("UNDO", ctx.bufnr, { "multi time on_lines", local_range })
+        new_ranges[#new_ranges + 1] = local_range
+        local_range = Range.join(new_ranges)
+    end
+end
+
+---@param ctx Context
+---@param range3 Range3|nil
+local function reconcile_request(ctx, range3)
+    local bufnr = ctx.bufnr
+    if buf_state.is_repair(ctx, range3) then
+        schedule_new_range(ctx)
+        invalid.clear(bufnr)
+    end
+end
+
+---@param ctx Context
+---@param range3 Range3|nil
+local function reconcile(ctx, range3)
+    local bufnr = ctx.bufnr
+    vim.schedule(function()
+        if not api.nvim_buf_is_valid(bufnr) then
+            return
+        end
+        if api.nvim_get_current_buf() ~= bufnr then
+            return
+        end
+        local ok, err = xpcall(
+            function()
+                reconcile_request(ctx, range3)
+            end,
+            debug.traceback
+        )
+        if not ok then
+            error(err)
+        end
+    end)
+end
+
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
@@ -304,10 +366,12 @@ end
 function M.on_lines(ctx, range3)
     update_attrs(ctx, range3)
     update_invalid(ctx, range3)
+    reconcile(ctx)
 end
 
 ---@param ctx Context
 function M.insert_leave(ctx)
+    reconcile(ctx)
 end
 
 return M

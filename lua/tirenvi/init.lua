@@ -2,7 +2,6 @@
 local Context = require("tirenvi.app.context")
 local Request = require("tirenvi.app.request")
 local pipeline = require("tirenvi.app.pipeline")
-local reconcile = require("tirenvi.app.reconcile")
 local config = require("tirenvi.config")
 local buffer = require("tirenvi.io.buffer")
 local attr_store = require("tirenvi.io.attr_store")
@@ -187,14 +186,12 @@ end
 function M.on_lines(ctx, range3)
 	log.watch("UNDO", "===+=== ENTRY on_lines[#%d]%s", ctx.bufnr, Range3.short(range3))
 	pipeline.on_lines(ctx, range3)
-	reconcile.reconcile(ctx, range3)
 end
 
 ---@param ctx Context
 function M.on_insert_leave(ctx)
 	log.watch("UNDO", "===+=== ENTRY insert_leave[#%d]", ctx.bufnr)
 	pipeline.insert_leave(ctx)
-	reconcile.reconcile(ctx)
 end
 
 ---@param ctx Context
