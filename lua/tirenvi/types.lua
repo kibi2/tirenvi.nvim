@@ -1,5 +1,3 @@
----@meta
-
 ---@alias Ndjson Attr_file|Record
 
 ---@class Rect

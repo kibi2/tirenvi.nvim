@@ -49,13 +49,7 @@ end
 ---@param bufnr number
 ---@return Range[]
 function M.get_ranges(bufnr)
-    local ranges = buffer.get(bufnr, buffer.IKEY.INVALID) or {}
-    local new_ranges = {}
-    -- Methods are lost during serialization, so reconstruct via the constructor.
-    for _, range in ipairs(ranges) do
-        new_ranges[#new_ranges + 1] = Range.from_lua(range.first, range.last)
-    end
-    return new_ranges
+    return buffer.get(bufnr, buffer.IKEY.INVALID) or {}
 end
 
 ---@param bufnr number

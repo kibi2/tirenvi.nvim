@@ -5,6 +5,7 @@
 local log = require("tirenvi.util.log")
 
 local M   = {}
+
 local api = vim.api
 
 ---@param first integer
@@ -45,8 +46,9 @@ end
 -- Public API
 -----------------------------------------------------------------------
 
-function M:__tostring()
-    return "range" .. M.short(self)
+---@return Range
+function M:get_range()
+    return self.range or self
 end
 
 ---@param first0 integer
@@ -156,6 +158,39 @@ function M:shift(first)
     local count = self.last - self.first + 1
     self.first = first
     self.last = first + count - 1
+end
+
+---@generic T
+---@param items T[]
+---@param range Range
+---@return T[]
+---@return T[]
+---@return T[]
+function M.split(items, range)
+    local range1 = M.from_lua(1, range.first - 1)
+    local range2 = M.from_lua(range.last + 1, math.huge)
+    return M.slice(items, range1), M.slice(items, range), M.slice(items, range2)
+end
+
+---@generic T
+---@param items T[]
+---@param range Range
+---@return T[]
+function M.slice(items, range)
+    local new_items = {}
+    if M.is_empty(range) then
+        return new_items
+    end
+    for _, item in ipairs(items) do
+        if M.intersect(M.get_range(item), range) then
+            local new_item = vim.deepcopy(item)
+            local item_range = M.get_range(new_item)
+            item_range.first = math.max(item_range.first, range.first)
+            item_range.last = math.min(item_range.last, range.last)
+            new_items[#new_items + 1] = new_item
+        end
+    end
+    return new_items
 end
 
 return M

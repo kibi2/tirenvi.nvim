@@ -67,7 +67,7 @@ local function log_watch(bufnr, message, range3, inv_range)
 		"[tree:%d->%d]%s%s",
 		pre,
 		next,
-		range3:short(),
+		Range3.short(range3),
 		no_ext
 	)
 	log.watch("UNDO", message .. status)

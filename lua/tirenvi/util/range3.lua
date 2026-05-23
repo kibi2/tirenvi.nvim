@@ -3,7 +3,6 @@
 ---@field last integer
 ---@field new_last integer
 local Range3 = {}
-Range3.__index = Range3
 
 local Range = require("tirenvi.util.range")
 
@@ -65,11 +64,11 @@ end
 ---@param new_last integer -- 1-based
 ---@return Range3
 function Range3.new(first, last, new_last)
-    return setmetatable({
+    return {
         first = first,
         last = last,
         new_last = new_last,
-    }, Range3)
+    }
 end
 
 ---@return string

@@ -4,6 +4,7 @@ local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
 local M = {}
+
 M.plain = {}
 M.grid = {}
 
