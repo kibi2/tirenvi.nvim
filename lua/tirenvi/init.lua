@@ -187,14 +187,14 @@ end
 function M.on_lines(ctx, range3)
 	log.watch("UNDO", "===+=== ENTRY on_lines[#%d]%s", ctx.bufnr, Range3.short(range3))
 	pipeline.on_lines(ctx, range3)
-	reconcile.handle(ctx, range3)
+	reconcile.reconcile(ctx, range3)
 end
 
 ---@param ctx Context
 function M.on_insert_leave(ctx)
 	log.watch("UNDO", "===+=== ENTRY insert_leave[#%d]", ctx.bufnr)
 	pipeline.insert_leave(ctx)
-	reconcile.handle(ctx)
+	reconcile.reconcile(ctx)
 end
 
 ---@param ctx Context

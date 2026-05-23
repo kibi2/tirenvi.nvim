@@ -1,6 +1,7 @@
 local config = require("tirenvi.config")
-local log = require("tirenvi.util.log")
+local Range3 = require("tirenvi.util.range3")
 local buffer = require("tirenvi.io.buffer")
+local log = require("tirenvi.util.log")
 
 local M = {}
 
@@ -18,6 +19,28 @@ local DEFAULT_OPTS = {
 	has_parser = true,
 	no_vscode = true,
 }
+local REPAIR_OFF = "REPAIR_OFF"
+local INSERT_LEAVE = "INSERT_LEAVE"
+local INSERT_MODE = "INSERT_MODE"
+local UNDO_REDO_MODE = "UNDO_REDO_MODE"
+local NORMAL_MODE = "NORMAL_MODE"
+
+
+---@param bufnr number
+---@param message string
+---@param range3 Range3|nil
+local function log_watch(bufnr, message, range3)
+	range3 = range3 or Range3.new(0, 0, 0)
+	local pre = buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST)
+	local next = fn.undotree(bufnr).seq_last
+	local status = string.format(
+		"[tree:%d->%d]%s",
+		pre,
+		next,
+		Range3.short(range3)
+	)
+	log.watch("UNDO", message .. status)
+end
 
 ---@param bufnr number
 ---@return boolean
@@ -79,6 +102,47 @@ function M.should_skip(bufnr, user_opts)
 		end
 	end
 	return false
+end
+
+---@param ctx Context
+---@param range3 Range3|nil
+---@return string
+local function get_status(ctx, range3)
+	if buffer.get_repair(ctx.bufnr) == false then
+		return REPAIR_OFF
+	end
+	if not range3 then
+		return INSERT_LEAVE
+	elseif M.is_insert_mode(ctx.bufnr) then
+		-- Modifying the buffer in insert mode may corrupt the undo node.
+		-- Therefore, in insert mode, only record the invalid changed region
+		-- and repair it when leaving insert mode.
+		return INSERT_MODE
+	elseif M.is_undo_mode(ctx.bufnr) then
+		-- Moving the cursor in insert mode may create an invalid table undo node.
+		-- Therefore, when performing undo/redo, skip table validation.
+		return UNDO_REDO_MODE
+	else
+		return NORMAL_MODE
+	end
+end
+
+---@param ctx Context
+---@param range3 Range3|nil
+---@return boolean
+function M.is_repair(ctx, range3)
+	local status = get_status(ctx, range3)
+	log_watch(ctx.bufnr, status, range3)
+	if status == INSERT_MODE then
+		return false
+	end
+	if status == UNDO_REDO_MODE then
+		return false
+	end
+	if status == REPAIR_OFF then
+		return false
+	end
+	return true
 end
 
 return M

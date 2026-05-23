@@ -8,16 +8,9 @@
 -----------------------------------------------------------------------
 
 local pipeline = require("tirenvi.app.pipeline")
-local Context = require("tirenvi.app.context")
-local Request = require("tirenvi.app.request")
-local tir_vim = require("tirenvi.core.tir_vim")
 local Range = require("tirenvi.util.range")
-local Range3 = require("tirenvi.util.range3")
-local buffer = require("tirenvi.io.buffer")
-local reader = require("tirenvi.io.reader")
 local buf_state = require("tirenvi.io.buf_state")
 local invalid = require("tirenvi.io.invalid")
-local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
 
 -----------------------------------------------------------------------
@@ -28,25 +21,10 @@ local M = {}
 
 local api = vim.api
 local fn = vim.fn
+
 -----------------------------------------------------------------------
 -- Private helpers
 -----------------------------------------------------------------------
-
----@param bufnr number
----@param message string
----@param range3 Range3|nil
-local function log_watch(bufnr, message, range3)
-	range3 = range3 or Range3.new(0, 0, 0)
-	local pre = buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST)
-	local next = fn.undotree(bufnr).seq_last
-	local status = string.format(
-		"[tree:%d->%d]%s",
-		pre,
-		next,
-		Range3.short(range3)
-	)
-	log.watch("UNDO", message .. status)
-end
 
 local local_range = nil
 ---@param ctx Context
@@ -74,55 +52,11 @@ local function schedule_new_range(ctx)
 	end
 end
 
-local REPAIR_OFF = "REPAIR_OFF"
-local INSERT_LEAVE = "INSERT_LEAVE"
-local INSERT_MODE = "INSERT_MODE"
-local UNDO_REDO_MODE = "UNDO_REDO_MODE"
-local NORMAL_MODE = "NORMAL_MODE"
-
 ---@param ctx Context
 ---@param range3 Range3|nil
----@return string
-local function get_status(ctx, range3)
-	if buffer.get_repair(ctx.bufnr) == false then
-		return REPAIR_OFF
-	end
-	if not range3 then
-		return INSERT_LEAVE
-	elseif buf_state.is_insert_mode(ctx.bufnr) then
-		-- Modifying the buffer in insert mode may corrupt the undo node.
-		-- Therefore, in insert mode, only record the invalid changed region
-		-- and repair it when leaving insert mode.
-		return INSERT_MODE
-	elseif buf_state.is_undo_mode(ctx.bufnr) then
-		-- Moving the cursor in insert mode may create an invalid table undo node.
-		-- Therefore, when performing undo/redo, skip table validation.
-		return UNDO_REDO_MODE
-	else
-		return NORMAL_MODE
-	end
-end
-
-local function is_repair(ctx, range3)
-	local status = get_status(ctx, range3)
-	log_watch(ctx.bufnr, status, range3)
-	if status == INSERT_MODE then
-		return false
-	end
-	if status == UNDO_REDO_MODE then
-		return false
-	end
-	if status == REPAIR_OFF then
-		return false
-	end
-	return true
-end
-
----@param ctx Context
----@param range3 Range3|nil
-local function handle_request(ctx, range3)
+local function reconcile_request(ctx, range3)
 	local bufnr = ctx.bufnr
-	if is_repair(ctx, range3) then
+	if buf_state.is_repair(ctx, range3) then
 		schedule_new_range(ctx)
 		invalid.clear(bufnr)
 	end
@@ -134,7 +68,7 @@ end
 
 ---@param ctx Context
 ---@param range3 Range3|nil
-function M.handle(ctx, range3)
+function M.reconcile(ctx, range3)
 	local bufnr = ctx.bufnr
 	vim.schedule(function()
 		if not api.nvim_buf_is_valid(bufnr) then
@@ -145,7 +79,7 @@ function M.handle(ctx, range3)
 		end
 		local ok, err = xpcall(
 			function()
-				handle_request(ctx, range3)
+				reconcile_request(ctx, range3)
 			end,
 			debug.traceback
 		)
