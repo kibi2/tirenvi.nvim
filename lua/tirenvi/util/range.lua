@@ -153,11 +153,21 @@ function M:is_whole()
     return not self.first or not self.last
 end
 
+---@param self Range
 ---@param first integer
-function M:shift(first)
+function M:move_to(first)
     local count = self.last - self.first + 1
     self.first = first
     self.last = first + count - 1
+end
+
+---@param self Range[]
+---@param delta integer
+function M:shift(delta)
+    for _, range in ipairs(self) do
+        range.first = range.first + delta
+        range.last = range.last + delta
+    end
 end
 
 ---@generic T

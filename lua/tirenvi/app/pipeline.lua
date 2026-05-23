@@ -4,9 +4,11 @@
 local Document = require("tirenvi.core.document")
 local Attrs = require("tirenvi.core.attrs")
 local Blocks = require("tirenvi.core.blocks")
+local tir_vim = require("tirenvi.core.tir_vim")
 local Request = require("tirenvi.app.request")
 local flat_parser = require("tirenvi.parser.flat_parser")
 local vim_parser = require("tirenvi.parser.vim_parser")
+local LinProvider = require("tirenvi.io.buffer_line_provider")
 local writer = require("tirenvi.io.writer")
 local attr_store = require("tirenvi.io.attr_store")
 local reader = require("tirenvi.io.reader")
@@ -127,6 +129,28 @@ local function doc_to_flat(ctx, req_r, doc, no_undo)
     writer.write(ctx, req_w)
 end
 
+---@param ctx Context
+---@param irow integer
+local function get_range(ctx, irow)
+    local line_provider = LinProvider.new(ctx.bufnr)
+    local top = tir_vim.get_block_top_nrow(ctx, line_provider, irow)
+    local bottom = tir_vim.get_block_bottom_nrow(ctx, line_provider, irow)
+    return top, bottom
+end
+
+---@param ctx Context
+---@param row Range
+local function expand_rect(ctx, row)
+    local top, bottom = get_range(ctx, row.first)
+    row.first = top
+    local irow = bottom + 1
+    while irow <= row.last do
+        _, bottom = get_range(ctx, irow)
+        irow = bottom + 1
+    end
+    row.last = bottom
+end
+
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
@@ -157,6 +181,7 @@ end
 ---@param sel Rect
 ---@param width_op WidthOp
 function M.cmd_width(ctx, sel, width_op)
+    expand_rect(ctx, sel.row)
     invalid.clear(ctx.bufnr)
     log.debug("row%s, col%s", Range.short(sel.row), Range.short(sel.col))
     local req_r = Request.from_range(sel.row)
@@ -202,6 +227,17 @@ function M.update_attrs(ctx, range3)
     local attrs = Document.replace_attrs(vim_doc, req_r.range, req_r.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "6RESULT:"))
     attr_store.write(ctx, attrs)
+end
+
+---@param ctx Context
+---@param range3 Range3
+function M.on_lines(ctx, range3)
+    M.update_attrs(ctx, range3)
+end
+
+---@param ctx Context
+function M.insert_leave(ctx)
+    --reconcile.handle(ctx)
 end
 
 return M

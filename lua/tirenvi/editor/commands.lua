@@ -135,8 +135,7 @@ local function cmd_width(ctx, opts)
 	local sel      = get_selection(opts)
 	log.debug("row[%d-%d], col[%d-%d] %s", sel.row.first, sel.row.last, sel.col.first, sel.col.last,
 		width_op:to_string())
-	local line_provider = LinProvider.new(ctx.bufnr)
-	init.width(ctx, line_provider, sel, width_op)
+	init.width(ctx, sel, width_op)
 end
 
 ---@param ctx Context

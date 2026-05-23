@@ -32,7 +32,7 @@ local function reset_range(self)
     local last = self[1].range.last
     for iattr = 2, #self do
         local range = self[iattr].range
-        Range.shift(range, last + 1)
+        Range.move_to(range, last + 1)
         last = range.last
     end
 end

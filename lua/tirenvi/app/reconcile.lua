@@ -17,6 +17,7 @@ local buffer = require("tirenvi.io.buffer")
 local reader = require("tirenvi.io.reader")
 local buf_state = require("tirenvi.io.buf_state")
 local invalid = require("tirenvi.io.invalid")
+local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
 
 -----------------------------------------------------------------------
@@ -57,18 +58,15 @@ end
 ---@param bufnr number
 ---@param message string
 ---@param range3 Range3|nil
----@param inv_range Range[]
-local function log_watch(bufnr, message, range3, inv_range)
+local function log_watch(bufnr, message, range3)
 	range3 = range3 or Range3.new(0, 0, 0)
 	local pre = buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST)
 	local next = fn.undotree(bufnr).seq_last
-	local no_ext = inv_range and (#inv_range ~= 0 and "/ext" .. #inv_range .. Range.short(inv_range[1]) or "") or ""
 	local status = string.format(
-		"[tree:%d->%d]%s%s",
+		"[tree:%d->%d]%s",
 		pre,
 		next,
-		Range3.short(range3),
-		no_ext
+		Range3.short(range3)
 	)
 	log.watch("UNDO", message .. status)
 end
@@ -96,48 +94,40 @@ local function schedule_new_range(ctx, new_ranges)
 	end
 end
 
+local REPAIR_OFF = "REPAIR_OFF"
 local INSERT_LEAVE = "INSERT_LEAVE"
 local INSERT_MODE = "INSERT_MODE"
 local UNDO_REDO_MODE = "UNDO_REDO_MODE"
-local UNDO_REDO_LEAVE = "UNDO_REDO_LEAVE"
 local NORMAL_MODE = "NORMAL_MODE"
 
 ---@param ctx Context
 ---@param range3 Range3|nil
----@param inv_ranges Range[]
----@return boolean
-local function is_repair(ctx, range3, inv_ranges)
+---@return string
+local function get_status(ctx, range3)
 	if buffer.get_repair(ctx.bufnr) == false then
-		return false
+		return REPAIR_OFF
 	end
 	local status
 	if not range3 then
-		status = INSERT_LEAVE
+		return INSERT_LEAVE
 	elseif buf_state.is_insert_mode(ctx.bufnr) then
 		-- Modifying the buffer in insert mode may corrupt the undo node.
 		-- Therefore, in insert mode, only record the invalid changed region
 		-- and repair it when leaving insert mode.
-		status = INSERT_MODE
+		return INSERT_MODE
 	elseif buf_state.is_undo_mode(ctx.bufnr) then
 		-- Moving the cursor in insert mode may create an invalid table undo node.
 		-- Therefore, when performing undo/redo, skip table validation.
-		status = UNDO_REDO_MODE
-	elseif #inv_ranges ~= 0 then
-		status = UNDO_REDO_LEAVE
+		return UNDO_REDO_MODE
 	else
-		status = NORMAL_MODE
+		return NORMAL_MODE
 	end
-	log_watch(ctx.bufnr, status, range3, inv_ranges)
-	return not (status == INSERT_MODE or status == UNDO_REDO_MODE)
 end
 
 ---@param bufnr number
----@param range3 Range3|nil
----@return Range|nil
+---@param range3 Range3
+---@return Range
 local function get_new_range(bufnr, range3)
-	if not range3 then
-		return nil
-	end
 	local new_range = Range3.get_new_range(range3)
 	log.watch("INVD", new_range)
 	expand_continue_lines(bufnr, new_range)
@@ -145,30 +135,46 @@ local function get_new_range(bufnr, range3)
 end
 
 ---@param bufnr number
----@param inv_ranges Range[]
+---@param prev_ranges Range[]
 ---@param range3 Range3|nil
-local function update_ranges(bufnr, inv_ranges, range3)
-	Range3.update_ranges(range3, inv_ranges)
-	local new_range = get_new_range(bufnr, range3)
-	inv_ranges[#inv_ranges + 1] = new_range
-	inv_ranges = Range.union(inv_ranges)
+---@return Range[]
+local function update_ranges(bufnr, prev_ranges, range3)
+	if not range3 then
+		return prev_ranges
+	end
+	local ranges1, _, ranges3 = Range.split(prev_ranges, Range.from_lua(range3.first, range3.last))
+	Range.shift(ranges3, Range3.get_delta(range3))
+	local range2 = get_new_range(bufnr, range3)
+	local new_ranges = ranges1
+	new_ranges[#new_ranges + 1] = range2
+	util.extend(new_ranges, ranges3)
+	return Range.union(new_ranges)
+end
+
+---@param bufnr number
+---@param new_ranges Range[]
+---@return Range[]
+local function check_invalid(bufnr, new_ranges)
+	local inv_ranges = {}
+	return inv_ranges
 end
 
 ---@param ctx Context
 ---@param range3 Range3|nil
 local function handle_request(ctx, range3)
 	local bufnr = ctx.bufnr
-	local inv_ranges = invalid.get_ranges(bufnr)
-	local repair = is_repair(ctx, range3, inv_ranges)
+	local prev_ranges = invalid.get_ranges(bufnr)
 	invalid.clear(bufnr)
-	update_ranges(bufnr, inv_ranges, range3)
-	if #inv_ranges == 0 then
+	local new_ranges = update_ranges(bufnr, prev_ranges, range3)
+	if #new_ranges == 0 then
 		return
 	end
-	if repair then
-		schedule_new_range(ctx, inv_ranges)
+	local status = get_status(ctx, range3)
+	log_watch(ctx.bufnr, status, range3)
+	if status == INSERT_MODE or status == UNDO_REDO_MODE or status == REPAIR_OFF then
+		invalid.set_ranges(bufnr, new_ranges)
 	else
-		invalid.set_ranges(bufnr, inv_ranges)
+		schedule_new_range(ctx, new_ranges)
 	end
 end
 

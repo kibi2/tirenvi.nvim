@@ -2,8 +2,8 @@
 local Context = require("tirenvi.app.context")
 local Request = require("tirenvi.app.request")
 local pipeline = require("tirenvi.app.pipeline")
+local reconcile = require("tirenvi.app.reconcile")
 local config = require("tirenvi.config")
-local reconcile = require("tirenvi.core.reconcile")
 local buffer = require("tirenvi.io.buffer")
 local attr_store = require("tirenvi.io.attr_store")
 local writer = require("tirenvi.io.writer")
@@ -31,38 +31,6 @@ M.motion = require("tirenvi.editor.motion")
 ---@return nil
 local function from_flat(ctx, no_undo)
 	pipeline.from_flat(ctx, no_undo)
-end
-
----@param ctx Context
----@param line_provider LineProvider
----@param irow integer
-local function get_range(ctx, line_provider, irow)
-	local top = tir_vim.get_block_top_nrow(ctx, line_provider, irow)
-	local bottom = tir_vim.get_block_bottom_nrow(ctx, line_provider, irow)
-	return top, bottom
-end
-
----@param ctx Context
----@param line_provider LineProvider
----@param row Range
-local function expand_rect(ctx, line_provider, row)
-	local top, bottom = get_range(ctx, line_provider, row.first)
-	row.first = top
-	local irow = bottom + 1
-	while irow <= row.last do
-		_, bottom = get_range(ctx, line_provider, irow)
-		irow = bottom + 1
-	end
-	row.last = bottom
-end
-
----@param ctx Context
----@param line_provider LineProvider
----@param sel Rect
----@param width_op WidthOp
-local function cmd_width(ctx, line_provider, sel, width_op)
-	expand_rect(ctx, line_provider, sel.row)
-	pipeline.cmd_width(ctx, sel, width_op)
 end
 
 local warned = false
@@ -161,11 +129,10 @@ function M.format(ctx)
 end
 
 ---@param ctx Context	
----@param line_provider LineProvider
 ---@param sel Rect
 ---@param width_op WidthOp
-function M.width(ctx, line_provider, sel, width_op)
-	cmd_width(ctx, line_provider, sel, width_op)
+function M.width(ctx, sel, width_op)
+	pipeline.cmd_width(ctx, sel, width_op)
 	local command = util.get_termcodes(width_op:to_cmd())
 	set_repeat(command)
 end
@@ -219,13 +186,14 @@ end
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
 	log.watch("UNDO", "===+=== ENTRY on_lines[#%d]%s", ctx.bufnr, Range3.short(range3))
-	pipeline.update_attrs(ctx, range3)
+	pipeline.on_lines(ctx, range3)
 	reconcile.handle(ctx, range3)
 end
 
 ---@param ctx Context
 function M.on_insert_leave(ctx)
 	log.watch("UNDO", "===+=== ENTRY insert_leave[#%d]", ctx.bufnr)
+	pipeline.insert_leave(ctx)
 	reconcile.handle(ctx)
 end
 
