@@ -1,6 +1,7 @@
 -----------------------------------------------------------------------
 -- Dependencies
 -----------------------------------------------------------------------
+local Context = require("tirenvi.app.context")
 local Document = require("tirenvi.core.document")
 local Attrs = require("tirenvi.core.attrs")
 local Blocks = require("tirenvi.core.blocks")
@@ -9,6 +10,7 @@ local Request = require("tirenvi.app.request")
 local flat_parser = require("tirenvi.parser.flat_parser")
 local vim_parser = require("tirenvi.parser.vim_parser")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
+local buffer = require("tirenvi.io.buffer")
 local writer = require("tirenvi.io.writer")
 local attr_store = require("tirenvi.io.attr_store")
 local reader = require("tirenvi.io.reader")
@@ -151,6 +153,95 @@ local function expand_rect(ctx, row)
     row.last = bottom
 end
 
+---@param ctx Context
+---@param range3 Range3
+local function update_attrs(ctx, range3)
+    local req_r = Request.from_range(Range3.get_new_range(range3))
+    local vim_doc = vim_to_vdoc_text_driven(ctx, req_r, range3)
+    if not vim_doc then
+        return nil
+    end
+    Document.inherit_neighbor_attr(vim_doc, req_r.attrs, range3)
+    log.watch("ATTR", Document.debug_attrs(vim_doc, "2NEIGHBOR:"))
+    Document.infer_consistent_attr(vim_doc)
+    log.watch("ATTR", Document.debug_attrs(vim_doc, "3CONSISTENT:"))
+    Document.apply_cached_attr(vim_doc, req_r.attrs)
+    log.watch("ATTR", Document.debug_attrs(vim_doc, "4CACHED:"))
+    Document.set_auto_attr(vim_doc)
+    log.watch("ATTR", Document.debug_attrs(vim_doc, "5AUTO ATTR:"))
+    local attrs = Document.replace_attrs(vim_doc, req_r.range, req_r.attrs)
+    log.watch("ATTR", Attrs.debug_attrs(attrs, "6RESULT:"))
+    attr_store.write(ctx, attrs)
+end
+
+---@param bufnr number
+---@param range Range
+local function expand_continue_lines(bufnr, range)
+    local ctx = Context.from_buf(bufnr)
+    local req = Request.from_range(range)
+    local lines = reader.read(ctx, req)
+    local prev = range.first - 1
+    local prev_line = buffer.get_line(bufnr, prev)
+    while tir_vim.is_continue_line(prev_line) do
+        prev = prev - 1
+        prev_line = buffer.get_line(bufnr, prev)
+    end
+    range.first = prev + 1
+    ---@type string|nil
+    local last_line = lines[#lines]
+    local last = range.last
+    while tir_vim.is_continue_line(last_line) or last_line == "" do
+        last = last + 1
+        last_line = buffer.get_line(bufnr, last)
+    end
+    range.last = last
+end
+
+---@param bufnr number
+---@param range3 Range3
+---@return Range
+local function get_new_range(bufnr, range3)
+    local new_range = Range3.get_new_range(range3)
+    log.watch("INVD", new_range)
+    expand_continue_lines(bufnr, new_range)
+    return new_range
+end
+
+---@param bufnr number
+---@param prev_ranges Range[]
+---@param range3 Range3|nil
+---@return Range[]
+local function update_ranges(bufnr, prev_ranges, range3)
+    if not range3 then
+        return prev_ranges
+    end
+    local ranges1, _, ranges3 = Range.split(prev_ranges, Range.from_lua(range3.first, range3.last))
+    Range.shift(ranges3, Range3.get_delta(range3))
+    local range2 = get_new_range(bufnr, range3)
+    local new_ranges = ranges1
+    new_ranges[#new_ranges + 1] = range2
+    util.extend(new_ranges, ranges3)
+    return Range.union(new_ranges)
+end
+
+---@param bufnr number
+---@param new_ranges Range[]
+---@return Range[]
+local function check_invalid(bufnr, new_ranges)
+    local inv_ranges = {}
+    return inv_ranges
+end
+
+---@param ctx Context
+---@param range3 Range3|nil
+local function update_invalid(ctx, range3)
+    local bufnr = ctx.bufnr
+    local prev_ranges = invalid.get_ranges(bufnr)
+    invalid.clear(bufnr)
+    local inv_ranges = update_ranges(bufnr, prev_ranges, range3)
+    invalid.set_ranges(bufnr, inv_ranges)
+end
+
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
@@ -210,34 +301,13 @@ end
 
 ---@param ctx Context
 ---@param range3 Range3
-function M.update_attrs(ctx, range3)
-    local req_r = Request.from_range(Range3.get_new_range(range3))
-    local vim_doc = vim_to_vdoc_text_driven(ctx, req_r, range3)
-    if not vim_doc then
-        return nil
-    end
-    Document.inherit_neighbor_attr(vim_doc, req_r.attrs, range3)
-    log.watch("ATTR", Document.debug_attrs(vim_doc, "2NEIGHBOR:"))
-    Document.infer_consistent_attr(vim_doc)
-    log.watch("ATTR", Document.debug_attrs(vim_doc, "3CONSISTENT:"))
-    Document.apply_cached_attr(vim_doc, req_r.attrs)
-    log.watch("ATTR", Document.debug_attrs(vim_doc, "4CACHED:"))
-    Document.set_auto_attr(vim_doc)
-    log.watch("ATTR", Document.debug_attrs(vim_doc, "5AUTO ATTR:"))
-    local attrs = Document.replace_attrs(vim_doc, req_r.range, req_r.attrs)
-    log.watch("ATTR", Attrs.debug_attrs(attrs, "6RESULT:"))
-    attr_store.write(ctx, attrs)
-end
-
----@param ctx Context
----@param range3 Range3
 function M.on_lines(ctx, range3)
-    M.update_attrs(ctx, range3)
+    update_attrs(ctx, range3)
+    update_invalid(ctx, range3)
 end
 
 ---@param ctx Context
 function M.insert_leave(ctx)
-    --reconcile.handle(ctx)
 end
 
 return M

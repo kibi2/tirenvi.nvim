@@ -33,29 +33,6 @@ local fn = vim.fn
 -----------------------------------------------------------------------
 
 ---@param bufnr number
----@param range Range
-local function expand_continue_lines(bufnr, range)
-	local ctx = Context.from_buf(bufnr)
-	local req = Request.from_range(range)
-	local lines = reader.read(ctx, req)
-	local prev = range.first - 1
-	local prev_line = buffer.get_line(bufnr, prev)
-	while tir_vim.is_continue_line(prev_line) do
-		prev = prev - 1
-		prev_line = buffer.get_line(bufnr, prev)
-	end
-	range.first = prev + 1
-	---@type string|nil
-	local last_line = lines[#lines]
-	local last = range.last
-	while tir_vim.is_continue_line(last_line) or last_line == "" do
-		last = last + 1
-		last_line = buffer.get_line(bufnr, last)
-	end
-	range.last = last
-end
-
----@param bufnr number
 ---@param message string
 ---@param range3 Range3|nil
 local function log_watch(bufnr, message, range3)
@@ -80,8 +57,11 @@ local function apply_local_range(ctx)
 end
 
 ---@param ctx Context
----@param new_ranges Range[]
-local function schedule_new_range(ctx, new_ranges)
+local function schedule_new_range(ctx)
+	local new_ranges = invalid.get_ranges(ctx.bufnr)
+	if #new_ranges == 0 then
+		return
+	end
 	if local_range == nil then
 		local_range = Range.join(new_ranges)
 		vim.schedule(function()
@@ -107,7 +87,6 @@ local function get_status(ctx, range3)
 	if buffer.get_repair(ctx.bufnr) == false then
 		return REPAIR_OFF
 	end
-	local status
 	if not range3 then
 		return INSERT_LEAVE
 	elseif buf_state.is_insert_mode(ctx.bufnr) then
@@ -124,57 +103,28 @@ local function get_status(ctx, range3)
 	end
 end
 
----@param bufnr number
----@param range3 Range3
----@return Range
-local function get_new_range(bufnr, range3)
-	local new_range = Range3.get_new_range(range3)
-	log.watch("INVD", new_range)
-	expand_continue_lines(bufnr, new_range)
-	return new_range
-end
-
----@param bufnr number
----@param prev_ranges Range[]
----@param range3 Range3|nil
----@return Range[]
-local function update_ranges(bufnr, prev_ranges, range3)
-	if not range3 then
-		return prev_ranges
+local function is_repair(ctx, range3)
+	local status = get_status(ctx, range3)
+	log_watch(ctx.bufnr, status, range3)
+	if status == INSERT_MODE then
+		return false
 	end
-	local ranges1, _, ranges3 = Range.split(prev_ranges, Range.from_lua(range3.first, range3.last))
-	Range.shift(ranges3, Range3.get_delta(range3))
-	local range2 = get_new_range(bufnr, range3)
-	local new_ranges = ranges1
-	new_ranges[#new_ranges + 1] = range2
-	util.extend(new_ranges, ranges3)
-	return Range.union(new_ranges)
-end
-
----@param bufnr number
----@param new_ranges Range[]
----@return Range[]
-local function check_invalid(bufnr, new_ranges)
-	local inv_ranges = {}
-	return inv_ranges
+	if status == UNDO_REDO_MODE then
+		return false
+	end
+	if status == REPAIR_OFF then
+		return false
+	end
+	return true
 end
 
 ---@param ctx Context
 ---@param range3 Range3|nil
 local function handle_request(ctx, range3)
 	local bufnr = ctx.bufnr
-	local prev_ranges = invalid.get_ranges(bufnr)
-	invalid.clear(bufnr)
-	local new_ranges = update_ranges(bufnr, prev_ranges, range3)
-	if #new_ranges == 0 then
-		return
-	end
-	local status = get_status(ctx, range3)
-	log_watch(ctx.bufnr, status, range3)
-	if status == INSERT_MODE or status == UNDO_REDO_MODE or status == REPAIR_OFF then
-		invalid.set_ranges(bufnr, new_ranges)
-	else
-		schedule_new_range(ctx, new_ranges)
+	if is_repair(ctx, range3) then
+		schedule_new_range(ctx)
+		invalid.clear(bufnr)
 	end
 end
 
