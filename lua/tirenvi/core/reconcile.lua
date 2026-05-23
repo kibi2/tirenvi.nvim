@@ -144,24 +144,31 @@ local function get_new_range(bufnr, range3)
 	return new_range
 end
 
+---@param bufnr number
+---@param inv_ranges Range[]
+---@param range3 Range3|nil
+local function update_ranges(bufnr, inv_ranges, range3)
+	Range3.update_ranges(range3, inv_ranges)
+	local new_range = get_new_range(bufnr, range3)
+	inv_ranges[#inv_ranges + 1] = new_range
+	inv_ranges = Range.union(inv_ranges)
+end
+
 ---@param ctx Context
 ---@param range3 Range3|nil
 local function handle_request(ctx, range3)
 	local bufnr = ctx.bufnr
-	local inv_ranges = invalid.get_ranges(ctx.bufnr)
+	local inv_ranges = invalid.get_ranges(bufnr)
+	local repair = is_repair(ctx, range3, inv_ranges)
 	invalid.clear(bufnr)
-	Range3.update_ranges(range3, inv_ranges)
-	local new_range = get_new_range(bufnr, range3)
-	local format_ranges = vim.deepcopy(inv_ranges)
-	format_ranges[#format_ranges + 1] = new_range
-	format_ranges = Range.union(format_ranges)
-	if #format_ranges == 0 then
+	update_ranges(bufnr, inv_ranges, range3)
+	if #inv_ranges == 0 then
 		return
 	end
-	if is_repair(ctx, range3, inv_ranges) then
-		schedule_new_range(ctx, format_ranges)
+	if repair then
+		schedule_new_range(ctx, inv_ranges)
 	else
-		invalid.set_ranges(bufnr, format_ranges)
+		invalid.set_ranges(bufnr, inv_ranges)
 	end
 end
 
