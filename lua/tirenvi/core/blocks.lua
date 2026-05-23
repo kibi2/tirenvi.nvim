@@ -51,7 +51,7 @@ end
 --- Split NDJSON records into plain/grid blocks.
 ---@param records Ndjson[]
 ---@return Blocks
-local function build_blocks_from_records(records)
+local function build_blocks_text_driven(records)
 	local self = {}
 	---@type Block
 	local block = Block.new()
@@ -83,7 +83,7 @@ end
 ---@param records Ndjson[]
 ---@param attrs Attr[]
 ---@return Blocks
-local function build_blocks_from_attrs(records, attrs)
+local function build_blocks_attr_driven(records, attrs)
 	local self = {}
 	for iattr, attr in ipairs(attrs) do
 		local block = Block.new()
@@ -120,9 +120,9 @@ end
 ---@return Blocks
 local function build_blocks(records, attrs)
 	if attrs then
-		return build_blocks_from_attrs(records, attrs)
+		return build_blocks_attr_driven(records, attrs)
 	else
-		return build_blocks_from_records(records)
+		return build_blocks_text_driven(records)
 	end
 end
 

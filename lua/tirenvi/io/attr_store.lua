@@ -40,20 +40,23 @@ local function show_debug_marks(bufnr, attr, iattr)
 end
 
 ---@param bufnr number
+---@param attrs Attr[]|nil
 local function set_attrs(bufnr, attrs)
-    M.clear(bufnr)
     buffer.set(bufnr, buffer.IKEY.ATTRS, attrs)
     vim.schedule(function()
-        for iattr, attr in ipairs(attrs) do
+        vim.api.nvim_buf_clear_namespace(bufnr, namespaces.ATTR, 0, -1)
+        for iattr, attr in ipairs(attrs or {}) do
             show_debug_marks(bufnr, attr, iattr)
         end
     end)
 end
 
+-----------------------------------------------------------------------
 -- Public API
+-----------------------------------------------------------------------
 
 ---@param ctx Context
----@param attrs Attr[]
+---@param attrs Attr[]|nil
 function M.write(ctx, attrs)
     set_attrs(ctx.bufnr, attrs)
 end
@@ -61,21 +64,7 @@ end
 ---@param ctx Context
 ---@param req Request
 function M.read(ctx, req)
-    req.attrs = M.get_attrs(ctx.bufnr)
-end
-
----@param bufnr number
-function M.clear(bufnr)
-    buffer.set(bufnr, buffer.IKEY.ATTRS, nil)
-    vim.schedule(function()
-        vim.api.nvim_buf_clear_namespace(bufnr, namespaces.ATTR, 0, -1)
-    end)
-end
-
----@param bufnr number
----@return Attr[]|nil
-function M.get_attrs(bufnr)
-    return buffer.get(bufnr, buffer.IKEY.ATTRS)
+    req.attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
 end
 
 return M

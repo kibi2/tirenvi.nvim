@@ -42,7 +42,7 @@ end
 ---@param req_r Request
 ---@param range3 Range3|nil
 ---@return Document|nil
-local function vim_to_vdoc(ctx, req_r, range3)
+local function vim_to_vdoc_text_driven(ctx, req_r, range3)
     reader.read(ctx, req_r)
     if not Attrs.has_range(req_r.attrs) then
         return nil
@@ -50,7 +50,7 @@ local function vim_to_vdoc(ctx, req_r, range3)
     log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
     req_r.attrs = Attrs.update_range(req_r.attrs or {}, range3)
     if range3 then log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "0UPDATE CHACHED:")) end
-    local vim_doc = vim_parser.parse(ctx, req_r, range3)
+    local vim_doc = vim_parser.parse_text_driven(ctx, req_r, range3)
     log.watch("ATTR", Document.debug_attrs(vim_doc, "1DOC ATTR:"))
     return vim_doc
 end
@@ -58,13 +58,13 @@ end
 ---@param ctx Context
 ---@param req_r Request
 ---@return Document|nil
-local function vim_to_vdoc_format(ctx, req_r)
+local function vim_to_vdoc_attr_driven(ctx, req_r)
     reader.read(ctx, req_r)
     if not Attrs.has_range(req_r.attrs) then
         return nil
     end
     log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
-    local vim_doc = vim_parser.parse_format(ctx, req_r)
+    local vim_doc = vim_parser.parse_attr_driven(ctx, req_r)
     log.watch("ATTR", Document.debug_attrs(vim_doc, "1DOC ATTR:"))
     return vim_doc
 end
@@ -72,8 +72,8 @@ end
 ---@param ctx Context
 ---@param req_r Request
 ---@return Document|nil
-local function vim_to_doc(ctx, req_r)
-    local vim_doc = vim_to_vdoc(ctx, req_r)
+local function vim_to_doc_text_driven(ctx, req_r)
+    local vim_doc = vim_to_vdoc_text_driven(ctx, req_r)
     if not vim_doc then
         return nil
     end
@@ -87,8 +87,8 @@ end
 ---@param no_normalize boolean -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
 ---@return Document|nil
-local function vim_to_doc_format(ctx, req_r, no_normalize)
-    local vim_doc = vim_to_vdoc_format(ctx, req_r)
+local function vim_to_doc_attrs_driven(ctx, req_r, no_normalize)
+    local vim_doc = vim_to_vdoc_attr_driven(ctx, req_r)
     if not vim_doc or not Blocks.has_grid(vim_doc.blocks) then
         return nil
     end
@@ -147,7 +147,7 @@ end
 ---@param no_undo boolean|nil
 function M.to_flat(ctx, no_undo)
     local req_r = Request.from_range(Range.WHOLE)
-    local doc = vim_to_doc(ctx, req_r)
+    local doc = vim_to_doc_text_driven(ctx, req_r)
     if doc and Blocks.has_grid(doc.blocks) then
         doc_to_flat(ctx, req_r, doc, no_undo)
     end
@@ -160,7 +160,7 @@ function M.cmd_width(ctx, sel, width_op)
     invalid.clear(ctx.bufnr)
     log.debug("row%s, col%s", Range.short(sel.row), Range.short(sel.col))
     local req_r = Request.from_range(sel.row)
-    local doc = vim_to_doc(ctx, req_r)
+    local doc = vim_to_doc_text_driven(ctx, req_r)
     if doc and Blocks.has_grid(doc.blocks) then
         Blocks.change_width(doc.blocks, sel.col, width_op)
         local vim_doc = Document.to_vim(doc)
@@ -175,7 +175,7 @@ function M.cmd_format(ctx, no_normalize, no_undo)
     invalid.clear(ctx.bufnr)
     no_normalize = no_normalize or false
     local req_r = Request.from_range(Range.WHOLE)
-    local doc = vim_to_doc_format(ctx, req_r, no_normalize)
+    local doc = vim_to_doc_attrs_driven(ctx, req_r, no_normalize)
     if not doc or not Blocks.has_grid(doc.blocks) then
         return
     end
@@ -187,7 +187,7 @@ end
 ---@param range3 Range3
 function M.update_attrs(ctx, range3)
     local req_r = Request.from_range(Range3.get_new_range(range3))
-    local vim_doc = vim_to_vdoc(ctx, req_r, range3)
+    local vim_doc = vim_to_vdoc_text_driven(ctx, req_r, range3)
     if not vim_doc then
         return nil
     end

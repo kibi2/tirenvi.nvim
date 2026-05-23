@@ -13,16 +13,6 @@ local api   = vim.api
 -----------------------------------------------------------------------
 
 ---@param self Attr[]
----@param range Range
----@return Attr[]
----@return Attr[]
-local function split(self, range)
-    local range1 = Range.from_lua(1, range.first - 1)
-    local range2 = Range.from_lua(range.last + 1, math.huge)
-    return M.slice(self, range1), M.slice(self, range2)
-end
-
----@param self Attr[]
 ---@return Attr[]
 local function connect(self)
     local attrs = { self[1] }
@@ -111,7 +101,7 @@ end
 ---@param doc_attrs Attr[]
 ---@return Attr[]
 function M:replace_attrs(range, doc_attrs)
-    local attrs1, attrs3 = split(self, range)
+    local attrs1, _, attrs3 = Range.split(self, range)
     local attrs = attrs1
     log.watch("ATTR", range)
     log.watch("ATTR", M.debug_attrs(self, "MERGE ORIGIN:"))
@@ -200,25 +190,6 @@ end
 ---@return Attr|nil
 function M:get(irow)
     return self[get_index(self, 1, irow)]
-end
-
----@param self Attr[]
----@param range Range
----@return Attr[]
-function M:slice(range)
-    local attrs = {}
-    if Range.is_empty(range) then
-        return attrs
-    end
-    for _, attr in ipairs(self) do
-        if Range.intersect(attr.range, range) then
-            local new_attr = vim.deepcopy(attr)
-            new_attr.range.first = math.max(new_attr.range.first, range.first)
-            new_attr.range.last = math.min(new_attr.range.last, range.last)
-            attrs[#attrs + 1] = new_attr
-        end
-    end
-    return attrs
 end
 
 return M

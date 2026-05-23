@@ -9,8 +9,8 @@ local attr_store = require("tirenvi.io.attr_store")
 local writer = require("tirenvi.io.writer")
 local reader = require("tirenvi.io.reader")
 local tir_vim = require("tirenvi.core.tir_vim")
-local Blocks = require("tirenvi.core.blocks")
 local Range = require("tirenvi.util.range")
+local Range3 = require("tirenvi.util.range3")
 local util = require("tirenvi.util.util")
 local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
@@ -218,7 +218,7 @@ end
 ---@param ctx Context
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
-	log.watch("UNDO", "===+=== ENTRY on_lines[#%d]%s", ctx.bufnr, range3:short())
+	log.watch("UNDO", "===+=== ENTRY on_lines[#%d]%s", ctx.bufnr, Range3.short(range3))
 	pipeline.update_attrs(ctx, range3)
 	reconcile.handle(ctx, range3)
 end
@@ -240,7 +240,7 @@ function M.on_filetype(ctx)
 	end
 	pipeline.to_flat(ctx)
 	buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, new_filetype)
-	attr_store.clear(ctx.bufnr)
+	attr_store.write(ctx, nil)
 	ctx = Context.from_buf(ctx.bufnr)
 	if not ctx.parser then
 		buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, nil)
