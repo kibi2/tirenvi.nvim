@@ -122,4 +122,15 @@ function M.reconcile(line_provider, prev_ranges, attrs, range3)
     return inv_ranges
 end
 
+---@param prev_ranges Range[]
+---@param range3 Range3
+---@return Range[]
+function M.remove(prev_ranges, range3)
+    local ranges1, _, ranges3 = Range.split(prev_ranges, Range.from_lua(range3.first, range3.last))
+    Range.shift(ranges3, Range3.get_delta(range3))
+    local new_ranges = ranges1
+    util.extend(new_ranges, ranges3)
+    return Range.union(new_ranges)
+end
+
 return M

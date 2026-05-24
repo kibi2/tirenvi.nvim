@@ -222,7 +222,6 @@ local function repair_request(ctx, range3)
     end
     local bufnr = ctx.bufnr
     schedule_new_range(ctx)
-    dirty.clear(bufnr)
 end
 
 ---@param ctx Context
@@ -286,7 +285,6 @@ function M.cmd_width(ctx, sel, width_op)
         Blocks.change_width(doc.blocks, sel.col, width_op)
         local buf_doc = Document.to_vim(doc)
         doc_to_vim(ctx, req_r, buf_doc)
-        dirty.clear(ctx.bufnr)
     end
 end
 
@@ -302,7 +300,6 @@ function M.cmd_format(ctx, no_normalize, no_undo)
     end
     local buf_doc = Document.to_vim(doc)
     doc_to_vim(ctx, req_r, buf_doc, no_undo)
-    dirty.clear(ctx.bufnr)
 end
 
 ---@param ctx Context

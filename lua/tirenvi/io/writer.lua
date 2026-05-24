@@ -1,4 +1,7 @@
+local Request = require("tirenvi.app.request")
+local dirty_range = require("tirenvi.core.dirty_range")
 local buffer = require("tirenvi.io.buffer")
+local dirty = require("tirenvi.io.dirty")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -13,6 +16,10 @@ local M = {}
 ---@param req Request
 function M.write(ctx, req)
     buffer.set_lines(ctx.bufnr, req.range, req.lines, req.no_undo)
+    local range3 = Request.get_range3(req)
+    local prev_ranges = dirty.get_ranges(ctx.bufnr)
+    local new_ranges = dirty_range.remove(prev_ranges, range3)
+    dirty.set_ranges(ctx.bufnr, new_ranges)
 end
 
 return M

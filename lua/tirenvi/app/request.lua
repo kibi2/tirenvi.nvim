@@ -3,6 +3,7 @@
 -----------------------------------------------------------------------
 
 local Range = require("tirenvi.util.range")
+local Range3 = require("tirenvi.util.range3")
 local log = require("tirenvi.util.log")
 
 -----------------------------------------------------------------------
@@ -48,6 +49,13 @@ end
 ---@return integer -- 1-based
 function M:lua_range()
     return Range.to_lua(self.range)
+end
+
+---@param self Request
+---@return Range3
+function M:get_range3()
+    local first, last = M.lua_range(self)
+    return Range3.new(first, last, first + #self.lines - 1)
 end
 
 return M
