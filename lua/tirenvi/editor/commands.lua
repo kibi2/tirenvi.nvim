@@ -168,9 +168,8 @@ end
 local commands = {
 	toggle = cmd_toggle,
 	redraw = cmd_repair,
-	_format = cmd_repair,
 	width = cmd_width,
-	_repair = cmd_repair,
+	repair = cmd_repair,
 }
 
 

@@ -4,7 +4,7 @@
 source $TIRENVI_ROOT/tests/common.vim
 
 edit $TIRENVI_ROOT/tests/data/simple.md
-Tir _repair toggle
+Tir repair toggle
 sleep 1m
 execute "normal! 3G"
 execute "normal! 3D"

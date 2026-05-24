@@ -35,7 +35,8 @@ end
 
 local function diagnostic_setup()
     fn.sign_define("TirenviSign", { text = "◆", texthl = "ErrorMsg" })
-    api.nvim_set_hl(0, "TirenviDebugLine", { bg = "#888840" })
+    api.nvim_set_hl(0, "TirenviDebugLine", { bg = "#404000" })
+    api.nvim_set_hl(0, "TirDirty", { bg = "#2a2a1a", italic = true, })
 end
 
 local function special_setup()

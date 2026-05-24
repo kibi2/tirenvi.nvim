@@ -23,12 +23,15 @@ local function show_debug_marks(bufnr, range, id)
         strict = false,
         invalidate = false,
         --
-        hl_group = "TirenviDebugLine",
+        hl_group = "TirDirty",
+        --hl_group = "CursorLine",
+        --hl_group = "DiagnosticWarn",
         hl_eol = false,
-        --virt_text = { { tostring(id), "ErrorMsg" } },
-        --virt_text_pos = "eol_right_align", -- eol
-        sign_text = tostring(id):sub(-2),
-        sign_hl_group = "ErrorMsg",
+        --virt_text = { { "dirty", "Comment" } },
+        --virt_text_pos = "eol", -- eol
+        --sign_text = tostring(id):sub(-2),
+        sign_text = ".",
+        sign_hl_group = "DiagnosticWarn",
     }
     vim.api.nvim_buf_set_extmark(bufnr, namespaces.INVALID, start0, 0, opts)
 end
@@ -36,6 +39,7 @@ end
 ---@param bufnr number
 ---@param ranges Range[]|nil
 function M.set_ranges(bufnr, ranges)
+    vim.api.nvim_buf_clear_namespace(bufnr, namespaces.INVALID, 0, -1)
     buffer.set(bufnr, buffer.IKEY.DIRTY, ranges)
     if not ranges then
         return
