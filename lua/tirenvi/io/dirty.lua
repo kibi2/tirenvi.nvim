@@ -30,13 +30,13 @@ local function show_debug_marks(bufnr, range, id)
         sign_text = ".",
         sign_hl_group = "DiagnosticWarn",
     }
-    vim.api.nvim_buf_set_extmark(bufnr, namespaces.INVALID, start0, 0, opts)
+    vim.api.nvim_buf_set_extmark(bufnr, namespaces.DIRTY, start0, 0, opts)
 end
 
 ---@param bufnr number
 ---@param ranges Range[]|nil
 function M.set_ranges(bufnr, ranges)
-    vim.api.nvim_buf_clear_namespace(bufnr, namespaces.INVALID, 0, -1)
+    vim.api.nvim_buf_clear_namespace(bufnr, namespaces.DIRTY, 0, -1)
     buffer.set(bufnr, buffer.IKEY.DIRTY, ranges)
     if not ranges then
         return
@@ -55,7 +55,7 @@ end
 
 ---@param bufnr number
 function M.clear(bufnr)
-    vim.api.nvim_buf_clear_namespace(bufnr, namespaces.INVALID, 0, -1)
+    vim.api.nvim_buf_clear_namespace(bufnr, namespaces.DIRTY, 0, -1)
     M.set_ranges(bufnr, nil)
 end
 

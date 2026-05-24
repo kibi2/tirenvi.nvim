@@ -1,7 +1,6 @@
 -----------------------------------------------------------------------
 -- Dependencies
 -----------------------------------------------------------------------
-local Context = require("tirenvi.app.context")
 local Document = require("tirenvi.core.document")
 local Attrs = require("tirenvi.core.attrs")
 local Blocks = require("tirenvi.core.blocks")
@@ -11,7 +10,6 @@ local Request = require("tirenvi.app.request")
 local flat_parser = require("tirenvi.parser.flat_parser")
 local buf_parser = require("tirenvi.parser.buf_parser")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
-local buffer = require("tirenvi.io.buffer")
 local buf_state = require("tirenvi.io.buf_state")
 local writer = require("tirenvi.io.writer")
 local attr_store = require("tirenvi.io.attr_store")

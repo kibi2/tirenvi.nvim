@@ -3,9 +3,7 @@
 -----------------------------------------------------------------------
 
 local config = require("tirenvi.config")
-local buffer = require("tirenvi.io.buffer")
 local errors = require("tirenvi.util.errors")
-local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
 
 -----------------------------------------------------------------------

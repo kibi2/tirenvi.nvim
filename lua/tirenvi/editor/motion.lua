@@ -1,5 +1,4 @@
 local Context = require("tirenvi.app.context")
-local Attrs = require("tirenvi.core.attrs")
 local buffer = require("tirenvi.io.buffer")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
 local tir_buf = require("tirenvi.core.tir_buf")

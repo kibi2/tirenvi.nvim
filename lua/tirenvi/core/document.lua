@@ -4,7 +4,6 @@ local Attrs = require("tirenvi.core.attrs")
 local Blocks = require("tirenvi.core.blocks")
 local Block = require("tirenvi.core.block")
 local Range = require("tirenvi.util.range")
-local Range3 = require("tirenvi.util.range3")
 local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
 

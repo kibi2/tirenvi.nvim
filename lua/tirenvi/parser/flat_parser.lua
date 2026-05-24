@@ -12,7 +12,6 @@
 local Document = require("tirenvi.core.document")
 local Context = require("tirenvi.app.context")
 local Parser = require("tirenvi.parser.parser")
-local util = require("tirenvi.util.util")
 local errors = require("tirenvi.util.errors")
 local log = require("tirenvi.util.log")
 
