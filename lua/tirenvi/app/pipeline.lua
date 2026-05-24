@@ -55,7 +55,7 @@ local function vim_to_vdoc_text_driven(ctx, req_r, range3)
         return nil
     end
     log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
-    req_r.attrs = Attrs.update_range(req_r.attrs or {}, range3)
+    req_r.attrs = Attrs.adjust(req_r.attrs or {}, range3)
     if range3 then log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "0UPDATE CHACHED:")) end
     local vim_doc = vim_parser.parse_text_driven(ctx, req_r, range3)
     log.watch("ATTR", Document.debug_attrs(vim_doc, "1DOC ATTR:"))
@@ -158,7 +158,7 @@ end
 
 ---@param ctx Context
 ---@param range3 Range3
-local function update_attrs(ctx, range3)
+local function reconcile_attrs(ctx, range3)
     local req_r = Request.from_range(Range3.get_new_range(range3))
     local vim_doc = vim_to_vdoc_text_driven(ctx, req_r, range3)
     if not vim_doc then
@@ -240,7 +240,7 @@ end
 
 ---@param ctx Context
 ---@param range3 Range3
-local function update_invalid(ctx, range3)
+local function reconcile_dirty_ranges(ctx, range3)
     local bufnr = ctx.bufnr
     local prev_ranges = invalid.get_ranges(bufnr)
     invalid.clear(bufnr)
@@ -278,17 +278,18 @@ end
 
 ---@param ctx Context
 ---@param range3 Range3|nil
-local function reconcile_request(ctx, range3)
-    local bufnr = ctx.bufnr
-    if buf_state.is_repair(ctx, range3) then
-        schedule_new_range(ctx)
-        invalid.clear(bufnr)
+local function repair_request(ctx, range3)
+    if not buf_state.is_repair(ctx, range3) then
+        return
     end
+    local bufnr = ctx.bufnr
+    schedule_new_range(ctx)
+    invalid.clear(bufnr)
 end
 
 ---@param ctx Context
 ---@param range3 Range3|nil
-local function reconcile(ctx, range3)
+local function repair(ctx, range3)
     local bufnr = ctx.bufnr
     vim.schedule(function()
         if not api.nvim_buf_is_valid(bufnr) then
@@ -299,7 +300,7 @@ local function reconcile(ctx, range3)
         end
         local ok, err = xpcall(
             function()
-                reconcile_request(ctx, range3)
+                repair_request(ctx, range3)
             end,
             debug.traceback
         )
@@ -369,14 +370,14 @@ end
 ---@param ctx Context
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
-    update_attrs(ctx, range3)
-    update_invalid(ctx, range3)
-    reconcile(ctx)
+    reconcile_attrs(ctx, range3)
+    reconcile_dirty_ranges(ctx, range3)
+    repair(ctx, range3)
 end
 
 ---@param ctx Context
 function M.insert_leave(ctx)
-    reconcile(ctx)
+    repair(ctx)
 end
 
 return M

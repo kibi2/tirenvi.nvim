@@ -144,7 +144,7 @@ end
 ---@param attrs Attr[]
 ---@param range3 Range3|nil
 ---@return Attr[]
-function M.update_range(attrs, range3)
+function M.adjust(attrs, range3)
     if #attrs == 0 or not range3 then
         return attrs
     end
