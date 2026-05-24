@@ -2,7 +2,7 @@ local Context = require("tirenvi.app.context")
 local Attrs = require("tirenvi.core.attrs")
 local buffer = require("tirenvi.io.buffer")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
-local tir_vim = require("tirenvi.core.tir_vim")
+local tir_text = require("tirenvi.core.tir_text")
 
 local M = {}
 
@@ -11,7 +11,7 @@ local function get_pipe()
 	local ctx = Context.from_buf()
 	local irow = buffer.get_cursor()
 	local line = buffer.get_line(ctx.bufnr, irow)
-	return tir_vim.get_pipe_char(line) or ""
+	return tir_text.get_pipe_char(line) or ""
 end
 
 ---@param op string
@@ -33,7 +33,7 @@ function M.block_top()
 	local ctx           = Context.from_buf()
 	local irow, icol    = buffer.get_cursor()
 	local line_provider = LinProvider.new(ctx.bufnr)
-	local top           = tir_vim.get_block_top_nrow(ctx, line_provider, irow)
+	local top           = tir_text.get_block_top_nrow(ctx, line_provider, irow)
 	buffer.set_cursor(0, top, icol)
 end
 
@@ -41,7 +41,7 @@ function M.block_bottom()
 	local ctx = Context.from_buf()
 	local irow, icol = buffer.get_cursor()
 	local line_provider = LinProvider.new(ctx.bufnr)
-	local bottom = tir_vim.get_block_bottom_nrow(ctx, line_provider, irow)
+	local bottom = tir_text.get_block_bottom_nrow(ctx, line_provider, irow)
 	buffer.set_cursor(0, bottom, icol)
 end
 

@@ -5,7 +5,7 @@ local Context = require("tirenvi.app.context")
 local Document = require("tirenvi.core.document")
 local Attrs = require("tirenvi.core.attrs")
 local Blocks = require("tirenvi.core.blocks")
-local tir_vim = require("tirenvi.core.tir_vim")
+local tir_text = require("tirenvi.core.tir_text")
 local Request = require("tirenvi.app.request")
 local flat_parser = require("tirenvi.parser.flat_parser")
 local vim_parser = require("tirenvi.parser.vim_parser")
@@ -138,8 +138,8 @@ end
 ---@param irow integer
 local function get_range(ctx, irow)
     local line_provider = LinProvider.new(ctx.bufnr)
-    local top = tir_vim.get_block_top_nrow(ctx, line_provider, irow)
-    local bottom = tir_vim.get_block_bottom_nrow(ctx, line_provider, irow)
+    local top = tir_text.get_block_top_nrow(ctx, line_provider, irow)
+    local bottom = tir_text.get_block_bottom_nrow(ctx, line_provider, irow)
     return top, bottom
 end
 
@@ -185,7 +185,7 @@ local function expand_continue_lines(bufnr, range)
     local lines = reader.read(ctx, req)
     local prev = range.first - 1
     local prev_line = buffer.get_line(bufnr, prev)
-    while tir_vim.is_continue_line(prev_line) do
+    while tir_text.is_continue_line(prev_line) do
         prev = prev - 1
         prev_line = buffer.get_line(bufnr, prev)
     end
@@ -193,7 +193,7 @@ local function expand_continue_lines(bufnr, range)
     ---@type string|nil
     local last_line = lines[#lines]
     local last = range.last
-    while tir_vim.is_continue_line(last_line) or last_line == "" do
+    while tir_text.is_continue_line(last_line) or last_line == "" do
         last = last + 1
         last_line = buffer.get_line(bufnr, last)
     end
