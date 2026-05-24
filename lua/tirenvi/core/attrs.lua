@@ -52,15 +52,19 @@ local function get_new_seq(seq, range3, size, new_size)
     return new_pos + range3.first
 end
 
+local current_index = 1
 ---@param self Attr[]
----@param index integer
 ---@param irow integer
 ---@return integer|nil
-local function get_index(self, index, irow)
-    for index = index, #self do
-        if Range.contain(self[index].range, irow) then
-            return index
+local function get_index(self, irow)
+    if current_index > #self then
+        current_index = 1
+    end
+    for _ = 1, #self do
+        if Range.contain(self[current_index].range, irow) then
+            return current_index
         end
+        current_index = current_index % #self + 1
     end
     return nil
 end
@@ -174,11 +178,11 @@ function M.adjust(attrs, range3)
 end
 
 ---@param self Attr[]
----@param target Attr
+---@param range Range
 ---@return Attr|nil
-function M.get_attr(self, target)
+function M.get_attr(self, range)
     for _, attr in ipairs(self) do
-        if Range.intersect(attr.range, target.range) then
+        if Range.intersect(attr.range, range) then
             return attr
         end
     end
@@ -189,7 +193,7 @@ end
 ---@param irow integer
 ---@return Attr|nil
 function M:get(irow)
-    return self[get_index(self, 1, irow)]
+    return self[get_index(self, irow)]
 end
 
 return M

@@ -170,6 +170,21 @@ function M:shift(delta)
     end
 end
 
+---@param self Range[]
+---@param irow integer
+function M:append(irow)
+    if #self == 0 then
+        self[1] = new(irow, irow)
+    else
+        local last = self[#self]
+        if last.last + 1 == irow then
+            last.last = irow
+        else
+            self[#self + 1] = new(irow, irow)
+        end
+    end
+end
+
 ---@generic T
 ---@param items T[]
 ---@param range Range

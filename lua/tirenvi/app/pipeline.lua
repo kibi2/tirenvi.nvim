@@ -159,6 +159,7 @@ end
 
 ---@param ctx Context
 ---@param range3 Range3
+---@return Attr[]|nil
 local function reconcile_attrs(ctx, range3)
     local req_r = Request.from_range(Range3.get_new_range(range3))
     local vim_doc = vim_to_vdoc_text_driven(ctx, req_r, range3)
@@ -176,6 +177,7 @@ local function reconcile_attrs(ctx, range3)
     local attrs = Document.replace_attrs(vim_doc, req_r.range, req_r.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "6RESULT:"))
     attr_store.write(ctx, attrs)
+    return attrs
 end
 
 ---@param bufnr number

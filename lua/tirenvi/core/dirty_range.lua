@@ -1,3 +1,4 @@
+local Attrs = require("tirenvi.core.attrs")
 local tir_text = require("tirenvi.core.tir_text")
 local Range3 = require("tirenvi.util.range3")
 local Range = require("tirenvi.util.range")
@@ -65,10 +66,10 @@ local function check_invalid(line_provider, new_ranges)
     local inv_ranges = {}
     for _, range in ipairs(new_ranges) do
         for irow = range.first, range.last do
-            inv_ranges[#inv_ranges + 1] = Range.from_lua(irow, irow)
+            local attr = Attrs.get({}, irow)
+            Range.append(inv_ranges, irow)
         end
     end
-    Range.union(inv_ranges)
     return inv_ranges
 end
 
