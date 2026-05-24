@@ -50,7 +50,7 @@ end
 ---@param req_r Request
 ---@param range3 Range3|nil
 ---@return Document|nil
-local function vim_to_vdoc_text_driven(ctx, req_r, range3)
+local function buf_to_bdoc_text_driven(ctx, req_r, range3)
     reader.read(ctx, req_r)
     if not Attrs.has_range(req_r.attrs) then
         return nil
@@ -66,7 +66,7 @@ end
 ---@param ctx Context
 ---@param req_r Request
 ---@return Document|nil
-local function vim_to_vdoc_attr_driven(ctx, req_r)
+local function buf_to_bdoc_attr_driven(ctx, req_r)
     reader.read(ctx, req_r)
     if not Attrs.has_range(req_r.attrs) then
         return nil
@@ -80,8 +80,8 @@ end
 ---@param ctx Context
 ---@param req_r Request
 ---@return Document|nil
-local function vim_to_doc_text_driven(ctx, req_r)
-    local buf_doc = vim_to_vdoc_text_driven(ctx, req_r)
+local function buf_to_doc_text_driven(ctx, req_r)
+    local buf_doc = buf_to_bdoc_text_driven(ctx, req_r)
     if not buf_doc then
         return nil
     end
@@ -95,8 +95,8 @@ end
 ---@param no_normalize boolean -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
 ---@return Document|nil
-local function vim_to_doc_attrs_driven(ctx, req_r, no_normalize)
-    local buf_doc = vim_to_vdoc_attr_driven(ctx, req_r)
+local function buf_to_doc_attrs_driven(ctx, req_r, no_normalize)
+    local buf_doc = buf_to_bdoc_attr_driven(ctx, req_r)
     if not buf_doc or not Blocks.has_grid(buf_doc.blocks) then
         return nil
     end
@@ -162,7 +162,7 @@ end
 ---@return Attr[]|nil
 local function reconcile_attrs(ctx, range3)
     local req_r = Request.from_range(Range3.get_new_range(range3))
-    local buf_doc = vim_to_vdoc_text_driven(ctx, req_r, range3)
+    local buf_doc = buf_to_bdoc_text_driven(ctx, req_r, range3)
     if not buf_doc then
         return nil
     end
@@ -271,7 +271,7 @@ end
 ---@param no_undo boolean|nil
 function M.to_flat(ctx, no_undo)
     local req_r = Request.from_range(Range.WHOLE)
-    local doc = vim_to_doc_text_driven(ctx, req_r)
+    local doc = buf_to_doc_text_driven(ctx, req_r)
     if doc and Blocks.has_grid(doc.blocks) then
         doc_to_flat(ctx, req_r, doc, no_undo)
     end
@@ -285,7 +285,7 @@ function M.cmd_width(ctx, sel, width_op)
     dirty.clear(ctx.bufnr)
     log.debug("row%s, col%s", Range.short(sel.row), Range.short(sel.col))
     local req_r = Request.from_range(sel.row)
-    local doc = vim_to_doc_text_driven(ctx, req_r)
+    local doc = buf_to_doc_text_driven(ctx, req_r)
     if doc and Blocks.has_grid(doc.blocks) then
         Blocks.change_width(doc.blocks, sel.col, width_op)
         local buf_doc = Document.to_vim(doc)
@@ -300,7 +300,7 @@ function M.cmd_format(ctx, no_normalize, no_undo)
     dirty.clear(ctx.bufnr)
     no_normalize = no_normalize or false
     local req_r = Request.from_range(Range.WHOLE)
-    local doc = vim_to_doc_attrs_driven(ctx, req_r, no_normalize)
+    local doc = buf_to_doc_attrs_driven(ctx, req_r, no_normalize)
     if not doc or not Blocks.has_grid(doc.blocks) then
         return
     end
