@@ -24,12 +24,9 @@ local function show_debug_marks(bufnr, range, id)
         invalidate = false,
         --
         hl_group = "TirDirty",
-        --hl_group = "CursorLine",
-        --hl_group = "DiagnosticWarn",
         hl_eol = false,
         --virt_text = { { "dirty", "Comment" } },
-        --virt_text_pos = "eol", -- eol
-        --sign_text = tostring(id):sub(-2),
+        --virt_text_pos = "eol",
         sign_text = ".",
         sign_hl_group = "DiagnosticWarn",
     }
