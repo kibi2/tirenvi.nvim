@@ -84,7 +84,7 @@ The following components are responsible for converting between layers.
 flat_parser
     fl_lines  ↔ Blocks
 
-vim_parser
+buf_parser
     vi_lines  ↔ Blocks
 
 external parser
@@ -121,7 +121,7 @@ records ↔ vi_lines
 flat file
   → (neovim)             read file into fl_lines
   → (flat_parser.parse)  fl_lines → Blocks
-  → (vim_parser.unparse) Blocks → vi_lines
+  → (buf_parser.unparse) Blocks → vi_lines
   → (neovim)             replace vim buffer
 ```
 
@@ -132,7 +132,7 @@ flat file
 ```text
 vim buffer
   → (neovim)               get lines into vi_lines
-  → (vim_parser.parse)     vi_lines → Blocks
+  → (buf_parser.parse)     vi_lines → Blocks
   → (flat_parser.unparse)  Blocks → fl_lines
   → (neovim)               write to file
 ```
@@ -161,8 +161,8 @@ init.from_flat
 ```text
 vim buffer
   → (neovim)             get lines into vi_lines
-  → (vim_parser.parse)   vi_lines → Blocks
-  → (vim_parser.unparse) Blocks → vi_lines
+  → (buf_parser.parse)   vi_lines → Blocks
+  → (buf_parser.unparse) Blocks → vi_lines
   → (neovim)             replace vim buffer
 ```
 
@@ -189,8 +189,8 @@ init.from_flat
 ```text
 vim buffer
   → (neovim)             get lines into vi_lines
-  → (vim_parser.parse)   vi_lines → Blocks
+  → (buf_parser.parse)   vi_lines → Blocks
   → (rapair.repair)      Blocks.repair()
-  → (vim_parser.unparse) Blocks → vi_lines
+  → (buf_parser.unparse) Blocks → vi_lines
   → (neovim)             replace vim buffer
 ```

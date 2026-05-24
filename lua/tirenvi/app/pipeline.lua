@@ -9,7 +9,7 @@ local tir_buf = require("tirenvi.core.tir_buf")
 local dirty_range = require("tirenvi.core.dirty_range")
 local Request = require("tirenvi.app.request")
 local flat_parser = require("tirenvi.parser.flat_parser")
-local vim_parser = require("tirenvi.parser.vim_parser")
+local buf_parser = require("tirenvi.parser.buf_parser")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
 local buffer = require("tirenvi.io.buffer")
 local buf_state = require("tirenvi.io.buf_state")
@@ -58,7 +58,7 @@ local function vim_to_vdoc_text_driven(ctx, req_r, range3)
     log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
     req_r.attrs = Attrs.adjust(req_r.attrs or {}, range3)
     if range3 then log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "0UPDATE CHACHED:")) end
-    local vim_doc = vim_parser.parse_text_driven(ctx, req_r, range3)
+    local vim_doc = buf_parser.parse_text_driven(ctx, req_r, range3)
     log.watch("ATTR", Document.debug_attrs(vim_doc, "1DOC ATTR:"))
     return vim_doc
 end
@@ -72,7 +72,7 @@ local function vim_to_vdoc_attr_driven(ctx, req_r)
         return nil
     end
     log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
-    local vim_doc = vim_parser.parse_attr_driven(ctx, req_r)
+    local vim_doc = buf_parser.parse_attr_driven(ctx, req_r)
     log.watch("ATTR", Document.debug_attrs(vim_doc, "1DOC ATTR:"))
     return vim_doc
 end
@@ -111,7 +111,7 @@ end
 ---@param vim_doc Document
 ---@param no_undo boolean|nil
 local function doc_to_vim(ctx, req_r, vim_doc, no_undo)
-    local vi_lines = vim_parser.unparse(vim_doc, req_r)
+    local vi_lines = buf_parser.unparse(vim_doc, req_r)
     log.watch("ATTR", Document.debug_attrs(vim_doc, "9DOC ATTR:"))
     local req_w = Request.from_lines(req_r.range, vi_lines, no_undo or false)
     req_w.attrs = Document.replace_attrs(vim_doc, req_r.range, req_r.attrs)

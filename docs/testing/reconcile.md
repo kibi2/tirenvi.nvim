@@ -80,7 +80,7 @@ module name: core/repair -> core/reconcile
 | M.repair | repair | repair をshedule するだけ |
 | repair | repair_ranges | extmark参照してrangesを取り出す<br>insert/undo mode ならextmarkを付けるだけ<br>call repair_ranges |
 | repair_ranges | get_repaired_lines<br>ui.set_lines | rangeごとにcall get_repaired_lines<br>bufferに修正したtir-vimを書き込む |
-| get_repaired_lines | get_reference_attrs<br>get_blocks<br>Blocks.repair<br>vim_parser.unparse | rang前後の未修正行から列幅attrを参照<br>rangeからBlocksを作成する<br>Blocksを修正する<br>修正したBLocksからtir-vimを作る |
+| get_repaired_lines | get_reference_attrs<br>get_blocks<br>Blocks.repair<br>buf_parser.unparse | rang前後の未修正行から列幅attrを参照<br>rangeからBlocksを作成する<br>Blocksを修正する<br>修正したBLocksからtir-vimを作る |
 | get_blocks | <br>fix_empty_line_after_table | rangeからBlocksを作成する<br>新規行が追加された場合plain, gridを判定して調整する |
 | Blocks.repair<br> | apply_reference_attr_multi<br>apply_reference_attr_single | plain混在可blocksにattrを設定する<br>plain混在不可blocksにattrを設定する |
 | apply_reference_attr_multi | insert_plain_block<br>attach_attr | block間の矛盾を解消するblocks にattrを設定する |
@@ -107,7 +107,7 @@ module name: core/repair -> core/reconcile
 * 未修正行(rangeの前後1行を見る)からattrを作成する
 * attrをblockに設定する
 * BlockとBlockの構造に矛盾があればここで対処する(Block内の矛盾はここでは無視)
-* Block内の矛盾はvim_parser.unparseが行う
+* Block内の矛盾はbuf_parser.unparseが行う
 
 ## implement
 

@@ -20,12 +20,12 @@ lua << EOF
   local Range = require("tirenvi.util.range")
   local req_r = Request.from_range(Range.WHOLE)
   local reader = require("tirenvi.io.reader")
-  local vim_parser = require("tirenvi.parser.vim_parser")
+  local buf_parser = require("tirenvi.parser.buf_parser")
   local Document = require("tirenvi.core.document")
 	local ctx =  Context.from_buf(bufnr)
   reader.read(ctx, req_r)
   log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "UPDATE CHACHED ATTRS:")) 
-  local vim_doc = vim_parser.parse_text_driven(ctx, req_r, range3)
+  local vim_doc = buf_parser.parse_text_driven(ctx, req_r, range3)
   log.watch("ATTR", Document.debug_attrs(vim_doc, "1DOC ATTR:"))
 EOF
 
