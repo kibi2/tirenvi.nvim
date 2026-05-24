@@ -85,10 +85,10 @@ function M.parse_text_driven(ctx, req, range3)
 	local records = Record.from_tir_buf(req.lines)
 	local allow_plain = Context.is_allow_plain(ctx)
 	promote_empty_lines(records, req, allow_plain, range3)
-	local vim_doc = Document.new_vim_doc(records, allow_plain)
+	local buf_doc = Document.new_buf_doc(records, allow_plain)
 	local first = Request.lua_range(req)
-	Document.set_attr_range(vim_doc, first)
-	return vim_doc
+	Document.set_attr_range(buf_doc, first)
+	return buf_doc
 end
 
 ---@param ctx Context
@@ -97,17 +97,17 @@ end
 function M.parse_attr_driven(ctx, req)
 	local records = Record.from_tir_buf(req.lines)
 	--local attr = Attrs.slice(req.attrs, req.range) TODO
-	local vim_doc = Document.new_vim_doc(records, Context.is_allow_plain(ctx), req.attrs)
-	return vim_doc
+	local buf_doc = Document.new_buf_doc(records, Context.is_allow_plain(ctx), req.attrs)
+	return buf_doc
 end
 
----@param vim_doc Document
+---@param buf_doc Document
 ---@param req Request
 ---@return string[]
-function M.unparse(vim_doc, req)
+function M.unparse(buf_doc, req)
 	local first = Request.lua_range(req)
-	Document.set_attr_range(vim_doc, first)
-	local ndjsons = Document.serialize(vim_doc)
+	Document.set_attr_range(buf_doc, first)
+	local ndjsons = Document.serialize(buf_doc)
 	return Record.to_tir_buf(ndjsons)
 end
 
@@ -115,9 +115,9 @@ end
 ---@return boolean
 function M.table_is_aligned(lines)
 	local records = Record.from_tir_buf(lines)
-	local vim_doc = Document.new_vim_doc(records, false)
-	Document.infer_consistent_attr(vim_doc)
-	return Document.has_width(vim_doc)
+	local buf_doc = Document.new_buf_doc(records, false)
+	Document.infer_consistent_attr(buf_doc)
+	return Document.has_width(buf_doc)
 end
 
 return M
