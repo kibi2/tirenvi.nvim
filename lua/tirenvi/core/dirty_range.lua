@@ -1,3 +1,4 @@
+local Attr = require("tirenvi.core.attr")
 local Attrs = require("tirenvi.core.attrs")
 local tir_text = require("tirenvi.core.tir_text")
 local Range3 = require("tirenvi.util.range3")
@@ -59,15 +60,48 @@ local function adjust(line_provider, prev_ranges, range3)
     return Range.union(new_ranges)
 end
 
+---@param attr Attr|nil
+---@param line string|nil
+---@return boolean
+local function is_valid(attr, line)
+    if not line then
+        return true
+    end
+    if not attr then
+        return false
+    end
+    local pipe = tir_text.get_pipe_char(line)
+    if not pipe then
+        return Attr.is_plain(attr)
+    end
+    if not tir_text.is_normal_grid(line, pipe) then
+        return false
+    end
+    local widths = tir_text.get_widths(line)
+    if #attr.columns ~= #widths then
+        return false
+    end
+    for icol, width in ipairs(widths) do
+        if attr.columns[icol].width ~= width then
+            return false
+        end
+    end
+    return true
+end
+
 ---@param line_provider LineProvider
 ---@param new_ranges Range[]
+---@param attrs Attr[]
 ---@return Range[]
-local function check_invalid(line_provider, new_ranges)
+local function check_dirty(line_provider, new_ranges, attrs)
     local inv_ranges = {}
     for _, range in ipairs(new_ranges) do
         for irow = range.first, range.last do
-            local attr = Attrs.get({}, irow)
-            Range.append(inv_ranges, irow)
+            local attr = Attrs.get(attrs, irow)
+            local line = line_provider.get_line(irow)
+            if not is_valid(attr, line) then
+                Range.append(inv_ranges, irow)
+            end
         end
     end
     return inv_ranges
@@ -78,12 +112,13 @@ end
 -----------------------------------------------------------------------
 
 ---@param line_provider LineProvider
+---@param prev_ranges Range[]
+---@param attrs Attr[]
 ---@param range3 Range3
 ---@return Range[]
-function M.reconcile(line_provider, prev_ranges, range3)
+function M.reconcile(line_provider, prev_ranges, attrs, range3)
     local new_ranges = adjust(line_provider, prev_ranges, range3)
-    local inv_ranges = check_invalid(line_provider, new_ranges)
-    -- local inv_ranges = new_ranges
+    local inv_ranges = check_dirty(line_provider, new_ranges, attrs)
     return inv_ranges
 end
 

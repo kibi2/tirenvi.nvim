@@ -36,7 +36,7 @@ end
 ---@param bufnr number
 ---@param ranges Range[]|nil
 function M.set_ranges(bufnr, ranges)
-    buffer.set(bufnr, buffer.IKEY.INVALID, ranges)
+    buffer.set(bufnr, buffer.IKEY.DIRTY, ranges)
     if not ranges then
         return
     end
@@ -49,7 +49,7 @@ end
 ---@param bufnr number
 ---@return Range[]
 function M.get_ranges(bufnr)
-    return buffer.get(bufnr, buffer.IKEY.INVALID) or {}
+    return buffer.get(bufnr, buffer.IKEY.DIRTY) or {}
 end
 
 ---@param bufnr number

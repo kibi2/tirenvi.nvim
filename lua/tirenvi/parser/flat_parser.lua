@@ -46,7 +46,7 @@ local function js_lines_to_ndjsons(js_lines)
 		if js_line ~= nil and js_line ~= "" then
 			local ok, ndjson = pcall(vim.json.decode, js_line)
 			if not ok then
-				error(errors.new_domain_error(errors.invalid_json_error(js_line, ndjson)))
+				error(errors.new_domain_error(errors.dirty_json_error(js_line, ndjson)))
 			end
 			ndjsons[#ndjsons + 1] = ndjson
 		end

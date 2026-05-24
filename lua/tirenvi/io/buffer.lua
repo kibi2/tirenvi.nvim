@@ -38,8 +38,8 @@ M.IKEY              = {
 	-- block attrs
 	ATTRS = "attrs",
 
-	-- invalid row #
-	INVALID = "invalid",
+	-- dirty row #
+	DIRTY = "dirty",
 }
 
 local initial_value = {
@@ -50,7 +50,7 @@ local initial_value = {
 	[M.IKEY.FILETYPE] = nil,
 	[M.IKEY.REPAIR] = nil,
 	[M.IKEY.ATTRS] = nil,
-	[M.IKEY.INVALID] = nil,
+	[M.IKEY.DIRTY] = nil,
 }
 
 -----------------------------------------------------------------------

@@ -44,7 +44,7 @@ end
 
 ---@param bufnr number
 ---@return boolean
-function M.is_insert_mode(bufnr)
+local function is_insert_mode(bufnr)
 	local mode = buffer.get(bufnr, buffer.IKEY.INSERT_MODE) == true
 	if mode then
 		log.debug("===-===-===-=== insert mode[%d] ===-===-===-===", bufnr)
@@ -54,7 +54,7 @@ end
 
 ---@param bufnr number
 ---@return boolean
-function M.is_undo_mode(bufnr)
+local function is_undo_mode(bufnr)
 	local pre = buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST)
 	local next = fn.undotree(bufnr).seq_last
 	if pre == next then
@@ -62,6 +62,29 @@ function M.is_undo_mode(bufnr)
 		return true
 	end
 	return false
+end
+
+---@param ctx Context
+---@param range3 Range3|nil
+---@return string
+local function get_status(ctx, range3)
+	if buffer.get_repair(ctx.bufnr) == false then
+		return REPAIR_OFF
+	end
+	if not range3 then
+		return INSERT_LEAVE
+	elseif is_insert_mode(ctx.bufnr) then
+		-- Modifying the buffer in insert mode may corrupt the undo node.
+		-- Therefore, in insert mode, only record the dirty changed region
+		-- and repair it when leaving insert mode.
+		return INSERT_MODE
+	elseif is_undo_mode(ctx.bufnr) then
+		-- Moving the cursor in insert mode may create an dirty table undo node.
+		-- Therefore, when performing undo/redo, skip table validation.
+		return UNDO_REDO_MODE
+	else
+		return NORMAL_MODE
+	end
 end
 
 local checks = {
@@ -102,29 +125,6 @@ function M.should_skip(bufnr, user_opts)
 		end
 	end
 	return false
-end
-
----@param ctx Context
----@param range3 Range3|nil
----@return string
-local function get_status(ctx, range3)
-	if buffer.get_repair(ctx.bufnr) == false then
-		return REPAIR_OFF
-	end
-	if not range3 then
-		return INSERT_LEAVE
-	elseif M.is_insert_mode(ctx.bufnr) then
-		-- Modifying the buffer in insert mode may corrupt the undo node.
-		-- Therefore, in insert mode, only record the invalid changed region
-		-- and repair it when leaving insert mode.
-		return INSERT_MODE
-	elseif M.is_undo_mode(ctx.bufnr) then
-		-- Moving the cursor in insert mode may create an invalid table undo node.
-		-- Therefore, when performing undo/redo, skip table validation.
-		return UNDO_REDO_MODE
-	else
-		return NORMAL_MODE
-	end
 end
 
 ---@param ctx Context

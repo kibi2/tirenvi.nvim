@@ -16,7 +16,7 @@ local buf_state = require("tirenvi.io.buf_state")
 local writer = require("tirenvi.io.writer")
 local attr_store = require("tirenvi.io.attr_store")
 local reader = require("tirenvi.io.reader")
-local invalid = require("tirenvi.io.invalid")
+local dirty = require("tirenvi.io.dirty")
 local Range = require("tirenvi.util.range")
 local Range3 = require("tirenvi.util.range3")
 local util = require("tirenvi.util.util")
@@ -181,13 +181,14 @@ local function reconcile_attrs(ctx, range3)
 end
 
 ---@param bufnr number
+---@param attrs Attr[]
 ---@param range3 Range3
-local function reconcile_dirty_ranges(bufnr, range3)
-    local prev_ranges = invalid.get_ranges(bufnr)
+local function reconcile_dirty_ranges(bufnr, attrs, range3)
+    local prev_ranges = dirty.get_ranges(bufnr)
     local line_provider = LinProvider.new(bufnr)
-    local inv_ranges = dirty_range.reconcile(line_provider, prev_ranges, range3)
-    invalid.clear(bufnr)
-    invalid.set_ranges(bufnr, inv_ranges)
+    local inv_ranges = dirty_range.reconcile(line_provider, prev_ranges, attrs, range3)
+    dirty.clear(bufnr)
+    dirty.set_ranges(bufnr, inv_ranges)
 end
 
 local local_range = nil
@@ -200,7 +201,7 @@ end
 
 ---@param ctx Context
 local function schedule_new_range(ctx)
-    local new_ranges = invalid.get_ranges(ctx.bufnr)
+    local new_ranges = dirty.get_ranges(ctx.bufnr)
     if #new_ranges == 0 then
         return
     end
@@ -224,7 +225,7 @@ local function repair_request(ctx, range3)
     end
     local bufnr = ctx.bufnr
     schedule_new_range(ctx)
-    invalid.clear(bufnr)
+    dirty.clear(bufnr)
 end
 
 ---@param ctx Context
@@ -281,7 +282,7 @@ end
 ---@param width_op WidthOp
 function M.cmd_width(ctx, sel, width_op)
     expand_rect(ctx, sel.row)
-    invalid.clear(ctx.bufnr)
+    dirty.clear(ctx.bufnr)
     log.debug("row%s, col%s", Range.short(sel.row), Range.short(sel.col))
     local req_r = Request.from_range(sel.row)
     local doc = vim_to_doc_text_driven(ctx, req_r)
@@ -296,7 +297,7 @@ end
 ---@param no_normalize boolean|nil
 ---@param no_undo boolean|nil
 function M.cmd_format(ctx, no_normalize, no_undo)
-    invalid.clear(ctx.bufnr)
+    dirty.clear(ctx.bufnr)
     no_normalize = no_normalize or false
     local req_r = Request.from_range(Range.WHOLE)
     local doc = vim_to_doc_attrs_driven(ctx, req_r, no_normalize)
@@ -310,8 +311,11 @@ end
 ---@param ctx Context
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
-    reconcile_attrs(ctx, range3)
-    reconcile_dirty_ranges(ctx.bufnr, range3)
+    local attrs = reconcile_attrs(ctx, range3)
+    if not attrs then
+        return
+    end
+    reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
     repair(ctx, range3)
 end
 
