@@ -1,11 +1,11 @@
 === MESSAGE ===
-[Tirenvi] auto-reconcile:OFF 
-[Tirenvi] auto-reconcile:OFF 
-[Tirenvi] auto-reconcile:ON 
-[Tirenvi] auto-reconcile:ON 
-[Tirenvi] invalid argument: of (expected: on|off)
-[Tirenvi] auto-reconcile:OFF 
-[Tirenvi] auto-reconcile:ON 
+[Tirenvi] repair:disable 
+[Tirenvi] repair:disable 
+[Tirenvi] repair:enable 
+[Tirenvi] repair:enable 
+[Tirenvi] invalid argument: of (expected: [enable|disable|toggle])
+[Tirenvi] repair:disable 
+[Tirenvi] repair:enable 
 
 === DISPLAY ===
 │a⠀│b⠀│

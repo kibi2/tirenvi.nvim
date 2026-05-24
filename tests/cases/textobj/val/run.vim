@@ -16,7 +16,7 @@ execute "normal y"
 execute "normal $"
 execute "normal P"
 sleep 1m
-Tir _repair off
+Tir _repair disable
 execute "normal! 5Gainsert\<Esc>"
 call feedkeys("vah", "x")
 sleep 1m

@@ -1,6 +1,6 @@
 === MESSAGE ===
 block of 7 lines yanked
-[Tirenvi] auto-reconcile:OFF 
+[Tirenvi] repair:disable 
 tirenvi: Cannot select column: table is not aligned.
 
 === DISPLAY ===

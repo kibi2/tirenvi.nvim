@@ -5,19 +5,19 @@ source $TIRENVI_ROOT/tests/common.vim
 
 edit input.csv
 sleep 1m
-Tir _repair off
+Tir _repair disable
 sleep 1m
-Tir _repair off
+Tir _repair disable
 sleep 1m
-Tir _repair on
+Tir _repair enable
 sleep 1m
-Tir _repair on
+Tir _repair enable
 sleep 1m
 Tir _repair of
 sleep 1m
-Tir _repair
+Tir _repair toggle
 sleep 1m
-Tir _repair
+Tir _repair toggle
 sleep 1m
 call cursor(2, 1)
 execute "normal! aADD\<Esc>"

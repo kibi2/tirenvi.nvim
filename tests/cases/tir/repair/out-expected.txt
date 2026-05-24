@@ -1,7 +1,7 @@
 
 --- before format ---
 === MESSAGE ===
-[Tirenvi] auto-reconcile:OFF 
+[Tirenvi] repair:disable 
 3 fewer lines
 5 substitutions on 4 lines
 3 lines yanked

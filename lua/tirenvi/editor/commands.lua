@@ -145,17 +145,20 @@ local function cmd_repair(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr) then return end
 	local arg = opts.fargs[2]
 	if arg == nil then
+		init.format(ctx)
+		return
+	elseif arg == "toggle" then
 		buffer.set_repair(ctx.bufnr, not buffer.get_repair(ctx.bufnr))
-	elseif arg == "on" then
+	elseif arg == "enable" then
 		buffer.set_repair(ctx.bufnr, true)
-	elseif arg == "off" then
+	elseif arg == "disable" then
 		buffer.set_repair(ctx.bufnr, false)
 	else
-		notify.error("[Tirenvi] invalid argument: " .. arg .. " (expected: on|off)")
+		notify.error("[Tirenvi] invalid argument: " .. arg .. " (expected: [enable|disable|toggle])")
 		return
 	end
-	notify.info(string.format("[Tirenvi] auto-reconcile:%s ",
-		buffer.get_repair(ctx.bufnr) and "ON" or "OFF"))
+	notify.info(string.format("[Tirenvi] repair:%s ",
+		buffer.get_repair(ctx.bufnr) and "enable" or "disable"))
 end
 
 ----------------------------------------------------------------------
@@ -164,8 +167,8 @@ end
 
 local commands = {
 	toggle = cmd_toggle,
-	redraw = cmd_format,
-	_format = cmd_format,
+	redraw = cmd_repair,
+	_format = cmd_repair,
 	width = cmd_width,
 	_repair = cmd_repair,
 }
