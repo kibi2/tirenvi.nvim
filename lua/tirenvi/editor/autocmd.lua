@@ -86,7 +86,7 @@ end
 
 ---@param ctx Context
 local function on_buf_write_post(ctx)
-	init.restore_tir_text(ctx)
+	init.restore_tir_buf(ctx)
 end
 
 ---@param ctx Context

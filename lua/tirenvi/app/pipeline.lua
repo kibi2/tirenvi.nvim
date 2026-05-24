@@ -5,7 +5,7 @@ local Context = require("tirenvi.app.context")
 local Document = require("tirenvi.core.document")
 local Attrs = require("tirenvi.core.attrs")
 local Blocks = require("tirenvi.core.blocks")
-local tir_text = require("tirenvi.core.tir_text")
+local tir_buf = require("tirenvi.core.tir_buf")
 local dirty_range = require("tirenvi.core.dirty_range")
 local Request = require("tirenvi.app.request")
 local flat_parser = require("tirenvi.parser.flat_parser")
@@ -139,8 +139,8 @@ end
 ---@param irow integer
 local function get_range(ctx, irow)
     local line_provider = LinProvider.new(ctx.bufnr)
-    local top = tir_text.get_block_top_nrow(ctx, line_provider, irow)
-    local bottom = tir_text.get_block_bottom_nrow(ctx, line_provider, irow)
+    local top = tir_buf.get_block_top_nrow(ctx, line_provider, irow)
+    local bottom = tir_buf.get_block_bottom_nrow(ctx, line_provider, irow)
     return top, bottom
 end
 

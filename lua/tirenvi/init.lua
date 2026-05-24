@@ -7,7 +7,7 @@ local buffer = require("tirenvi.io.buffer")
 local attr_store = require("tirenvi.io.attr_store")
 local writer = require("tirenvi.io.writer")
 local reader = require("tirenvi.io.reader")
-local tir_text = require("tirenvi.core.tir_text")
+local tir_buf = require("tirenvi.core.tir_buf")
 local Range = require("tirenvi.util.range")
 local Range3 = require("tirenvi.util.range3")
 local util = require("tirenvi.util.util")
@@ -85,7 +85,7 @@ local buffer_backup
 function M.export_flat(ctx)
 	local req = Request.from_range(Range.WHOLE)
 	buffer_backup = reader.read(ctx, req)
-	if not tir_text.has_pipe(buffer_backup) then
+	if not tir_buf.has_pipe(buffer_backup) then
 		buffer_backup = nil
 		return
 	end
@@ -95,7 +95,7 @@ end
 --- Convert current buffer (or specified buffer) from plain format to view format
 ---@param ctx Context
 ---@return nil
-function M.restore_tir_text(ctx)
+function M.restore_tir_buf(ctx)
 	if not buffer_backup then
 		return
 	end
@@ -115,7 +115,7 @@ end
 function M.toggle(ctx)
 	local req = Request.from_range(Range.WHOLE)
 	local lines = reader.read(ctx, req)
-	if tir_text.has_pipe(lines) then
+	if tir_buf.has_pipe(lines) then
 		M.disable(ctx)
 	else
 		M.enable(ctx)
@@ -149,7 +149,7 @@ function M.insert_char_in_newline(ctx)
 	if not Context.is_allow_plain(ctx) then
 		line_ref = line_ref or line_next
 	end
-	local pipe = tir_text.get_pipe_char(line_ref)
+	local pipe = tir_buf.get_pipe_char(line_ref)
 	if not pipe then
 		return
 	end
@@ -160,7 +160,7 @@ end
 function M.keymap_lf()
 	local col = fn.col(".")
 	local line = fn.getline(".")
-	if not tir_text.get_pipe_char(line) then
+	if not tir_buf.get_pipe_char(line) then
 		return util.get_termcodes("<CR>")
 	end
 	if col == 1 or col > #line then
@@ -172,7 +172,7 @@ end
 ---@return string
 function M.keymap_tab()
 	local line = fn.getline(".")
-	if not tir_text.get_pipe_char(line) then
+	if not tir_buf.get_pipe_char(line) then
 		return util.get_termcodes("<Tab>")
 	end
 	if bo.expandtab then
