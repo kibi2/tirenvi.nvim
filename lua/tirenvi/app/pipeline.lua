@@ -6,6 +6,7 @@ local Document = require("tirenvi.core.document")
 local Attrs = require("tirenvi.core.attrs")
 local Blocks = require("tirenvi.core.blocks")
 local tir_text = require("tirenvi.core.tir_text")
+local dirty_range = require("tirenvi.core.dirty_range")
 local Request = require("tirenvi.app.request")
 local flat_parser = require("tirenvi.parser.flat_parser")
 local vim_parser = require("tirenvi.parser.vim_parser")
@@ -178,75 +179,12 @@ local function reconcile_attrs(ctx, range3)
 end
 
 ---@param bufnr number
----@param range Range
-local function expand_continue_lines(bufnr, range)
-    local ctx = Context.from_buf(bufnr)
-    local req = Request.from_range(range)
-    local lines = reader.read(ctx, req)
-    local prev = range.first - 1
-    local prev_line = buffer.get_line(bufnr, prev)
-    while tir_text.is_continue_line(prev_line) do
-        prev = prev - 1
-        prev_line = buffer.get_line(bufnr, prev)
-    end
-    range.first = prev + 1
-    ---@type string|nil
-    local last_line = lines[#lines]
-    local last = range.last
-    while tir_text.is_continue_line(last_line) or last_line == "" do
-        last = last + 1
-        last_line = buffer.get_line(bufnr, last)
-    end
-    range.last = last
-end
-
----@param bufnr number
 ---@param range3 Range3
----@return Range
-local function get_new_range(bufnr, range3)
-    local new_range = Range3.get_new_range(range3)
-    log.watch("INVD", new_range)
-    expand_continue_lines(bufnr, new_range)
-    return new_range
-end
-
----@param bufnr number
----@param prev_ranges Range[]
----@param range3 Range3
----@return Range[]
-local function update_ranges(bufnr, prev_ranges, range3)
-    local ranges1, _, ranges3 = Range.split(prev_ranges, Range.from_lua(range3.first, range3.last))
-    Range.shift(ranges3, Range3.get_delta(range3))
-    local range2 = get_new_range(bufnr, range3)
-    local new_ranges = ranges1
-    new_ranges[#new_ranges + 1] = range2
-    util.extend(new_ranges, ranges3)
-    return Range.union(new_ranges)
-end
-
----@param bufnr number
----@param new_ranges Range[]
----@return Range[]
-local function check_invalid(bufnr, new_ranges)
-    local inv_ranges = {}
-    for _, range in ipairs(new_ranges) do
-        for irow = range.first, range.last do
-            inv_ranges[#inv_ranges + 1] = Range.from_lua(irow, irow)
-        end
-    end
-    Range.union(inv_ranges)
-    return inv_ranges
-end
-
----@param ctx Context
----@param range3 Range3
-local function reconcile_dirty_ranges(ctx, range3)
-    local bufnr = ctx.bufnr
+local function reconcile_dirty_ranges(bufnr, range3)
     local prev_ranges = invalid.get_ranges(bufnr)
+    local line_provider = LinProvider.new(bufnr)
+    local inv_ranges = dirty_range.reconcile(line_provider, prev_ranges, range3)
     invalid.clear(bufnr)
-    local new_ranges = update_ranges(bufnr, prev_ranges, range3)
-    local inv_ranges = check_invalid(bufnr, new_ranges)
-    -- local inv_ranges = new_ranges
     invalid.set_ranges(bufnr, inv_ranges)
 end
 
@@ -371,7 +309,7 @@ end
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
     reconcile_attrs(ctx, range3)
-    reconcile_dirty_ranges(ctx, range3)
+    reconcile_dirty_ranges(ctx.bufnr, range3)
     repair(ctx, range3)
 end
 
