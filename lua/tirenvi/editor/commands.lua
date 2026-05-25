@@ -81,15 +81,6 @@ function WidthOp:apply(current)
 	end
 end
 
--- Command / Keymap handlers (private)
----@param ctx Context
----@param opts {[string]:any}
----@return nil
-local function cmd_format(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr) then return end
-	init.format(ctx)
-end
-
 ---@param ctx Context
 ---@param opts {[string]:any}
 ---@return nil
@@ -160,6 +151,18 @@ local function cmd_repair(ctx, opts)
 		buffer.get_repair(ctx.bufnr) and "enable" or "disable"))
 end
 
+local warned = false
+---@param ctx Context
+---@param opts {[string]:any}
+---@return nil
+local function cmd_redraw(ctx, opts)
+	if not warned then
+		warned = true
+		notify.warn("Tir redraw is deprecated and will be removed in v0.5. Use :Tir repair")
+	end
+	cmd_repair(ctx, opts)
+end
+
 ----------------------------------------------------------------------
 -- Registration (private)
 ----------------------------------------------------------------------
@@ -168,6 +171,7 @@ local commands = {
 	toggle = cmd_toggle,
 	width = cmd_width,
 	repair = cmd_repair,
+	redraw = cmd_redraw,
 }
 
 
