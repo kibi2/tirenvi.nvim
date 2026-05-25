@@ -148,7 +148,7 @@ function M.is_normal_grid(line, pipe)
     if not util.start_with(line, pipe) then
         return false
     end
-    if not util.end_with(line, pipen) then
+    if not util.end_with(line, pipe) then
         return false
     end
     return true
@@ -157,11 +157,15 @@ end
 ---@param line string
 ---@return integer[]
 function M.get_widths(line)
+    return M.get_max_widths(line, true)
+end
+
+---@param line string
+---@param no_wrap boolean|nil
+---@return integer[]
+function M.get_max_widths(line, no_wrap)
     local cells = M.get_cells(line)
-    local widths = {}
-    for _, cell in ipairs(cells) do
-        widths[#widths + 1] = Cell.get_width(cell)
-    end
+    local widths = Cell.get_max_widths(cells, no_wrap)
     return widths
 end
 

@@ -61,7 +61,7 @@ local function get_index(self, irow)
         current_index = 1
     end
     for _ = 1, #self do
-        if Range.contain(self[current_index].range, irow) then
+        if Range.contains(self[current_index].range, irow) then
             return current_index
         end
         current_index = current_index % #self + 1
@@ -182,7 +182,7 @@ end
 ---@return Attr|nil
 function M.get_attr(self, range)
     for _, attr in ipairs(self) do
-        if Range.intersect(attr.range, range) then
+        if Range.intersects(attr.range, range) then
             return attr
         end
     end

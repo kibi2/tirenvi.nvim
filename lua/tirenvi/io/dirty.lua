@@ -28,7 +28,7 @@ local function show_marks(bufnr, range, id)
     if vim.log.levels.DEBUG >= config.log.level then
         opts.virt_text = { { "dirty", "Comment" } }
         opts.virt_text_pos = "eol"
-        opts.sign_text = "|"
+        opts.sign_text = tostring(id):sub(-2)
     end
     vim.api.nvim_buf_set_extmark(bufnr, namespaces.DIRTY, start0, 0, opts)
 end

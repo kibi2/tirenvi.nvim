@@ -17,6 +17,7 @@ local reader = require("tirenvi.io.reader")
 local dirty = require("tirenvi.io.dirty")
 local Range = require("tirenvi.util.range")
 local Range3 = require("tirenvi.util.range3")
+local errors = require("tirenvi.util.errors")
 local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
 
@@ -203,14 +204,14 @@ local function schedule_new_range(ctx)
         return
     end
     if local_range == nil then
-        local_range = Range.join(new_ranges)
+        local_range = Range.bounding(new_ranges)
         vim.schedule(function()
             apply_local_range(ctx)
         end)
     else
         log.watch("UNDO", ctx.bufnr, { "multi time on_lines", local_range })
         new_ranges[#new_ranges + 1] = local_range
-        local_range = Range.join(new_ranges)
+        local_range = Range.bounding(new_ranges)
     end
 end
 
@@ -247,6 +248,15 @@ local function repair(ctx, range3)
     end)
 end
 
+---@param ctx Context
+---@param range Range
+---@return boolean
+local function has_dirty(ctx, range)
+    local dirty_ranges = dirty.get_ranges(ctx.bufnr)
+    local ranges = Range.slice(dirty_ranges, range)
+    return #ranges > 0
+end
+
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
@@ -279,6 +289,9 @@ end
 function M.cmd_width(ctx, sel, width_op)
     expand_rect(ctx, sel.row)
     log.debug("row%s, col%s", Range.short(sel.row), Range.short(sel.col))
+    if has_dirty(ctx, sel.row) then
+        error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
+    end
     local req_r = Request.from_range(sel.row)
     local doc = buf_to_doc_text_driven(ctx, req_r)
     if doc and Blocks.has_grid(doc.blocks) then

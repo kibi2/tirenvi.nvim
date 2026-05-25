@@ -96,25 +96,30 @@ local lf_len = display_width(lf)
 -----------------------------------------------------------------------
 
 ---@param cells Cell[]
+---@param no_wrap boolean|nil
 ---@return integer[]
-function M.get_widths(cells)
+function M.get_max_widths(cells, no_wrap)
     local widths = {}
     for _, cell in ipairs(cells) do
-        local width = M.get_width(cell)
+        local width = M.get_max_width(cell, no_wrap)
         widths[#widths + 1] = width
     end
     return widths
 end
 
 ---@param self Cell
+---@param no_wrap boolean|nil
 ---@return integer
-function M.get_width(self)
+function M.get_max_width(self, no_wrap)
+    no_wrap = no_wrap or false
     if not self then
         return 0
     end
     local cells = { self }
-    if not util.end_with(self, config.marks.padding) then
-        cells = vim.split(self, lf)
+    if not no_wrap then
+        if not util.end_with(self, config.marks.padding) then
+            cells = vim.split(self, lf)
+        end
     end
     local max_width = 0
     for icell, cell in pairs(cells) do

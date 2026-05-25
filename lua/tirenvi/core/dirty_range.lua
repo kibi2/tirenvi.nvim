@@ -29,7 +29,7 @@ local function expand_continue_lines(line_provider, range)
     ---@type string|nil
     local last_line = lines[#lines]
     local last = range.last
-    while tir_buf.is_continue_line(last_line) or last_line == "" do
+    while tir_buf.is_continue_line(last_line) do
         last = last + 1
         last_line = line_provider.get_line(last)
     end
@@ -41,7 +41,6 @@ end
 ---@return Range
 local function get_new_range(line_provider, range3)
     local new_range = Range3.get_new_range(range3)
-    log.watch("INVD", new_range)
     expand_continue_lines(line_provider, new_range)
     return new_range
 end
@@ -57,7 +56,7 @@ local function adjust(line_provider, prev_ranges, range3)
     local new_ranges = ranges1
     new_ranges[#new_ranges + 1] = range2
     util.extend(new_ranges, ranges3)
-    return Range.union(new_ranges)
+    return Range.merge(new_ranges)
 end
 
 ---@param attr Attr|nil
@@ -100,7 +99,7 @@ local function check_dirty(line_provider, new_ranges, attrs)
             local attr = Attrs.get(attrs, irow)
             local line = line_provider.get_line(irow)
             if not is_valid(attr, line) then
-                Range.append(inv_ranges, irow)
+                Range.push(inv_ranges, irow)
             end
         end
     end
@@ -119,6 +118,7 @@ end
 function M.reconcile(line_provider, prev_ranges, attrs, range3)
     local new_ranges = adjust(line_provider, prev_ranges, range3)
     local inv_ranges = check_dirty(line_provider, new_ranges, attrs)
+    log.watch("INVD", inv_ranges)
     return inv_ranges
 end
 
@@ -130,7 +130,7 @@ function M.remove(prev_ranges, range3)
     Range.shift(ranges3, Range3.get_delta(range3))
     local new_ranges = ranges1
     util.extend(new_ranges, ranges3)
-    return Range.union(new_ranges)
+    return Range.merge(new_ranges)
 end
 
 return M

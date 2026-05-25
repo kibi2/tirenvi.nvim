@@ -25,7 +25,7 @@ end
 M.WHOLE = { first = nil, last = nil }
 
 ---@return Range[]
-local function sort_range(ranges)
+local function sort(ranges)
     table.sort(ranges, function(prev, next)
         return prev.first < next.first
     end)
@@ -78,7 +78,7 @@ end
 ---@param self Range|nil
 ---@param target Range|nil
 ---@return boolean
-function M:intersect(target)
+function M:intersects(target)
     if not self or not target then
         return false
     end
@@ -94,17 +94,17 @@ end
 ---@param self Range
 ---@param index integer
 ---@return boolean
-function M:contain(index)
+function M:contains(index)
     return self.first <= index and index <= self.last
 end
 
 ---@param ranges Range[]
 ---@return Range[]
-function M.union(ranges)
+function M.merge(ranges)
     if #ranges == 0 then
         return ranges
     end
-    ranges = sort_range(ranges)
+    ranges = sort(ranges)
     local unions = { ranges[1] }
     for index = 2, #ranges do
         local merged = union_range(unions[#unions], ranges[index])
@@ -119,7 +119,7 @@ end
 
 ---@param ranges Range[]
 ---@return Range
-function M.join(ranges)
+function M.bounding(ranges)
     local min = ranges[1].first
     local max = ranges[1].last
     for _, ranges in ipairs(ranges) do
@@ -172,7 +172,7 @@ end
 
 ---@param self Range[]
 ---@param irow integer
-function M:append(irow)
+function M:push(irow)
     if #self == 0 then
         self[1] = new(irow, irow)
     else
@@ -207,7 +207,7 @@ function M.slice(items, range)
         return new_items
     end
     for _, item in ipairs(items) do
-        if M.intersect(M.get_range(item), range) then
+        if M.intersects(M.get_range(item), range) then
             local new_item = vim.deepcopy(item)
             local item_range = M.get_range(new_item)
             item_range.first = math.max(item_range.first, range.first)
