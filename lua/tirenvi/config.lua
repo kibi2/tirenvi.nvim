@@ -45,6 +45,10 @@ local defaults = {
 		conceal = {
 			level = 1,
 			cursor = "nvic",
+		},
+		highlight = {
+			line = "TirenviDirty",
+			sign = "TirenviDirtySign",
 		}
 	},
 	log = {

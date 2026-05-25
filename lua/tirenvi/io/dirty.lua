@@ -20,10 +20,10 @@ local function show_marks(bufnr, range, id)
         strict = false,
         invalidate = false,
         --
-        hl_group = "TirDirty",
+        hl_group = config.ui.highlight.line,
         hl_eol = false,
         sign_text = ".",
-        sign_hl_group = "DiagnosticWarn",
+        sign_hl_group = config.ui.highlight.sign,
     }
     if vim.log.levels.DEBUG >= config.log.level then
         opts.virt_text = { { "dirty", "Comment" } }
