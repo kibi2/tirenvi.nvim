@@ -53,56 +53,65 @@ flat (gfm markdown, csv, tsv, ...)
         ↓ external parser
 TIR (intermediate representation)
         ↓ tirenvi
-tir-vim (structured buffer view)
+tir-buf (structured buffer view)
 ```
 
-Editing happens in **tir-vim format**.
+Editing happens in **tir-buf format**.
 
 On save:
 
 ```text
-tir-vim → TIR → original flat format
+tir-buf → TIR → original flat format
 ```
 
 Key principles:
 
 * The buffer contains only text
-* No hidden state
-* No shadow buffer
+* No hidden shadow buffer
 * No custom buffer type
 * Transformations are reversible
-* The buffer is always structurally valid
+* TIR is the source of truth
+* Buffer structure can temporarily diverge during editing
+* Structural repair is explicit and controllable
 
-Edit tables directly in Vim — without breaking structure.
+Edit tables directly in Vim while preserving a structured internal model.
 
 ## Features
 
 * Render CSV/TSV/GFM into an aligned structured view
 * Preserve original file format on save
 * Toggle raw ↔ structured view
-* Automatic structural correction
+* Immediate or deferred structural repair
+* Dirty line tracking and highlighting
 * Multiline cell support with preserved line breaks
 * Column width control with wrapping support
 * Grid-aware join that preserves column structure
 * Column text objects for structural editing
-* Works with all native Vim motions and operators
+* Works with native Vim motions and operators
 * External parser architecture (extensible)
 * No learning curve
 
 ## Structural Integrity Model
 
-Tirenvi is a **strict editor**.
+Tirenvi maintains a structured internal table model while allowing temporary buffer inconsistencies.
 
-* Invalid structural edits are detected
-* In Normal mode: corrected immediately
-* In Insert mode: corrected after leaving Insert
-* Undo tree integrity is preserved
-* Only leaf undo states are auto-corrected
+In deferred repair mode:
 
-Structural integrity is preserved in the current editing state.
+* Invalid table edits are allowed temporarily
+* Dirty lines are tracked incrementally
+* Internal attrs/model state remains structurally valid
+* Buffer structure may temporarily diverge from the model
+* `:Tir repair` synchronizes the buffer with the internal model
+
+In immediate repair mode:
+
+* Invalid structural edits are repaired automatically
+* Normal mode edits are repaired immediately
+* Insert mode edits are repaired after leaving Insert
 
 Tirenvi respects Vim’s undo tree.
-Historical undo states are not modified,
+
+Historical undo states are not rewritten,
 even if they contain temporary structural inconsistencies.
 
 ## Installation
@@ -167,11 +176,15 @@ require("tirenvi").setup({
 
 ## Commands
 
-| Command | Description |
-| ------------- | ---------------------------------- |
-| `:Tir redraw` | Normalize table layout (trim padding and re-align cells) |
-| `:Tir toggle` | Switch raw ↔ structured table view |
+| Command                  | Description                                                         |
+| ------------------------ | ------------------------------------------------------------------- |
+| `:Tir repair`            | Repair and reformat dirty tables                                    |
+| `:Tir repair enable`     | Enable automatic structural repair                                  |
+| `:Tir repair disable`    | Disable automatic structural repair                                 |
+| `:Tir repair toggle`     | Toggle automatic structural repair                                  |
+| `:Tir toggle`            | Switch raw ↔ structured table view                                  |
 | `:Tir width[=+-][count]` | Adjust column width by count (`=`: set, `+/-`: increment/decrement) |
+| `:Tir redraw`            | Deprecated. Will be removed in v0.5.<br>Use `:Tir repair` instead   |
 
 All native Vim editing works.
 
@@ -242,7 +255,6 @@ It is a structured text editor layer.
 
 * Column formatting presets
 * Outline mode
-* Optional non-strict mode (experimental)
 
 ## Comparison
 
@@ -264,7 +276,7 @@ Tirenvi prioritizes **structural safety with Vim purity**.
 The architecture centers around:
 
 * flat ↔ TIR (external)
-* TIR ↔ tir-vim (internal)
+* TIR ↔ tir-buf (internal)
 
 Large changes should respect this separation.
 
@@ -273,3 +285,4 @@ Please open an issue before major design proposals.
 ## License
 
 MIT License.
+
