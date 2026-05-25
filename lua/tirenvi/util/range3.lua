@@ -8,12 +8,6 @@ local Range = require("tirenvi.util.range")
 
 ---@param self Range3
 ---@return integer
-local function get_delta(self)
-    return self.new_last - self.last
-end
-
----@param self Range3
----@return integer
 local function get_update(self)
     return math.min(self.new_last, self.last) - self.first + 1
 end
@@ -21,13 +15,15 @@ end
 ---@param self Range3
 ---@return string
 local function get_add_str(self)
-    return get_delta(self) > 0 and tostring(get_delta(self) .. "A") or ""
+    local delta = Range3.get_delta(self)
+    return delta > 0 and tostring(delta .. "A") or ""
 end
 
 ---@param self Range3
 ---@return string
 local function get_remove_str(self)
-    return get_delta(self) < 0 and tostring(-get_delta(self) .. "D") or ""
+    local delta = Range3.get_delta(self)
+    return delta < 0 and tostring(-delta .. "D") or ""
 end
 
 ---@param self Range3
@@ -58,6 +54,12 @@ end
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
+
+---@param self Range3
+---@return integer
+function Range3.get_delta(self)
+    return self.new_last - self.last
+end
 
 ---@param first integer -- 1-based
 ---@param last integer -- 1-based
@@ -95,7 +97,7 @@ function Range3:update_ranges(ranges)
 end
 
 function Range3:is_insert()
-    return get_delta(self) > 0 and get_update(self) == 0
+    return Range3.get_delta(self) > 0 and get_update(self) == 0
 end
 
 return Range3

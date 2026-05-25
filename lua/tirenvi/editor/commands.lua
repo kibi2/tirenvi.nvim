@@ -4,7 +4,6 @@ local Cell = require("tirenvi.core.cell")
 local guard = require("tirenvi.util.guard")
 local buf_state = require("tirenvi.io.buf_state")
 local buffer = require("tirenvi.io.buffer")
-local LinProvider = require("tirenvi.io.buffer_line_provider")
 local init = require("tirenvi.init")
 local notify = require("tirenvi.util.notify")
 local errors = require("tirenvi.util.errors")
@@ -82,15 +81,6 @@ function WidthOp:apply(current)
 	end
 end
 
--- Command / Keymap handlers (private)
----@param ctx Context
----@param opts {[string]:any}
----@return nil
-local function cmd_format(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr) then return end
-	init.format(ctx)
-end
-
 ---@param ctx Context
 ---@param opts {[string]:any}
 ---@return nil
@@ -135,8 +125,7 @@ local function cmd_width(ctx, opts)
 	local sel      = get_selection(opts)
 	log.debug("row[%d-%d], col[%d-%d] %s", sel.row.first, sel.row.last, sel.col.first, sel.col.last,
 		width_op:to_string())
-	local line_provider = LinProvider.new(ctx.bufnr)
-	init.width(ctx, line_provider, sel, width_op)
+	init.width(ctx, sel, width_op)
 end
 
 ---@param ctx Context
@@ -146,17 +135,32 @@ local function cmd_repair(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr) then return end
 	local arg = opts.fargs[2]
 	if arg == nil then
+		init.format(ctx)
+		return
+	elseif arg == "toggle" then
 		buffer.set_repair(ctx.bufnr, not buffer.get_repair(ctx.bufnr))
-	elseif arg == "on" then
+	elseif arg == "enable" then
 		buffer.set_repair(ctx.bufnr, true)
-	elseif arg == "off" then
+	elseif arg == "disable" then
 		buffer.set_repair(ctx.bufnr, false)
 	else
-		notify.error("[Tirenvi] invalid argument: " .. arg .. " (expected: on|off)")
+		notify.error("[Tirenvi] invalid argument: " .. arg .. " (expected: [enable|disable|toggle])")
 		return
 	end
-	notify.info(string.format("[Tirenvi] auto-reconcile:%s ",
-		buffer.get_repair(ctx.bufnr) and "ON" or "OFF"))
+	notify.info(string.format("[Tirenvi] repair:%s ",
+		buffer.get_repair(ctx.bufnr) and "enable" or "disable"))
+end
+
+local warned = false
+---@param ctx Context
+---@param opts {[string]:any}
+---@return nil
+local function cmd_redraw(ctx, opts)
+	if not warned then
+		warned = true
+		notify.warn("Tir redraw is deprecated and will be removed in v0.5. Use :Tir repair")
+	end
+	cmd_repair(ctx, opts)
 end
 
 ----------------------------------------------------------------------
@@ -165,10 +169,9 @@ end
 
 local commands = {
 	toggle = cmd_toggle,
-	redraw = cmd_format,
-	_format = cmd_format,
 	width = cmd_width,
-	_repair = cmd_repair,
+	repair = cmd_repair,
+	redraw = cmd_redraw,
 }
 
 

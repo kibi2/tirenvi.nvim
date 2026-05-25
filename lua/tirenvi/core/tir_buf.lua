@@ -1,7 +1,8 @@
 local Context = require("tirenvi.app.context")
+local Cell = require("tirenvi.core.cell")
 local config = require("tirenvi.config")
-local util = require("tirenvi.util.util")
 local buffer = require("tirenvi.io.buffer")
+local util = require("tirenvi.util.util")
 local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
@@ -138,6 +139,34 @@ function M.get_cells(line)
     line = remove_end_pipe(line)
     line = line:gsub(vim.pesc(pipec), pipen)
     return vim.split(line, pipen, { plain = true })
+end
+
+---@param line string
+---@param pipe string
+---@return boolean
+function M.is_normal_grid(line, pipe)
+    if not util.start_with(line, pipe) then
+        return false
+    end
+    if not util.end_with(line, pipe) then
+        return false
+    end
+    return true
+end
+
+---@param line string
+---@return integer[]
+function M.get_widths(line)
+    return M.get_max_widths(line, true)
+end
+
+---@param line string
+---@param no_wrap boolean|nil
+---@return integer[]
+function M.get_max_widths(line, no_wrap)
+    local cells = M.get_cells(line)
+    local widths = Cell.get_max_widths(cells, no_wrap)
+    return widths
 end
 
 ---@param line string|nil

@@ -4,7 +4,6 @@ local Attrs = require("tirenvi.core.attrs")
 local Blocks = require("tirenvi.core.blocks")
 local Block = require("tirenvi.core.block")
 local Range = require("tirenvi.util.range")
-local Range3 = require("tirenvi.util.range3")
 local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
 
@@ -107,7 +106,7 @@ end
 ---@param allow_plain boolean
 ---@param attrs Attr[]|nil
 ---@return Document
-function M.new_vim_doc(records, allow_plain, attrs)
+function M.new_buf_doc(records, allow_plain, attrs)
     return new(records, allow_plain, attrs)
 end
 
@@ -115,7 +114,7 @@ end
 ---@param no_normalize boolean|nil  -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
 ---@return Document
-function M.from_vim_doc(self, no_normalize)
+function M.from_buf_doc(self, no_normalize)
     no_normalize = no_normalize or false
     local doc = vim.deepcopy(self)
     Blocks.from_vim(doc.blocks, no_normalize)

@@ -18,7 +18,7 @@ M.grid = {}
 ---@return Attr_column[]
 local function get_columns(cells)
     local columns = {}
-    local widths = Cell.get_widths(cells)
+    local widths = Cell.get_max_widths(cells)
     for _, width in ipairs(widths) do
         width = math.max(width, Cell.MIN_WIDTH)
         columns[#columns + 1] = { width = width }
@@ -32,7 +32,7 @@ end
 local function get_max_width(records, icol)
     local max_width = 0
     for _, record in ipairs(records) do
-        local width = Cell.get_width(record.row[icol])
+        local width = Cell.get_max_width(record.row[icol])
         max_width = math.max(max_width, width)
     end
     return math.max(max_width, Cell.MIN_WIDTH)
@@ -121,7 +121,7 @@ function M:change_width(records, sel, width_op)
     for icol, column in ipairs(self.columns) do
         local old_width = column.width
         local cel_range = Range.from_lua(start_col, start_col + old_width)
-        if Range.intersect(sel, cel_range) then
+        if Range.intersects(sel, cel_range) then
             if width_op.kind == "auto" then
                 column.width = get_max_width(records, icol)
             else

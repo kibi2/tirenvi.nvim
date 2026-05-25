@@ -1,6 +1,6 @@
 local Context = require("tirenvi.app.context")
-local tir_vim = require("tirenvi.core.tir_vim")
-local vim_parser = require("tirenvi.parser.vim_parser")
+local tir_buf = require("tirenvi.core.tir_buf")
+local buf_parser = require("tirenvi.parser.buf_parser")
 local config = require("tirenvi.config")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
 local buffer = require("tirenvi.io.buffer")
@@ -18,11 +18,11 @@ local M = {}
 local function setup_vl(ctx, line_provider, is_around)
     is_around = is_around or false
     local count = vim.v.count1
-    local rect, lines = tir_vim.get_block_rect(ctx, line_provider, count, is_around)
+    local rect, lines = tir_buf.get_block_rect(ctx, line_provider, count, is_around)
     if not rect then
         return
     end
-    if not vim_parser.table_is_aligned(lines) then
+    if not buf_parser.table_is_aligned(lines) then
         notify.error(errors.ERR.TABLE_IS_NOT_ALIGNED)
         return
     end

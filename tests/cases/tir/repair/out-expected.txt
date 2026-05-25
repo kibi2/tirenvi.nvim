@@ -1,7 +1,7 @@
 
 --- before format ---
 === MESSAGE ===
-[Tirenvi] auto-reconcile:OFF 
+[Tirenvi] repair:disable 
 3 fewer lines
 5 substitutions on 4 lines
 3 lines yanked
@@ -20,6 +20,8 @@ gfm
 │CarQWl│27⠀│NagQWya⠀⠀⠀⠀⠀│
 markdQWwn
 
+
+--- after format ---
 === MESSAGE ===
 [{'range': {'first': 1, 'last': 2}}, {'columns': [{'width': 5}, {'width': 3}, {'width': 11}], 'range': {'first': 3, 'last': 7}}, {'range': {'first': 8, 'last': 8}}, {'columns': [{'width': 6}, {'width': 3}, {'width': 12}], 'range': {'first': 9, 'last': 11}}, {'range': {'first': 12, 'last': 13}}]
 
@@ -37,3 +39,16 @@ gfm
 │CarQWl│27⠀│NagQWya⠀⠀⠀⠀⠀│
 markdQWwn
 
+=== MESSAGE ===
+[Tirenvi] repair:disable 
+[Tirenvi] repair:disable 
+[Tirenvi] repair:enable 
+[Tirenvi] repair:enable 
+[Tirenvi] invalid argument: of (expected: [enable|disable|toggle])
+[Tirenvi] repair:disable 
+[Tirenvi] repair:enable 
+
+=== DISPLAY ===
+│a⠀│b⠀│
+┊AD┊d⠀┊
+│Dc│⠀⠀│

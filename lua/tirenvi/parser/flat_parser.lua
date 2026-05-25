@@ -12,7 +12,6 @@
 local Document = require("tirenvi.core.document")
 local Context = require("tirenvi.app.context")
 local Parser = require("tirenvi.parser.parser")
-local util = require("tirenvi.util.util")
 local errors = require("tirenvi.util.errors")
 local log = require("tirenvi.util.log")
 
@@ -46,7 +45,7 @@ local function js_lines_to_ndjsons(js_lines)
 		if js_line ~= nil and js_line ~= "" then
 			local ok, ndjson = pcall(vim.json.decode, js_line)
 			if not ok then
-				error(errors.new_domain_error(errors.invalid_json_error(js_line, ndjson)))
+				error(errors.new_domain_error(errors.dirty_json_error(js_line, ndjson)))
 			end
 			ndjsons[#ndjsons + 1] = ndjson
 		end

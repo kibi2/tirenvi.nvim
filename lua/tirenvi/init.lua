@@ -3,12 +3,11 @@ local Context = require("tirenvi.app.context")
 local Request = require("tirenvi.app.request")
 local pipeline = require("tirenvi.app.pipeline")
 local config = require("tirenvi.config")
-local reconcile = require("tirenvi.core.reconcile")
 local buffer = require("tirenvi.io.buffer")
 local attr_store = require("tirenvi.io.attr_store")
 local writer = require("tirenvi.io.writer")
 local reader = require("tirenvi.io.reader")
-local tir_vim = require("tirenvi.core.tir_vim")
+local tir_buf = require("tirenvi.core.tir_buf")
 local Range = require("tirenvi.util.range")
 local Range3 = require("tirenvi.util.range3")
 local util = require("tirenvi.util.util")
@@ -31,38 +30,6 @@ M.motion = require("tirenvi.editor.motion")
 ---@return nil
 local function from_flat(ctx, no_undo)
 	pipeline.from_flat(ctx, no_undo)
-end
-
----@param ctx Context
----@param line_provider LineProvider
----@param irow integer
-local function get_range(ctx, line_provider, irow)
-	local top = tir_vim.get_block_top_nrow(ctx, line_provider, irow)
-	local bottom = tir_vim.get_block_bottom_nrow(ctx, line_provider, irow)
-	return top, bottom
-end
-
----@param ctx Context
----@param line_provider LineProvider
----@param row Range
-local function expand_rect(ctx, line_provider, row)
-	local top, bottom = get_range(ctx, line_provider, row.first)
-	row.first = top
-	local irow = bottom + 1
-	while irow <= row.last do
-		_, bottom = get_range(ctx, line_provider, irow)
-		irow = bottom + 1
-	end
-	row.last = bottom
-end
-
----@param ctx Context
----@param line_provider LineProvider
----@param sel Rect
----@param width_op WidthOp
-local function cmd_width(ctx, line_provider, sel, width_op)
-	expand_rect(ctx, line_provider, sel.row)
-	pipeline.cmd_width(ctx, sel, width_op)
 end
 
 local warned = false
@@ -118,7 +85,7 @@ local buffer_backup
 function M.export_flat(ctx)
 	local req = Request.from_range(Range.WHOLE)
 	buffer_backup = reader.read(ctx, req)
-	if not tir_vim.has_pipe(buffer_backup) then
+	if not tir_buf.has_pipe(buffer_backup) then
 		buffer_backup = nil
 		return
 	end
@@ -128,7 +95,7 @@ end
 --- Convert current buffer (or specified buffer) from plain format to view format
 ---@param ctx Context
 ---@return nil
-function M.restore_tir_vim(ctx)
+function M.restore_tir_buf(ctx)
 	if not buffer_backup then
 		return
 	end
@@ -148,7 +115,7 @@ end
 function M.toggle(ctx)
 	local req = Request.from_range(Range.WHOLE)
 	local lines = reader.read(ctx, req)
-	if tir_vim.has_pipe(lines) then
+	if tir_buf.has_pipe(lines) then
 		M.disable(ctx)
 	else
 		M.enable(ctx)
@@ -161,11 +128,10 @@ function M.format(ctx)
 end
 
 ---@param ctx Context	
----@param line_provider LineProvider
 ---@param sel Rect
 ---@param width_op WidthOp
-function M.width(ctx, line_provider, sel, width_op)
-	cmd_width(ctx, line_provider, sel, width_op)
+function M.width(ctx, sel, width_op)
+	pipeline.cmd_width(ctx, sel, width_op)
 	local command = util.get_termcodes(width_op:to_cmd())
 	set_repeat(command)
 end
@@ -183,7 +149,7 @@ function M.insert_char_in_newline(ctx)
 	if not Context.is_allow_plain(ctx) then
 		line_ref = line_ref or line_next
 	end
-	local pipe = tir_vim.get_pipe_char(line_ref)
+	local pipe = tir_buf.get_pipe_char(line_ref)
 	if not pipe then
 		return
 	end
@@ -194,7 +160,7 @@ end
 function M.keymap_lf()
 	local col = fn.col(".")
 	local line = fn.getline(".")
-	if not tir_vim.get_pipe_char(line) then
+	if not tir_buf.get_pipe_char(line) then
 		return util.get_termcodes("<CR>")
 	end
 	if col == 1 or col > #line then
@@ -206,7 +172,7 @@ end
 ---@return string
 function M.keymap_tab()
 	local line = fn.getline(".")
-	if not tir_vim.get_pipe_char(line) then
+	if not tir_buf.get_pipe_char(line) then
 		return util.get_termcodes("<Tab>")
 	end
 	if bo.expandtab then
@@ -219,14 +185,13 @@ end
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
 	log.watch("UNDO", "===+=== ENTRY on_lines[#%d]%s", ctx.bufnr, Range3.short(range3))
-	pipeline.update_attrs(ctx, range3)
-	reconcile.handle(ctx, range3)
+	pipeline.on_lines(ctx, range3)
 end
 
 ---@param ctx Context
 function M.on_insert_leave(ctx)
 	log.watch("UNDO", "===+=== ENTRY insert_leave[#%d]", ctx.bufnr)
-	reconcile.handle(ctx)
+	pipeline.insert_leave(ctx)
 end
 
 ---@param ctx Context

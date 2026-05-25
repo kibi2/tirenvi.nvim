@@ -1,6 +1,7 @@
 -----------------------------------------------------------------------
 -- Dependencies
 -----------------------------------------------------------------------
+local Context = require("tirenvi.app.context")
 local Document = require("tirenvi.core.document")
 local Attrs = require("tirenvi.core.attrs")
 local Blocks = require("tirenvi.core.blocks")
@@ -10,6 +11,7 @@ local Request = require("tirenvi.app.request")
 local flat_parser = require("tirenvi.parser.flat_parser")
 local buf_parser = require("tirenvi.parser.buf_parser")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
+local buffer = require("tirenvi.io.buffer")
 local buf_state = require("tirenvi.io.buf_state")
 local writer = require("tirenvi.io.writer")
 local attr_store = require("tirenvi.io.attr_store")
@@ -17,7 +19,6 @@ local reader = require("tirenvi.io.reader")
 local dirty = require("tirenvi.io.dirty")
 local Range = require("tirenvi.util.range")
 local Range3 = require("tirenvi.util.range3")
-local errors = require("tirenvi.util.errors")
 local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
 
@@ -204,14 +205,14 @@ local function schedule_new_range(ctx)
         return
     end
     if local_range == nil then
-        local_range = Range.bounding(new_ranges)
+        local_range = Range.join(new_ranges)
         vim.schedule(function()
             apply_local_range(ctx)
         end)
     else
         log.watch("UNDO", ctx.bufnr, { "multi time on_lines", local_range })
         new_ranges[#new_ranges + 1] = local_range
-        local_range = Range.bounding(new_ranges)
+        local_range = Range.join(new_ranges)
     end
 end
 
@@ -223,6 +224,7 @@ local function repair_request(ctx, range3)
     end
     local bufnr = ctx.bufnr
     schedule_new_range(ctx)
+    dirty.clear(bufnr)
 end
 
 ---@param ctx Context
@@ -246,15 +248,6 @@ local function repair(ctx, range3)
             error(err)
         end
     end)
-end
-
----@param ctx Context
----@param range Range
----@return boolean
-local function has_dirty(ctx, range)
-    local dirty_ranges = dirty.get_ranges(ctx.bufnr)
-    local ranges = Range.slice(dirty_ranges, range)
-    return #ranges > 0
 end
 
 -----------------------------------------------------------------------
@@ -289,15 +282,13 @@ end
 function M.cmd_width(ctx, sel, width_op)
     expand_rect(ctx, sel.row)
     log.debug("row%s, col%s", Range.short(sel.row), Range.short(sel.col))
-    if has_dirty(ctx, sel.row) then
-        error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
-    end
     local req_r = Request.from_range(sel.row)
     local doc = buf_to_doc_text_driven(ctx, req_r)
     if doc and Blocks.has_grid(doc.blocks) then
         Blocks.change_width(doc.blocks, sel.col, width_op)
         local buf_doc = Document.to_vim(doc)
         doc_to_vim(ctx, req_r, buf_doc)
+        dirty.clear(ctx.bufnr)
     end
 end
 
@@ -313,6 +304,7 @@ function M.cmd_format(ctx, no_normalize, no_undo)
     end
     local buf_doc = Document.to_vim(doc)
     doc_to_vim(ctx, req_r, buf_doc, no_undo)
+    dirty.clear(ctx.bufnr)
 end
 
 ---@param ctx Context

@@ -1,7 +1,7 @@
 local config = require("tirenvi.config")
 local CONST = require("tirenvi.constants")
 local Cell = require("tirenvi.core.cell")
-local tir_vim = require("tirenvi.core.tir_vim")
+local tir_buf = require("tirenvi.core.tir_buf")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -19,7 +19,7 @@ local pipen = config.marks.pipe
 ---@param vi_line string
 ---@return Record
 local function from_vi_line(vi_line)
-    local pipe = tir_vim.get_pipe_char(vi_line)
+    local pipe = tir_buf.get_pipe_char(vi_line)
     if pipe then
         return M.grid.new_from_vi_line(vi_line, pipe == pipec)
     else
@@ -77,7 +77,7 @@ end
 ---@return Record_grid
 function M.grid.new_from_vi_line(vi_line, has_continuation)
     vi_line = vi_line or ""
-    local cells = tir_vim.get_cells(vi_line)
+    local cells = tir_buf.get_cells(vi_line)
     local record = M.grid.new(cells)
     record._has_continuation = has_continuation
     return record
@@ -155,7 +155,7 @@ end
 
 ---@param vi_lines string[]
 ---@return Record[]
-function M.from_tir_vim(vi_lines)
+function M.from_tir_buf(vi_lines)
     local records = {}
     for index = 1, #vi_lines do
         records[index] = from_vi_line(vi_lines[index])
@@ -165,21 +165,21 @@ end
 
 ---@param ndjsons Ndjson[]
 ---@return string[]
-function M.to_tir_vim(ndjsons)
-    local tir_vim = {}
+function M.to_tir_buf(ndjsons)
+    local tir_buf = {}
     for _, record in ipairs(ndjsons) do
         local kind = record.kind
         if kind == CONST.KIND.PLAIN then
-            tir_vim[#tir_vim + 1] = record.line or ""
+            tir_buf[#tir_buf + 1] = record.line or ""
         elseif kind == CONST.KIND.GRID then
             local pipe = record._has_continuation and pipec or pipen
             local row_items = record.row
             local row = table.concat(row_items, pipe)
             row = pipe .. row .. pipe
-            tir_vim[#tir_vim + 1] = row
+            tir_buf[#tir_buf + 1] = row
         end
     end
-    return tir_vim
+    return tir_buf
 end
 
 ---@param self Record_grid[]
