@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2026-05-25
+
+### Added
+
+* Deferred structural repair mode
+* Dirty line tracking and highlighting
+* Configurable highlight groups for dirty markers
+* Dirty range tracking infrastructure
+* `:Tir repair [enable|disable|toggle]`
+
+### Changed
+
+* Rename `:Tir redraw` to `:Tir repair`
+* Rename reconcile-based APIs and modules to repair
+* Rename `tir-vim` architecture terminology to `tir-buf`
+* Rename `vim_*` modules to `buf_*`
+* Rename `INVALID` namespace/state to `DIRTY`
+* Improve internal pipeline organization and repair flow
+* Improve Range utility APIs and naming consistency
+
+### Deprecated
+
+* `:Tir redraw`
+
+  * Deprecated in favor of `:Tir repair`
+  * Will be removed in v0.5
+
+### Notes
+
+This release introduces a deferred repair model that allows temporary malformed table edits while preserving a structurally valid internal table model.
+
+Buffer text and internal table state are now treated separately:
+the internal attrs/model remains authoritative, while the visible buffer may temporarily diverge until repaired.
+
+This release also continues the transition from the older redraw/reconcile terminology toward a repair-based architecture.
+
 ## [0.3.0] - 2026-04-20
 
 ### Added

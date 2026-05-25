@@ -2,7 +2,7 @@
 
 
 
-- version: 0.3.0
+- version: 0.4.0
 - ⚠️ WARNING vim-repeat not found ('.' repeat disabled)
 - ✅ OK tir-csv found
 - ✅ OK tir-gfm-lite found
