@@ -57,6 +57,9 @@ local current_index = 1
 ---@param irow integer
 ---@return integer|nil
 local function get_index(self, irow)
+    if not self or #self == 0 then
+        return nil
+    end
     if current_index > #self then
         current_index = 1
     end
@@ -193,6 +196,9 @@ end
 ---@param irow integer
 ---@return Attr|nil
 function M:get(irow)
+    if not M.has_range(self) then
+        return nil
+    end
     return self[get_index(self, irow)]
 end
 
