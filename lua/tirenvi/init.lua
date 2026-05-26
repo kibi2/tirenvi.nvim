@@ -203,7 +203,9 @@ function M.on_filetype(ctx)
 	if old_filetype and old_filetype == new_filetype then
 		return ctx
 	end
-	pipeline.to_flat(ctx)
+	if old_filetype then
+		pipeline.to_flat(ctx)
+	end
 	buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, new_filetype)
 	attr_store.write(ctx, nil)
 	ctx = Context.from_buf(ctx.bufnr)

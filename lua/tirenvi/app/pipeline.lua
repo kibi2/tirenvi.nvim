@@ -35,9 +35,6 @@ local api = vim.api
 ---@param req_r Request
 ---@return Document
 local function flat_to_doc(ctx, req_r)
-    reader.read(ctx, req_r)
-    log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
-    util.ensure_no_reserved_marks(req_r.lines)
     local doc = flat_parser.parse(ctx, req_r)
     log.watch("ATTR", Document.debug_attrs(doc, "1DOC ATTR:"))
     Document.apply_attrs_by_id(doc, req_r.attrs)
@@ -48,12 +45,9 @@ end
 ---@param ctx Context
 ---@param req_r Request
 ---@param range3 Range3|nil
----@return Document|nil
+---@return Document
 local function buf_to_bdoc_text_driven(ctx, req_r, range3)
     reader.read(ctx, req_r)
-    if not Attrs.has_range(req_r.attrs) then
-        return nil
-    end
     log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
     req_r.attrs = Attrs.adjust(req_r.attrs or {}, range3)
     if range3 then log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "0UPDATE CHACHED:")) end
@@ -78,12 +72,9 @@ end
 
 ---@param ctx Context
 ---@param req_r Request
----@return Document|nil
+---@return Document
 local function buf_to_doc_text_driven(ctx, req_r)
     local buf_doc = buf_to_bdoc_text_driven(ctx, req_r)
-    if not buf_doc then
-        return nil
-    end
     Document.apply_cached_attr(buf_doc, req_r.attrs)
     log.watch("ATTR", Document.debug_attrs(buf_doc, "4CACHED:"))
     return Document.from_buf_doc(buf_doc)
@@ -162,7 +153,7 @@ end
 local function reconcile_attrs(ctx, range3)
     local req_r = Request.from_range(Range3.get_new_range(range3))
     local buf_doc = buf_to_bdoc_text_driven(ctx, req_r, range3)
-    if not buf_doc then
+    if not Attrs.has_range(req_r.attrs) then
         return nil
     end
     Document.inherit_neighbor_attr(buf_doc, req_r.attrs, range3)
@@ -221,7 +212,6 @@ local function repair_request(ctx, range3)
     if not buf_state.is_repair(ctx, range3) then
         return
     end
-    local bufnr = ctx.bufnr
     schedule_new_range(ctx)
 end
 
@@ -266,11 +256,19 @@ end
 ---@return nil
 function M.from_flat(ctx, no_undo)
     local req_r = Request.from_range(Range.WHOLE)
-    local flat_doc = flat_to_doc(ctx, req_r)
-    Document.set_auto_attr(flat_doc)
-    log.watch("ATTR", Document.debug_attrs(flat_doc, "5AUTO ATTR:"))
-    local buf_doc = Document.to_vim(flat_doc)
-    doc_to_vim(ctx, req_r, buf_doc, no_undo)
+    reader.read(ctx, req_r)
+    log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
+    if util.ensure_no_reserved_marks(req_r.lines) then
+        local flat_doc = flat_to_doc(ctx, req_r)
+        Document.set_auto_attr(flat_doc)
+        log.watch("ATTR", Document.debug_attrs(flat_doc, "5AUTO ATTR:"))
+        local buf_doc = Document.to_vim(flat_doc)
+        doc_to_vim(ctx, req_r, buf_doc, no_undo)
+    else
+        local buf_doc = buf_to_doc_text_driven(ctx, req_r)
+        local attrs = Blocks.collect_attrs(buf_doc.blocks)
+        attr_store.write(ctx, attrs)
+    end
 end
 
 ---@param ctx Context

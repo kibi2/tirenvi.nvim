@@ -10,6 +10,7 @@
 
 local config = require("tirenvi.config")
 local errors = require("tirenvi.util.errors")
+local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
 
 
@@ -94,12 +95,15 @@ function M.extend(array1, array2)
 end
 
 ---@param fl_lines string[]
----@return nil
+---@return boolean
 function M.ensure_no_reserved_marks(fl_lines)
 	local found = find_reserved_marks(fl_lines)
 	if #found > 0 then
-		error(errors.new_domain_error(errors.err_no_usable_characters(found)))
+		--error(errors.new_domain_error(errors.err_no_usable_characters(found)))
+		notify.error(errors.err_no_usable_characters(found))
+		return false
 	end
+	return true
 end
 
 ---@param line string
