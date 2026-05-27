@@ -62,9 +62,9 @@ function M.write(ctx, attrs)
 end
 
 ---@param ctx Context
----@param req Request
-function M.read(ctx, req)
-    req.attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+---@return Attr[]|nil
+function M.read(ctx)
+    return buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
 end
 
 return M

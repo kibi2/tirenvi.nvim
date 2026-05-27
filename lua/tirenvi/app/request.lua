@@ -21,14 +21,6 @@ local M = {}
 
 -- private helpers
 
-local function set_buf(ctx, req)
-    local allow_plain = ctx.parser.allow_plain or false
-    if allow_plain then
-        --local lines = buffer.get_lines(ctx.bufnr, 0, -1)
-        --req.is_buf = tir_buf.has_pipe(lines)
-    end
-end
-
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------

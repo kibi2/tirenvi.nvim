@@ -47,6 +47,7 @@ end
 ---@param missing string[]
 ---@return string
 function M.err_no_usable_characters(missing)
+	table.sort(missing)
 	return string.format(
 		PREFIX
 		.. "No usable characters found for marks: [%s].\n"
