@@ -47,7 +47,9 @@ local function set_repeat(command)
 	end
 end
 
--- public API
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
 
 --- Set up tirenvi plugin (load autocmds and commands)
 ---@param opts {[string]:any}
@@ -114,8 +116,8 @@ end
 ---@return nil
 function M.toggle(ctx)
 	local req = Request.from_range(Range.WHOLE)
-	local lines = reader.read(ctx, req)
-	if tir_buf.has_pipe(lines) then
+	reader.read(ctx, req)
+	if tir_buf.has_pipe(req.lines) then
 		M.disable(ctx)
 	else
 		M.enable(ctx)
