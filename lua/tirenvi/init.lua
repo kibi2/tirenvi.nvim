@@ -87,13 +87,13 @@ local buffer_backup
 function M.export_flat(ctx)
 	local req = Request.new_reader(Range.WHOLE)
 	reader.read(ctx, req)
-	if not tir_buf.has_pipe(req.lines) then
+	if not Request.is_buf(req) then
 		buffer_backup = nil
 		return
 	else
 		buffer_backup = req.lines
+		pipeline.to_flat(ctx, true)
 	end
-	pipeline.to_flat(ctx, true)
 end
 
 --- Convert current buffer (or specified buffer) from plain format to view format
@@ -119,7 +119,7 @@ end
 function M.toggle(ctx)
 	local req = Request.new_reader(Range.WHOLE)
 	reader.read(ctx, req)
-	if tir_buf.has_pipe(req.lines) then
+	if Request.is_buf(req) then
 		M.disable(ctx)
 	else
 		M.enable(ctx)

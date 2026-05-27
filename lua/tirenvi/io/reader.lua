@@ -15,9 +15,11 @@ local M = {}
 ---@param range Range
 local function neighbor_has_pipe(bufnr, range)
     local first, last = Range.to_lua(range)
+    local lines = buffer.get_lines(bufnr, first - 1, last + 1)
     local line_prev = buffer.get_line(bufnr, first - 1) or ""
+    local line = lines[1] or ""
     local line_next = buffer.get_line(bufnr, last + 1) or ""
-    return tir_buf.has_pipe({ line_prev, line_next })
+    return tir_buf.has_pipe({ line_prev, line, line_next })
 end
 
 ---@param ctx Context
@@ -39,13 +41,11 @@ end
 
 ---@param ctx Context
 ---@param req Request
----@return string[]
 function M.read(ctx, req)
     req.attrs = attr_store.read(ctx)
     req.is_buf = set_buf(ctx, req)
     local first, last = Request.lua_range(req)
     req.lines = buffer.get_lines(ctx.bufnr, first, last)
-    return req.lines
 end
 
 return M
