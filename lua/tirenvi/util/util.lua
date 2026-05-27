@@ -95,15 +95,11 @@ function M.extend(array1, array2)
 end
 
 ---@param fl_lines string[]
----@return boolean
 function M.ensure_no_reserved_marks(fl_lines)
 	local found = find_reserved_marks(fl_lines)
 	if #found > 0 then
-		--error(errors.new_domain_error(errors.err_no_usable_characters(found)))
-		notify.error(errors.err_no_usable_characters(found))
-		return false
+		error(errors.new_domain_error(errors.err_no_usable_characters(found)))
 	end
-	return true
 end
 
 ---@param line string

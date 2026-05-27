@@ -57,6 +57,9 @@ end
 ---@param attrs Attr[]|nil
 ---@param is_flat boolean|nil
 local function set_flat(bufnr, attrs, is_flat)
+    if not attrs then
+        return
+    end
     is_flat = is_flat or not Attrs.has_grid(attrs)
     buf_state.set_flat(bufnr, is_flat)
 end

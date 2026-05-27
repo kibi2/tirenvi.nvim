@@ -9,8 +9,6 @@ M.plain = {}
 M.grid = {}
 
 -- constants / defaults
-local pipec = config.marks.pipec
-local pipen = config.marks.pipe
 
 -----------------------------------------------------------------------
 -- Private helpers
@@ -19,6 +17,7 @@ local pipen = config.marks.pipe
 ---@param vi_line string
 ---@return Record
 local function from_vi_line(vi_line)
+    local pipec = config.marks.pipec
     local pipe = tir_buf.get_pipe_char(vi_line)
     if pipe then
         return M.grid.new_from_vi_line(vi_line, pipe == pipec)
@@ -166,6 +165,8 @@ end
 ---@param ndjsons Ndjson[]
 ---@return string[]
 function M.to_tir_buf(ndjsons)
+    local pipec = config.marks.pipec
+    local pipen = config.marks.pipe
     local tir_buf = {}
     for _, record in ipairs(ndjsons) do
         local kind = record.kind

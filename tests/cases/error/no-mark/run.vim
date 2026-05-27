@@ -6,7 +6,7 @@ lua << EOF
 local M = require("tirenvi")
 M.setup({
   marks = {
-    pipe = "a"
+    padding = "a"
   },
 	log = {
 		output = "buffer", -- "notify" | "buffer" | "print" | "file"

@@ -7,8 +7,6 @@ local M       = {}
 
 local api     = vim.api
 local fn      = vim.fn
-local pipen   = config.marks.pipe
-local pipec   = config.marks.pipec
 
 -----------------------------------------------------------------------
 -- utils
@@ -108,7 +106,9 @@ end
 
 ---@param winid integer|nil
 function M.special_apply(winid)
-    winid = winid or api.nvim_get_current_win()
+    local pipen = config.marks.pipe
+    local pipec = config.marks.pipec
+    winid       = winid or api.nvim_get_current_win()
     M.special_clear(winid)
     add_match(winid, "TirenviPadding", pat_v(config.marks.padding), 10)
     add_match(winid, "TirenviSpecialChar", pat_v(config.marks.lf), 20)

@@ -258,17 +258,17 @@ function M.from_flat(ctx, no_undo)
     local req_r = Request.new_reader(Range.WHOLE)
     reader.read(ctx, req_r)
     log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
-    if util.ensure_no_reserved_marks(req_r.lines) then
-        local flat_doc = flat_to_doc(ctx, req_r)
-        Document.set_auto_attr(flat_doc)
-        log.watch("ATTR", Document.debug_attrs(flat_doc, "5AUTO ATTR:"))
-        local buf_doc = Document.to_vim(flat_doc)
-        doc_to_vim(ctx, req_r, buf_doc, no_undo)
+    local doc
+    if Request.is_flat(req_r) or not tir_buf.has_pipe(req_r.lines) then
+        util.ensure_no_reserved_marks(req_r.lines)
+        doc = flat_to_doc(ctx, req_r)
     else
-        local buf_doc = buf_to_doc_text_driven(ctx, req_r)
-        local attrs = Blocks.collect_attrs(buf_doc.blocks)
-        attr_store.write(ctx, attrs)
+        doc = buf_to_doc_text_driven(ctx, req_r)
     end
+    Document.set_auto_attr(doc)
+    log.watch("ATTR", Document.debug_attrs(doc, "5AUTO ATTR:"))
+    local buf_doc = Document.to_vim(doc)
+    doc_to_vim(ctx, req_r, buf_doc, no_undo)
 end
 
 ---@param ctx Context
