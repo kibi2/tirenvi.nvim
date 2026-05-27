@@ -155,7 +155,7 @@ end
 ---@return Attr[]
 function M:replace_attrs(range, chached_attrs)
     local doc_attrs = Blocks.collect_attrs(self.blocks)
-    if not chached_attrs or not Attrs.has_range(chached_attrs) or Range.is_whole(range) then
+    if not chached_attrs or Range.is_whole(range) then
         return doc_attrs
     end
     return Attrs.replace_attrs(chached_attrs, range, doc_attrs)

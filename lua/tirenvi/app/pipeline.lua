@@ -61,7 +61,7 @@ end
 ---@return Document|nil
 local function buf_to_bdoc_attr_driven(ctx, req_r)
     reader.read(ctx, req_r)
-    if not Attrs.has_range(req_r.attrs) then
+    if Request.is_flat(req_r) then
         return nil
     end
     log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
@@ -87,7 +87,7 @@ end
 ---@return Document|nil
 local function buf_to_doc_attrs_driven(ctx, req_r, no_normalize)
     local buf_doc = buf_to_bdoc_attr_driven(ctx, req_r)
-    if not buf_doc or not Blocks.has_grid(buf_doc.blocks) then
+    if not buf_doc then
         return nil
     end
     Document.insert_empty_lines(buf_doc)
@@ -153,7 +153,7 @@ end
 local function reconcile_attrs(ctx, range3)
     local req_r = Request.new_reader(Range3.get_new_range(range3))
     local buf_doc = buf_to_bdoc_text_driven(ctx, req_r, range3)
-    if not Attrs.has_range(req_r.attrs) then
+    if Request.is_flat(req_r) then
         return nil
     end
     Document.inherit_neighbor_attr(buf_doc, req_r.attrs, range3)
@@ -310,10 +310,9 @@ function M.cmd_format(ctx, no_normalize, no_undo)
         return
     end
     local doc = buf_to_doc_attrs_driven(ctx, req_r, no_normalize)
-    if not doc or not Blocks.has_grid(doc.blocks) then
-        --return
+    if not doc then
+        return
     end
-    ---@cast doc Document
     local buf_doc = Document.to_vim(doc)
     doc_to_vim(ctx, req_r, buf_doc, no_undo)
 end
