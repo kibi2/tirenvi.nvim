@@ -86,10 +86,12 @@ local buffer_backup
 ---@return nil
 function M.export_flat(ctx)
 	local req = Request.from_range(Range.WHOLE)
-	buffer_backup = reader.read(ctx, req)
-	if not tir_buf.has_pipe(buffer_backup) then
+	reader.read(ctx, req)
+	if not tir_buf.has_pipe(ctx, req) then
 		buffer_backup = nil
 		return
+	else
+		buffer_backup = req.lines
 	end
 	pipeline.to_flat(ctx, true)
 end
@@ -117,7 +119,7 @@ end
 function M.toggle(ctx)
 	local req = Request.from_range(Range.WHOLE)
 	reader.read(ctx, req)
-	if tir_buf.has_pipe(req.lines) then
+	if tir_buf.has_pipe(ctx, req) then
 		M.disable(ctx)
 	else
 		M.enable(ctx)
@@ -197,13 +199,12 @@ function M.on_insert_leave(ctx)
 end
 
 ---@param ctx Context
----@return Context
 function M.on_filetype(ctx)
 	local old_filetype = buffer.get(ctx.bufnr, buffer.IKEY.FILETYPE)
 	local new_filetype = bo[ctx.bufnr].filetype
 	-- log.debug("filetype %s -> %s", tostring(old_filetype), tostring(new_filetype))
 	if old_filetype and old_filetype == new_filetype then
-		return ctx
+		return
 	end
 	if old_filetype then
 		pipeline.to_flat(ctx)
@@ -214,7 +215,6 @@ function M.on_filetype(ctx)
 	if not ctx.parser then
 		buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, nil)
 	end
-	return ctx
 end
 
 return M

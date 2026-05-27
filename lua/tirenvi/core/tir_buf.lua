@@ -184,9 +184,12 @@ function M.get_pipe_char(line)
     return nil
 end
 
----@param lines string[]
+---@param ctx Context
+---@param req Request
 ---@return boolean
-function M.has_pipe(lines)
+function M.has_pipe(ctx, req)
+    local lines = req.lines
+    ---@cast lines -nil
     for _, line in ipairs(lines) do
         if M.get_pipe_char(line) then
             return true
