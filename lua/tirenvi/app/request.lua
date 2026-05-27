@@ -17,6 +17,7 @@ local M = {}
 ---@field lines? string[]
 ---@field attrs? Attr[]
 ---@field no_undo? boolean
+---@field is_buf? boolean
 
 -- private helpers
 
@@ -56,6 +57,18 @@ end
 function M:get_range3()
     local first, last = M.lua_range(self)
     return Range3.new(first, last, first + #self.lines - 1)
+end
+
+---@param self Request
+---@return boolean
+function M:is_no_undo()
+    return self.no_undo == true
+end
+
+---@param self Request
+---@return boolean
+function M:is_buf()
+    return self.is_buf == true
 end
 
 return M

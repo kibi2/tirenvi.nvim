@@ -16,6 +16,10 @@ local M = {}
 ---@return string[]
 function M.read(ctx, req)
     attr_store.read(ctx, req)
+    local allow_plain = ctx.parser.allow_plain or false
+    if allow_plain then
+        buffer.get_lines(ctx.bufnr, 0, -1)
+    end
     local first, last = Request.lua_range(req)
     req.lines = buffer.get_lines(ctx.bufnr, first, last)
     return req.lines

@@ -76,7 +76,7 @@ end
 ---@param bufnr number
 ---@param range Range
 ---@param lines string[]
----@param no_undo boolean|nil
+---@param no_undo boolean
 local function set_lines(bufnr, range, lines, no_undo)
 	M.clear_cache()
 	local undolevels = bo[bufnr].undolevels
@@ -179,7 +179,7 @@ end
 ---@param bufnr number
 ---@param range Range
 ---@param lines string[]
----@param no_undo boolean|nil
+---@param no_undo boolean
 function M.set_lines(bufnr, range, lines, no_undo)
 	-- log.debug(M.get_state(bufnr))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
