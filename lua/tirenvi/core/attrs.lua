@@ -76,8 +76,20 @@ end
 -- Public API
 -----------------------------------------------------------------------
 
----@param self Attr[]
+---@param self Attr[]|nil
 ---@return boolean
+function M.has_grid(self)
+    if not self then
+        return false
+    end
+    for _, attr in ipairs(self) do
+        if Attr.is_grid(attr) then
+            return true
+        end
+    end
+    return false
+end
+
 function M.has_range(self)
     if not self then
         return false

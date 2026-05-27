@@ -40,6 +40,9 @@ M.IKEY              = {
 
 	-- dirty row #
 	DIRTY = "dirty",
+
+	-- is tir-buf
+	FLAT = "flat",
 }
 
 local initial_value = {
@@ -51,6 +54,7 @@ local initial_value = {
 	[M.IKEY.REPAIR] = nil,
 	[M.IKEY.ATTRS] = nil,
 	[M.IKEY.DIRTY] = nil,
+	[M.IKEY.FLAT] = nil,
 }
 
 -----------------------------------------------------------------------

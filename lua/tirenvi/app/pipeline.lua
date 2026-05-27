@@ -121,7 +121,7 @@ local function doc_to_flat(ctx, req_r, doc, no_undo)
     req_w.attrs = vim.deepcopy(req_r.attrs)
     Attrs.remove_range(req_w.attrs)
     log.watch("ATTR", Attrs.debug_attrs(req_w.attrs, "9CHACHED:"))
-    attr_store.write(ctx, req_w.attrs)
+    attr_store.write(ctx, req_w.attrs, true)
     writer.write(ctx, req_w)
 end
 
@@ -305,10 +305,15 @@ end
 function M.cmd_format(ctx, no_normalize, no_undo)
     no_normalize = no_normalize or false
     local req_r = Request.new_reader(Range.WHOLE)
-    local doc = buf_to_doc_attrs_driven(ctx, req_r, no_normalize)
-    if not doc or not Blocks.has_grid(doc.blocks) then
+    reader.read(ctx, req_r)
+    if Request.is_flat(req_r) then
         return
     end
+    local doc = buf_to_doc_attrs_driven(ctx, req_r, no_normalize)
+    if not doc or not Blocks.has_grid(doc.blocks) then
+        --return
+    end
+    ---@cast doc Document
     local buf_doc = Document.to_vim(doc)
     doc_to_vim(ctx, req_r, buf_doc, no_undo)
 end

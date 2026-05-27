@@ -87,7 +87,7 @@ local buffer_backup
 function M.export_flat(ctx)
 	local req = Request.new_reader(Range.WHOLE)
 	reader.read(ctx, req)
-	if not Request.is_buf(req) then
+	if Request.is_flat(req) then
 		buffer_backup = nil
 		return
 	else
@@ -119,10 +119,10 @@ end
 function M.toggle(ctx)
 	local req = Request.new_reader(Range.WHOLE)
 	reader.read(ctx, req)
-	if Request.is_buf(req) then
-		M.disable(ctx)
-	else
+	if Request.is_flat(req) then
 		M.enable(ctx)
+	else
+		M.disable(ctx)
 	end
 end
 

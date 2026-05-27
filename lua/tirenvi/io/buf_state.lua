@@ -145,4 +145,16 @@ function M.is_repair(ctx, range3)
 	return true
 end
 
+---@param bufnr number
+---@return boolean
+function M.is_flat(bufnr)
+	return buffer.get(bufnr, buffer.IKEY.FLAT) == true
+end
+
+---@param bufnr number
+---@param value boolean
+function M.set_flat(bufnr, value)
+	buffer.set(bufnr, buffer.IKEY.FLAT, value)
+end
+
 return M

@@ -17,7 +17,7 @@ local M = {}
 ---@field lines? string[]
 ---@field attrs? Attr[]
 ---@field no_undo? boolean
----@field is_buf? boolean
+---@field is_flat? boolean
 
 -- private helpers
 
@@ -68,8 +68,8 @@ end
 
 ---@param self Request
 ---@return boolean
-function M:is_buf()
-    return self.is_buf == true
+function M:is_flat()
+    return self.is_flat == true
 end
 
 return M
