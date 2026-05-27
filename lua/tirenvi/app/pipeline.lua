@@ -103,7 +103,7 @@ end
 local function doc_to_vim(ctx, req_r, buf_doc, no_undo)
     local vi_lines = buf_parser.unparse(buf_doc, req_r)
     log.watch("ATTR", Document.debug_attrs(buf_doc, "9DOC ATTR:"))
-    local req_w = Request.from_lines(req_r.range, vi_lines, no_undo or false)
+    local req_w = Request.new_writer(req_r.range, vi_lines, no_undo or false)
     req_w.attrs = Document.replace_attrs(buf_doc, req_r.range, req_r.attrs)
     log.watch("ATTR", Attrs.debug_attrs(req_w.attrs, "9CHACHED:"))
     attr_store.write(ctx, req_w.attrs)
@@ -117,7 +117,7 @@ end
 ---@param no_undo boolean|nil
 local function doc_to_flat(ctx, req_r, doc, no_undo)
     local fl_lines = flat_parser.unparse(ctx, doc)
-    local req_w = Request.from_lines(req_r.range, fl_lines, no_undo or false)
+    local req_w = Request.new_writer(req_r.range, fl_lines, no_undo or false)
     req_w.attrs = vim.deepcopy(req_r.attrs)
     Attrs.remove_range(req_w.attrs)
     log.watch("ATTR", Attrs.debug_attrs(req_w.attrs, "9CHACHED:"))
@@ -151,7 +151,7 @@ end
 ---@param range3 Range3
 ---@return Attr[]|nil
 local function reconcile_attrs(ctx, range3)
-    local req_r = Request.from_range(Range3.get_new_range(range3))
+    local req_r = Request.new_reader(Range3.get_new_range(range3))
     local buf_doc = buf_to_bdoc_text_driven(ctx, req_r, range3)
     if not Attrs.has_range(req_r.attrs) then
         return nil
@@ -255,7 +255,7 @@ end
 ---@param no_undo boolean|nil
 ---@return nil
 function M.from_flat(ctx, no_undo)
-    local req_r = Request.from_range(Range.WHOLE)
+    local req_r = Request.new_reader(Range.WHOLE)
     reader.read(ctx, req_r)
     log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
     if util.ensure_no_reserved_marks(req_r.lines) then
@@ -274,7 +274,7 @@ end
 ---@param ctx Context
 ---@param no_undo boolean|nil
 function M.to_flat(ctx, no_undo)
-    local req_r = Request.from_range(Range.WHOLE)
+    local req_r = Request.new_reader(Range.WHOLE)
     local doc = buf_to_doc_text_driven(ctx, req_r)
     if doc and Blocks.has_grid(doc.blocks) then
         doc_to_flat(ctx, req_r, doc, no_undo)
@@ -290,7 +290,7 @@ function M.cmd_width(ctx, sel, width_op)
     if has_dirty(ctx, sel.row) then
         error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
     end
-    local req_r = Request.from_range(sel.row)
+    local req_r = Request.new_reader(sel.row)
     local doc = buf_to_doc_text_driven(ctx, req_r)
     if doc and Blocks.has_grid(doc.blocks) then
         Blocks.change_width(doc.blocks, sel.col, width_op)
@@ -304,7 +304,7 @@ end
 ---@param no_undo boolean|nil
 function M.cmd_format(ctx, no_normalize, no_undo)
     no_normalize = no_normalize or false
-    local req_r = Request.from_range(Range.WHOLE)
+    local req_r = Request.new_reader(Range.WHOLE)
     local doc = buf_to_doc_attrs_driven(ctx, req_r, no_normalize)
     if not doc or not Blocks.has_grid(doc.blocks) then
         return

@@ -85,7 +85,7 @@ local buffer_backup
 ---@param ctx Context
 ---@return nil
 function M.export_flat(ctx)
-	local req = Request.from_range(Range.WHOLE)
+	local req = Request.new_reader(Range.WHOLE)
 	reader.read(ctx, req)
 	if not tir_buf.has_pipe(ctx, req) then
 		buffer_backup = nil
@@ -103,7 +103,7 @@ function M.restore_tir_buf(ctx)
 	if not buffer_backup then
 		return
 	end
-	local req = Request.from_lines(Range.WHOLE, buffer_backup, true)
+	local req = Request.new_writer(Range.WHOLE, buffer_backup, true)
 	writer.write(ctx, req)
 	buffer_backup = nil
 end
@@ -117,7 +117,7 @@ end
 ---@param ctx Context
 ---@return nil
 function M.toggle(ctx)
-	local req = Request.from_range(Range.WHOLE)
+	local req = Request.new_reader(Range.WHOLE)
 	reader.read(ctx, req)
 	if tir_buf.has_pipe(ctx, req) then
 		M.disable(ctx)

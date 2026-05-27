@@ -21,23 +21,32 @@ local M = {}
 
 -- private helpers
 
+local function set_buf(ctx, req)
+    local allow_plain = ctx.parser.allow_plain or false
+    if allow_plain then
+        --local lines = buffer.get_lines(ctx.bufnr, 0, -1)
+        --req.is_buf = tir_buf.has_pipe(lines)
+    end
+end
+
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
 
 ---@param range Range
 ---@return Request
-function M.from_range(range)
-    return {
+function M.new_reader(range)
+    local self = {
         range = range,
     }
+    return self
 end
 
 ---@param range Range
 ---@param lines string[]
 ---@param no_undo boolean|nil
 ---@return Request
-function M.from_lines(range, lines, no_undo)
+function M.new_writer(range, lines, no_undo)
     return {
         range = range,
         lines = lines,
