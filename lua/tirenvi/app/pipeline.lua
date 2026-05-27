@@ -47,7 +47,6 @@ end
 ---@param range3 Range3|nil
 ---@return Document
 local function buf_to_bdoc_text_driven(ctx, req_r, range3)
-    reader.read(ctx, req_r)
     log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
     req_r.attrs = Attrs.adjust(req_r.attrs or {}, range3)
     if range3 then log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "0UPDATE CHACHED:")) end
@@ -58,12 +57,8 @@ end
 
 ---@param ctx Context
 ---@param req_r Request
----@return Document|nil
+---@return Document
 local function buf_to_bdoc_attr_driven(ctx, req_r)
-    reader.read(ctx, req_r)
-    if Request.is_flat(req_r) then
-        return nil
-    end
     log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
     local buf_doc = buf_parser.parse_attr_driven(ctx, req_r)
     log.watch("ATTR", Document.debug_attrs(buf_doc, "1DOC ATTR:"))
@@ -84,12 +79,9 @@ end
 ---@param req_r Request
 ---@param no_normalize boolean -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
----@return Document|nil
+---@return Document
 local function buf_to_doc_attrs_driven(ctx, req_r, no_normalize)
     local buf_doc = buf_to_bdoc_attr_driven(ctx, req_r)
-    if not buf_doc then
-        return nil
-    end
     Document.insert_empty_lines(buf_doc)
     local doc = Document.from_buf_doc(buf_doc, no_normalize)
     log.watch("ATTR", Document.debug_attrs(doc, "7INSERT EMPTY:"))
@@ -148,14 +140,11 @@ local function expand_rect(ctx, row)
 end
 
 ---@param ctx Context
+---@param req_r Request
 ---@param range3 Range3
----@return Attr[]|nil
-local function reconcile_attrs(ctx, range3)
-    local req_r = Request.new_reader(Range3.get_new_range(range3))
+---@return Attr[]
+local function reconcile_attrs(ctx, req_r, range3)
     local buf_doc = buf_to_bdoc_text_driven(ctx, req_r, range3)
-    if Request.is_flat(req_r) then
-        return nil
-    end
     Document.inherit_neighbor_attr(buf_doc, req_r.attrs, range3)
     log.watch("ATTR", Document.debug_attrs(buf_doc, "2NEIGHBOR:"))
     Document.infer_consistent_attr(buf_doc)
@@ -275,10 +264,12 @@ end
 ---@param no_undo boolean|nil
 function M.to_flat(ctx, no_undo)
     local req_r = Request.new_reader(Range.WHOLE)
-    local doc = buf_to_doc_text_driven(ctx, req_r)
-    if doc and Blocks.has_grid(doc.blocks) then
-        doc_to_flat(ctx, req_r, doc, no_undo)
+    reader.read(ctx, req_r)
+    if Request.is_flat(req_r) then
+        return
     end
+    local doc = buf_to_doc_text_driven(ctx, req_r)
+    doc_to_flat(ctx, req_r, doc, no_undo)
 end
 
 ---@param ctx Context
@@ -291,12 +282,14 @@ function M.cmd_width(ctx, sel, width_op)
         error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
     end
     local req_r = Request.new_reader(sel.row)
-    local doc = buf_to_doc_text_driven(ctx, req_r)
-    if doc and Blocks.has_grid(doc.blocks) then
-        Blocks.change_width(doc.blocks, sel.col, width_op)
-        local buf_doc = Document.to_vim(doc)
-        doc_to_vim(ctx, req_r, buf_doc)
+    reader.read(ctx, req_r)
+    if Request.is_flat(req_r) then
+        return
     end
+    local doc = buf_to_doc_text_driven(ctx, req_r)
+    Blocks.change_width(doc.blocks, sel.col, width_op)
+    local buf_doc = Document.to_vim(doc)
+    doc_to_vim(ctx, req_r, buf_doc)
 end
 
 ---@param ctx Context
@@ -310,9 +303,6 @@ function M.cmd_format(ctx, no_normalize, no_undo)
         return
     end
     local doc = buf_to_doc_attrs_driven(ctx, req_r, no_normalize)
-    if not doc then
-        return
-    end
     local buf_doc = Document.to_vim(doc)
     doc_to_vim(ctx, req_r, buf_doc, no_undo)
 end
@@ -320,10 +310,12 @@ end
 ---@param ctx Context
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
-    local attrs = reconcile_attrs(ctx, range3)
-    if not attrs then
+    local req_r = Request.new_reader(Range3.get_new_range(range3))
+    reader.read(ctx, req_r)
+    if Request.is_flat(req_r) then
         return
     end
+    local attrs = reconcile_attrs(ctx, req_r, range3)
     reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
     repair(ctx, range3)
 end
