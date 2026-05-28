@@ -18,5 +18,11 @@ call cursor(2, 11)
 Tir width=8
 sleep 1m
 execute 'write ' . outfile
+call Snapshot({ 'file': outfile, 'desc': 'write' })
+
+sleep 1m
+Tir repair disable
+Tir repair
+execute 'write ' . outfile
 
 call RunTest({ 'file': outfile, 'nomessage': 'true' })

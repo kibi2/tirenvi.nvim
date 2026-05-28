@@ -39,6 +39,8 @@ gfm
 │CarQWl│27⠀│NagQWya⠀⠀⠀⠀⠀│
 markdQWwn
 
+
+--- final ---
 === MESSAGE ===
 [Tirenvi] repair:disable 
 [Tirenvi] repair:disable 
@@ -52,3 +54,17 @@ markdQWwn
 │a⠀│b⠀│
 ┊AD┊d⠀┊
 │Dc│⠀⠀│
+=== MESSAGE ===
+[Tirenvi] repair:disable 
+7 substitutions on 3 lines
+[Tirenvi] repair:enable 
+
+=== DISPLAY ===
+│xx│xx│
+┊ne┊⠀⠀┊
+┊w ┊⠀⠀┊
+┊li┊⠀⠀┊
+│ne│⠀⠀│
+┊xx┊xx┊
+┊xx┊⠀⠀┊
+│x⠀│⠀⠀│

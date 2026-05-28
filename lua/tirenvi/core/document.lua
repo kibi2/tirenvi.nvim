@@ -82,12 +82,9 @@ local function new_attr_file()
     return { kind = CONST.KIND.ATTR_FILE, version = VERSION }
 end
 
----@param self Document|nil
+---@param self Document
 ---@return Attr[]
 local function collect_attrs(self)
-    if not self then
-        return {}
-    end
     return Blocks.collect_attrs(self.blocks)
 end
 

@@ -248,12 +248,4 @@ function M.get_block_rect(ctx, line_provider, count, is_around)
     return rect, lines
 end
 
----@param line string
----@return boolean
-function M.start_with_pipe(line)
-    local pipen = config.marks.pipe
-    local pipec = config.marks.pipec
-    return util.start_with(line, pipen) or util.start_with(line, pipec)
-end
-
 return M

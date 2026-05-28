@@ -1,3 +1,7 @@
+=== MESSAGE ===
+tirenvi: Unknown Tir command: foo
+Usage: :Tir <redraw|repair|toggle|width>
+Tir redraw is deprecated and will be removed in v0.5. Use :Tir repair
 
 === DISPLAY ===
 A1,B22,C333,D4444,E55555,F666666
