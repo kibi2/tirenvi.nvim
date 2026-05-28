@@ -17,6 +17,9 @@ local M = {}
 ---@param line_provider LineProvider
 ---@param range Range
 local function expand_continue_lines(line_provider, range)
+    if Range.is_empty(range) then
+        return
+    end
     local first, last = Range.to_lua(range)
     local lines = line_provider.get_lines(first, last)
     local prev = range.first - 1
@@ -54,9 +57,12 @@ local function adjust(line_provider, prev_ranges, range3)
     Range.shift(ranges3, Range3.get_delta(range3))
     local range2 = get_new_range(line_provider, range3)
     local new_ranges = ranges1
-    new_ranges[#new_ranges + 1] = range2
+    if not Range.is_empty(range2) then
+        new_ranges[#new_ranges + 1] = range2
+    end
     util.extend(new_ranges, ranges3)
-    return Range.merge(new_ranges)
+    --return Range.merge(new_ranges)
+    return new_ranges
 end
 
 ---@param attr Attr|nil
@@ -88,6 +94,56 @@ local function is_valid(attr, line)
     return true
 end
 
+---@param next_attr Attr|nil
+---@param line string|nil
+---@return boolean
+local function is_valid_bound(next_attr, line)
+    if not line then
+        return true
+    end
+    if not next_attr or Attr.is_plain(next_attr) then
+        return true
+    end
+    local pipe = tir_buf.get_pipe_char(line)
+    if not pipe then
+        return true
+    end
+    if not tir_buf.is_normal_grid(line, pipe) then
+        return false
+    end
+    local widths = tir_buf.get_widths(line)
+    if #next_attr.columns ~= #widths then
+        return false
+    end
+    for icol, width in ipairs(widths) do
+        if next_attr.columns[icol].width ~= width then
+            return false
+        end
+    end
+    return true
+end
+
+---@param line_provider LineProvider
+---@param range Range
+---@param attrs Attr[]
+---@return Range[]
+local function check_dirty_1range(line_provider, range, attrs)
+    local inv_ranges = {}
+    for irow = range.first, range.last do
+        local attr = Attrs.get(attrs, irow)
+        local line = line_provider.get_line(irow)
+        if not is_valid(attr, line) then
+            Range.push(inv_ranges, irow)
+        elseif Attr.is_grid(attr) then
+            attr = Attrs.get(attrs, irow + 1)
+            if not is_valid_bound(attr, line) then
+                Range.push(inv_ranges, irow)
+            end
+        end
+    end
+    return inv_ranges
+end
+
 ---@param line_provider LineProvider
 ---@param new_ranges Range[]
 ---@param attrs Attr[]
@@ -95,13 +151,8 @@ end
 local function check_dirty(line_provider, new_ranges, attrs)
     local inv_ranges = {}
     for _, range in ipairs(new_ranges) do
-        for irow = range.first, range.last do
-            local attr = Attrs.get(attrs, irow)
-            local line = line_provider.get_line(irow)
-            if not is_valid(attr, line) then
-                Range.push(inv_ranges, irow)
-            end
-        end
+        local ranges = check_dirty_1range(line_provider, range, attrs)
+        util.extend(inv_ranges, ranges)
     end
     return inv_ranges
 end
@@ -117,6 +168,9 @@ end
 ---@return Range[]
 function M.reconcile(line_provider, prev_ranges, attrs, range3)
     local new_ranges = adjust(line_provider, prev_ranges, range3)
+    if #new_ranges == 0 then
+        new_ranges = { Range.from_lua(range3.first - 1, range3.first - 1) }
+    end
     local inv_ranges = check_dirty(line_provider, new_ranges, attrs)
     log.watch("INVD", inv_ranges)
     return inv_ranges

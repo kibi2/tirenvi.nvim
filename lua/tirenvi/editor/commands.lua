@@ -206,7 +206,8 @@ local function on_tir(opts)
 		command = "width"
 	end
 	local ctx = Context.from_buf()
-	log.debug("===+===+===+===+=== %s %s[%d] ===+===+===+===+===", opts.name, opts.fargs[1], ctx.bufnr)
+	log.debug("===+===+===+===+=== %s %s %s[%d] ===+===+===+===+===",
+		opts.name, opts.fargs[1], opts.fargs[2] or "", ctx.bufnr)
 	local func = commands[command]
 	if not func then
 		notify.error(errors.err_unknown_command(sub))
