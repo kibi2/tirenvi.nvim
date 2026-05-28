@@ -92,7 +92,7 @@ end
 ---@param req_r Request
 ---@param buf_doc Document
 ---@param no_undo boolean|nil
-local function doc_to_vim(ctx, req_r, buf_doc, no_undo)
+local function doc_to_buf(ctx, req_r, buf_doc, no_undo)
     local vi_lines = buf_parser.unparse(buf_doc, req_r)
     log.watch("ATTR", Document.debug_attrs(buf_doc, "9DOC ATTR:"))
     local req_w = Request.new_writer(req_r.range, vi_lines, no_undo or false)
@@ -256,8 +256,8 @@ function M.from_flat(ctx, no_undo)
     end
     Document.set_auto_attr(doc)
     log.watch("ATTR", Document.debug_attrs(doc, "5AUTO ATTR:"))
-    local buf_doc = Document.to_vim(doc)
-    doc_to_vim(ctx, req_r, buf_doc, no_undo)
+    local buf_doc = Document.to_buf(doc)
+    doc_to_buf(ctx, req_r, buf_doc, no_undo)
 end
 
 ---@param ctx Context
@@ -288,8 +288,8 @@ function M.cmd_width(ctx, sel, width_op)
     end
     local doc = buf_to_doc_text_driven(ctx, req_r)
     Blocks.change_width(doc.blocks, sel.col, width_op)
-    local buf_doc = Document.to_vim(doc)
-    doc_to_vim(ctx, req_r, buf_doc)
+    local buf_doc = Document.to_buf(doc)
+    doc_to_buf(ctx, req_r, buf_doc)
 end
 
 ---@param ctx Context
@@ -303,8 +303,8 @@ function M.cmd_format(ctx, no_normalize, no_undo)
         return
     end
     local doc = buf_to_doc_attrs_driven(ctx, req_r, no_normalize)
-    local buf_doc = Document.to_vim(doc)
-    doc_to_vim(ctx, req_r, buf_doc, no_undo)
+    local buf_doc = Document.to_buf(doc)
+    doc_to_buf(ctx, req_r, buf_doc, no_undo)
 end
 
 ---@param ctx Context

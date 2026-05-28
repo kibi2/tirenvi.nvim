@@ -212,7 +212,7 @@ function M.plain:to_grid()
 end
 
 ---@self Block_plain
-function M.plain:from_vim()
+function M.plain:from_buf()
     remove_padding(self)
 end
 
@@ -259,7 +259,7 @@ end
 
 ---@param no_normalize boolean
 ---@self Block_grid
-function M.grid:from_vim(no_normalize)
+function M.grid:from_buf(no_normalize)
     remove_padding(self)
     if not no_normalize then
         unwrap(self)
@@ -268,7 +268,7 @@ end
 
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
-function M.grid:to_vim()
+function M.grid:to_buf()
     apply_column_count(self, #self.attr.columns)
     wrap(self)
     fill_padding(self)

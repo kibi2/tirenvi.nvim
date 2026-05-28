@@ -114,7 +114,7 @@ end
 function M.from_buf_doc(self, no_normalize)
     no_normalize = no_normalize or false
     local doc = vim.deepcopy(self)
-    Blocks.from_vim(doc.blocks, no_normalize)
+    Blocks.from_buf(doc.blocks, no_normalize)
     return doc
 end
 
@@ -127,8 +127,8 @@ end
 
 ---@param self Document
 ---@return Document
-function M:to_vim()
-    Blocks.to_vim(self.blocks)
+function M:to_buf()
+    Blocks.to_buf(self.blocks)
     return self
 end
 

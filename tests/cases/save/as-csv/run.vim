@@ -18,7 +18,7 @@ call cursor(2, 11)
 Tir width=8
 sleep 1m
 execute 'write ' . outfile
-call Snapshot({ 'file': outfile, 'desc': 'write' })
+call Snapshot({ 'file': outfile, 'nomessage': 'true', 'desc': 'write' })
 
 sleep 1m
 Tir repair disable
