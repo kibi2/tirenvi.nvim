@@ -90,18 +90,6 @@ function M.has_grid(self)
     return false
 end
 
-function M.has_range(self)
-    if not self then
-        return false
-    end
-    for _, attr in ipairs(self) do
-        if attr.range == nil then
-            return false
-        end
-    end
-    return true
-end
-
 ---@param self Attr[]|nil
 ---@return Attr[]
 function M.get_grid_attrs(self)
@@ -208,9 +196,6 @@ end
 ---@param irow integer
 ---@return Attr|nil
 function M:get(irow)
-    if not M.has_range(self) then
-        return nil
-    end
     return self[get_index(self, irow)]
 end
 
