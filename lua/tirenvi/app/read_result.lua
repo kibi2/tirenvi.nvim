@@ -27,10 +27,9 @@ local M = {}
 ---@param range Range
 ---@return ReadResult
 function M.new_reader(range)
-    local self = {
+    return {
         range = range,
     }
-    return self
 end
 
 ---@param self ReadResult
@@ -38,13 +37,6 @@ end
 ---@return integer -- 1-based
 function M:lua_range()
     return Range.to_lua(self.range)
-end
-
----@param self ReadResult
----@return Range3
-function M:get_range3()
-    local first, last = M.lua_range(self)
-    return Range3.new(first, last, first + #self.lines - 1)
 end
 
 ---@param self ReadResult
