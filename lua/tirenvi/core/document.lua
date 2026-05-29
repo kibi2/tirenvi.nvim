@@ -62,6 +62,8 @@ local M = {}
 
 ---@alias Cell string
 
+---@alias Ndjson Attr_file|Record
+
 local VERSION = "tir/0.1"
 
 -- private helpers

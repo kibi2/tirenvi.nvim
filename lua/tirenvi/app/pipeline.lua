@@ -35,7 +35,7 @@ local api = vim.api
 ---@param ctx Context
 ---@param r_result ReadResult
 ---@return Document
-local function flat_to_tirdoc(ctx, r_result)
+local function fllines_to_tirdoc(ctx, r_result)
     local tirdoc = flat_parser.parse(ctx, r_result)
     log.watch("ATTR", Document.debug_attrs(tirdoc, "[1]DOC ATTR:"))
     Document.apply_attrs_by_id(tirdoc, r_result.attrs)
@@ -70,7 +70,7 @@ end
 ---@param ctx Context
 ---@param r_result ReadResult
 ---@return Document
-local function buf_to_doc_text_driven(ctx, r_result)
+local function buflines_to_doc_text_driven(ctx, r_result)
     local bufdoc = buf_to_bdoc_text_driven(ctx, r_result)
     Document.apply_cached_attr(bufdoc, r_result.attrs)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[4]CACHED:"))
@@ -253,9 +253,9 @@ function M.from_flat(ctx, no_undo)
     local tirdoc
     if ReadResult.is_flat(r_result) or not Bufline.has_pipe(r_result.lines) then
         util.ensure_no_reserved_marks(r_result.lines)
-        tirdoc = flat_to_tirdoc(ctx, r_result)
+        tirdoc = fllines_to_tirdoc(ctx, r_result)
     else
-        tirdoc = buf_to_doc_text_driven(ctx, r_result)
+        tirdoc = buflines_to_doc_text_driven(ctx, r_result)
     end
     Document.set_auto_attr(tirdoc)
     log.watch("ATTR", Document.debug_attrs(tirdoc, "5AUTO ATTR:"))
@@ -270,7 +270,7 @@ function M.to_flat(ctx, no_undo)
     if ReadResult.is_flat(r_result) then
         return
     end
-    local doc = buf_to_doc_text_driven(ctx, r_result)
+    local doc = buflines_to_doc_text_driven(ctx, r_result)
     doc_to_flat(ctx, r_result, doc, no_undo)
 end
 
@@ -287,7 +287,7 @@ function M.cmd_width(ctx, sel, width_op)
     if ReadResult.is_flat(r_result) then
         return
     end
-    local doc = buf_to_doc_text_driven(ctx, r_result)
+    local doc = buflines_to_doc_text_driven(ctx, r_result)
     Blocks.change_width(doc.blocks, sel.col, width_op)
     local bufdoc = Document.to_bufdoc(doc)
     bufdoc_to_buflines(ctx, r_result, bufdoc)

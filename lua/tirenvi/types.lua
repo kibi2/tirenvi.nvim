@@ -1,5 +1,3 @@
----@alias Ndjson Attr_file|Record
-
 ---@class Rect
 ---@field row Range
 ---@field col Range
