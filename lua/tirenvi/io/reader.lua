@@ -17,12 +17,15 @@ local M = {}
 -----------------------------------------------------------------------
 
 ---@param ctx Context
----@param req Request
-function M.read(ctx, req)
+---@param range Range
+---@return Request
+function M.read(ctx, range)
+    local req = Request.new_reader(range)
     req.attrs = attr_store.read(ctx)
     req.is_flat = buf_state.is_flat(ctx.bufnr)
     local first, last = Request.lua_range(req)
     req.lines = buffer.get_lines(ctx.bufnr, first, last)
+    return req
 end
 
 return M

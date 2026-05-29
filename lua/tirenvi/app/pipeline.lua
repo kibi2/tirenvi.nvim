@@ -248,8 +248,7 @@ end
 ---@param no_undo boolean|nil
 ---@return nil
 function M.from_flat(ctx, no_undo)
-    local req_r = Request.new_reader(Range.WHOLE)
-    reader.read(ctx, req_r)
+    local req_r = reader.read(ctx, Range.WHOLE)
     log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
     local doc
     if Request.is_flat(req_r) or not tir_buf.has_pipe(req_r.lines) then
@@ -267,8 +266,7 @@ end
 ---@param ctx Context
 ---@param no_undo boolean|nil
 function M.to_flat(ctx, no_undo)
-    local req_r = Request.new_reader(Range.WHOLE)
-    reader.read(ctx, req_r)
+    local req_r = reader.read(ctx, Range.WHOLE)
     if Request.is_flat(req_r) then
         return
     end
@@ -285,8 +283,7 @@ function M.cmd_width(ctx, sel, width_op)
     if has_dirty(ctx, sel.row) then
         error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
     end
-    local req_r = Request.new_reader(sel.row)
-    reader.read(ctx, req_r)
+    local req_r = reader.read(ctx, sel.row)
     if Request.is_flat(req_r) then
         return
     end
@@ -301,8 +298,7 @@ end
 ---@param no_undo boolean|nil
 function M.cmd_format(ctx, no_normalize, no_undo)
     no_normalize = no_normalize or false
-    local req_r = Request.new_reader(Range.WHOLE)
-    reader.read(ctx, req_r)
+    local req_r = reader.read(ctx, Range.WHOLE)
     if Request.is_flat(req_r) then
         return
     end
@@ -314,8 +310,7 @@ end
 ---@param ctx Context
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
-    local req_r = Request.new_reader(Range3.get_new_range(range3))
-    reader.read(ctx, req_r)
+    local req_r = reader.read(ctx, Range3.get_new_range(range3))
     if Request.is_flat(req_r) then
         return
     end

@@ -85,8 +85,7 @@ local buffer_backup
 ---@param ctx Context
 ---@return nil
 function M.export_flat(ctx)
-	local req = Request.new_reader(Range.WHOLE)
-	reader.read(ctx, req)
+	local req = reader.read(ctx, Range.WHOLE)
 	if Request.is_flat(req) then
 		buffer_backup = nil
 		return
@@ -117,8 +116,7 @@ end
 ---@param ctx Context
 ---@return nil
 function M.toggle(ctx)
-	local req = Request.new_reader(Range.WHOLE)
-	reader.read(ctx, req)
+	local req = reader.read(ctx, Range.WHOLE)
 	if Request.is_flat(req) then
 		M.enable(ctx)
 	else
