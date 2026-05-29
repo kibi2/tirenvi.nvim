@@ -107,11 +107,11 @@ function M.outdated_parser_error(parser)
 	)
 end
 
----@param js_line string
+---@param jsline string
 ---@param message string
 ---@return string
-function M.invalid_json_error(js_line, message)
-	return string.format(PREFIX .. "tirenvi: invalid JSON from parser\n%s\nerror: %s", js_line, message)
+function M.invalid_json_error(jsline, message)
+	return string.format(PREFIX .. "tirenvi: invalid JSON from parser\n%s\nerror: %s", jsline, message)
 end
 
 function M.table_merge_warning(irow)
