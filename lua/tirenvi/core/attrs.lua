@@ -76,18 +76,18 @@ end
 -- Public API
 -----------------------------------------------------------------------
 
----@param self Attr[]
+---@param self Attr[]|nil
 ---@return boolean
-function M.has_range(self)
+function M.has_grid(self)
     if not self then
         return false
     end
     for _, attr in ipairs(self) do
-        if attr.range == nil then
-            return false
+        if Attr.is_grid(attr) then
+            return true
         end
     end
-    return true
+    return false
 end
 
 ---@param self Attr[]|nil
@@ -196,9 +196,6 @@ end
 ---@param irow integer
 ---@return Attr|nil
 function M:get(irow)
-    if not M.has_range(self) then
-        return nil
-    end
     return self[get_index(self, irow)]
 end
 

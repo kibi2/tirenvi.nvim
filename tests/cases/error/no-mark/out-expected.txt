@@ -1,5 +1,5 @@
 === MESSAGE ===
-tirenvi: No usable characters found for marks: [pipe].
+tirenvi: No usable characters found for marks: [padding].
 Please configure alternative characters in tirenvi.setup().
 
 === DISPLAY ===

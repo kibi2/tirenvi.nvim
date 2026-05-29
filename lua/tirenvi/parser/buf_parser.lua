@@ -70,9 +70,6 @@ local function promote_empty_lines(records, req, allow_plain, range3)
 	if not range3 then
 		return records
 	end
-	if not Attrs.has_range(req.attrs) then
-		return records
-	end
 	if allow_plain then
 		return promote_empty_lines_gfm(records, req, range3)
 	else

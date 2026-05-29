@@ -15,7 +15,7 @@ local M = {}
 ---@param ctx Context
 ---@param req Request
 function M.write(ctx, req)
-    buffer.set_lines(ctx.bufnr, req.range, req.lines, req.no_undo)
+    buffer.set_lines(ctx.bufnr, req.range, req.lines, Request.is_no_undo(req))
     local range3 = Request.get_range3(req)
     local prev_ranges = dirty.get_ranges(ctx.bufnr)
     local new_ranges = dirty_range.remove(prev_ranges, range3)

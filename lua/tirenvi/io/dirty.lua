@@ -34,13 +34,10 @@ local function show_marks(bufnr, range, id)
 end
 
 ---@param bufnr number
----@param ranges Range[]|nil
+---@param ranges Range[]
 function M.set_ranges(bufnr, ranges)
     vim.api.nvim_buf_clear_namespace(bufnr, namespaces.DIRTY, 0, -1)
     buffer.set(bufnr, buffer.IKEY.DIRTY, ranges)
-    if not ranges then
-        return
-    end
     log.watch("INVD", ranges)
     for irange, range in ipairs(ranges) do
         show_marks(bufnr, range, irange)

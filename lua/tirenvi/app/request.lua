@@ -17,6 +17,7 @@ local M = {}
 ---@field lines? string[]
 ---@field attrs? Attr[]
 ---@field no_undo? boolean
+---@field is_flat? boolean
 
 -- private helpers
 
@@ -26,17 +27,18 @@ local M = {}
 
 ---@param range Range
 ---@return Request
-function M.from_range(range)
-    return {
+function M.new_reader(range)
+    local self = {
         range = range,
     }
+    return self
 end
 
 ---@param range Range
 ---@param lines string[]
 ---@param no_undo boolean|nil
 ---@return Request
-function M.from_lines(range, lines, no_undo)
+function M.new_writer(range, lines, no_undo)
     return {
         range = range,
         lines = lines,
@@ -56,6 +58,18 @@ end
 function M:get_range3()
     local first, last = M.lua_range(self)
     return Range3.new(first, last, first + #self.lines - 1)
+end
+
+---@param self Request
+---@return boolean
+function M:is_no_undo()
+    return self.no_undo == true
+end
+
+---@param self Request
+---@return boolean
+function M:is_flat()
+    return self.is_flat == true
 end
 
 return M

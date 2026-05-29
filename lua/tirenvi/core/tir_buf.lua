@@ -6,9 +6,6 @@ local util = require("tirenvi.util.util")
 local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
-local pipen = config.marks.pipe
-local pipec = config.marks.pipec
-
 local M = {}
 
 local api = vim.api
@@ -17,6 +14,8 @@ local api = vim.api
 ---@param line string
 ---@return string
 local function remove_start_pipe(line)
+    local pipen = config.marks.pipe
+    local pipec = config.marks.pipec
     if util.start_with(line, pipen) then
         line = line:sub(#pipen + 1)
     elseif util.start_with(line, pipec) then
@@ -28,6 +27,8 @@ end
 ---@param line string
 ---@return string
 local function remove_end_pipe(line)
+    local pipen = config.marks.pipe
+    local pipec = config.marks.pipec
     if util.end_with(line, pipen) then
         line = line:sub(1, - #pipen - 1)
     elseif util.end_with(line, pipec) then
@@ -89,6 +90,8 @@ end
 ---@param line string
 ---@return integer[]
 function M.get_pipe_byte_position(line)
+    local pipen = config.marks.pipe
+    local pipec = config.marks.pipec
     local indexes = get_pipe_byte_position(line, pipen)
     if #indexes == 0 then
         indexes = get_pipe_byte_position(line, pipec)
@@ -135,6 +138,8 @@ end
 ---@param line string
 ---@return string[]
 function M.get_cells(line)
+    local pipen = config.marks.pipe
+    local pipec = config.marks.pipec
     line = remove_start_pipe(line)
     line = remove_end_pipe(line)
     line = line:gsub(vim.pesc(pipec), pipen)
@@ -172,6 +177,8 @@ end
 ---@param line string|nil
 ---@return string|nil
 function M.get_pipe_char(line)
+    local pipen = config.marks.pipe
+    local pipec = config.marks.pipec
     if not line then
         return nil
     end
@@ -198,6 +205,7 @@ end
 ---@param line string|nil
 ---@return boolean
 function M.is_continue_line(line)
+    local pipec = config.marks.pipec
     if not line then
         return false
     end
@@ -211,6 +219,8 @@ end
 ---@return Rect|nil
 ---@return string[]
 function M.get_block_rect(ctx, line_provider, count, is_around)
+    local pipen = config.marks.pipe
+    local pipec = config.marks.pipec
     local irow, icol = buffer.get_cursor()
     local cline = line_provider.get_line(irow) or ""
     local cbyte_pos = M.get_pipe_byte_position(cline)
@@ -236,12 +246,6 @@ function M.get_block_rect(ctx, line_provider, count, is_around)
             bbyte_pos[end_index] - 1),
     }
     return rect, lines
-end
-
----@param line string
----@return boolean
-function M.start_with_pipe(line)
-    return util.start_with(line, pipen) or util.start_with(line, pipec)
 end
 
 return M

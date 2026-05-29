@@ -47,7 +47,9 @@ local function set_repeat(command)
 	end
 end
 
--- public API
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
 
 --- Set up tirenvi plugin (load autocmds and commands)
 ---@param opts {[string]:any}
@@ -83,13 +85,15 @@ local buffer_backup
 ---@param ctx Context
 ---@return nil
 function M.export_flat(ctx)
-	local req = Request.from_range(Range.WHOLE)
-	buffer_backup = reader.read(ctx, req)
-	if not tir_buf.has_pipe(buffer_backup) then
+	local req = Request.new_reader(Range.WHOLE)
+	reader.read(ctx, req)
+	if Request.is_flat(req) then
 		buffer_backup = nil
 		return
+	else
+		buffer_backup = req.lines
+		pipeline.to_flat(ctx, true)
 	end
-	pipeline.to_flat(ctx, true)
 end
 
 --- Convert current buffer (or specified buffer) from plain format to view format
@@ -99,7 +103,7 @@ function M.restore_tir_buf(ctx)
 	if not buffer_backup then
 		return
 	end
-	local req = Request.from_lines(Range.WHOLE, buffer_backup, true)
+	local req = Request.new_writer(Range.WHOLE, buffer_backup, true)
 	writer.write(ctx, req)
 	buffer_backup = nil
 end
@@ -113,12 +117,12 @@ end
 ---@param ctx Context
 ---@return nil
 function M.toggle(ctx)
-	local req = Request.from_range(Range.WHOLE)
-	local lines = reader.read(ctx, req)
-	if tir_buf.has_pipe(lines) then
-		M.disable(ctx)
-	else
+	local req = Request.new_reader(Range.WHOLE)
+	reader.read(ctx, req)
+	if Request.is_flat(req) then
 		M.enable(ctx)
+	else
+		M.disable(ctx)
 	end
 end
 
@@ -195,13 +199,12 @@ function M.on_insert_leave(ctx)
 end
 
 ---@param ctx Context
----@return Context
 function M.on_filetype(ctx)
 	local old_filetype = buffer.get(ctx.bufnr, buffer.IKEY.FILETYPE)
 	local new_filetype = bo[ctx.bufnr].filetype
 	-- log.debug("filetype %s -> %s", tostring(old_filetype), tostring(new_filetype))
 	if old_filetype and old_filetype == new_filetype then
-		return ctx
+		return
 	end
 	if old_filetype then
 		pipeline.to_flat(ctx)
@@ -212,7 +215,6 @@ function M.on_filetype(ctx)
 	if not ctx.parser then
 		buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, nil)
 	end
-	return ctx
 end
 
 return M

@@ -215,13 +215,13 @@ end
 ---@param self Blocks
 ---@param no_normalize boolean  -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
-function M.from_vim(self, no_normalize)
-	apply(self, "from_vim", no_normalize)
+function M.from_buf(self, no_normalize)
+	apply(self, "from_buf", no_normalize)
 end
 
 ---@self Blocks
-function M:to_vim()
-	apply(self, "to_vim")
+function M:to_buf()
+	apply(self, "to_buf")
 end
 
 ---@self Blocks

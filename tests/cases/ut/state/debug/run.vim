@@ -18,7 +18,7 @@ lua << EOF
   local Attrs = require("tirenvi.core.attrs")
   local Request = require("tirenvi.app.request")
   local Range = require("tirenvi.util.range")
-  local req_r = Request.from_range(Range.WHOLE)
+  local req_r = Request.new_reader(Range.WHOLE)
   local reader = require("tirenvi.io.reader")
   local buf_parser = require("tirenvi.parser.buf_parser")
   local Document = require("tirenvi.core.document")

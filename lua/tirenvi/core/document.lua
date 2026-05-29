@@ -82,12 +82,9 @@ local function new_attr_file()
     return { kind = CONST.KIND.ATTR_FILE, version = VERSION }
 end
 
----@param self Document|nil
+---@param self Document
 ---@return Attr[]
 local function collect_attrs(self)
-    if not self then
-        return {}
-    end
     return Blocks.collect_attrs(self.blocks)
 end
 
@@ -117,7 +114,7 @@ end
 function M.from_buf_doc(self, no_normalize)
     no_normalize = no_normalize or false
     local doc = vim.deepcopy(self)
-    Blocks.from_vim(doc.blocks, no_normalize)
+    Blocks.from_buf(doc.blocks, no_normalize)
     return doc
 end
 
@@ -130,8 +127,8 @@ end
 
 ---@param self Document
 ---@return Document
-function M:to_vim()
-    Blocks.to_vim(self.blocks)
+function M:to_buf()
+    Blocks.to_buf(self.blocks)
     return self
 end
 
@@ -155,7 +152,7 @@ end
 ---@return Attr[]
 function M:replace_attrs(range, chached_attrs)
     local doc_attrs = Blocks.collect_attrs(self.blocks)
-    if not chached_attrs or not Attrs.has_range(chached_attrs) or Range.is_whole(range) then
+    if not chached_attrs or Range.is_whole(range) then
         return doc_attrs
     end
     return Attrs.replace_attrs(chached_attrs, range, doc_attrs)

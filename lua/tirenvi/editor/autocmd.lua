@@ -9,9 +9,11 @@ local Range3 = require("tirenvi.util.range3")
 local log = require("tirenvi.util.log")
 
 -- module
+
 local M = {}
 
 -- constants / defaults
+
 local GROUP_NAME = "tirenvi"
 
 local api = vim.api
@@ -38,9 +40,8 @@ local function on_lines(_, bufnr, tick, range3, bytecount)
 	init.on_lines(ctx, range3)
 end
 
----@param ctx Context
-local function attach_on_lines(ctx)
-	local bufnr = ctx.bufnr
+---@param bufnr number
+local function attach_on_lines(bufnr)
 	if buffer.get(bufnr, buffer.IKEY.ATTACHED) then
 		return
 	end
@@ -96,13 +97,12 @@ end
 
 ---@param args table
 local function on_cursor_hold(args)
-	attach_on_lines(args)
+	attach_on_lines(args.buf)
 end
 
 ---@param ctx Context
----@return Context
 local function on_filetype(ctx)
-	return init.on_filetype(ctx)
+	init.on_filetype(ctx)
 end
 
 ---@param args table
@@ -118,41 +118,41 @@ local function debug_entry_point(args)
 end
 
 ---@param augroup integer
----@param ctx Context
-local function clear_buffer_local_autocmds(augroup, ctx)
-	api.nvim_clear_autocmds({ group = augroup, buffer = ctx.bufnr })
+---@param bufnr number
+local function clear_buffer_local_autocmds(augroup, bufnr)
+	api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
 end
 
 ---@param augroup integer
----@param ctx Context
-local function register_buffer_local_autocmds(augroup, ctx)
-	attach_on_lines(ctx)
+---@param bufnr number
+local function register_buffer_local_autocmds(augroup, bufnr)
+	attach_on_lines(bufnr)
 
 	api.nvim_create_autocmd("BufWritePre", {
 		group = augroup,
-		buffer = ctx.bufnr,
+		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
-			local ctx = get_context(args.bufnr)
+			local ctx = get_context(args.buf)
 			on_buf_write_pre(ctx)
 		end),
 	})
 
 	api.nvim_create_autocmd("BufWritePost", {
 		group = augroup,
-		buffer = ctx.bufnr,
+		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
-			local ctx = get_context(args.bufnr)
+			local ctx = get_context(args.buf)
 			on_buf_write_post(ctx)
 		end),
 	})
 
 	api.nvim_create_autocmd("CursorHold", {
 		group = augroup,
-		buffer = ctx.bufnr,
+		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
 			on_cursor_hold(args)
@@ -161,11 +161,10 @@ local function register_buffer_local_autocmds(augroup, ctx)
 
 	api.nvim_create_autocmd("InsertEnter", {
 		group = augroup,
-		buffer = ctx.bufnr,
+		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
-			local ctx = get_context(args.bufnr)
 			assert(not buffer.get(args.buf, buffer.IKEY.INSERT_MODE))
 			buffer.set(args.buf, buffer.IKEY.INSERT_MODE, true)
 		end),
@@ -173,11 +172,11 @@ local function register_buffer_local_autocmds(augroup, ctx)
 
 	api.nvim_create_autocmd("InsertLeave", {
 		group = augroup,
-		buffer = ctx.bufnr,
+		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
-			local ctx = get_context(args.bufnr)
+			local ctx = get_context(args.buf)
 			-- InsertLeave may be triggered without a preceding InsertEnter
 			-- due to the behavior of other plugins (e.g., Telescope).
 			-- Do not assert insert_mode here.
@@ -188,18 +187,18 @@ local function register_buffer_local_autocmds(augroup, ctx)
 
 	api.nvim_create_autocmd("InsertCharPre", {
 		group = augroup,
-		buffer = ctx.bufnr,
+		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
-			local ctx = get_context(args.bufnr)
+			local ctx = get_context(args.buf)
 			on_insert_char_pre(ctx)
 		end),
 	})
 
 	vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
 		group = augroup,
-		buffer = ctx.bufnr,
+		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
 			ui.special_apply()
@@ -213,17 +212,18 @@ local function register_autocmds()
 	vim.api.nvim_create_autocmd("FileType", {
 		group = augroup,
 		callback = guard.guarded(function(args)
-			if buf_state.should_skip(args.buf, {
+			local bufnr = args.buf
+			if buf_state.should_skip(bufnr, {
 					has_parser = false,
 				}) then
 				return
 			end
 			debug_entry_point(args)
-			local ctx = get_context(args.bufnr)
-			ctx = on_filetype(ctx)
-			clear_buffer_local_autocmds(augroup, ctx)
-			if buf_state.should_skip(args.buf) then return end
-			register_buffer_local_autocmds(augroup, ctx)
+			local ctx = get_context(bufnr)
+			on_filetype(ctx)
+			clear_buffer_local_autocmds(augroup, bufnr)
+			if buf_state.should_skip(bufnr) then return end
+			register_buffer_local_autocmds(augroup, bufnr)
 		end),
 	})
 
@@ -232,7 +232,7 @@ local function register_autocmds()
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
-			local ctx = get_context(args.bufnr)
+			local ctx = get_context(args.buf)
 			on_buf_read_post(ctx)
 		end),
 	})

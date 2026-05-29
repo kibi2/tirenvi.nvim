@@ -43,6 +43,14 @@ execute "normal! aADD\<Esc>"
 sleep 1m
 Tir repair
 sleep 1m
+call Snapshot({'desc': 'final' })
 
+Tir repair disable
+%s /[A-z]/xx/g
+execute "normal! 3G2lD"
+Tir repair enable
+execute "normal! 2G"
+execute "normal! Onew line\<Esc>"
+sleep 1m
 
 call RunTest({})
