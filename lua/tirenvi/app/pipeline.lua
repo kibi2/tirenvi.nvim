@@ -7,6 +7,7 @@ local Blocks = require("tirenvi.core.blocks")
 local tir_buf = require("tirenvi.core.tir_buf")
 local dirty_range = require("tirenvi.core.dirty_range")
 local Request = require("tirenvi.app.request")
+local ReadResult = require("tirenvi.app.read_result")
 local flat_parser = require("tirenvi.parser.flat_parser")
 local buf_parser = require("tirenvi.parser.buf_parser")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
@@ -32,7 +33,7 @@ local api = vim.api
 -- private helpers
 
 ---@param ctx Context
----@param req_r Request
+---@param req_r ReadResult
 ---@return Document
 local function flat_to_doc(ctx, req_r)
     local doc = flat_parser.parse(ctx, req_r)
@@ -43,7 +44,7 @@ local function flat_to_doc(ctx, req_r)
 end
 
 ---@param ctx Context
----@param req_r Request
+---@param req_r ReadResult
 ---@param range3 Range3|nil
 ---@return Document
 local function buf_to_bdoc_text_driven(ctx, req_r, range3)
@@ -51,14 +52,14 @@ local function buf_to_bdoc_text_driven(ctx, req_r, range3)
     req_r.attrs = Attrs.adjust(req_r.attrs or {}, range3)
     if range3 then log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "0UPDATE CHACHED:")) end
     local buf_doc = buf_parser.parse_text_driven(ctx, req_r, range3)
-    local first = Request.lua_range(req_r)
+    local first = ReadResult.lua_range(req_r)
     Document.set_attr_range(buf_doc, first)
     log.watch("ATTR", Document.debug_attrs(buf_doc, "1DOC ATTR:"))
     return buf_doc
 end
 
 ---@param ctx Context
----@param req_r Request
+---@param req_r ReadResult
 ---@return Document
 local function buf_to_bdoc_attr_driven(ctx, req_r)
     log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
@@ -68,7 +69,7 @@ local function buf_to_bdoc_attr_driven(ctx, req_r)
 end
 
 ---@param ctx Context
----@param req_r Request
+---@param req_r ReadResult
 ---@return Document
 local function buf_to_doc_text_driven(ctx, req_r)
     local buf_doc = buf_to_bdoc_text_driven(ctx, req_r)
@@ -78,7 +79,7 @@ local function buf_to_doc_text_driven(ctx, req_r)
 end
 
 ---@param ctx Context
----@param req_r Request
+---@param req_r ReadResult
 ---@param no_normalize boolean -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
 ---@return Document
@@ -91,13 +92,13 @@ local function buf_to_doc_attrs_driven(ctx, req_r, no_normalize)
 end
 
 ---@param ctx Context
----@param req_r Request
+---@param req_r ReadResult
 ---@param buf_doc Document
 ---@param no_undo boolean|nil
 local function doc_to_buf(ctx, req_r, buf_doc, no_undo)
-    local first = Request.lua_range(req_r)
+    local first = ReadResult.lua_range(req_r)
     Document.set_attr_range(buf_doc, first)
-    local vi_lines = buf_parser.unparse(buf_doc, req_r)
+    local vi_lines = buf_parser.unparse(buf_doc)
     log.watch("ATTR", Document.debug_attrs(buf_doc, "9DOC ATTR:"))
     local req_w = Request.new_writer(req_r.range, vi_lines, no_undo or false)
     req_w.attrs = Document.replace_attrs(buf_doc, req_r.range, req_r.attrs)
@@ -144,7 +145,7 @@ local function expand_rect(ctx, row)
 end
 
 ---@param ctx Context
----@param req_r Request
+---@param req_r ReadResult
 ---@param range3 Range3
 ---@return Attr[]
 local function reconcile_attrs(ctx, req_r, range3)
@@ -251,7 +252,7 @@ function M.from_flat(ctx, no_undo)
     local req_r = reader.read(ctx, Range.WHOLE)
     log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
     local doc
-    if Request.is_flat(req_r) or not tir_buf.has_pipe(req_r.lines) then
+    if ReadResult.is_flat(req_r) or not tir_buf.has_pipe(req_r.lines) then
         util.ensure_no_reserved_marks(req_r.lines)
         doc = flat_to_doc(ctx, req_r)
     else
@@ -267,7 +268,7 @@ end
 ---@param no_undo boolean|nil
 function M.to_flat(ctx, no_undo)
     local req_r = reader.read(ctx, Range.WHOLE)
-    if Request.is_flat(req_r) then
+    if ReadResult.is_flat(req_r) then
         return
     end
     local doc = buf_to_doc_text_driven(ctx, req_r)
@@ -284,7 +285,7 @@ function M.cmd_width(ctx, sel, width_op)
         error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
     end
     local req_r = reader.read(ctx, sel.row)
-    if Request.is_flat(req_r) then
+    if ReadResult.is_flat(req_r) then
         return
     end
     local doc = buf_to_doc_text_driven(ctx, req_r)
@@ -299,7 +300,7 @@ end
 function M.cmd_format(ctx, no_normalize, no_undo)
     no_normalize = no_normalize or false
     local req_r = reader.read(ctx, Range.WHOLE)
-    if Request.is_flat(req_r) then
+    if ReadResult.is_flat(req_r) then
         return
     end
     local doc = buf_to_doc_attrs_driven(ctx, req_r, no_normalize)
@@ -311,7 +312,7 @@ end
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
     local req_r = reader.read(ctx, Range3.get_new_range(range3))
-    if Request.is_flat(req_r) then
+    if ReadResult.is_flat(req_r) then
         return
     end
     local attrs = reconcile_attrs(ctx, req_r, range3)

@@ -88,7 +88,7 @@ end
 -- public API
 
 ---@param ctx Context
----@param req Request
+---@param req ReadResult
 ---@return Document
 function M.parse(ctx, req)
 	local js_lines = flat_to_js_lines(req.lines, ctx.parser)

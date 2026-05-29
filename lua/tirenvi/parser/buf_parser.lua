@@ -27,7 +27,7 @@ local M = {}
 -----------------------------------------------------------------------
 
 ---@param records Record[]
----@param req Request
+---@param req ReadResult
 ---@param range3 Range3
 local function promote_empty_lines_gfm(records, req, range3)
 	if not Range3.is_insert(range3) then
@@ -49,7 +49,7 @@ local function promote_empty_lines_gfm(records, req, range3)
 end
 
 ---@param records Record[]
----@param req Request
+---@param req ReadResult
 local function promote_empty_lines_csv(records, req)
 	local first, last = Range.to_lua(req.range)
 	local prev_attr = Attrs.get(req.attrs, first - 1)
@@ -63,7 +63,7 @@ local function promote_empty_lines_csv(records, req)
 end
 
 ---@param records Record[]
----@param req Request
+---@param req ReadResult
 ---@param range3 Range3|nil
 ---@param allow_plain boolean
 local function promote_empty_lines(records, req, allow_plain, range3)
@@ -78,7 +78,7 @@ local function promote_empty_lines(records, req, allow_plain, range3)
 end
 
 ---@param ctx Context
----@param req Request
+---@param req ReadResult
 ---@param range3 Range3|nil
 ---@return Document
 function M.parse_text_driven(ctx, req, range3)
@@ -90,7 +90,7 @@ function M.parse_text_driven(ctx, req, range3)
 end
 
 ---@param ctx Context
----@param req Request
+---@param req ReadResult
 ---@return Document
 function M.parse_attr_driven(ctx, req)
 	local records = Record.from_tir_buf(req.lines)
@@ -100,9 +100,8 @@ function M.parse_attr_driven(ctx, req)
 end
 
 ---@param buf_doc Document
----@param req Request
 ---@return string[]
-function M.unparse(buf_doc, req)
+function M.unparse(buf_doc)
 	local ndjsons = Document.serialize(buf_doc)
 	return Record.to_tir_buf(ndjsons)
 end

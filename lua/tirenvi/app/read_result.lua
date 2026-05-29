@@ -12,7 +12,7 @@ local log = require("tirenvi.util.log")
 
 local M = {}
 
----@class ReadRsult
+---@class ReadResult
 ---@field range Range
 ---@field no_undo? boolean
 ---@field lines? string[]
@@ -26,7 +26,7 @@ local M = {}
 -----------------------------------------------------------------------
 
 ---@param range Range
----@return Request
+---@return ReadResult
 function M.new_reader(range)
     local self = {
         range = range,
@@ -37,7 +37,7 @@ end
 ---@param range Range
 ---@param lines string[]
 ---@param no_undo boolean|nil
----@return Request
+---@return ReadResult
 function M.new_writer(range, lines, no_undo)
     return {
         range = range,
@@ -46,14 +46,14 @@ function M.new_writer(range, lines, no_undo)
     }
 end
 
----@param self Request
+---@param self ReadResult
 ---@return integer -- 1-based
 ---@return integer -- 1-based
 function M:lua_range()
     return Range.to_lua(self.range)
 end
 
----@param self Request
+---@param self ReadResult
 ---@return Range3
 function M:get_range3()
     local first, last = M.lua_range(self)
@@ -66,7 +66,7 @@ function M:is_no_undo()
     return self.no_undo == true
 end
 
----@param self Request
+---@param self ReadResult
 ---@return boolean
 function M:is_flat()
     return self.is_flat == true
