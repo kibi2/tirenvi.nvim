@@ -40,21 +40,27 @@ local function prepare_replace_map(map)
     return out
 end
 
-local ESCAPE_MAP = prepare_replace_map({
-    ["\n"] = config.marks.lf,
-    ["\t"] = config.marks.tab,
-})
-
-local UNESCAPE_MAP = prepare_replace_map({
-    [config.marks.lf] = "\n",
-    [config.marks.tab] = "\t",
-})
-
 -----------------------------------------------------------------------
 -- Private helpers
 -----------------------------------------------------------------------
 
 local function nop(...) end
+
+---@return {[string]: string}
+local function get_escape_map()
+    return prepare_replace_map({
+        ["\n"] = config.marks.lf,
+        ["\t"] = config.marks.tab,
+    })
+end
+
+---@return {[string]: string}
+local function get_un_escape_map()
+    return prepare_replace_map({
+        [config.marks.lf] = "\n",
+        [config.marks.tab] = "\t",
+    })
+end
 
 ---@self Block
 ---@param kind Block_kind
@@ -219,7 +225,7 @@ end
 ---@self Block
 function M.plain:to_flat()
     for _, record in ipairs(self.records) do
-        for key, val in pairs(UNESCAPE_MAP) do
+        for key, val in pairs(get_un_escape_map()) do
             record.line = record.line:gsub(key, val)
         end
     end
@@ -249,12 +255,12 @@ end
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 function M.grid:from_flat()
-    apply_replacements(self, ESCAPE_MAP)
+    apply_replacements(self, get_escape_map())
 end
 
 ---@self Block_grid
 function M.grid:to_flat()
-    apply_replacements(self, UNESCAPE_MAP)
+    apply_replacements(self, get_un_escape_map())
 end
 
 ---@param no_normalize boolean

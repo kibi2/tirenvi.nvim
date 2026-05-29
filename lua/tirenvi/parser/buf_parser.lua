@@ -86,8 +86,6 @@ function M.parse_text_driven(ctx, req, range3)
 	local allow_plain = Context.is_allow_plain(ctx)
 	promote_empty_lines(records, req, allow_plain, range3)
 	local buf_doc = Document.new_buf_doc(records, allow_plain)
-	local first = Request.lua_range(req)
-	Document.set_attr_range(buf_doc, first)
 	return buf_doc
 end
 
@@ -105,8 +103,6 @@ end
 ---@param req Request
 ---@return string[]
 function M.unparse(buf_doc, req)
-	local first = Request.lua_range(req)
-	Document.set_attr_range(buf_doc, first)
 	local ndjsons = Document.serialize(buf_doc)
 	return Record.to_tir_buf(ndjsons)
 end

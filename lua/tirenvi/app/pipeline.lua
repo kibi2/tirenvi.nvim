@@ -51,6 +51,8 @@ local function buf_to_bdoc_text_driven(ctx, req_r, range3)
     req_r.attrs = Attrs.adjust(req_r.attrs or {}, range3)
     if range3 then log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "0UPDATE CHACHED:")) end
     local buf_doc = buf_parser.parse_text_driven(ctx, req_r, range3)
+    local first = Request.lua_range(req_r)
+    Document.set_attr_range(buf_doc, first)
     log.watch("ATTR", Document.debug_attrs(buf_doc, "1DOC ATTR:"))
     return buf_doc
 end
@@ -93,6 +95,8 @@ end
 ---@param buf_doc Document
 ---@param no_undo boolean|nil
 local function doc_to_buf(ctx, req_r, buf_doc, no_undo)
+    local first = Request.lua_range(req_r)
+    Document.set_attr_range(buf_doc, first)
     local vi_lines = buf_parser.unparse(buf_doc, req_r)
     log.watch("ATTR", Document.debug_attrs(buf_doc, "9DOC ATTR:"))
     local req_w = Request.new_writer(req_r.range, vi_lines, no_undo or false)
