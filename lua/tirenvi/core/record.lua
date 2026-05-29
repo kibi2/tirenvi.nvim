@@ -1,7 +1,7 @@
 local config = require("tirenvi.config")
 local CONST = require("tirenvi.constants")
 local Cell = require("tirenvi.core.cell")
-local tir_buf = require("tirenvi.core.tir_buf")
+local Bufline = require("tirenvi.core.bufline")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -18,7 +18,7 @@ M.grid = {}
 ---@return Record
 local function from_bufline(bufline)
     local pipec = config.marks.pipec
-    local pipe = tir_buf.get_pipe_char(bufline)
+    local pipe = Bufline.get_pipe_char(bufline)
     if pipe then
         return M.grid.new_from_bufline(bufline, pipe == pipec)
     else
@@ -76,7 +76,7 @@ end
 ---@return Record_grid
 function M.grid.new_from_bufline(bufline, has_continuation)
     bufline = bufline or ""
-    local cells = tir_buf.get_cells(bufline)
+    local cells = Bufline.get_cells(bufline)
     local record = M.grid.new(cells)
     record._has_continuation = has_continuation
     return record

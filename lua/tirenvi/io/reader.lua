@@ -1,5 +1,5 @@
 local Attrs = require("tirenvi.core.attrs")
-local tir_buf = require("tirenvi.core.tir_buf")
+local Bufline = require("tirenvi.core.bufline")
 local buffer = require("tirenvi.io.buffer")
 local buf_state = require("tirenvi.io.buf_state")
 local attr_store = require("tirenvi.io.attr_store")

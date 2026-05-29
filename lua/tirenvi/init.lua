@@ -8,7 +8,7 @@ local buffer = require("tirenvi.io.buffer")
 local attr_store = require("tirenvi.io.attr_store")
 local writer = require("tirenvi.io.writer")
 local reader = require("tirenvi.io.reader")
-local tir_buf = require("tirenvi.core.tir_buf")
+local Bufline = require("tirenvi.core.bufline")
 local Range = require("tirenvi.util.range")
 local Range3 = require("tirenvi.util.range3")
 local util = require("tirenvi.util.util")
@@ -152,7 +152,7 @@ function M.insert_char_in_newline(ctx)
 	if not Context.is_allow_plain(ctx) then
 		line_ref = line_ref or line_next
 	end
-	local pipe = tir_buf.get_pipe_char(line_ref)
+	local pipe = Bufline.get_pipe_char(line_ref)
 	if not pipe then
 		return
 	end
@@ -163,7 +163,7 @@ end
 function M.keymap_lf()
 	local col = fn.col(".")
 	local line = fn.getline(".")
-	if not tir_buf.get_pipe_char(line) then
+	if not Bufline.get_pipe_char(line) then
 		return util.get_termcodes("<CR>")
 	end
 	if col == 1 or col > #line then
@@ -175,7 +175,7 @@ end
 ---@return string
 function M.keymap_tab()
 	local line = fn.getline(".")
-	if not tir_buf.get_pipe_char(line) then
+	if not Bufline.get_pipe_char(line) then
 		return util.get_termcodes("<Tab>")
 	end
 	if bo.expandtab then

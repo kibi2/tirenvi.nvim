@@ -1,6 +1,6 @@
 local Attr = require("tirenvi.core.attr")
 local Attrs = require("tirenvi.core.attrs")
-local tir_buf = require("tirenvi.core.tir_buf")
+local Bufline = require("tirenvi.core.bufline")
 local Range3 = require("tirenvi.util.range3")
 local Range = require("tirenvi.util.range")
 local util = require("tirenvi.util.util")
@@ -24,7 +24,7 @@ local function expand_continue_lines(line_provider, range)
     local lines = line_provider.get_lines(first, last)
     local prev = range.first - 1
     local prev_line = line_provider.get_line(prev)
-    while tir_buf.is_continue_line(prev_line) do
+    while Bufline.is_continue_line(prev_line) do
         prev = prev - 1
         prev_line = line_provider.get_line(prev)
     end
@@ -32,7 +32,7 @@ local function expand_continue_lines(line_provider, range)
     ---@type string|nil
     local last_line = lines[#lines]
     local last = range.last
-    while tir_buf.is_continue_line(last_line) do
+    while Bufline.is_continue_line(last_line) do
         last = last + 1
         last_line = line_provider.get_line(last)
     end
@@ -75,14 +75,14 @@ local function is_valid(attr, line)
     if not attr then
         return false
     end
-    local pipe = tir_buf.get_pipe_char(line)
+    local pipe = Bufline.get_pipe_char(line)
     if not pipe then
         return Attr.is_plain(attr)
     end
-    if not tir_buf.is_normal_grid(line, pipe) then
+    if not Bufline.is_normal_grid(line, pipe) then
         return false
     end
-    local widths = tir_buf.get_widths(line)
+    local widths = Bufline.get_widths(line)
     if #attr.columns ~= #widths then
         return false
     end
@@ -104,14 +104,14 @@ local function is_valid_bound(next_attr, line)
     if not next_attr or Attr.is_plain(next_attr) then
         return true
     end
-    local pipe = tir_buf.get_pipe_char(line)
+    local pipe = Bufline.get_pipe_char(line)
     if not pipe then
         return true
     end
-    if not tir_buf.is_normal_grid(line, pipe) then
+    if not Bufline.is_normal_grid(line, pipe) then
         return false
     end
-    local widths = tir_buf.get_widths(line)
+    local widths = Bufline.get_widths(line)
     if #next_attr.columns ~= #widths then
         return false
     end
