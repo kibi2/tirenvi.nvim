@@ -14,9 +14,8 @@ local M = {}
 
 ---@class ReadResult
 ---@field range Range
----@field no_undo? boolean
----@field lines? string[]
----@field attrs? Attr[]
+---@field lines string[]
+---@field attrs Attr[]|nil
 ---@field is_flat? boolean
 
 -- private helpers
@@ -34,18 +33,6 @@ function M.new_reader(range)
     return self
 end
 
----@param range Range
----@param lines string[]
----@param no_undo boolean|nil
----@return ReadResult
-function M.new_writer(range, lines, no_undo)
-    return {
-        range = range,
-        lines = lines,
-        no_undo = no_undo or false,
-    }
-end
-
 ---@param self ReadResult
 ---@return integer -- 1-based
 ---@return integer -- 1-based
@@ -58,12 +45,6 @@ end
 function M:get_range3()
     local first, last = M.lua_range(self)
     return Range3.new(first, last, first + #self.lines - 1)
-end
-
----@param self Request
----@return boolean
-function M:is_no_undo()
-    return self.no_undo == true
 end
 
 ---@param self ReadResult

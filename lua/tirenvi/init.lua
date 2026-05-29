@@ -1,5 +1,6 @@
 ----- dependencies
 local Context = require("tirenvi.app.context")
+local ReadResult = require("tirenvi.app.read_result")
 local Request = require("tirenvi.app.request")
 local pipeline = require("tirenvi.app.pipeline")
 local config = require("tirenvi.config")
@@ -85,12 +86,12 @@ local buffer_backup
 ---@param ctx Context
 ---@return nil
 function M.export_flat(ctx)
-	local req = reader.read(ctx, Range.WHOLE)
-	if Request.is_flat(req) then
+	local r_result = reader.read(ctx, Range.WHOLE)
+	if ReadResult.is_flat(r_result) then
 		buffer_backup = nil
 		return
 	else
-		buffer_backup = req.lines
+		buffer_backup = r_result.lines
 		pipeline.to_flat(ctx, true)
 	end
 end
@@ -116,8 +117,8 @@ end
 ---@param ctx Context
 ---@return nil
 function M.toggle(ctx)
-	local req = reader.read(ctx, Range.WHOLE)
-	if Request.is_flat(req) then
+	local r_result = reader.read(ctx, Range.WHOLE)
+	if ReadResult.is_flat(r_result) then
 		M.enable(ctx)
 	else
 		M.disable(ctx)

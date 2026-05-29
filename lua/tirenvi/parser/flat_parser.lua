@@ -88,10 +88,10 @@ end
 -- public API
 
 ---@param ctx Context
----@param req ReadResult
+---@param r_result ReadResult
 ---@return Document
-function M.parse(ctx, req)
-	local js_lines = flat_to_js_lines(req.lines, ctx.parser)
+function M.parse(ctx, r_result)
+	local js_lines = flat_to_js_lines(r_result.lines, ctx.parser)
 	local ndjsons = js_lines_to_ndjsons(js_lines)
 	return Document.new_flat_doc(ndjsons, Context.is_allow_plain(ctx))
 end

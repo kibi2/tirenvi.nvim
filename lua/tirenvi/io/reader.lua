@@ -20,12 +20,12 @@ local M = {}
 ---@param range Range
 ---@return ReadResult
 function M.read(ctx, range)
-    local req = ReadResult.new_reader(range)
-    req.attrs = attr_store.read(ctx)
-    req.is_flat = buf_state.is_flat(ctx.bufnr)
-    local first, last = ReadResult.lua_range(req)
-    req.lines = buffer.get_lines(ctx.bufnr, first, last)
-    return req
+    local r_result = ReadResult.new_reader(range)
+    r_result.attrs = attr_store.read(ctx)
+    r_result.is_flat = buf_state.is_flat(ctx.bufnr)
+    local first, last = ReadResult.lua_range(r_result)
+    r_result.lines = buffer.get_lines(ctx.bufnr, first, last)
+    return r_result
 end
 
 return M

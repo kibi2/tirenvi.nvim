@@ -14,10 +14,9 @@ local M = {}
 
 ---@class Request
 ---@field range Range
----@field lines? string[]
----@field attrs? Attr[]
----@field no_undo? boolean
----@field is_flat? boolean
+---@field lines string[]
+---@field attrs Attr[]
+---@field no_undo boolean
 
 -- private helpers
 
@@ -64,12 +63,6 @@ end
 ---@return boolean
 function M:is_no_undo()
     return self.no_undo == true
-end
-
----@param self Request
----@return boolean
-function M:is_flat()
-    return self.is_flat == true
 end
 
 return M
