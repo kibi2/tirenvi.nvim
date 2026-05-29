@@ -113,8 +113,8 @@ end
 ---@param doc Document
 ---@param no_undo boolean|nil
 local function doc_to_flat(ctx, r_result, doc, no_undo)
-    local fl_lines = flat_parser.unparse(ctx, doc)
-    local req_w = Request.new_writer(r_result.range, fl_lines, no_undo or false)
+    local fllines = flat_parser.unparse(ctx, doc)
+    local req_w = Request.new_writer(r_result.range, fllines, no_undo or false)
     req_w.attrs = vim.deepcopy(r_result.attrs)
     Attrs.remove_range(req_w.attrs)
     log.watch("ATTR", Attrs.debug_attrs(req_w.attrs, "[9]CHACHED:"))

@@ -29,11 +29,11 @@ local M = {}
 -- private helpers
 
 --- Convert flat lines to NDJSON lines
----@param fl_lines string[]
+---@param fllines string[]
 ---@param parser Parser
 ---@return string[] NDJSON lines
-local function flat_to_jslines(fl_lines, parser)
-	local js_string = Parser.run(parser, "parse", fl_lines)
+local function flat_to_jslines(fllines, parser)
+	local js_string = Parser.run(parser, "parse", fllines)
 	return vim.split(js_string, "\n", { plain = true })
 end
 
@@ -80,9 +80,9 @@ end
 ---@return string[] flat lines
 local function jslines_to_flat(jslines, parser)
 	local fl_string = Parser.run(parser, "unparse", jslines)
-	local fl_lines = vim.split(fl_string, "\n")
-	--log.debug(util.to_hex(table.concat(fl_lines, "\n")):sub(1, 80) .. " ")
-	return fl_lines
+	local fllines = vim.split(fl_string, "\n")
+	--log.debug(util.to_hex(table.concat(fllines, "\n")):sub(1, 80) .. " ")
+	return fllines
 end
 
 -- public API
