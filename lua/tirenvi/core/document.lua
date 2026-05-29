@@ -93,7 +93,7 @@ end
 ---@param ndjsons Ndjson[]
 ---@param allow_plain boolean
 ---@return Document
-function M.new_flat_doc(ndjsons, allow_plain)
+function M.new_tirdoc(ndjsons, allow_plain)
     local self = new(ndjsons, allow_plain)
     Blocks.from_flat(self.blocks)
     return self
@@ -120,7 +120,7 @@ end
 
 ---@param self Document
 ---@return Document
-function M:to_flat_doc()
+function M:to_tirdoc()
     Blocks.to_flat(self.blocks)
     return self
 end

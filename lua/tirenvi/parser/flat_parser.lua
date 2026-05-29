@@ -93,7 +93,7 @@ end
 function M.parse(ctx, r_result)
 	local js_lines = flat_to_js_lines(r_result.lines, ctx.parser)
 	local ndjsons = js_lines_to_ndjsons(js_lines)
-	return Document.new_flat_doc(ndjsons, Context.is_allow_plain(ctx))
+	return Document.new_tirdoc(ndjsons, Context.is_allow_plain(ctx))
 end
 
 --- Convert display lines back to TSV format
@@ -101,8 +101,8 @@ end
 ---@param document Document	
 ---@return string[]
 function M.unparse(ctx, document)
-	local flat_doc = Document.to_flat_doc(document)
-	local ndjsons = Document.serialize_to_flat(flat_doc)
+	local tirdoc = Document.to_tirdoc(document)
+	local ndjsons = Document.serialize_to_flat(tirdoc)
 	local js_lines = ndjsons_to_lines(ndjsons)
 	log.debug("[%d]='%s'...[%d]='%s'", 1, tostring(js_lines[1]), #js_lines, tostring(js_lines[#js_lines]))
 	return js_lines_to_flat(js_lines, ctx.parser)
