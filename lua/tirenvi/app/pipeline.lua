@@ -50,11 +50,11 @@ end
 local function buf_to_bdoc_text_driven(ctx, r_result, range3)
     r_result.attrs = Attrs.adjust(r_result.attrs or {}, range3)
     if range3 then log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[0]UPDATE CHACHED:")) end
-    local buf_doc = buf_parser.parse_text_driven(ctx, r_result, range3)
+    local bufdoc = buf_parser.parse_text_driven(ctx, r_result, range3)
     local first = ReadResult.lua_range(r_result)
-    Document.set_attr_range(buf_doc, first)
-    log.watch("ATTR", Document.debug_attrs(buf_doc, "[1]DOC ATTR:"))
-    return buf_doc
+    Document.set_attr_range(bufdoc, first)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
+    return bufdoc
 end
 
 ---@param ctx Context
@@ -62,19 +62,19 @@ end
 ---@return Document
 local function buf_to_bdoc_attr_driven(ctx, r_result)
     log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "CHACHED ATTRS:"))
-    local buf_doc = buf_parser.parse_attr_driven(ctx, r_result)
-    log.watch("ATTR", Document.debug_attrs(buf_doc, "[1]DOC ATTR:"))
-    return buf_doc
+    local bufdoc = buf_parser.parse_attr_driven(ctx, r_result)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
+    return bufdoc
 end
 
 ---@param ctx Context
 ---@param r_result ReadResult
 ---@return Document
 local function buf_to_doc_text_driven(ctx, r_result)
-    local buf_doc = buf_to_bdoc_text_driven(ctx, r_result)
-    Document.apply_cached_attr(buf_doc, r_result.attrs)
-    log.watch("ATTR", Document.debug_attrs(buf_doc, "[4]CACHED:"))
-    return Document.from_buf_doc(buf_doc)
+    local bufdoc = buf_to_bdoc_text_driven(ctx, r_result)
+    Document.apply_cached_attr(bufdoc, r_result.attrs)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[4]CACHED:"))
+    return Document.from_bufdoc(bufdoc)
 end
 
 ---@param ctx Context
@@ -83,9 +83,9 @@ end
 -- Prevents line count changes that would break put(); used for repair.
 ---@return Document
 local function buf_to_doc_attrs_driven(ctx, r_result, no_normalize)
-    local buf_doc = buf_to_bdoc_attr_driven(ctx, r_result)
-    Document.insert_empty_lines(buf_doc)
-    local doc = Document.from_buf_doc(buf_doc, no_normalize)
+    local bufdoc = buf_to_bdoc_attr_driven(ctx, r_result)
+    Document.insert_empty_lines(bufdoc)
+    local doc = Document.from_bufdoc(bufdoc, no_normalize)
     log.watch("ATTR", Document.debug_attrs(doc, "[7]INSERT EMPTY:"))
     return doc
 end
@@ -149,16 +149,16 @@ end
 ---@param range3 Range3
 ---@return Attr[]
 local function reconcile_attrs(ctx, r_result, range3)
-    local buf_doc = buf_to_bdoc_text_driven(ctx, r_result, range3)
-    Document.inherit_neighbor_attr(buf_doc, r_result.attrs, range3)
-    log.watch("ATTR", Document.debug_attrs(buf_doc, "[2]NEIGHBOR:"))
-    Document.infer_consistent_attr(buf_doc)
-    log.watch("ATTR", Document.debug_attrs(buf_doc, "[3]CONSISTENT:"))
-    Document.apply_cached_attr(buf_doc, r_result.attrs)
-    log.watch("ATTR", Document.debug_attrs(buf_doc, "[4]CACHED:"))
-    Document.set_auto_attr(buf_doc)
-    log.watch("ATTR", Document.debug_attrs(buf_doc, "[5]AUTO ATTR:"))
-    local attrs = Document.replace_attrs(buf_doc, r_result.range, r_result.attrs)
+    local bufdoc = buf_to_bdoc_text_driven(ctx, r_result, range3)
+    Document.inherit_neighbor_attr(bufdoc, r_result.attrs, range3)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[2]NEIGHBOR:"))
+    Document.infer_consistent_attr(bufdoc)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[3]CONSISTENT:"))
+    Document.apply_cached_attr(bufdoc, r_result.attrs)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[4]CACHED:"))
+    Document.set_auto_attr(bufdoc)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[5]AUTO ATTR:"))
+    local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[6]RESULT:"))
     attr_store.write(ctx, attrs)
     return attrs
@@ -289,8 +289,8 @@ function M.cmd_width(ctx, sel, width_op)
     end
     local doc = buf_to_doc_text_driven(ctx, r_result)
     Blocks.change_width(doc.blocks, sel.col, width_op)
-    local buf_doc = Document.to_bufdoc(doc)
-    bufdoc_to_buflines(ctx, r_result, buf_doc)
+    local bufdoc = Document.to_bufdoc(doc)
+    bufdoc_to_buflines(ctx, r_result, bufdoc)
 end
 
 ---@param ctx Context
@@ -303,8 +303,8 @@ function M.cmd_format(ctx, no_normalize, no_undo)
         return
     end
     local doc = buf_to_doc_attrs_driven(ctx, r_result, no_normalize)
-    local buf_doc = Document.to_bufdoc(doc)
-    bufdoc_to_buflines(ctx, r_result, buf_doc, no_undo)
+    local bufdoc = Document.to_bufdoc(doc)
+    bufdoc_to_buflines(ctx, r_result, bufdoc, no_undo)
 end
 
 ---@param ctx Context
