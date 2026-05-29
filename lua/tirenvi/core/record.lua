@@ -164,7 +164,7 @@ end
 
 ---@param ndjsons Ndjson[]
 ---@return string[]
-function M.to_tir_buf(ndjsons)
+function M.to_buflines(ndjsons)
     local pipec = config.marks.pipec
     local pipen = config.marks.pipe
     local tir_buf = {}

@@ -125,11 +125,12 @@ function M:to_flat_doc()
     return self
 end
 
----@param self Document
+---@param tirdoc Document
 ---@return Document
-function M:to_buf()
-    Blocks.to_buf(self.blocks)
-    return self
+function M.to_bufdoc(tirdoc)
+    local bufdoc = vim.deepcopy(tirdoc)
+    Blocks.to_bufdoc(bufdoc.blocks)
+    return bufdoc
 end
 
 ---@param self Document
@@ -168,9 +169,9 @@ function M:set_auto_attr()
     Blocks.set_auto_attr(self.blocks)
 end
 
----@param self Document
-function M:set_attr_range(first)
-    Blocks.set_attr_range(self.blocks, first)
+---@param bufdoc Document
+function M.set_attr_range(bufdoc, first)
+    Blocks.set_attr_range(bufdoc.blocks, first)
 end
 
 ---@param self Document

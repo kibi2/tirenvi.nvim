@@ -274,7 +274,7 @@ end
 
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
-function M.grid:to_buf()
+function M.grid:to_bufdoc()
     apply_column_count(self, #self.attr.columns)
     wrap(self)
     fill_padding(self)

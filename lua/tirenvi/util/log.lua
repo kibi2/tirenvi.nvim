@@ -146,6 +146,7 @@ local category_hl_map = {}
 local category_match_id = {}
 vim.api.nvim_set_hl(0, "TirLog_Entry", { fg = "#55ffff", bold = true })
 vim.api.nvim_set_hl(0, "TirLog_Error", { fg = "#ffffff", bg = "#ff0000", bold = true })
+vim.api.nvim_set_hl(0, "TirLog_num", { fg = "#cc55cc", bold = true })
 
 local function apply_log_highlight(bufnr)
 	local winid = vim.fn.bufwinid(bufnr)
@@ -153,6 +154,8 @@ local function apply_log_highlight(bufnr)
 	vim.api.nvim_win_call(winid, function()
 		vim.fn.clearmatches()
 		vim.fn.matchadd("TirLog_Entry", "===")
+		--vim.fn.matchadd("TirLog_Error", [[\[[0-9,]\+\]]])
+		vim.fn.matchadd("TirLog_num", "\\[[0-9,]\\+\\]")
 		vim.fn.matchadd("TirLog_Error", "\\[ERROR\\]")
 		for cat, hl in pairs(category_hl_map) do
 			vim.fn.matchadd(hl, "\\[" .. cat .. "\\]")

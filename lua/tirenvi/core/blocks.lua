@@ -134,10 +134,10 @@ end
 ---| "conflict"
 ---| "grid in plain"
 
----@param self Blocks
+---@param bufblocks Blocks
 ---@param first integer
-local function rebuild_attr_range(self, first)
-	for _, block in ipairs(self) do
+local function rebuild_attr_range(bufblocks, first)
+	for _, block in ipairs(bufblocks) do
 		local attr = block.attr or Attr.new()
 		block.attr = attr
 		local last = first + #block.records - 1
@@ -220,8 +220,8 @@ function M.from_buf(self, no_normalize)
 end
 
 ---@self Blocks
-function M:to_buf()
-	apply(self, "to_buf")
+function M:to_bufdoc()
+	apply(self, "to_bufdoc")
 end
 
 ---@self Blocks
@@ -234,10 +234,10 @@ function M:set_auto_attr()
 	apply(self, "set_auto_attr")
 end
 
----@self Blocks
+---@parama bufblocks Blocks
 ---@param first integer
-function M:set_attr_range(first)
-	rebuild_attr_range(self, first)
+function M.set_attr_range(bufblocks, first)
+	rebuild_attr_range(bufblocks, first)
 end
 
 ---@param self Blocks

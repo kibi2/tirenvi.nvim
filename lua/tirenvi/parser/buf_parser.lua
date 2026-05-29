@@ -103,7 +103,7 @@ end
 ---@return string[]
 function M.unparse(buf_doc)
 	local ndjsons = Document.serialize(buf_doc)
-	return Record.to_tir_buf(ndjsons)
+	return Record.to_buflines(ndjsons)
 end
 
 ---@param lines string[]
