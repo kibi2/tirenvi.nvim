@@ -195,7 +195,7 @@ end
 function M.plain.new()
     local self = M.new()
     M.set_kind(self, CONST.KIND.PLAIN)
-    M.add(self, Record.plain.new_from_vi_line(""))
+    M.add(self, Record.plain.new_from_bufline(""))
     return self
 end
 
