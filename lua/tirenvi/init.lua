@@ -99,7 +99,7 @@ end
 --- Convert current buffer (or specified buffer) from plain format to view format
 ---@param ctx Context
 ---@return nil
-function M.restore_tir_buf(ctx)
+function M.restore_buflines(ctx)
 	if not buffer_backup then
 		return
 	end

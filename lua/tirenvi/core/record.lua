@@ -154,7 +154,7 @@ end
 
 ---@param buflines string[]
 ---@return Record[]
-function M.from_tir_buf(buflines)
+function M.from_buflines(buflines)
     local records = {}
     for index = 1, #buflines do
         records[index] = from_bufline(buflines[index])
@@ -167,20 +167,20 @@ end
 function M.to_buflines(ndjsons)
     local pipec = config.marks.pipec
     local pipen = config.marks.pipe
-    local tir_buf = {}
+    local buflines = {}
     for _, record in ipairs(ndjsons) do
         local kind = record.kind
         if kind == CONST.KIND.PLAIN then
-            tir_buf[#tir_buf + 1] = record.line or ""
+            buflines[#buflines + 1] = record.line or ""
         elseif kind == CONST.KIND.GRID then
             local pipe = record._has_continuation and pipec or pipen
             local row_items = record.row
             local row = table.concat(row_items, pipe)
             row = pipe .. row .. pipe
-            tir_buf[#tir_buf + 1] = row
+            buflines[#buflines + 1] = row
         end
     end
-    return tir_buf
+    return buflines
 end
 
 ---@param self Record_grid[]

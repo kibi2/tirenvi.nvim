@@ -82,7 +82,7 @@ end
 ---@param range3 Range3|nil
 ---@return Document
 function M.parse_text_driven(ctx, r_result, range3)
-	local records = Record.from_tir_buf(r_result.lines)
+	local records = Record.from_buflines(r_result.lines)
 	local allow_plain = Context.is_allow_plain(ctx)
 	promote_empty_lines(records, r_result, allow_plain, range3)
 	local bufdoc = Document.new_bufdoc(records, allow_plain)
@@ -93,7 +93,7 @@ end
 ---@param r_result ReadResult
 ---@return Document
 function M.parse_attr_driven(ctx, r_result)
-	local records = Record.from_tir_buf(r_result.lines)
+	local records = Record.from_buflines(r_result.lines)
 	--local attr = Attrs.slice(r_result.attrs, r_result.range) TODO
 	local bufdoc = Document.new_bufdoc(records, Context.is_allow_plain(ctx), r_result.attrs)
 	return bufdoc
@@ -109,7 +109,7 @@ end
 ---@param lines string[]
 ---@return boolean
 function M.table_is_aligned(lines)
-	local records = Record.from_tir_buf(lines)
+	local records = Record.from_buflines(lines)
 	local bufdoc = Document.new_bufdoc(records, false)
 	Document.infer_consistent_attr(bufdoc)
 	return Document.has_width(bufdoc)
