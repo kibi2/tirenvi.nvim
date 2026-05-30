@@ -16,7 +16,7 @@ local M = {}
 ---@field range Range
 ---@field lines string[]
 ---@field attrs Attr[]|nil
----@field is_flat? boolean
+---@field is_flat boolean
 
 -- private helpers
 

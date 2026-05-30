@@ -89,7 +89,6 @@ function M.export_flat(ctx)
 	local r_result = reader.read(ctx, Range.WHOLE)
 	if ReadResult.is_flat(r_result) then
 		buffer_backup = nil
-		return
 	else
 		buffer_backup = r_result.lines
 		pipeline.to_flat(ctx, true)
