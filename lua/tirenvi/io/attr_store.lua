@@ -55,13 +55,12 @@ end
 
 ---@param bufnr number
 ---@param attrs Attr[]|nil
----@param is_flat boolean|nil
-local function set_flat(bufnr, attrs, is_flat)
+---@param buffer_format BufferFormat|nil
+local function set_buffer_format(bufnr, attrs, buffer_format)
     if not attrs then
         return
     end
-    is_flat = is_flat == true
-    buf_state.set_flat(bufnr, is_flat)
+    buf_state.set_buffer_format(bufnr, buffer_format)
 end
 
 -----------------------------------------------------------------------
@@ -70,10 +69,13 @@ end
 
 ---@param ctx Context
 ---@param attrs Attr[]|nil
----@param is_flat boolean|nil
-function M.write(ctx, attrs, is_flat)
+---@param buffer_format BufferFormat|nil
+function M.write(ctx, attrs, buffer_format)
     set_attrs(ctx.bufnr, attrs)
-    set_flat(ctx.bufnr, attrs, is_flat)
+    if attrs and not Attrs.has_grid(attrs) then
+        buffer_format = "plain"
+    end
+    set_buffer_format(ctx.bufnr, attrs, buffer_format)
 end
 
 ---@param ctx Context

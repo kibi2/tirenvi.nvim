@@ -85,7 +85,9 @@ end
 ---@param opts {[string]:any}
 ---@return nil
 local function cmd_toggle(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr) then return end
+	if buf_state.should_skip(ctx.bufnr, { is_formatted = false, }) then
+		return
+	end
 	ui.special_apply()
 	init.toggle(ctx)
 end

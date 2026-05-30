@@ -16,7 +16,6 @@ local M = {}
 ---@field range Range
 ---@field lines string[]
 ---@field attrs Attr[]|nil
----@field is_flat boolean
 
 -- private helpers
 
@@ -37,12 +36,6 @@ end
 ---@return integer -- 1-based
 function M:lua_range()
     return Range.to_lua(self.range)
-end
-
----@param self ReadResult
----@return boolean
-function M:is_flat()
-    return self.is_flat == true
 end
 
 return M

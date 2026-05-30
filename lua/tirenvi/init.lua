@@ -1,10 +1,10 @@
 ----- dependencies
 local Context = require("tirenvi.app.context")
-local ReadResult = require("tirenvi.app.read_result")
 local Request = require("tirenvi.app.request")
 local pipeline = require("tirenvi.app.pipeline")
 local config = require("tirenvi.config")
 local buffer = require("tirenvi.io.buffer")
+local buf_state = require("tirenvi.io.buf_state")
 local attr_store = require("tirenvi.io.attr_store")
 local writer = require("tirenvi.io.writer")
 local reader = require("tirenvi.io.reader")
@@ -87,12 +87,8 @@ local buffer_backup
 ---@return nil
 function M.export_flat(ctx)
 	local r_result = reader.read(ctx, Range.WHOLE)
-	if ReadResult.is_flat(r_result) then
-		buffer_backup = nil
-	else
-		buffer_backup = r_result.lines
-		pipeline.to_flat(ctx, true)
-	end
+	buffer_backup = r_result.lines
+	pipeline.to_flat(ctx, true)
 end
 
 --- Convert current buffer (or specified buffer) from plain format to view format
@@ -116,10 +112,9 @@ end
 ---@param ctx Context
 ---@return nil
 function M.toggle(ctx)
-	local r_result = reader.read(ctx, Range.WHOLE)
-	if ReadResult.is_flat(r_result) then
+	if buf_state.is_flat(ctx.bufnr) then
 		M.enable(ctx)
-	else
+	elseif buf_state.is_formatted(ctx.bufnr) then
 		M.disable(ctx)
 	end
 end

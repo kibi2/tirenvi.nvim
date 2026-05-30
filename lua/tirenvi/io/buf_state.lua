@@ -12,11 +12,13 @@ local bo = vim.bo
 ---@class Check_options
 ---@field supported? boolean
 ---@field has_parser? boolean
+---@field is_formatted? boolean
 ---@field no_vscode? boolean
 
 local DEFAULT_OPTS = {
 	supported = true,
 	has_parser = true,
+	is_formatted = true,
 	no_vscode = true,
 }
 local REPAIR_OFF = "REPAIR_OFF"
@@ -96,6 +98,10 @@ local checks = {
 		return buffer.get(bufnr, buffer.IKEY.FILETYPE) ~= nil
 	end,
 
+	is_formatted = function(bufnr)
+		return M.is_formatted(bufnr)
+	end,
+
 	no_vscode = function()
 		return not M.is_vscode()
 	end,
@@ -146,15 +152,26 @@ function M.is_repair(ctx, range3)
 end
 
 ---@param bufnr number
----@return boolean
-function M.is_flat(bufnr)
-	return buffer.get(bufnr, buffer.IKEY.FLAT) == true
+---@return BufferFormat
+function M.get_buffer_format(bufnr)
+	return buffer.get(bufnr, buffer.IKEY.BUFFER_FORMAT) or "flat"
 end
 
 ---@param bufnr number
----@param value boolean
-function M.set_flat(bufnr, value)
-	buffer.set(bufnr, buffer.IKEY.FLAT, value)
+---@param value BufferFormat|nil
+function M.set_buffer_format(bufnr, value)
+	value = value or "formatted"
+	buffer.set(bufnr, buffer.IKEY.BUFFER_FORMAT, value)
+end
+
+---@return boolean
+function M.is_flat(bufnr)
+	return M.get_buffer_format(bufnr) == "flat"
+end
+
+---@return boolean
+function M.is_formatted(bufnr)
+	return M.get_buffer_format(bufnr) == "formatted"
 end
 
 return M

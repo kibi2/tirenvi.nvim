@@ -61,4 +61,4 @@ Tir width=
 sleep 1m
 "                              2, 3, 8
 
-call RunTest({ 'desc': 'width = 2, 3, 8' })
+call RunTest({ 'desc': 'width = 2, 3, 8', 'nomessage': 'true' })

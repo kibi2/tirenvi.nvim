@@ -110,7 +110,7 @@ local function doc_to_flat(ctx, r_result, doc, no_undo)
     req_w.attrs = vim.deepcopy(r_result.attrs)
     Attrs.remove_range(req_w.attrs)
     log.watch("ATTR", Attrs.debug_attrs(req_w.attrs, "[9]CHACHED:"))
-    attr_store.write(ctx, req_w.attrs, true)
+    attr_store.write(ctx, req_w.attrs, "flat")
     writer.write(ctx, req_w)
 end
 
@@ -242,11 +242,11 @@ end
 function M.from_flat(ctx, no_undo)
     local r_result = reader.read(ctx, Range.WHOLE)
     local tirdoc
-    if ReadResult.is_flat(r_result) or not Bufline.has_pipe(r_result.lines) then
+    if buf_state.is_formatted(ctx.bufnr) or Bufline.has_pipe(r_result.lines) then
+        tirdoc = buflines_to_tirdoc_text_driven(ctx, r_result)
+    else
         util.ensure_no_reserved_marks(r_result.lines)
         tirdoc = fllines_to_tirdoc(ctx, r_result)
-    else
-        tirdoc = buflines_to_tirdoc_text_driven(ctx, r_result)
     end
     Document.set_auto_attr(tirdoc)
     local bufdoc = Document.to_bufdoc(tirdoc)
@@ -257,9 +257,6 @@ end
 ---@param no_undo boolean|nil
 function M.to_flat(ctx, no_undo)
     local r_result = reader.read(ctx, Range.WHOLE)
-    if ReadResult.is_flat(r_result) then
-        return
-    end
     local doc = buflines_to_tirdoc_text_driven(ctx, r_result)
     doc_to_flat(ctx, r_result, doc, no_undo)
 end
@@ -274,9 +271,6 @@ function M.cmd_width(ctx, sel, width_op)
         error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
     end
     local r_result = reader.read(ctx, sel.row)
-    if ReadResult.is_flat(r_result) then
-        return
-    end
     local doc = buflines_to_tirdoc_text_driven(ctx, r_result)
     Blocks.change_width(doc.blocks, sel.col, width_op)
     local bufdoc = Document.to_bufdoc(doc)
@@ -287,12 +281,8 @@ end
 ---@param no_normalize boolean|nil
 ---@param no_undo boolean|nil
 function M.cmd_format(ctx, no_normalize, no_undo)
-    no_normalize = no_normalize or false
     local r_result = reader.read(ctx, Range.WHOLE)
-    if ReadResult.is_flat(r_result) then
-        return
-    end
-    local doc = buflines_to_tirdoc_attrs_driven(ctx, r_result, no_normalize)
+    local doc = buflines_to_tirdoc_attrs_driven(ctx, r_result, no_normalize or false)
     local bufdoc = Document.to_bufdoc(doc)
     bufdoc_to_buflines(ctx, r_result, bufdoc, no_undo)
 end
@@ -301,9 +291,6 @@ end
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
     local r_result = reader.read(ctx, Range3.get_new_range(range3))
-    if ReadResult.is_flat(r_result) then
-        return
-    end
     local attrs = reconcile_attrs(ctx, r_result, range3)
     reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
     repair(ctx, range3)
