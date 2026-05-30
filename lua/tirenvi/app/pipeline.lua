@@ -60,17 +60,7 @@ end
 ---@param ctx Context
 ---@param r_result ReadResult
 ---@return Document
-local function buf_to_bdoc_attr_driven(ctx, r_result)
-    log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "CHACHED ATTRS:"))
-    local bufdoc = buf_parser.parse_attr_driven(ctx, r_result)
-    log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
-    return bufdoc
-end
-
----@param ctx Context
----@param r_result ReadResult
----@return Document
-local function buflines_to_doc_text_driven(ctx, r_result)
+local function buflines_to_tirdoc_text_driven(ctx, r_result)
     local bufdoc = buf_to_bdoc_text_driven(ctx, r_result)
     Document.apply_cached_attr(bufdoc, r_result.attrs)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[4]CACHED:"))
@@ -82,8 +72,10 @@ end
 ---@param no_normalize boolean -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
 ---@return Document
-local function buf_to_doc_attrs_driven(ctx, r_result, no_normalize)
-    local bufdoc = buf_to_bdoc_attr_driven(ctx, r_result)
+local function buflines_to_tirdoc_attrs_driven(ctx, r_result, no_normalize)
+    log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "CHACHED ATTRS:"))
+    local bufdoc = buf_parser.parse_attr_driven(ctx, r_result)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
     Document.insert_empty_lines(bufdoc)
     local doc = Document.from_bufdoc(bufdoc, no_normalize)
     log.watch("ATTR", Document.debug_attrs(doc, "[7]INSERT EMPTY:"))
@@ -97,11 +89,11 @@ end
 local function bufdoc_to_buflines(ctx, r_result, bufdoc, no_undo)
     local first = ReadResult.lua_range(r_result)
     Document.set_attr_range(bufdoc, first)
-    local buf_lines = buf_parser.unparse(bufdoc)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[9]DOC ATTR:"))
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
     attr_store.write(ctx, attrs)
+    local buf_lines = buf_parser.unparse(bufdoc)
     if not util.same_str_array(buf_lines, r_result.lines) then
         local req_w = Request.new_writer(r_result.range, buf_lines, no_undo or false)
         req_w.attrs = attrs
@@ -157,7 +149,6 @@ local function reconcile_attrs(ctx, r_result, range3)
     Document.apply_cached_attr(bufdoc, r_result.attrs)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[4]CACHED:"))
     Document.set_auto_attr(bufdoc)
-    log.watch("ATTR", Document.debug_attrs(bufdoc, "[5]AUTO ATTR:"))
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[6]RESULT:"))
     attr_store.write(ctx, attrs)
@@ -255,10 +246,9 @@ function M.from_flat(ctx, no_undo)
         util.ensure_no_reserved_marks(r_result.lines)
         tirdoc = fllines_to_tirdoc(ctx, r_result)
     else
-        tirdoc = buflines_to_doc_text_driven(ctx, r_result)
+        tirdoc = buflines_to_tirdoc_text_driven(ctx, r_result)
     end
     Document.set_auto_attr(tirdoc)
-    log.watch("ATTR", Document.debug_attrs(tirdoc, "5AUTO ATTR:"))
     local bufdoc = Document.to_bufdoc(tirdoc)
     bufdoc_to_buflines(ctx, r_result, bufdoc, no_undo)
 end
@@ -270,7 +260,7 @@ function M.to_flat(ctx, no_undo)
     if ReadResult.is_flat(r_result) then
         return
     end
-    local doc = buflines_to_doc_text_driven(ctx, r_result)
+    local doc = buflines_to_tirdoc_text_driven(ctx, r_result)
     doc_to_flat(ctx, r_result, doc, no_undo)
 end
 
@@ -287,7 +277,7 @@ function M.cmd_width(ctx, sel, width_op)
     if ReadResult.is_flat(r_result) then
         return
     end
-    local doc = buflines_to_doc_text_driven(ctx, r_result)
+    local doc = buflines_to_tirdoc_text_driven(ctx, r_result)
     Blocks.change_width(doc.blocks, sel.col, width_op)
     local bufdoc = Document.to_bufdoc(doc)
     bufdoc_to_buflines(ctx, r_result, bufdoc)
@@ -302,7 +292,7 @@ function M.cmd_format(ctx, no_normalize, no_undo)
     if ReadResult.is_flat(r_result) then
         return
     end
-    local doc = buf_to_doc_attrs_driven(ctx, r_result, no_normalize)
+    local doc = buflines_to_tirdoc_attrs_driven(ctx, r_result, no_normalize)
     local bufdoc = Document.to_bufdoc(doc)
     bufdoc_to_buflines(ctx, r_result, bufdoc, no_undo)
 end

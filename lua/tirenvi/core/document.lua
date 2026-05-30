@@ -169,6 +169,7 @@ end
 ---@param self Document
 function M:set_auto_attr()
     Blocks.set_auto_attr(self.blocks)
+    log.watch("ATTR", M.debug_attrs(self, "[5]AUTO ATTR:"))
 end
 
 ---@param bufdoc Document
