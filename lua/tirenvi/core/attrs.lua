@@ -149,10 +149,10 @@ function M:remove_range()
 end
 
 ---@param attrs Attr[]
----@param range3 Range3|nil
+---@param range3 Range3
 ---@return Attr[]
 function M.adjust(attrs, range3)
-    if #attrs == 0 or not range3 then
+    if #attrs == 0 then
         return attrs
     end
     if not attrs[1].range then

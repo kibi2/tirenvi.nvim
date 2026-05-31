@@ -45,10 +45,10 @@ end
 
 ---@param ctx Context
 ---@param r_result ReadResult
----@param range3 Range3|nil
+---@param opts any
 ---@return Document
-local function buf_to_bdoc_text_driven(ctx, r_result, range3)
-    local bufdoc = buf_parser.parse_text_driven(ctx, r_result, range3)
+local function buf_to_bdoc_text_driven(ctx, r_result, opts)
+    local bufdoc = buf_parser.parse(ctx, r_result, opts)
     local first = ReadResult.lua_range(r_result)
     Document.set_attr_range(bufdoc, first)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
@@ -59,7 +59,8 @@ end
 ---@param r_result ReadResult
 ---@return Document
 local function buflines_to_tirdoc_text_driven(ctx, r_result)
-    local bufdoc = buf_to_bdoc_text_driven(ctx, r_result)
+    local opts = {}
+    local bufdoc = buf_to_bdoc_text_driven(ctx, r_result, opts)
     Document.apply_cached_attr(bufdoc, r_result.attrs)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[4]CACHED:"))
     return Document.from_bufdoc(bufdoc)
@@ -72,7 +73,8 @@ end
 ---@return Document
 local function buflines_to_tirdoc_attrs_driven(ctx, r_result, no_normalize)
     log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "CHACHED ATTRS:"))
-    local bufdoc = buf_parser.parse_attr_driven(ctx, r_result)
+    local opts = { attrs = r_result.attrs }
+    local bufdoc = buf_parser.parse(ctx, r_result, opts)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
     Document.insert_empty_lines(bufdoc)
     local doc = Document.from_bufdoc(bufdoc, no_normalize)
@@ -290,9 +292,10 @@ end
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
     local r_result = reader.read(ctx, Range3.get_new_range(range3))
-    r_result.attrs = Attrs.adjust(r_result.attrs or {}, range3)
+    r_result.attrs = Attrs.adjust(r_result.attrs, range3)
     log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[0]UPDATE CHACHED:"))
-    local bufdoc = buf_to_bdoc_text_driven(ctx, r_result, range3)
+    local opts = { range3 = range3 }
+    local bufdoc = buf_to_bdoc_text_driven(ctx, r_result, opts)
     local attrs = reconcile_attrs(ctx, r_result, bufdoc, range3)
     reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
     repair(ctx, range3)

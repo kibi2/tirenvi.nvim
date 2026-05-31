@@ -68,34 +68,24 @@ end
 ---@param allow_plain boolean
 local function promote_empty_lines(records, r_result, allow_plain, range3)
 	if not range3 then
-		return records
+		return
 	end
 	if allow_plain then
-		return promote_empty_lines_gfm(records, r_result, range3)
+		promote_empty_lines_gfm(records, r_result, range3)
 	else
-		return promote_empty_lines_csv(records, r_result)
+		promote_empty_lines_csv(records, r_result)
 	end
 end
 
 ---@param ctx Context
 ---@param r_result ReadResult
----@param range3 Range3|nil
+---@param opts any
 ---@return Document
-function M.parse_text_driven(ctx, r_result, range3)
+function M.parse(ctx, r_result, opts)
 	local records = Record.from_buflines(r_result.lines)
 	local allow_plain = Context.is_allow_plain(ctx)
-	promote_empty_lines(records, r_result, allow_plain, range3)
-	local bufdoc = Document.new_bufdoc(records, allow_plain)
-	return bufdoc
-end
-
----@param ctx Context
----@param r_result ReadResult
----@return Document
-function M.parse_attr_driven(ctx, r_result)
-	local records = Record.from_buflines(r_result.lines)
-	--local attr = Attrs.slice(r_result.attrs, r_result.range) TODO
-	local bufdoc = Document.new_bufdoc(records, Context.is_allow_plain(ctx), r_result.attrs)
+	promote_empty_lines(records, r_result, allow_plain, opts.range3)
+	local bufdoc = Document.new_bufdoc(records, allow_plain, opts.attrs)
 	return bufdoc
 end
 
