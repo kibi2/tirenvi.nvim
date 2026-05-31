@@ -236,7 +236,6 @@ function M.from_flat(ctx, no_undo)
     else
         util.ensure_no_reserved_marks(r_result.lines)
         -- fllines -> tirdoc
-        -- C-Attrsをidで配布
         tirdoc = fllines_to_tirdoc(ctx, r_result)
     end
     -- C-Attrsないところはauto

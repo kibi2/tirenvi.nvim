@@ -68,14 +68,14 @@ local VERSION = "tir/0.1"
 
 -- private helpers
 
----@param records Record[]
+---@param ndjsons Record[]
 ---@param allow_plain boolean
 ---@param attrs Attr[]|nil
 ---@return Document
-local function new(records, allow_plain, attrs)
+local function new(ndjsons, allow_plain, attrs)
     local self = {}
     self.attr = { allow_plain = allow_plain }
-    self.blocks = Blocks.new_from_records(records, allow_plain, attrs)
+    self.blocks = Blocks.new_from_records(ndjsons, attrs)
     return self
 end
 

@@ -82,6 +82,7 @@ end
 ---@param opts any
 ---@return Document
 function M.parse(ctx, r_result, opts)
+	-- tir-bufline.md 読んだ時rangeができない？
 	local records = Record.from_buflines(r_result.lines)
 	local allow_plain = Context.is_allow_plain(ctx)
 	promote_empty_lines(records, r_result, allow_plain, opts.range3)
