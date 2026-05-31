@@ -79,9 +79,9 @@ function M.write(ctx, attrs, buffer_format)
 end
 
 ---@param ctx Context
----@return Attr[]|nil
+---@return Attr[]
 function M.read(ctx)
-    return buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+    return buffer.get(ctx.bufnr, buffer.IKEY.ATTRS) or {}
 end
 
 return M

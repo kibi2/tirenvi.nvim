@@ -48,8 +48,6 @@ end
 ---@param range3 Range3|nil
 ---@return Document
 local function buf_to_bdoc_text_driven(ctx, r_result, range3)
-    r_result.attrs = Attrs.adjust(r_result.attrs or {}, range3)
-    if range3 then log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[0]UPDATE CHACHED:")) end
     local bufdoc = buf_parser.parse_text_driven(ctx, r_result, range3)
     local first = ReadResult.lua_range(r_result)
     Document.set_attr_range(bufdoc, first)
@@ -138,10 +136,10 @@ end
 
 ---@param ctx Context
 ---@param r_result ReadResult
+---@param bufdoc  Document
 ---@param range3 Range3
 ---@return Attr[]
-local function reconcile_attrs(ctx, r_result, range3)
-    local bufdoc = buf_to_bdoc_text_driven(ctx, r_result, range3)
+local function reconcile_attrs(ctx, r_result, bufdoc, range3)
     Document.inherit_neighbor_attr(bufdoc, r_result.attrs, range3)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[2]NEIGHBOR:"))
     Document.infer_consistent_attr(bufdoc)
@@ -259,6 +257,7 @@ function M.to_flat(ctx, no_undo)
     local r_result = reader.read(ctx, Range.WHOLE)
     local doc = buflines_to_tirdoc_text_driven(ctx, r_result)
     doc_to_flat(ctx, r_result, doc, no_undo)
+    return r_result.lines
 end
 
 ---@param ctx Context
@@ -291,7 +290,10 @@ end
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
     local r_result = reader.read(ctx, Range3.get_new_range(range3))
-    local attrs = reconcile_attrs(ctx, r_result, range3)
+    r_result.attrs = Attrs.adjust(r_result.attrs or {}, range3)
+    log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[0]UPDATE CHACHED:"))
+    local bufdoc = buf_to_bdoc_text_driven(ctx, r_result, range3)
+    local attrs = reconcile_attrs(ctx, r_result, bufdoc, range3)
     reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
     repair(ctx, range3)
 end
@@ -299,6 +301,23 @@ end
 ---@param ctx Context
 function M.insert_leave(ctx)
     repair(ctx)
+end
+
+local buffer_backup
+
+---@param ctx Context
+function M.write_pre(ctx)
+    buffer_backup = M.to_flat(ctx, true)
+end
+
+---@param ctx Context
+function M.write_post(ctx)
+    if not buffer_backup then
+        return
+    end
+    local req = Request.new_writer(Range.WHOLE, buffer_backup, true)
+    writer.write(ctx, req)
+    buffer_backup = nil
 end
 
 return M

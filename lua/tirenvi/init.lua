@@ -80,27 +80,18 @@ function M.enable(ctx)
 	from_flat(ctx)
 end
 
-local buffer_backup
-
 --- Convert current buffer (or specified buffer) from display format back to file format (tsv)
 ---@param ctx Context
 ---@return nil
-function M.export_flat(ctx)
-	local r_result = reader.read(ctx, Range.WHOLE)
-	buffer_backup = r_result.lines
-	pipeline.to_flat(ctx, true)
+function M.write_pre(ctx)
+	pipeline.write_pre(ctx)
 end
 
 --- Convert current buffer (or specified buffer) from plain format to view format
 ---@param ctx Context
 ---@return nil
-function M.restore_buflines(ctx)
-	if not buffer_backup then
-		return
-	end
-	local req = Request.new_writer(Range.WHOLE, buffer_backup, true)
-	writer.write(ctx, req)
-	buffer_backup = nil
+function M.write_post(ctx)
+	pipeline.write_post(ctx)
 end
 
 ---@param ctx Context

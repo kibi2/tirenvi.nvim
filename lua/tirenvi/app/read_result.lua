@@ -15,7 +15,7 @@ local M = {}
 ---@class ReadResult
 ---@field range Range
 ---@field lines string[]
----@field attrs Attr[]|nil
+---@field attrs Attr[]
 
 -- private helpers
 

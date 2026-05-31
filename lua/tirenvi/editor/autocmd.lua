@@ -82,12 +82,12 @@ end
 
 ---@param ctx Context
 local function on_buf_write_pre(ctx)
-	init.export_flat(ctx)
+	init.write_pre(ctx)
 end
 
 ---@param ctx Context
 local function on_buf_write_post(ctx)
-	init.restore_buflines(ctx)
+	init.write_post(ctx)
 end
 
 ---@param ctx Context
