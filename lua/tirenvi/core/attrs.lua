@@ -180,11 +180,11 @@ function M.adjust(attrs, range3)
     return new_attrs
 end
 
----@param self Attr[]
+---@param attrs Attr[]
 ---@param range Range
 ---@return Attr|nil
-function M.get_attr(self, range)
-    for _, attr in ipairs(self) do
+function M.get_attr(attrs, range)
+    for _, attr in ipairs(attrs) do
         if Range.intersects(attr.range, range) then
             return attr
         end

@@ -90,23 +90,31 @@ local function collect_attrs(self)
     return Blocks.collect_attrs(self.blocks)
 end
 
+---@param bufdoc Document
+local function set_attr_range(bufdoc, first)
+    Blocks.set_attr_range(bufdoc.blocks, first)
+end
+
 -- Public API
 
 ---@param ndjsons Ndjson[]
 ---@param allow_plain boolean
 ---@return Document
 function M.new_tirdoc(ndjsons, allow_plain)
-    local self = new(ndjsons, allow_plain)
-    Blocks.from_flat(self.blocks)
-    return self
+    local tirdoc = new(ndjsons, allow_plain)
+    Blocks.from_flat(tirdoc.blocks)
+    return tirdoc
 end
 
 ---@param records Record[]
 ---@param allow_plain boolean
 ---@param attrs Attr[]|nil
+---@param first integer|nil
 ---@return Document
-function M.new_bufdoc(records, allow_plain, attrs)
-    return new(records, allow_plain, attrs)
+function M.new_bufdoc(records, allow_plain, attrs, first)
+    local bufdoc = new(records, allow_plain, attrs)
+    set_attr_range(bufdoc, first)
+    return bufdoc
 end
 
 ---@param self Document
@@ -154,6 +162,8 @@ end
 ---@param chached_attrs Attr[]
 ---@return Attr[]
 function M:replace_attrs(range, chached_attrs)
+    local first = Range.to_lua(range)
+    set_attr_range(self, first)
     local doc_attrs = Blocks.collect_attrs(self.blocks)
     if not chached_attrs or Range.is_whole(range) then
         return doc_attrs
@@ -172,21 +182,16 @@ function M:set_auto_attr()
     log.watch("ATTR", M.debug_attrs(self, "[5]AUTO ATTR:"))
 end
 
----@param bufdoc Document
-function M.set_attr_range(bufdoc, first)
-    Blocks.set_attr_range(bufdoc.blocks, first)
+---@param self Document
+---@param attrs Attr[]
+function M:apply_attrs_by_range(attrs)
+    Blocks.apply_attrs_by_range(self.blocks, attrs)
 end
 
 ---@param self Document
----@param attrs Attr[]
-function M:apply_cached_attr(attrs)
-    Blocks.apply_cached_attr(self.blocks, attrs)
-end
-
----@param self Document
----@param attrs Attr[]
-function M:apply_attrs_by_id(attrs)
-    local attrs_grid = Attrs.get_grid_attrs(attrs)
+---@param c_attrs Attr[]
+function M:apply_attrs_by_id(c_attrs)
+    local attrs_grid = Attrs.get_grid_attrs(c_attrs)
     local iblock = 0
     for _, block in ipairs(self.blocks) do
         block.attr = Attr[block.kind].new()

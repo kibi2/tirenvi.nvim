@@ -27,7 +27,7 @@ lua << EOF
   log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "UPDATE CHACHED ATTRS:")) 
   local bufdoc = buf_parser.parse(ctx, r_result, {range3 = range3} )
   local first = ReadResult.lua_range(r_result)
-  Document.set_attr_range(bufdoc, first)
+  Document.replace_attrs(bufdoc, r_result.range)
   log.watch("ATTR", Document.debug_attrs(bufdoc, "1DOC ATTR:"))
 EOF
 

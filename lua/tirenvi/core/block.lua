@@ -296,7 +296,7 @@ end
 
 ---@self Block_grid
 ---@param attrs Attr[]
-function M.grid:apply_cached_attr(attrs)
+function M.grid:apply_attrs_by_range(attrs)
     local attr = Attrs.get_attr(attrs, self.attr.range)
     if not attr or not Attr.is_grid(attr) then
         return

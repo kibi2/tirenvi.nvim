@@ -112,7 +112,7 @@ end
 
 ---@param ctx Context
 function M.format(ctx)
-	pipeline.cmd_format(ctx)
+	pipeline.cmd_repair(ctx)
 end
 
 ---@param ctx Context	

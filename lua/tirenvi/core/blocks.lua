@@ -146,12 +146,8 @@ local function rebuild_attr_range(bufblocks, first)
 	end
 end
 
------------------------------------------------------------------------
--- Public API
------------------------------------------------------------------------
-
 ---@param self Blocks
-function M.merge_blocks(self)
+local function merge_blocks(self)
 	if #self <= 1 then
 		return
 	end
@@ -168,6 +164,10 @@ function M.merge_blocks(self)
 		self[i] = nil
 	end
 end
+
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
 
 ---@self Blocks
 ---@return Attr[]
@@ -189,13 +189,13 @@ end
 
 --- Convert NDJSON records into normalized blocks.
 ---@param ndjsons Ndjson[]
----@param attrs Attr[]|nil
 ---@param allow_plain boolean
+---@param attrs Attr[]|nil
 ---@return Blocks
 function M.new_from_records(ndjsons, allow_plain, attrs)
 	local self = build_blocks(ndjsons, attrs)
 	if not allow_plain and M.has_grid(self) then
-		M.merge_blocks(self)
+		merge_blocks(self)
 	end
 	return self
 end
@@ -235,8 +235,11 @@ function M:set_auto_attr()
 end
 
 ---@parama bufblocks Blocks
----@param first integer
+---@param first integer|nil
 function M.set_attr_range(bufblocks, first)
+	if not first then
+		return
+	end
 	rebuild_attr_range(bufblocks, first)
 end
 
@@ -252,8 +255,8 @@ end
 
 ---@self Blocks
 ---@param attrs Attr[]
-function M:apply_cached_attr(attrs)
-	apply(self, "apply_cached_attr", attrs)
+function M:apply_attrs_by_range(attrs)
+	apply(self, "apply_attrs_by_range", attrs)
 end
 
 ---@param self Blocks

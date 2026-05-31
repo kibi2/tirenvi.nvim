@@ -85,7 +85,7 @@ function M.parse(ctx, r_result, opts)
 	local records = Record.from_buflines(r_result.lines)
 	local allow_plain = Context.is_allow_plain(ctx)
 	promote_empty_lines(records, r_result, allow_plain, opts.range3)
-	local bufdoc = Document.new_bufdoc(records, allow_plain, opts.attrs)
+	local bufdoc = Document.new_bufdoc(records, allow_plain, opts.attrs, opts.first)
 	return bufdoc
 end
 

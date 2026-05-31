@@ -45,23 +45,12 @@ end
 
 ---@param ctx Context
 ---@param r_result ReadResult
----@param opts any
----@return Document
-local function buf_to_bdoc_text_driven(ctx, r_result, opts)
-    local bufdoc = buf_parser.parse(ctx, r_result, opts)
-    local first = ReadResult.lua_range(r_result)
-    Document.set_attr_range(bufdoc, first)
-    log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
-    return bufdoc
-end
-
----@param ctx Context
----@param r_result ReadResult
 ---@return Document
 local function buflines_to_tirdoc_text_driven(ctx, r_result)
-    local opts = {}
-    local bufdoc = buf_to_bdoc_text_driven(ctx, r_result, opts)
-    Document.apply_cached_attr(bufdoc, r_result.attrs)
+    local opts = { first = r_result.range.first }
+    local bufdoc = buf_parser.parse(ctx, r_result, opts)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
+    Document.apply_attrs_by_range(bufdoc, r_result.attrs)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[4]CACHED:"))
     return Document.from_bufdoc(bufdoc)
 end
@@ -77,9 +66,9 @@ local function buflines_to_tirdoc_attrs_driven(ctx, r_result, no_normalize)
     local bufdoc = buf_parser.parse(ctx, r_result, opts)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
     Document.insert_empty_lines(bufdoc)
-    local doc = Document.from_bufdoc(bufdoc, no_normalize)
-    log.watch("ATTR", Document.debug_attrs(doc, "[7]INSERT EMPTY:"))
-    return doc
+    local tirdoc = Document.from_bufdoc(bufdoc, no_normalize)
+    log.watch("ATTR", Document.debug_attrs(tirdoc, "[7]INSERT EMPTY:"))
+    return tirdoc
 end
 
 ---@param ctx Context
@@ -87,8 +76,6 @@ end
 ---@param bufdoc Document
 ---@param no_undo boolean|nil
 local function bufdoc_to_buflines(ctx, r_result, bufdoc, no_undo)
-    local first = ReadResult.lua_range(r_result)
-    Document.set_attr_range(bufdoc, first)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[9]DOC ATTR:"))
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
@@ -102,10 +89,10 @@ local function bufdoc_to_buflines(ctx, r_result, bufdoc, no_undo)
 end
 
 ---@param ctx Context
----@param doc Document
+---@param tirdoc Document
 ---@param no_undo boolean|nil
-local function doc_to_flat(ctx, r_result, doc, no_undo)
-    local fllines = flat_parser.unparse(ctx, doc)
+local function tirdoc_to_flat(ctx, r_result, tirdoc, no_undo)
+    local fllines = flat_parser.unparse(ctx, tirdoc)
     local req_w = Request.new_writer(r_result.range, fllines, no_undo or false)
     req_w.attrs = vim.deepcopy(r_result.attrs)
     Attrs.remove_range(req_w.attrs)
@@ -146,7 +133,7 @@ local function reconcile_attrs(ctx, r_result, bufdoc, range3)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[2]NEIGHBOR:"))
     Document.infer_consistent_attr(bufdoc)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[3]CONSISTENT:"))
-    Document.apply_cached_attr(bufdoc, r_result.attrs)
+    Document.apply_attrs_by_range(bufdoc, r_result.attrs)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[4]CACHED:"))
     Document.set_auto_attr(bufdoc)
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
@@ -169,7 +156,7 @@ local local_range = nil
 ---@param ctx Context
 local function apply_local_range(ctx)
     ---@cast local_range Range
-    M.cmd_format(ctx, true, true)
+    M.cmd_repair(ctx, true, true)
     local_range = nil
 end
 
@@ -240,16 +227,23 @@ end
 ---@param no_undo boolean|nil
 ---@return nil
 function M.from_flat(ctx, no_undo)
+    -- 読み込み
     local r_result = reader.read(ctx, Range.WHOLE)
     local tirdoc
     if buf_state.is_formatted(ctx.bufnr) or Bufline.has_pipe(r_result.lines) then
+        -- buflines -> tirdoc
         tirdoc = buflines_to_tirdoc_text_driven(ctx, r_result)
     else
         util.ensure_no_reserved_marks(r_result.lines)
+        -- fllines -> tirdoc
+        -- C-Attrsをidで配布
         tirdoc = fllines_to_tirdoc(ctx, r_result)
     end
+    -- C-Attrsないところはauto
     Document.set_auto_attr(tirdoc)
+    -- block.attrに従ってbufdoc作成
     local bufdoc = Document.to_bufdoc(tirdoc)
+    -- lines, attrs 書き出し
     bufdoc_to_buflines(ctx, r_result, bufdoc, no_undo)
 end
 
@@ -257,8 +251,8 @@ end
 ---@param no_undo boolean|nil
 function M.to_flat(ctx, no_undo)
     local r_result = reader.read(ctx, Range.WHOLE)
-    local doc = buflines_to_tirdoc_text_driven(ctx, r_result)
-    doc_to_flat(ctx, r_result, doc, no_undo)
+    local tirdoc = buflines_to_tirdoc_text_driven(ctx, r_result)
+    tirdoc_to_flat(ctx, r_result, tirdoc, no_undo)
     return r_result.lines
 end
 
@@ -272,19 +266,19 @@ function M.cmd_width(ctx, sel, width_op)
         error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
     end
     local r_result = reader.read(ctx, sel.row)
-    local doc = buflines_to_tirdoc_text_driven(ctx, r_result)
-    Blocks.change_width(doc.blocks, sel.col, width_op)
-    local bufdoc = Document.to_bufdoc(doc)
+    local tirdoc = buflines_to_tirdoc_text_driven(ctx, r_result)
+    Blocks.change_width(tirdoc.blocks, sel.col, width_op)
+    local bufdoc = Document.to_bufdoc(tirdoc)
     bufdoc_to_buflines(ctx, r_result, bufdoc)
 end
 
 ---@param ctx Context
 ---@param no_normalize boolean|nil
 ---@param no_undo boolean|nil
-function M.cmd_format(ctx, no_normalize, no_undo)
+function M.cmd_repair(ctx, no_normalize, no_undo)
     local r_result = reader.read(ctx, Range.WHOLE)
-    local doc = buflines_to_tirdoc_attrs_driven(ctx, r_result, no_normalize or false)
-    local bufdoc = Document.to_bufdoc(doc)
+    local tirdoc = buflines_to_tirdoc_attrs_driven(ctx, r_result, no_normalize or false)
+    local bufdoc = Document.to_bufdoc(tirdoc)
     bufdoc_to_buflines(ctx, r_result, bufdoc, no_undo)
 end
 
@@ -294,8 +288,9 @@ function M.on_lines(ctx, range3)
     local r_result = reader.read(ctx, Range3.get_new_range(range3))
     r_result.attrs = Attrs.adjust(r_result.attrs, range3)
     log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[0]UPDATE CHACHED:"))
-    local opts = { range3 = range3 }
-    local bufdoc = buf_to_bdoc_text_driven(ctx, r_result, opts)
+    local opts = { range3 = range3, first = r_result.range.first }
+    local bufdoc = buf_parser.parse(ctx, r_result, opts)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
     local attrs = reconcile_attrs(ctx, r_result, bufdoc, range3)
     reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
     repair(ctx, range3)
