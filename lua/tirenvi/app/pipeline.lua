@@ -156,26 +156,21 @@ local function reconcile_dirty_ranges(bufnr, attrs, range3)
     dirty.set_ranges(bufnr, inv_ranges)
 end
 
-local schedule_repair = false
+local schedule_repair_flag = false
 ---@param ctx Context
-local function do_repair(ctx)
-    schedule_repair = false
-    M.cmd_repair(ctx, true, true)
-end
-
----@param ctx Context
-local function schedule_new_range(ctx)
-    local new_ranges = dirty.get_ranges(ctx.bufnr)
-    if #new_ranges == 0 then
+local function schedule_repair(ctx)
+    local dirty_ranges = dirty.get_ranges(ctx.bufnr)
+    if #dirty_ranges == 0 then
         return
     end
-    if not schedule_repair then
+    if not schedule_repair_flag then
         vim.schedule(function()
-            do_repair(ctx)
+            schedule_repair_flag = false
+            M.cmd_repair(ctx, true, true)
         end)
-        schedule_repair = true
+        schedule_repair_flag = true
     else
-        log.watch("UNDO", ctx.bufnr, { "multi time on_lines", new_ranges })
+        log.watch("UNDO", ctx.bufnr, { "multi time on_lines", dirty_ranges })
     end
 end
 
@@ -185,12 +180,12 @@ local function repair_request(ctx, range3)
     if not buf_state.is_repair(ctx, range3) then
         return
     end
-    schedule_new_range(ctx)
+    schedule_repair(ctx)
 end
 
 ---@param ctx Context
 ---@param range3 Range3|nil
-local function repair(ctx, range3)
+local function check_and_repair(ctx, range3)
     local bufnr = ctx.bufnr
     vim.schedule(function()
         if not api.nvim_buf_is_valid(bufnr) then
@@ -296,12 +291,12 @@ function M.on_lines(ctx, range3)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
     local attrs = reconcile_attrs(ctx, r_result, bufdoc, range3)
     reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
-    repair(ctx, range3)
+    check_and_repair(ctx, range3)
 end
 
 ---@param ctx Context
 function M.insert_leave(ctx)
-    repair(ctx)
+    check_and_repair(ctx)
 end
 
 local buffer_backup
