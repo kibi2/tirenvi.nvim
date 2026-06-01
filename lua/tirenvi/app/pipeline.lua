@@ -2,6 +2,7 @@
 -- Dependencies
 -----------------------------------------------------------------------
 local Document = require("tirenvi.core.document")
+local Attr = require("tirenvi.core.attr")
 local Attrs = require("tirenvi.core.attrs")
 local Blocks = require("tirenvi.core.blocks")
 local Bufline = require("tirenvi.core.bufline")
@@ -45,13 +46,13 @@ end
 ---@param ctx Context
 ---@param r_result ReadResult
 ---@return Document
-local function buflines_to_tirdoc_text_driven(ctx, r_result)
+local function buflines_to_bufdoc_text_driven(ctx, r_result)
     local opts = { first = r_result.range.first }
     local bufdoc = buf_parser.parse(ctx, r_result, opts)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
     Document.apply_attrs(bufdoc, r_result.attrs)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[4]CACHED:"))
-    return Document.from_bufdoc(bufdoc)
+    return bufdoc
 end
 
 ---@param ctx Context
@@ -59,22 +60,27 @@ end
 ---@param no_normalize boolean -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
 ---@return Document
-local function buflines_to_tirdoc_attrs_driven(ctx, r_result, no_normalize)
+local function buflines_to_bufdoc_attrs_driven(ctx, r_result, no_normalize)
     log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "CHACHED ATTRS:"))
     local opts = { attrs = r_result.attrs }
     local bufdoc = buf_parser.parse(ctx, r_result, opts)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
     Document.insert_empty_lines(bufdoc)
-    local tirdoc = Document.from_bufdoc(bufdoc, no_normalize)
-    log.watch("ATTR", Document.debug_attrs(tirdoc, "[7]INSERT EMPTY:"))
-    return tirdoc
+    return bufdoc
 end
 
 ---@param ctx Context
 ---@param r_result ReadResult
----@param bufdoc Document
+---@param doc Document
 ---@param no_undo boolean|nil
-local function bufdoc_to_buflines(ctx, r_result, bufdoc, no_undo)
+---@param no_normalize boolean|nil
+local function doc_to_buflines(ctx, r_result, doc, no_undo, no_normalize)
+    local tirdoc = doc
+    if not doc._tir then
+        tirdoc = Document.from_bufdoc(doc, no_normalize or false)
+    end
+    Document.set_auto_attr(tirdoc)
+    local bufdoc = Document.to_bufdoc(tirdoc)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[9]DOC ATTR:"))
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
@@ -89,7 +95,8 @@ end
 ---@param ctx Context
 ---@param tirdoc Document
 ---@param no_undo boolean|nil
-local function tirdoc_to_flat(ctx, r_result, tirdoc, no_undo)
+---@param no_normalize boolean|nil
+local function tirdoc_to_flat(ctx, r_result, tirdoc, no_undo, no_normalize)
     local fllines = flat_parser.unparse(ctx, tirdoc)
     local req_w = Request.new_writer(r_result.range, fllines, no_undo or false)
     local attrs = vim.deepcopy(r_result.attrs)
@@ -226,23 +233,22 @@ end
 ---@return nil
 function M.from_flat(ctx, no_undo)
     local r_result = reader.read(ctx, Range.WHOLE)
-    local tirdoc
     if buf_state.is_formatted(ctx.bufnr) or Bufline.has_pipe(r_result.lines) then
-        tirdoc = buflines_to_tirdoc_text_driven(ctx, r_result)
+        local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
+        doc_to_buflines(ctx, r_result, bufdoc, no_undo)
     else
         util.ensure_no_reserved_marks(r_result.lines)
-        tirdoc = fllines_to_tirdoc(ctx, r_result)
+        local tirdoc = fllines_to_tirdoc(ctx, r_result)
+        doc_to_buflines(ctx, r_result, tirdoc, no_undo)
     end
-    Document.set_auto_attr(tirdoc)
-    local bufdoc = Document.to_bufdoc(tirdoc)
-    bufdoc_to_buflines(ctx, r_result, bufdoc, no_undo)
 end
 
 ---@param ctx Context
 ---@param no_undo boolean|nil
 function M.to_flat(ctx, no_undo)
     local r_result = reader.read(ctx, Range.WHOLE)
-    local tirdoc = buflines_to_tirdoc_text_driven(ctx, r_result)
+    local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
+    local tirdoc = Document.from_bufdoc(bufdoc)
     tirdoc_to_flat(ctx, r_result, tirdoc, no_undo)
     return r_result.lines
 end
@@ -257,10 +263,10 @@ function M.cmd_width(ctx, sel, width_op)
         error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
     end
     local r_result = reader.read(ctx, sel.row)
-    local tirdoc = buflines_to_tirdoc_text_driven(ctx, r_result)
-    Blocks.change_width(tirdoc.blocks, sel.col, width_op)
-    local bufdoc = Document.to_bufdoc(tirdoc)
-    bufdoc_to_buflines(ctx, r_result, bufdoc)
+    Attr.change_width(r_result.attrs, sel.col, width_op)
+    local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
+    --Blocks.change_width(bufdoc.blocks, sel.col, width_op)
+    doc_to_buflines(ctx, r_result, bufdoc)
 end
 
 ---@param ctx Context
@@ -268,9 +274,9 @@ end
 ---@param no_undo boolean|nil
 function M.cmd_repair(ctx, no_normalize, no_undo)
     local r_result = reader.read(ctx, Range.WHOLE)
-    local tirdoc = buflines_to_tirdoc_attrs_driven(ctx, r_result, no_normalize or false)
-    local bufdoc = Document.to_bufdoc(tirdoc)
-    bufdoc_to_buflines(ctx, r_result, bufdoc, no_undo)
+    local bufdoc = buflines_to_bufdoc_attrs_driven(ctx, r_result, no_normalize or false)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[7]INSERT EMPTY:"))
+    doc_to_buflines(ctx, r_result, bufdoc, no_undo, no_normalize)
 end
 
 ---@param ctx Context

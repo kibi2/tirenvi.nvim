@@ -113,22 +113,32 @@ function M.get_width_array(columns)
 end
 
 ---@param self Attr
----@param records Record_grid[]
 ---@param sel Range
 ---@param width_op WidthOp
-function M:change_width(records, sel, width_op)
+local function change_width(self, sel, width_op)
     local start_col = 1
-    for icol, column in ipairs(self.columns) do
+    for _, column in ipairs(self.columns) do
         local old_width = column.width
         local cel_range = Range.from_lua(start_col, start_col + old_width)
         if Range.intersects(sel, cel_range) then
             if width_op.kind == "auto" then
-                column.width = get_max_width(records, icol)
+                column.width = 0
             else
                 column.width = width_op:apply(old_width)
             end
         end
         start_col = cel_range.last + 1
+    end
+end
+
+---@param self Attr[]
+---@param sel Range
+---@param width_op WidthOp
+function M:change_width(sel, width_op)
+    for _, attr in ipairs(self) do
+        if M.is_grid(attr) then
+            change_width(attr, sel, width_op)
+        end
     end
 end
 
