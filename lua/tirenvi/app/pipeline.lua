@@ -55,10 +55,9 @@ end
 
 ---@param ctx Context
 ---@param r_result ReadResult
----@param no_normalize boolean -- If true, skip nomalizing.
 -- Prevents line count changes that would break put(); used for repair.
 ---@return Document
-local function buflines_to_bufdoc_attrs_driven(ctx, r_result, no_normalize)
+local function buflines_to_bufdoc_attrs_driven(ctx, r_result)
     log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "CHACHED ATTRS:"))
     local opts = { attrs = r_result.attrs }
     local bufdoc = buf_parser.parse(ctx, r_result, opts)
@@ -94,8 +93,7 @@ end
 ---@param ctx Context
 ---@param tirdoc Document
 ---@param no_undo boolean|nil
----@param no_normalize boolean|nil
-local function tirdoc_to_flat(ctx, r_result, tirdoc, no_undo, no_normalize)
+local function tirdoc_to_flat(ctx, r_result, tirdoc, no_undo)
     local fllines = flat_parser.unparse(ctx, tirdoc)
     local req_w = Request.new_writer(r_result.range, fllines, no_undo or false)
     local attrs = vim.deepcopy(r_result.attrs)
@@ -272,11 +270,11 @@ function M.cmd_width(ctx, sel, width_op)
 end
 
 ---@param ctx Context
----@param no_normalize boolean|nil
 ---@param no_undo boolean|nil
-function M.cmd_repair(ctx, no_normalize, no_undo)
+---@param no_normalize boolean|nil
+function M.cmd_repair(ctx, no_undo, no_normalize)
     local r_result = reader.read(ctx, Range.WHOLE)
-    local bufdoc = buflines_to_bufdoc_attrs_driven(ctx, r_result, no_normalize or false)
+    local bufdoc = buflines_to_bufdoc_attrs_driven(ctx, r_result)
     doc_to_buflines(ctx, r_result, bufdoc, no_undo, no_normalize)
 end
 

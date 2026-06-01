@@ -137,7 +137,7 @@ local function cmd_repair(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr) then return end
 	local arg = opts.fargs[2]
 	if arg == nil then
-		init.format(ctx)
+		init.repair(ctx)
 		return
 	elseif arg == "toggle" then
 		buffer.set_repair(ctx.bufnr, not buffer.get_repair(ctx.bufnr))

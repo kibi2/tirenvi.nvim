@@ -111,7 +111,7 @@ function M.toggle(ctx)
 end
 
 ---@param ctx Context
-function M.format(ctx)
+function M.repair(ctx)
 	pipeline.cmd_repair(ctx)
 end
 
