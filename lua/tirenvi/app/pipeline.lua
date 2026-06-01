@@ -82,7 +82,6 @@ local function bufdoc_to_buflines(ctx, r_result, bufdoc, no_undo)
     local buf_lines = buf_parser.unparse(bufdoc)
     if not util.same_str_array(buf_lines, r_result.lines) then
         local req_w = Request.new_writer(r_result.range, buf_lines, no_undo or false)
-        req_w.attrs = attrs
         writer.write(ctx, req_w)
     end
 end
@@ -93,10 +92,10 @@ end
 local function tirdoc_to_flat(ctx, r_result, tirdoc, no_undo)
     local fllines = flat_parser.unparse(ctx, tirdoc)
     local req_w = Request.new_writer(r_result.range, fllines, no_undo or false)
-    req_w.attrs = vim.deepcopy(r_result.attrs)
-    Attrs.remove_range(req_w.attrs)
-    log.watch("ATTR", Attrs.debug_attrs(req_w.attrs, "[9]CHACHED:"))
-    attr_store.write(ctx, req_w.attrs, "flat")
+    local attrs = vim.deepcopy(r_result.attrs)
+    Attrs.remove_range(attrs)
+    log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
+    attr_store.write(ctx, attrs, "flat")
     writer.write(ctx, req_w)
 end
 

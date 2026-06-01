@@ -92,8 +92,8 @@ end
 ---@param bufdoc Document
 ---@return string[]
 function M.unparse(bufdoc)
-	local ndjsons = Document.serialize(bufdoc)
-	return Record.to_buflines(ndjsons)
+	local records = Document.serialize_to_buf(bufdoc)
+	return Record.to_buflines(records)
 end
 
 ---@param lines string[]

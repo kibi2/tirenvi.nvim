@@ -162,13 +162,13 @@ function M.from_buflines(buflines)
     return records
 end
 
----@param ndjsons Ndjson[]
+---@param records Record[]
 ---@return string[]
-function M.to_buflines(ndjsons)
+function M.to_buflines(records)
     local pipec = config.marks.pipec
     local pipen = config.marks.pipe
     local buflines = {}
-    for _, record in ipairs(ndjsons) do
+    for _, record in ipairs(records) do
         local kind = record.kind
         if kind == CONST.KIND.PLAIN then
             buflines[#buflines + 1] = record.line or ""

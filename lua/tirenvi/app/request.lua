@@ -15,7 +15,6 @@ local M = {}
 ---@class Request
 ---@field range Range
 ---@field lines string[]
----@field attrs Attr[]
 ---@field no_undo boolean
 
 -- private helpers

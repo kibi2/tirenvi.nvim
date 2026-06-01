@@ -98,10 +98,9 @@ end
 
 --- Convert display lines back to TSV format
 ---@param ctx Context
----@param document Document	
+---@param tirdoc Document	
 ---@return string[]
-function M.unparse(ctx, document)
-	local tirdoc = Document.to_tirdoc(document)
+function M.unparse(ctx, tirdoc)
 	local ndjsons = Document.serialize_to_flat(tirdoc)
 	local jslines = ndjsons_to_lines(ndjsons)
 	log.debug("[%d]='%s'...[%d]='%s'", 1, tostring(jslines[1]), #jslines, tostring(jslines[#jslines]))

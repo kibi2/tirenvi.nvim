@@ -120,6 +120,13 @@ local function apply_attrs_by_id(tirdoc, c_attrs)
     end
 end
 
+---@param tirdoc Document
+local function to_flatdoc(tirdoc)
+    log.assert(tirdoc._tir)
+    Blocks.to_flat(tirdoc.blocks)
+    tirdoc._tir = true
+end
+
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
@@ -161,15 +168,6 @@ end
 
 ---@param tirdoc Document
 ---@return Document
-function M.to_tirdoc(tirdoc)
-    log.assert(tirdoc._tir)
-    Blocks.to_flat(tirdoc.blocks)
-    tirdoc._tir = true
-    return tirdoc
-end
-
----@param tirdoc Document
----@return Document
 function M.to_bufdoc(tirdoc)
     log.assert(tirdoc._tir)
     local bufdoc = vim.deepcopy(tirdoc)
@@ -179,8 +177,8 @@ function M.to_bufdoc(tirdoc)
 end
 
 ---@param bufdoc Document
----@return Ndjson[]
-function M.serialize(bufdoc)
+---@return Record[]
+function M.serialize_to_buf(bufdoc)
     log.assert(not bufdoc._tir)
     return Blocks.serialize(bufdoc.blocks)
 end
@@ -189,6 +187,7 @@ end
 ---@return Ndjson[]
 function M.serialize_to_flat(tirdoc)
     log.assert(tirdoc._tir)
+    to_flatdoc(tirdoc)
     local ndjsons = { new_attr_file() }
     util.extend(ndjsons, Blocks.serialize(tirdoc.blocks))
     return ndjsons
