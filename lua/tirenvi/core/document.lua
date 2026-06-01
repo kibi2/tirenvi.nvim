@@ -96,7 +96,33 @@ local function set_attr_range(bufdoc, first)
     Blocks.set_attr_range(bufdoc.blocks, first)
 end
 
+---@param bufdoc Document
+---@param attrs Attr[]
+local function apply_attrs_by_range(bufdoc, attrs)
+    log.assert(not bufdoc._tir)
+    Blocks.apply_attrs_by_range(bufdoc.blocks, attrs)
+end
+
+---@param tirdoc Document
+---@param c_attrs Attr[]
+local function apply_attrs_by_id(tirdoc, c_attrs)
+    log.assert(tirdoc._tir)
+    local attrs_grid = Attrs.get_grid_attrs(c_attrs)
+    local iblock = 0
+    for _, block in ipairs(tirdoc.blocks) do
+        block.attr = Attr[block.kind].new()
+        if block.kind == CONST.KIND.GRID then
+            iblock = iblock + 1
+            if attrs_grid[iblock] then
+                block.attr.columns = attrs_grid[iblock].columns
+            end
+        end
+    end
+end
+
+-----------------------------------------------------------------------
 -- Public API
+-----------------------------------------------------------------------
 
 ---@param ndjsons Ndjson[]
 ---@param allow_plain boolean
@@ -196,27 +222,13 @@ function M.set_auto_attr(bufdoc)
     log.watch("ATTR", M.debug_attrs(bufdoc, "[5]AUTO ATTR:"))
 end
 
----@param bufdoc Document
+---@param doc Document
 ---@param attrs Attr[]
-function M.apply_attrs_by_range(bufdoc, attrs)
-    log.assert(not bufdoc._tir)
-    Blocks.apply_attrs_by_range(bufdoc.blocks, attrs)
-end
-
----@param tirdoc Document
----@param c_attrs Attr[]
-function M.apply_attrs_by_id(tirdoc, c_attrs)
-    log.assert(tirdoc._tir)
-    local attrs_grid = Attrs.get_grid_attrs(c_attrs)
-    local iblock = 0
-    for _, block in ipairs(tirdoc.blocks) do
-        block.attr = Attr[block.kind].new()
-        if block.kind == CONST.KIND.GRID then
-            iblock = iblock + 1
-            if attrs_grid[iblock] then
-                block.attr.columns = attrs_grid[iblock].columns
-            end
-        end
+function M.apply_attrs(doc, attrs)
+    if doc._tir then
+        apply_attrs_by_id(doc, attrs)
+    else
+        apply_attrs_by_range(doc, attrs)
     end
 end
 

@@ -37,7 +37,7 @@ local api = vim.api
 local function fllines_to_tirdoc(ctx, r_result)
     local tirdoc = flat_parser.parse(ctx, r_result)
     log.watch("ATTR", Document.debug_attrs(tirdoc, "[1]DOC ATTR:"))
-    Document.apply_attrs_by_id(tirdoc, r_result.attrs)
+    Document.apply_attrs(tirdoc, r_result.attrs)
     log.watch("ATTR", Document.debug_attrs(tirdoc, "[4]CACHED:"))
     return tirdoc
 end
@@ -49,7 +49,7 @@ local function buflines_to_tirdoc_text_driven(ctx, r_result)
     local opts = { first = r_result.range.first }
     local bufdoc = buf_parser.parse(ctx, r_result, opts)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
-    Document.apply_attrs_by_range(bufdoc, r_result.attrs)
+    Document.apply_attrs(bufdoc, r_result.attrs)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[4]CACHED:"))
     return Document.from_bufdoc(bufdoc)
 end
@@ -132,7 +132,7 @@ local function reconcile_attrs(ctx, r_result, bufdoc, range3)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[2]NEIGHBOR:"))
     Document.infer_consistent_attr(bufdoc)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[3]CONSISTENT:"))
-    Document.apply_attrs_by_range(bufdoc, r_result.attrs)
+    Document.apply_attrs(bufdoc, r_result.attrs)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[4]CACHED:"))
     Document.set_auto_attr(bufdoc)
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
