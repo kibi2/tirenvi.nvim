@@ -156,12 +156,11 @@ local function reconcile_dirty_ranges(bufnr, attrs, range3)
     dirty.set_ranges(bufnr, inv_ranges)
 end
 
-local local_range = nil
+local schedule_repair = false
 ---@param ctx Context
-local function apply_local_range(ctx)
-    ---@cast local_range Range
+local function do_repair(ctx)
+    schedule_repair = false
     M.cmd_repair(ctx, true, true)
-    local_range = nil
 end
 
 ---@param ctx Context
@@ -170,15 +169,13 @@ local function schedule_new_range(ctx)
     if #new_ranges == 0 then
         return
     end
-    if local_range == nil then
-        local_range = Range.bounding(new_ranges)
+    if not schedule_repair then
         vim.schedule(function()
-            apply_local_range(ctx)
+            do_repair(ctx)
         end)
+        schedule_repair = true
     else
-        log.watch("UNDO", ctx.bufnr, { "multi time on_lines", local_range })
-        new_ranges[#new_ranges + 1] = local_range
-        local_range = Range.bounding(new_ranges)
+        log.watch("UNDO", ctx.bufnr, { "multi time on_lines", new_ranges })
     end
 end
 
