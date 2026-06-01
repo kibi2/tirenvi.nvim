@@ -143,7 +143,7 @@ end
 function M:collect_attrs()
 	local attrs = {}
 	for _, block in ipairs(self) do
-		assert(block.attr, "block.attr is nil")
+		log.assert(block.attr, "block.attr is nil")
 		attrs[#attrs + 1] = block.attr
 	end
 	return attrs

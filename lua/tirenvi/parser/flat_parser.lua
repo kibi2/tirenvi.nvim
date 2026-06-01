@@ -57,7 +57,7 @@ end
 ---@return string|nil
 local function ndjson_to_line(ndjson)
 	local ok, line = pcall(vim.json.encode, ndjson)
-	assert(ok, ("tirenvi: internal JSON encode failure\n%s\nerror: %s"):format(vim.inspect(ndjson), line))
+	log.assert(ok, ("tirenvi: internal JSON encode failure\n%s\nerror: %s"):format(vim.inspect(ndjson), line))
 	return line
 end
 

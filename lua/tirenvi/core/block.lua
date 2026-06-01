@@ -122,7 +122,7 @@ end
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 local function apply_column_count(self, ncol)
-    assert(ncol ~= 0, "column count must be greater than 0")
+    log.assert(ncol ~= 0, "column count must be greater than 0")
     apply(self, "apply_column_count", ncol)
 end
 
@@ -131,7 +131,7 @@ end
 ---@param replace {[string]:string}
 local function apply_replacements(self, replace)
     for _, record in ipairs(self.records) do
-        assert(record.kind == CONST.KIND.GRID, "unexpected record kind")
+        log.assert(record.kind == CONST.KIND.GRID, "unexpected record kind")
         for icol, cell in ipairs(record.row) do
             for key, val in pairs(replace) do
                 cell = cell:gsub(key, val)
@@ -182,7 +182,7 @@ function M:set_kind(kind)
     if self.kind == kind then
         return
     end
-    assert(not self.kind, "Block kind already set")
+    log.assert(not self.kind, "Block kind already set")
     initialize(self, kind)
 end
 

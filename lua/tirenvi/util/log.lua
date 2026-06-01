@@ -403,4 +403,13 @@ function M.is_debug()
 	return levels.DEBUG >= config.log.level
 end
 
+function M.assert(condition, message, ...)
+	if M.is_debug() then
+		assert(condition, message, ...)
+	end
+	if not condition then
+		M.error(message, ...)
+	end
+end
+
 return M

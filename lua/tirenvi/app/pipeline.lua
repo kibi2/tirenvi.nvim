@@ -7,7 +7,6 @@ local Blocks = require("tirenvi.core.blocks")
 local Bufline = require("tirenvi.core.bufline")
 local dirty_range = require("tirenvi.core.dirty_range")
 local Request = require("tirenvi.app.request")
-local ReadResult = require("tirenvi.app.read_result")
 local flat_parser = require("tirenvi.parser.flat_parser")
 local buf_parser = require("tirenvi.parser.buf_parser")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
@@ -227,22 +226,16 @@ end
 ---@param no_undo boolean|nil
 ---@return nil
 function M.from_flat(ctx, no_undo)
-    -- 読み込み
     local r_result = reader.read(ctx, Range.WHOLE)
     local tirdoc
     if buf_state.is_formatted(ctx.bufnr) or Bufline.has_pipe(r_result.lines) then
-        -- buflines -> tirdoc
         tirdoc = buflines_to_tirdoc_text_driven(ctx, r_result)
     else
         util.ensure_no_reserved_marks(r_result.lines)
-        -- fllines -> tirdoc
         tirdoc = fllines_to_tirdoc(ctx, r_result)
     end
-    -- C-Attrsないところはauto
     Document.set_auto_attr(tirdoc)
-    -- block.attrに従ってbufdoc作成
     local bufdoc = Document.to_bufdoc(tirdoc)
-    -- lines, attrs 書き出し
     bufdoc_to_buflines(ctx, r_result, bufdoc, no_undo)
 end
 
