@@ -245,13 +245,6 @@ function M.grid:to_grid()
     return self
 end
 
----@self Block_grid
----@param sel Range
----@param width_op WidthOp
-function M.grid:change_width(sel, width_op)
-    Attr.change_width(self.attr, self.records, sel, width_op)
-end
-
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 function M.grid:from_flat()

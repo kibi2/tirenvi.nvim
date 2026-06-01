@@ -194,7 +194,7 @@ function M.on_filetype(ctx)
 		pipeline.to_flat(ctx)
 	end
 	buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, new_filetype)
-	attr_store.write(ctx, nil)
+	attr_store.write(ctx.bufnr, nil)
 	ctx = Context.from_buf(ctx.bufnr)
 	if not ctx.parser then
 		buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, nil)

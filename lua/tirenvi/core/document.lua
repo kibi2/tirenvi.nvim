@@ -99,14 +99,14 @@ end
 ---@param bufdoc Document
 ---@param attrs Attr[]
 local function apply_attrs_by_range(bufdoc, attrs)
-    log.assert(not bufdoc._tir)
+    log.assert(not bufdoc._tir, "apply_attrs_by_range should be called only for bufdoc")
     Blocks.apply_attrs_by_range(bufdoc.blocks, attrs)
 end
 
 ---@param tirdoc Document
 ---@param c_attrs Attr[]
 local function apply_attrs_by_id(tirdoc, c_attrs)
-    log.assert(tirdoc._tir)
+    log.assert(tirdoc._tir, "apply_attrs_by_id should be called only for tirdoc")
     local attrs_grid = Attrs.get_grid_attrs(c_attrs)
     local iblock = 0
     for _, block in ipairs(tirdoc.blocks) do
@@ -122,7 +122,7 @@ end
 
 ---@param tirdoc Document
 local function to_flatdoc(tirdoc)
-    log.assert(tirdoc._tir)
+    log.assert(tirdoc._tir, "to_flatdoc should be called only for tirdoc")
     Blocks.to_flat(tirdoc.blocks)
     tirdoc._tir = true
 end
@@ -158,7 +158,7 @@ end
 -- Prevents line count changes that would break put(); used for repair.
 ---@return Document
 function M.from_bufdoc(bufdoc, no_normalize)
-    log.assert(not bufdoc._tir)
+    log.assert(not bufdoc._tir, "from_bufdoc should be called only for bufdoc")
     no_normalize = no_normalize or false
     local tirdoc = vim.deepcopy(bufdoc)
     Blocks.from_buf(tirdoc.blocks, no_normalize)
@@ -169,7 +169,7 @@ end
 ---@param tirdoc Document
 ---@return Document
 function M.to_bufdoc(tirdoc)
-    log.assert(tirdoc._tir)
+    log.assert(tirdoc._tir, "to_bufdoc should be called only for tirdoc")
     local bufdoc = vim.deepcopy(tirdoc)
     Blocks.to_bufdoc(bufdoc.blocks)
     bufdoc._tir = false
@@ -179,14 +179,14 @@ end
 ---@param bufdoc Document
 ---@return Record[]
 function M.serialize_to_buf(bufdoc)
-    log.assert(not bufdoc._tir)
+    log.assert(not bufdoc._tir, "serialize_to_buf should be called only for bufdoc")
     return Blocks.serialize(bufdoc.blocks)
 end
 
 ---@param tirdoc Document
 ---@return Ndjson[]
 function M.serialize_to_flat(tirdoc)
-    log.assert(tirdoc._tir)
+    log.assert(tirdoc._tir, "serialize_to_flat should be called only for tirdoc")
     to_flatdoc(tirdoc)
     local ndjsons = { new_attr_file() }
     util.extend(ndjsons, Blocks.serialize(tirdoc.blocks))
@@ -198,7 +198,7 @@ end
 ---@param chached_attrs Attr[]
 ---@return Attr[]
 function M.replace_attrs(bufdoc, range, chached_attrs)
-    log.assert(not bufdoc._tir)
+    log.assert(not bufdoc._tir, "replace_attrs should be called only for bufdoc")
     local first = Range.to_lua(range)
     set_attr_range(bufdoc, first)
     local doc_attrs = Blocks.collect_attrs(bufdoc.blocks)
@@ -210,13 +210,13 @@ end
 
 ---@param bufdoc Document
 function M.infer_consistent_attr(bufdoc)
-    log.assert(not bufdoc._tir)
+    log.assert(not bufdoc._tir, "infer_consistent_attr should be called only for bufdoc")
     Blocks.infer_consistent_attr(bufdoc.blocks)
 end
 
 ---@param bufdoc Document
 function M.set_auto_attr(bufdoc)
-    log.assert(not bufdoc._tir)
+    --log.assert(not bufdoc._tir, "set_auto_attr should be called only for bufdoc")
     Blocks.set_auto_attr(bufdoc.blocks)
     log.watch("ATTR", M.debug_attrs(bufdoc, "[5]AUTO ATTR:"))
 end
@@ -244,7 +244,7 @@ end
 ---@param attrs Attr[]
 ---@param range3 Range3
 function M.inherit_neighbor_attr(bufdoc, attrs, range3)
-    log.assert(not bufdoc._tir)
+    log.assert(not bufdoc._tir, "inherit_neighbor_attr should be called only for bufdoc")
     if #bufdoc.blocks == 0 then
         return
     end
@@ -256,14 +256,14 @@ end
 
 ---@param bufdoc Document
 function M.insert_empty_lines(bufdoc)
-    log.assert(not bufdoc._tir)
+    log.assert(not bufdoc._tir, "insert_empty_lines should be called only for bufdoc")
     Blocks.insert_empty_lines(bufdoc.blocks)
 end
 
 ---@param bufdoc Document
 ---@return boolean
 function M.has_width(bufdoc)
-    log.assert(not bufdoc._tir)
+    log.assert(not bufdoc._tir, "has_width should be called only for bufdoc")
     return Blocks.has_width(bufdoc.blocks)
 end
 

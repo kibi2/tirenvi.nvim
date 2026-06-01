@@ -169,7 +169,8 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
 			debug_entry_point(args)
-			log.assert(not buffer.get(args.buf, buffer.IKEY.INSERT_MODE))
+			log.assert(not buffer.get(args.buf, buffer.IKEY.INSERT_MODE),
+				"InsertEnter triggered while already in insert mode")
 			buffer.set(args.buf, buffer.IKEY.INSERT_MODE, true)
 		end),
 	})

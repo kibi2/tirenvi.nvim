@@ -149,13 +149,6 @@ function M:collect_attrs()
 	return attrs
 end
 
----@self Blocks
----@param sel Range
----@param width_op WidthOp
-function M:change_width(sel, width_op)
-	apply(self, "change_width", sel, width_op)
-end
-
 --- Convert NDJSON records into normalized blocks.
 ---@param ndjsons Ndjson[]
 ---@param attrs Attr[]|nil

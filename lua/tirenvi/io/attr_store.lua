@@ -55,7 +55,7 @@ end
 
 ---@param bufnr number
 ---@param attrs Attr[]|nil
----@param buffer_format BufferFormat|nil
+---@param buffer_format BufferFormat
 local function set_buffer_format(bufnr, attrs, buffer_format)
     if not attrs then
         return
@@ -67,21 +67,23 @@ end
 -- Public API
 -----------------------------------------------------------------------
 
----@param ctx Context
+---@param bufnr number
 ---@param attrs Attr[]|nil
 ---@param buffer_format BufferFormat|nil
-function M.write(ctx, attrs, buffer_format)
-    set_attrs(ctx.bufnr, attrs)
+function M.write(bufnr, attrs, buffer_format)
+    set_attrs(bufnr, attrs)
     if attrs and not Attrs.has_grid(attrs) then
         buffer_format = "plain"
+    elseif not buffer_format then
+        buffer_format = "formatted"
     end
-    set_buffer_format(ctx.bufnr, attrs, buffer_format)
+    set_buffer_format(bufnr, attrs, buffer_format)
 end
 
----@param ctx Context
+---@param bufnr number
 ---@return Attr[]
-function M.read(ctx)
-    return buffer.get(ctx.bufnr, buffer.IKEY.ATTRS) or {}
+function M.read(bufnr)
+    return buffer.get(bufnr, buffer.IKEY.ATTRS) or {}
 end
 
 return M

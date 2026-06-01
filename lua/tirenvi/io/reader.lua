@@ -19,7 +19,7 @@ local M = {}
 ---@return ReadResult
 function M.read(ctx, range)
     local result = ReadResult.new_reader(range)
-    result.attrs = attr_store.read(ctx)
+    result.attrs = attr_store.read(ctx.bufnr)
     local first, last = ReadResult.lua_range(result)
     result.lines = buffer.get_lines(ctx.bufnr, first, last)
     log.watch("ATTR", Attrs.debug_attrs(result.attrs, "[0]CHACHED ATTRS:"))
