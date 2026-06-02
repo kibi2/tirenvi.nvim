@@ -41,16 +41,15 @@ end
 ---@param ranges Range[]
 local function set_dirty_ranges(bufnr, ranges)
     buffer.set(bufnr, buffer.IKEY.DIRTY, ranges)
-    log.watch("invd", ranges)
+    log.watch("INVD", ranges)
     for irange, range in ipairs(ranges) do
         show_marks(bufnr, range, irange, "dirty")
     end
 end
 
 ---@param bufnr number
-local function set_dirty_boundaries(bufnr)
-    local attrs = buffer.get(bufnr, buffer.IKEY.ATTRS) or {}
-    local invalid_attrs = Attrs.get_invalid_attrs(attrs)
+local function set_dirty_attrs(bufnr)
+    local invalid_attrs = M.get_invalid_attrs(bufnr)
     for _, attr in ipairs(invalid_attrs) do
         local irow = attr.range.first
         local range = Range.from_lua(irow, irow)
@@ -67,13 +66,20 @@ end
 function M.set_ranges(bufnr, ranges)
     vim.api.nvim_buf_clear_namespace(bufnr, namespaces.DIRTY, 0, -1)
     set_dirty_ranges(bufnr, ranges)
-    set_dirty_boundaries(bufnr)
+    set_dirty_attrs(bufnr)
 end
 
 ---@param bufnr number
 ---@return Range[]
 function M.get_ranges(bufnr)
     return buffer.get(bufnr, buffer.IKEY.DIRTY) or {}
+end
+
+---@param bufnr number
+---@return Attr[]
+function M.get_invalid_attrs(bufnr)
+    local attrs = buffer.get(bufnr, buffer.IKEY.ATTRS) or {}
+    return Attrs.get_invalid_attrs(attrs)
 end
 
 return M

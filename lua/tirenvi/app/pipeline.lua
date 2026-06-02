@@ -151,6 +151,7 @@ local function reconcile_dirty_ranges(bufnr, attrs, range3)
     local prev_ranges = dirty.get_ranges(bufnr)
     local line_provider = LinProvider.new(bufnr)
     local inv_ranges = dirty_range.reconcile(line_provider, prev_ranges, attrs, range3)
+    log.watch("INVD", inv_ranges)
     dirty.set_ranges(bufnr, inv_ranges)
 end
 
@@ -189,11 +190,21 @@ local function has_dirty(bufnr, range)
     return #dirty_ranges > 0
 end
 
+---@param bufnr number
+---@return boolean
+local function need_repair(bufnr)
+    if has_dirty(bufnr) then
+        return true
+    end
+    local attrs = dirty.get_invalid_attrs(bufnr)
+    return #attrs > 0
+end
+
 ---@param ctx Context
 ---@param range3 Range3|nil
 local function check_and_repair(ctx, range3)
     local bufnr = ctx.bufnr
-    if not has_dirty(bufnr) then
+    if not need_repair(bufnr) then
         return
     end
     vim.schedule(function()

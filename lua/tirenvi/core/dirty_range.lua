@@ -61,7 +61,6 @@ local function adjust(line_provider, prev_ranges, range3)
         new_ranges[#new_ranges + 1] = range2
     end
     util.extend(new_ranges, ranges3)
-    --return Range.merge(new_ranges)
     return new_ranges
 end
 
@@ -168,12 +167,8 @@ end
 ---@return Range[]
 function M.reconcile(line_provider, prev_ranges, attrs, range3)
     local new_ranges = adjust(line_provider, prev_ranges, range3)
-    if #new_ranges == 0 then
-        new_ranges = { Range.from_lua(range3.first - 1, range3.first - 1) }
-    end
     local inv_ranges = check_dirty(line_provider, new_ranges, attrs)
-    log.watch("INVD", inv_ranges)
-    return inv_ranges
+    return Range.merge(inv_ranges)
 end
 
 ---@param prev_ranges Range[]
