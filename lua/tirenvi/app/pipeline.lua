@@ -157,11 +157,13 @@ end
 
 local schedule_repair_flag = false
 ---@param ctx Context
-local function schedule_repair(ctx)
+---@param range3 Range3|nil
+local function schedule_repair(ctx, range3)
     if not schedule_repair_flag then
         vim.schedule(function()
             schedule_repair_flag = false
-            M.cmd_repair(ctx, true, true)
+            local no_normalize = range3 and Range3.get_delta(range3) == 0 or false
+            M.cmd_repair(ctx, true, no_normalize)
         end)
         schedule_repair_flag = true
     else
@@ -176,7 +178,7 @@ local function repair_request(ctx, range3)
     if not buf_state.is_repair(ctx, range3) then
         return
     end
-    schedule_repair(ctx)
+    schedule_repair(ctx, range3)
 end
 
 ---@param bufnr number
