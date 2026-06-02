@@ -76,7 +76,7 @@ end
 
 ---@param ctx Context
 local function on_buf_read_post(ctx)
-	init.import_flat(ctx)
+	init.read_post(ctx)
 end
 
 ---@param ctx Context

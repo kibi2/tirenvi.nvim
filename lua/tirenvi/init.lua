@@ -1,13 +1,10 @@
 ----- dependencies
 local Context = require("tirenvi.app.context")
-local Request = require("tirenvi.app.request")
 local pipeline = require("tirenvi.app.pipeline")
 local config = require("tirenvi.config")
 local buffer = require("tirenvi.io.buffer")
 local buf_state = require("tirenvi.io.buf_state")
 local attr_store = require("tirenvi.io.attr_store")
-local writer = require("tirenvi.io.writer")
-local reader = require("tirenvi.io.reader")
 local Bufline = require("tirenvi.core.bufline")
 local Range = require("tirenvi.util.range")
 local Range3 = require("tirenvi.util.range3")
@@ -26,15 +23,7 @@ M.motion = require("tirenvi.editor.motion")
 
 -- private helpers
 
----@param ctx Context
----@param no_undo boolean|nil
----@return nil
-local function from_flat(ctx, no_undo)
-	pipeline.from_flat(ctx, no_undo)
-end
-
 local warned = false
-
 ---@param command string
 local function set_repeat(command)
 	local ok = pcall(function()
@@ -70,14 +59,8 @@ end
 --- Convert current buffer (or specified buffer) from plain format to tir-vim format
 ---@param ctx Context
 ---@return nil
-function M.import_flat(ctx)
-	from_flat(ctx, true)
-end
-
----@param ctx Context
----@return nil
-function M.enable(ctx)
-	from_flat(ctx)
+function M.read_post(ctx)
+	pipeline.read_post(ctx)
 end
 
 --- Convert current buffer (or specified buffer) from display format back to file format (tsv)
@@ -96,17 +79,11 @@ end
 
 ---@param ctx Context
 ---@return nil
-function M.disable(ctx)
-	pipeline.to_flat(ctx)
-end
-
----@param ctx Context
----@return nil
 function M.toggle(ctx)
 	if buf_state.is_formatted(ctx.bufnr) then
-		M.disable(ctx)
+		pipeline.to_flat(ctx)
 	elseif not buf_state.is_plain(ctx.bufnr) then
-		M.enable(ctx)
+		pipeline.from_flat(ctx)
 	end
 end
 
@@ -190,11 +167,13 @@ function M.on_filetype(ctx)
 	if old_filetype and old_filetype == new_filetype then
 		return
 	end
+	local buffer_format
 	if old_filetype then
 		pipeline.to_flat(ctx)
+		buffer_format = "flat"
 	end
 	buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, new_filetype)
-	attr_store.write(ctx.bufnr, nil)
+	attr_store.write(ctx.bufnr, nil, buffer_format)
 	ctx = Context.from_buf(ctx.bufnr)
 	if not ctx.parser then
 		buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, nil)

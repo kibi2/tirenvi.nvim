@@ -125,12 +125,11 @@ local function expand_rect(ctx, row)
     row.last = bottom
 end
 
----@param ctx Context
 ---@param r_result ReadResult
 ---@param bufdoc  Document
 ---@param range3 Range3
 ---@return Attr[]
-local function reconcile_attrs(ctx, r_result, bufdoc, range3)
+local function reconcile_attrs(r_result, bufdoc, range3)
     Document.inherit_neighbor_attr(bufdoc, r_result.attrs, range3)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[2]NEIGHBOR:"))
     Document.infer_consistent_attr(bufdoc)
@@ -140,7 +139,6 @@ local function reconcile_attrs(ctx, r_result, bufdoc, range3)
     Document.set_auto_attr(bufdoc)
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[6]RESULT:"))
-    attr_store.write(ctx.bufnr, attrs, "formatted")
     return attrs
 end
 
@@ -244,18 +242,26 @@ end
 -----------------------------------------------------------------------
 
 ---@param ctx Context
----@param no_undo boolean|nil
 ---@return nil
-function M.from_flat(ctx, no_undo)
+function M.read_post(ctx)
     local r_result = reader.read(ctx, Range.WHOLE)
-    if is_flat(ctx.bufnr, r_result.lines) then
+    if not Bufline.has_pipe(r_result.lines) then
         util.ensure_no_reserved_marks(r_result.lines)
         local tirdoc = fllines_to_tirdoc(ctx, r_result)
-        doc_to_buflines(ctx, r_result, tirdoc, no_undo)
+        doc_to_buflines(ctx, r_result, tirdoc, true)
     else
         local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
-        doc_to_buflines(ctx, r_result, bufdoc, no_undo)
+        doc_to_buflines(ctx, r_result, bufdoc, true)
     end
+end
+
+---@param ctx Context
+---@return nil
+function M.from_flat(ctx)
+    local r_result = reader.read(ctx, Range.WHOLE)
+    util.ensure_no_reserved_marks(r_result.lines)
+    local tirdoc = fllines_to_tirdoc(ctx, r_result)
+    doc_to_buflines(ctx, r_result, tirdoc)
 end
 
 ---@param ctx Context
@@ -302,7 +308,8 @@ function M.on_lines(ctx, range3)
     local opts = { range3 = range3, first = r_result.range.first }
     local bufdoc = buf_parser.parse(ctx, r_result, opts)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
-    local attrs = reconcile_attrs(ctx, r_result, bufdoc, range3)
+    local attrs = reconcile_attrs(r_result, bufdoc, range3)
+    attr_store.write(ctx.bufnr, attrs, nil)
     reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
     check_and_repair(ctx, range3)
 end
@@ -312,21 +319,24 @@ function M.insert_leave(ctx)
     check_and_repair(ctx)
 end
 
-local buffer_backup
+local backup_buffer
+local backup_format
 
 ---@param ctx Context
 function M.write_pre(ctx)
-    buffer_backup = M.to_flat(ctx, true)
+    backup_format = buf_state.get_buffer_format(ctx.bufnr)
+    backup_buffer = M.to_flat(ctx, true)
 end
 
 ---@param ctx Context
 function M.write_post(ctx)
-    if not buffer_backup then
+    if not backup_buffer then
         return
     end
-    local req = Request.new_writer(Range.WHOLE, buffer_backup, true)
+    local req = Request.new_writer(Range.WHOLE, backup_buffer, true)
     writer.write(ctx, req)
-    buffer_backup = nil
+    buf_state.set_buffer_format(ctx.bufnr, backup_format)
+    backup_buffer = nil
 end
 
 return M

@@ -1,6 +1,7 @@
 local config = require("tirenvi.config")
 local Attr = require("tirenvi.core.attr")
 local Attrs = require("tirenvi.core.attrs")
+local bufline = require("tirenvi.core.bufline")
 local namespaces = require("tirenvi.io.namespaces")
 local buffer = require("tirenvi.io.buffer")
 local buf_state = require("tirenvi.io.buf_state")
@@ -62,10 +63,12 @@ end
 ---@param buffer_format BufferFormat|nil
 function M.write(bufnr, attrs, buffer_format)
     set_attrs(bufnr, attrs)
-    if buffer_format == "formatted" then
-        if attrs and not Attrs.has_grid(attrs) then
-            buffer_format = "plain"
-        end
+    if attrs and not Attrs.has_grid(attrs) then
+        buffer_format = "plain"
+    end
+    if not buffer_format then
+        local lines = buffer.get_lines(bufnr, 1, -1)
+        buffer_format = bufline.has_pipe(lines) and "formatted" or "flat"
     end
     buf_state.set_buffer_format(bufnr, buffer_format)
 end
