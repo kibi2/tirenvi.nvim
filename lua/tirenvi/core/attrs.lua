@@ -229,4 +229,19 @@ function M:change_width(rect, width_op)
     end
 end
 
+---@param self Attr[]
+---@return Attr[]
+function M:get_invalid_attrs()
+    local invalid = {}
+    local prev = self[1]
+    for iattr = 2, #self do
+        local attr = self[iattr]
+        if not Attr.is_consistent(prev, attr) then
+            invalid[#invalid + 1] = attr
+        end
+        prev = attr
+    end
+    return invalid
+end
+
 return M

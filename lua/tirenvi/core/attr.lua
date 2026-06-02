@@ -114,7 +114,28 @@ end
 
 ---@param source Attr
 ---@param target Attr
+---@return boolean
 function M.is_same_columns(source, target)
+    local columns1 = source.columns or {}
+    local columns2 = target.columns or {}
+    if #columns1 ~= #columns2 then
+        return false
+    end
+    for icol = 1, #columns1 do
+        if columns1[icol].width ~= columns2[icol].width then
+            return false
+        end
+    end
+    return true
+end
+
+---@param source Attr
+---@param target Attr
+---@return boolean
+function M.is_consistent(source, target)
+    if M.is_plain(source) or M.is_plain(target) then
+        return true
+    end
     local columns1 = source.columns or {}
     local columns2 = target.columns or {}
     if #columns1 ~= #columns2 then
