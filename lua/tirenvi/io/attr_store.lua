@@ -53,16 +53,6 @@ local function set_attrs(bufnr, attrs)
     end)
 end
 
----@param bufnr number
----@param attrs Attr[]|nil
----@param buffer_format BufferFormat
-local function set_buffer_format(bufnr, attrs, buffer_format)
-    if not attrs then
-        return
-    end
-    buf_state.set_buffer_format(bufnr, buffer_format)
-end
-
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
@@ -72,12 +62,12 @@ end
 ---@param buffer_format BufferFormat|nil
 function M.write(bufnr, attrs, buffer_format)
     set_attrs(bufnr, attrs)
-    if attrs and not Attrs.has_grid(attrs) then
-        buffer_format = "plain"
-    elseif not buffer_format then
-        buffer_format = "formatted"
+    if buffer_format == "formatted" then
+        if attrs and not Attrs.has_grid(attrs) then
+            buffer_format = "plain"
+        end
     end
-    set_buffer_format(bufnr, attrs, buffer_format)
+    buf_state.set_buffer_format(bufnr, buffer_format)
 end
 
 ---@param bufnr number

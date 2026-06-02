@@ -16,6 +16,7 @@ local log = require("tirenvi.util.log")
 local M = {}
 
 local api = vim.api
+local bo = vim.bo
 local fn = vim.fn
 
 ---@class WidthOp
@@ -81,17 +82,6 @@ function WidthOp:apply(current)
 	end
 end
 
----@param ctx Context
----@param opts {[string]:any}
----@return nil
-local function cmd_toggle(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr, { is_formatted = false, }) then
-		return
-	end
-	ui.special_apply()
-	init.toggle(ctx)
-end
-
 ---@param opts {[string]:any}
 ---@return Rect
 local function get_selection(opts)
@@ -128,6 +118,17 @@ local function cmd_width(ctx, opts)
 	log.debug("row[%d-%d], col[%d-%d] %s", sel.row.first, sel.row.last, sel.col.first, sel.col.last,
 		width_op:to_string())
 	init.width(ctx, sel, width_op)
+end
+
+---@param ctx Context
+---@param opts {[string]:any}
+---@return nil
+local function cmd_toggle(ctx, opts)
+	if buf_state.should_skip(ctx.bufnr, { is_formatted = false, }) then
+		return
+	end
+	ui.special_apply()
+	init.toggle(ctx)
 end
 
 ---@param ctx Context
@@ -208,8 +209,10 @@ local function on_tir(opts)
 		command = "width"
 	end
 	local ctx = Context.from_buf()
-	log.debug("===+===+===+===+=== %s %s %s[%d] ===+===+===+===+===",
-		opts.name, opts.fargs[1], opts.fargs[2] or "", ctx.bufnr)
+	local filetype = bo[ctx.bufnr].filetype
+	local format = buf_state.get_buffer_format(ctx.bufnr) or "nil"
+	log.debug("===+===+===+===+=== %s %s %s[%d] %s : %s ===+===+===+===+===",
+		opts.name, opts.fargs[1], opts.fargs[2] or "", ctx.bufnr, filetype, format)
 	local func = commands[command]
 	if not func then
 		notify.error(errors.err_unknown_command(sub))

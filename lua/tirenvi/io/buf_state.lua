@@ -152,7 +152,7 @@ function M.is_repair(ctx, range3)
 end
 
 ---@param bufnr number
----@param value BufferFormat
+---@param value BufferFormat|nil
 function M.set_buffer_format(bufnr, value)
 	buffer.set(bufnr, buffer.IKEY.BUFFER_FORMAT, value)
 end
@@ -164,13 +164,13 @@ function M.get_buffer_format(bufnr)
 end
 
 ---@return boolean
-function M.is_flat(bufnr)
-	return M.get_buffer_format(bufnr) == "flat"
+function M.is_formatted(bufnr)
+	return M.get_buffer_format(bufnr) == "formatted"
 end
 
 ---@return boolean
-function M.is_formatted(bufnr)
-	return M.get_buffer_format(bufnr) == "formatted"
+function M.is_plain(bufnr)
+	return M.get_buffer_format(bufnr) == "plain"
 end
 
 return M

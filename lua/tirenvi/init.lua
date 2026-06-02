@@ -103,10 +103,10 @@ end
 ---@param ctx Context
 ---@return nil
 function M.toggle(ctx)
-	if buf_state.is_flat(ctx.bufnr) then
-		M.enable(ctx)
-	elseif buf_state.is_formatted(ctx.bufnr) then
+	if buf_state.is_formatted(ctx.bufnr) then
 		M.disable(ctx)
+	elseif not buf_state.is_plain(ctx.bufnr) then
+		M.enable(ctx)
 	end
 end
 

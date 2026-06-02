@@ -9,7 +9,6 @@ local Range3 = require("tirenvi.util.range3")
 local log = require("tirenvi.util.log")
 
 -- module
-
 local M = {}
 
 -- constants / defaults
@@ -114,7 +113,9 @@ local function on_vim_leave(args) end
 
 local function debug_entry_point(args)
 	local filetype = bo[args.buf].filetype
-	log.debug("===+===+===+===+=== %s[#%d]%s ===+===+===+===+===", args.event, args.buf, filetype)
+	local format = buf_state.get_buffer_format(args.buf) or "nil"
+	log.debug("===+===+===+===+=== %s[#%d] %s : %s ===+===+===+===+===",
+		args.event, args.buf, filetype, format)
 end
 
 ---@param augroup integer

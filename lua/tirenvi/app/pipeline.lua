@@ -82,7 +82,7 @@ local function doc_to_buflines(ctx, r_result, doc, no_undo, no_normalize)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[9]DOC ATTR:"))
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
-    attr_store.write(ctx.bufnr, attrs)
+    attr_store.write(ctx.bufnr, attrs, "formatted")
     local buf_lines = buf_parser.unparse(bufdoc)
     if not util.same_str_array(buf_lines, r_result.lines) then
         local req_w = Request.new_writer(r_result.range, buf_lines, no_undo or false)
@@ -140,7 +140,7 @@ local function reconcile_attrs(ctx, r_result, bufdoc, range3)
     Document.set_auto_attr(bufdoc)
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[6]RESULT:"))
-    attr_store.write(ctx.bufnr, attrs)
+    attr_store.write(ctx.bufnr, attrs, "formatted")
     return attrs
 end
 
@@ -157,10 +157,6 @@ end
 local schedule_repair_flag = false
 ---@param ctx Context
 local function schedule_repair(ctx)
-    local dirty_ranges = dirty.get_ranges(ctx.bufnr)
-    if #dirty_ranges == 0 then
-        return
-    end
     if not schedule_repair_flag then
         vim.schedule(function()
             schedule_repair_flag = false
@@ -168,6 +164,7 @@ local function schedule_repair(ctx)
         end)
         schedule_repair_flag = true
     else
+        local dirty_ranges = dirty.get_ranges(ctx.bufnr)
         log.watch("UNDO", ctx.bufnr, { "multi time on_lines", dirty_ranges })
     end
 end
@@ -181,10 +178,24 @@ local function repair_request(ctx, range3)
     schedule_repair(ctx)
 end
 
+---@param bufnr number
+---@param range Range|nil
+---@return boolean
+local function has_dirty(bufnr, range)
+    local dirty_ranges = dirty.get_ranges(bufnr)
+    if range then
+        dirty_ranges = Range.slice(dirty_ranges, range)
+    end
+    return #dirty_ranges > 0
+end
+
 ---@param ctx Context
 ---@param range3 Range3|nil
 local function check_and_repair(ctx, range3)
     local bufnr = ctx.bufnr
+    if not has_dirty(bufnr) then
+        return
+    end
     vim.schedule(function()
         if not api.nvim_buf_is_valid(bufnr) then
             return
@@ -202,15 +213,6 @@ local function check_and_repair(ctx, range3)
             error(err)
         end
     end)
-end
-
----@param ctx Context
----@param range Range
----@return boolean
-local function has_dirty(ctx, range)
-    local dirty_ranges = dirty.get_ranges(ctx.bufnr)
-    local ranges = Range.slice(dirty_ranges, range)
-    return #ranges > 0
 end
 
 ---@param bufnr number
@@ -258,7 +260,7 @@ end
 ---@param sel Rect
 ---@param width_op WidthOp
 function M.cmd_width(ctx, sel, width_op)
-    if has_dirty(ctx, sel.row) then
+    if has_dirty(ctx.bufnr, sel.row) then
         error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
     end
     expand_rect(ctx, sel.row)
