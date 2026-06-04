@@ -209,7 +209,7 @@ local function on_tir(opts)
 	end
 	local ctx = Context.from_buf()
 	local filetype = bo[ctx.bufnr].filetype
-	local format = buf_state.get_buffer_format(ctx.bufnr) or "nil"
+	local format = buf_state.get_buffer_format(ctx.bufnr)
 	log.debug("===+===+===+===+=== %s %s %s[%d] %s : %s ===+===+===+===+===",
 		opts.name, opts.fargs[1], opts.fargs[2] or "", ctx.bufnr, filetype, format)
 	local func = commands[command]

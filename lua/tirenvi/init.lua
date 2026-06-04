@@ -80,10 +80,11 @@ end
 ---@param ctx Context
 ---@return nil
 function M.toggle(ctx)
-	if buf_state.is_formatted(ctx.bufnr) then
-		pipeline.to_flat(ctx)
-	elseif not buf_state.is_plain(ctx.bufnr) then
+	local is_flat = buf_state.is_flat(ctx.bufnr)
+	if is_flat == nil or is_flat then
 		pipeline.from_flat(ctx)
+	elseif buf_state.has_grid(ctx) then
+		pipeline.to_flat(ctx)
 	end
 end
 
@@ -167,13 +168,11 @@ function M.on_filetype(ctx)
 	if old_filetype and old_filetype == new_filetype then
 		return
 	end
-	local buffer_format
 	if old_filetype then
 		pipeline.to_flat(ctx)
-		buffer_format = "flat"
 	end
 	buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, new_filetype)
-	attr_store.write(ctx.bufnr, nil, buffer_format)
+	attr_store.write(ctx.bufnr, nil, true)
 	ctx = Context.from_buf(ctx.bufnr)
 	if not ctx.parser then
 		buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, nil)

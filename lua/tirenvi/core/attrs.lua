@@ -96,10 +96,10 @@ end
 -----------------------------------------------------------------------
 
 ---@param self Attr[]|nil
----@return boolean
+---@return boolean|nil
 function M.has_grid(self)
     if not self then
-        return false
+        return nil
     end
     for _, attr in ipairs(self) do
         if Attr.is_grid(attr) then

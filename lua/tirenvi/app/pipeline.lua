@@ -82,7 +82,7 @@ local function doc_to_buflines(ctx, r_result, doc, no_undo, no_normalize)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[9]DOC ATTR:"))
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
-    attr_store.write(ctx.bufnr, attrs, "formatted")
+    attr_store.write(ctx.bufnr, attrs, false)
     local buf_lines = buf_parser.unparse(bufdoc)
     if not util.same_str_array(buf_lines, r_result.lines) then
         local req_w = Request.new_writer(r_result.range, buf_lines, no_undo or false)
@@ -100,7 +100,7 @@ local function tirdoc_to_flat(ctx, r_result, tirdoc, no_undo)
     --TODO
     --Attrs.remove_range(attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
-    attr_store.write(ctx.bufnr, attrs, "flat")
+    attr_store.write(ctx.bufnr, attrs, true)
     writer.write(ctx, req_w)
 end
 
@@ -227,17 +227,6 @@ local function check_and_repair(ctx, range3)
     end)
 end
 
----@param bufnr number
----@param lines string[]
----@return boolean
-local function is_flat(bufnr, lines)
-    local format = buf_state.get_buffer_format(bufnr)
-    if not format then
-        return not Bufline.has_pipe(lines)
-    end
-    return not buf_state.is_formatted(bufnr) -- flat or plain
-end
-
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
@@ -261,7 +250,6 @@ local backup_format
 
 ---@param ctx Context
 function M.write_pre(ctx)
-    backup_format = buf_state.get_buffer_format(ctx.bufnr)
     backup_buffer = M.to_flat(ctx, true)
 end
 
@@ -324,14 +312,13 @@ end
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
     local r_result = reader.read(ctx, Range3.get_new_range(range3))
-    -- log.probe(r_result.attrs)
     r_result.attrs = Attrs.adjust(r_result.attrs, range3)
     log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[0]UPDATE CHACHED:"))
     local opts = { range3 = range3, first = r_result.range.first }
     local bufdoc = buf_parser.parse(ctx, r_result, opts)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
     local attrs = reconcile_attrs(r_result, bufdoc, range3)
-    attr_store.write(ctx.bufnr, attrs, nil)
+    attr_store.write(ctx.bufnr, attrs, false)
     reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
     check_and_repair(ctx, range3)
 end

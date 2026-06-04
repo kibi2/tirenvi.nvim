@@ -1,5 +1,7 @@
+local Context = require("tirenvi.app.context")
 local config = require("tirenvi.config")
 local Range3 = require("tirenvi.util.range3")
+local Attrs = require("tirenvi.core.attrs")
 local buffer = require("tirenvi.io.buffer")
 local log = require("tirenvi.util.log")
 
@@ -99,7 +101,7 @@ local checks = {
 	end,
 
 	is_formatted = function(bufnr)
-		return M.is_formatted(bufnr)
+		return not M.is_flat(bufnr)
 	end,
 
 	no_vscode = function()
@@ -152,25 +154,49 @@ function M.is_repair(ctx, range3)
 end
 
 ---@param bufnr number
----@param value BufferFormat|nil
+---@param value boolean
 function M.set_buffer_format(bufnr, value)
-	buffer.set(bufnr, buffer.IKEY.BUFFER_FORMAT, value)
+	buffer.set(bufnr, buffer.IKEY.FLAT, value)
 end
 
 ---@param bufnr number
----@return BufferFormat|nil
+---@return string
 function M.get_buffer_format(bufnr)
-	return buffer.get(bufnr, buffer.IKEY.BUFFER_FORMAT)
+	local ctx = Context.from_buf(bufnr)
+	local allow_plain = Context.is_allow_plain(ctx)
+	local flat
+	local is_flat = buffer.get(bufnr, buffer.IKEY.FLAT)
+	if is_flat == nil then
+		flat = "nil"
+	else
+		flat = is_flat and "flat" or "tir"
+	end
+	local grid
+	local has_grid = M.has_grid(ctx)
+	if has_grid == nil then
+		grid = "nil"
+	else
+		grid = has_grid and "grid" or "no-grid"
+	end
+	if not allow_plain then
+		log.assert(grid == "grid", "grid must be enabled when plain is not allowed")
+	end
+	return string.format("%s/%s/%s", allow_plain and "gfm" or "csv", flat, grid)
 end
 
----@return boolean
-function M.is_formatted(bufnr)
-	return M.get_buffer_format(bufnr) == "formatted"
+---@return boolean|nil
+function M.is_flat(bufnr)
+	return buffer.get(bufnr, buffer.IKEY.FLAT)
 end
 
----@return boolean
-function M.is_plain(bufnr)
-	return M.get_buffer_format(bufnr) == "plain"
+---@param ctx Context
+---@return boolean|nil
+function M.has_grid(ctx)
+	if not Context.is_allow_plain(ctx) then
+		return true
+	end
+	local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+	return Attrs.has_grid(attrs)
 end
 
 return M

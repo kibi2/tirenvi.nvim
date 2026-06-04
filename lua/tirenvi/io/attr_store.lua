@@ -60,17 +60,10 @@ end
 
 ---@param bufnr number
 ---@param attrs Attr[]|nil
----@param buffer_format BufferFormat|nil
-function M.write(bufnr, attrs, buffer_format)
+---@param is_flat boolean
+function M.write(bufnr, attrs, is_flat)
     set_attrs(bufnr, attrs)
-    if attrs and not Attrs.has_grid(attrs) then
-        buffer_format = "plain"
-    end
-    if not buffer_format then
-        local lines = buffer.get_lines(bufnr, 1, -1)
-        buffer_format = bufline.has_pipe(lines) and "formatted" or "flat"
-    end
-    buf_state.set_buffer_format(bufnr, buffer_format)
+    buf_state.set_buffer_format(bufnr, is_flat)
 end
 
 ---@param bufnr number

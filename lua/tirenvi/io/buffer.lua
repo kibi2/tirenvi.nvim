@@ -41,8 +41,8 @@ M.IKEY              = {
 	-- dirty row #
 	DIRTY = "dirty",
 
-	-- buffer format
-	BUFFER_FORMAT = "buffer_format",
+	-- buffer is flat or tir-buffer
+	FLAT = "flat",
 }
 
 local initial_value = {
@@ -54,7 +54,7 @@ local initial_value = {
 	[M.IKEY.REPAIR] = nil,
 	[M.IKEY.ATTRS] = nil,
 	[M.IKEY.DIRTY] = nil,
-	[M.IKEY.BUFFER_FORMAT] = nil,
+	[M.IKEY.FLAT] = nil,
 }
 
 -----------------------------------------------------------------------

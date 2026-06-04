@@ -52,9 +52,6 @@ end
 ---@param r_result ReadResult
 local function promote_empty_lines_csv(records, r_result)
 	local first, last = Range.to_lua(r_result.range)
-	-- log.probe(first)
-	-- log.probe(last)
-	-- log.probe(r_result.attrs)
 	local prev_attr = Attrs.get(r_result.attrs, first - 1)
 	local next_attr = Attrs.get(r_result.attrs, last + 1)
 	if not Attr.is_grid(prev_attr) and not Attr.is_grid(next_attr) then

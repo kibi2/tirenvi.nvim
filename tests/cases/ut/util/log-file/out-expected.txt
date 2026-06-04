@@ -3,6 +3,6 @@
 [TIR][DEBUG][[string ":lua"] 18] <boolean> false
 [TIR][🟧PRB][[string ":lua"] 19] -0.003
 [TIR][CATEGORY][[string ":lua"] 20] format 38 foo (12,34)
-[TIR][DEBUG][autocmd.lua 117] ===+===+===+===+=== VimLeavePre[#1] text : flat ===+===+===+===+===
-[TIR][DEBUG][autocmd.lua 117] ===+===+===+===+=== VimLeavePre[#1] text : flat ===+===+===+===+===
-[TIR][DEBUG][autocmd.lua 117] ===+===+===+===+=== VimLeave[#1] text : flat ===+===+===+===+===
+[TIR][DEBUG][autocmd.lua 117] ===+===+===+===+=== VimLeavePre[#1] text : csv/flat/grid ===+===+===+===+===
+[TIR][DEBUG][autocmd.lua 117] ===+===+===+===+=== VimLeavePre[#1] text : csv/flat/grid ===+===+===+===+===
+[TIR][DEBUG][autocmd.lua 117] ===+===+===+===+=== VimLeave[#1] text : csv/flat/grid ===+===+===+===+===
