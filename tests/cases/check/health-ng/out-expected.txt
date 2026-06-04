@@ -11,6 +11,8 @@
 - ❌ ERROR tir-csv >= 1.1.4 required, but 0.1.4 found
 - ❌ ERROR tir-gfm-lite >= 0.2 required, but 0.1.6 found
 === DISPLAY ===
+=== MESSAGE ===
 ==============================================================================
+Running healthchecks...
 tirenvi ~
 tirenvi:                                                            1 ⚠️  4 ❌

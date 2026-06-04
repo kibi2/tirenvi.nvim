@@ -23,6 +23,10 @@ local function build_motion(op)
 	end
 end
 
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
+
 M.f = build_motion("f")
 M.F = build_motion("F")
 M.t = build_motion("t")

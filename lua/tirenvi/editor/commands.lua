@@ -177,7 +177,6 @@ local commands = {
 	redraw = cmd_redraw,
 }
 
-
 local function get_command_keys()
 	local keys = {}
 	for key, _ in pairs(commands) do
@@ -251,7 +250,9 @@ local function register_keymaps()
 	})
 end
 
+-----------------------------------------------------------------------
 -- Public API
+-----------------------------------------------------------------------
 
 ---@return string
 function M.keymap_lf()

@@ -44,7 +44,9 @@ local function setup_val()
     setup_vl(ctx, line_provider, true)
 end
 
--- public API
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
 
 function M.setup()
     vim.keymap.set({ "x" }, "i" .. config.textobj.column, setup_vil, {

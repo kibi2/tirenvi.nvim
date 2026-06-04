@@ -18,4 +18,4 @@ EOF
 edit $TIRENVI_ROOT/tests/data/simple.csv
 checkhealth tirenvi
 
-call RunTest({ "nomessage": 'true' })
+call RunTest({})

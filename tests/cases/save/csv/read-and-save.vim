@@ -4,5 +4,7 @@ let outfile = 'gen.csv'
 
 execute 'edit ' . outfile
 write
+sleep 1m
+execute "normal! 1G0x"
 
-call RunTest({ 'file': outfile, 'nomessage': 'true' })
+call RunTest({ 'file': outfile })

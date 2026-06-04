@@ -97,7 +97,8 @@ local function tirdoc_to_flat(ctx, r_result, tirdoc, no_undo)
     local fllines = flat_parser.unparse(ctx, tirdoc)
     local req_w = Request.new_writer(r_result.range, fllines, no_undo or false)
     local attrs = vim.deepcopy(r_result.attrs)
-    Attrs.remove_range(attrs)
+    --TODO
+    --Attrs.remove_range(attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
     attr_store.write(ctx.bufnr, attrs, "flat")
     writer.write(ctx, req_w)
@@ -255,6 +256,26 @@ function M.read_post(ctx)
     end
 end
 
+local backup_buffer
+local backup_format
+
+---@param ctx Context
+function M.write_pre(ctx)
+    backup_format = buf_state.get_buffer_format(ctx.bufnr)
+    backup_buffer = M.to_flat(ctx, true)
+end
+
+---@param ctx Context
+function M.write_post(ctx)
+    if not backup_buffer then
+        return
+    end
+    local req = Request.new_writer(Range.WHOLE, backup_buffer, true)
+    writer.write(ctx, req)
+    buf_state.set_buffer_format(ctx.bufnr, backup_format)
+    backup_buffer = nil
+end
+
 ---@param ctx Context
 ---@return nil
 function M.from_flat(ctx)
@@ -303,6 +324,7 @@ end
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
     local r_result = reader.read(ctx, Range3.get_new_range(range3))
+    -- log.probe(r_result.attrs)
     r_result.attrs = Attrs.adjust(r_result.attrs, range3)
     log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[0]UPDATE CHACHED:"))
     local opts = { range3 = range3, first = r_result.range.first }
@@ -317,26 +339,6 @@ end
 ---@param ctx Context
 function M.insert_leave(ctx)
     check_and_repair(ctx)
-end
-
-local backup_buffer
-local backup_format
-
----@param ctx Context
-function M.write_pre(ctx)
-    backup_format = buf_state.get_buffer_format(ctx.bufnr)
-    backup_buffer = M.to_flat(ctx, true)
-end
-
----@param ctx Context
-function M.write_post(ctx)
-    if not backup_buffer then
-        return
-    end
-    local req = Request.new_writer(Range.WHOLE, backup_buffer, true)
-    writer.write(ctx, req)
-    buf_state.set_buffer_format(ctx.bufnr, backup_format)
-    backup_buffer = nil
 end
 
 return M
