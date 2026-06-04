@@ -194,6 +194,9 @@ end
 ---@param ctx Context
 ---@return boolean
 local function need_repair(ctx)
+    if buf_state.is_flat(ctx.bufnr) then
+        return false
+    end
     if buf_state.has_grid(ctx) == false then
         return false
     end
@@ -312,9 +315,22 @@ function M.cmd_repair(ctx, no_undo, no_normalize)
 end
 
 ---@param ctx Context
+---@param r_result ReadResult
+---@return boolean
+local function check_flat_case(ctx, r_result)
+    if not buf_state.is_flat(ctx.bufnr) then
+        return false
+    end
+    return true
+end
+
+---@param ctx Context
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
     local r_result = reader.read(ctx, Range3.get_new_range(range3))
+    if check_flat_case(ctx, r_result) then
+        return
+    end
     r_result.attrs = Attrs.adjust(r_result.attrs, range3)
     log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[0]UPDATE CHACHED:"))
     local opts = { range3 = range3, first = r_result.range.first }

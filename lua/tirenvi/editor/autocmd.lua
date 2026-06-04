@@ -34,7 +34,7 @@ end
 ---@param bytecount integer
 local function on_lines(_, bufnr, tick, range3, bytecount)
 	buffer.clear_cache()
-	if buf_state.should_skip(bufnr) then return end
+	if buf_state.should_skip(bufnr, { is_tirbuf = false, }) then return end
 	local ctx = get_context(bufnr)
 	init.on_lines(ctx, range3)
 end
