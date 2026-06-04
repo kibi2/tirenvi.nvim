@@ -133,7 +133,7 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		group = augroup,
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
-			if buf_state.should_skip(args.buf) then return end
+			if buf_state.should_skip(args.buf, { has_grid = true, }) then return end
 			debug_entry_point(args)
 			local ctx = get_context(args.buf)
 			on_buf_write_pre(ctx)
@@ -144,7 +144,7 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		group = augroup,
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
-			if buf_state.should_skip(args.buf, { is_formatted = false, }) then
+			if buf_state.should_skip(args.buf, { is_tirbuf = false, }) then
 				return
 			end
 			debug_entry_point(args)
@@ -157,7 +157,7 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		group = augroup,
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
-			if buf_state.should_skip(args.buf, { is_formatted = false, }) then
+			if buf_state.should_skip(args.buf, { is_tirbuf = false, }) then
 				return
 			end
 			on_cursor_hold(args)
@@ -206,7 +206,7 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		group = augroup,
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
-			if buf_state.should_skip(args.buf, { is_formatted = false, }) then
+			if buf_state.should_skip(args.buf, { is_tirbuf = false, }) then
 				return
 			end
 			ui.special_apply()
@@ -223,7 +223,7 @@ local function register_autocmds()
 			local bufnr = args.buf
 			if buf_state.should_skip(bufnr, {
 					has_parser = false,
-					is_formatted = false,
+					is_tirbuf = false,
 				}) then
 				return
 			end
@@ -231,7 +231,7 @@ local function register_autocmds()
 			local ctx = get_context(bufnr)
 			on_filetype(ctx)
 			clear_buffer_local_autocmds(augroup, bufnr)
-			if buf_state.should_skip(args.buf, { is_formatted = false, }) then
+			if buf_state.should_skip(args.buf, { is_tirbuf = false, }) then
 				return
 			end
 			register_buffer_local_autocmds(augroup, bufnr)
@@ -241,7 +241,7 @@ local function register_autocmds()
 	api.nvim_create_autocmd("BufReadPost", {
 		group = augroup,
 		callback = guard.guarded(function(args)
-			if buf_state.should_skip(args.buf, { is_formatted = false, }) then
+			if buf_state.should_skip(args.buf, { is_tirbuf = false, }) then
 				return
 			end
 			debug_entry_point(args)

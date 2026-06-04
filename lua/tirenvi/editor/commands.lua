@@ -112,7 +112,7 @@ end
 ---@param opts {[string]:any}
 ---@return nil
 local function cmd_width(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr) then return end
+	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
 	local width_op = WidthOp.new(opts.args)
 	local sel      = get_selection(opts)
 	log.debug("row[%d-%d], col[%d-%d] %s", sel.row.first, sel.row.last, sel.col.first, sel.col.last,
@@ -124,7 +124,7 @@ end
 ---@param opts {[string]:any}
 ---@return nil
 local function cmd_toggle(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr, { is_formatted = false, }) then
+	if buf_state.should_skip(ctx.bufnr, { is_tirbuf = false, has_grid = true, }) then
 		return
 	end
 	ui.special_apply()

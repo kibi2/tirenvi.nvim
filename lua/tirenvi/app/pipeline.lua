@@ -191,13 +191,16 @@ local function has_dirty(bufnr, range)
     return #dirty_ranges > 0
 end
 
----@param bufnr number
+---@param ctx Context
 ---@return boolean
-local function need_repair(bufnr)
-    if has_dirty(bufnr) then
+local function need_repair(ctx)
+    if buf_state.has_grid(ctx) == false then
+        return false
+    end
+    if has_dirty(ctx.bufnr) then
         return true
     end
-    local attrs = dirty.get_invalid_attrs(bufnr)
+    local attrs = dirty.get_invalid_attrs(ctx.bufnr)
     return #attrs > 0
 end
 
@@ -205,9 +208,6 @@ end
 ---@param range3 Range3|nil
 local function check_and_repair(ctx, range3)
     local bufnr = ctx.bufnr
-    if not need_repair(bufnr) then
-        return
-    end
     vim.schedule(function()
         if not api.nvim_buf_is_valid(bufnr) then
             return
@@ -303,6 +303,9 @@ end
 ---@param no_undo boolean|nil
 ---@param no_normalize boolean|nil
 function M.cmd_repair(ctx, no_undo, no_normalize)
+    if not need_repair(ctx) then
+        return
+    end
     local r_result = reader.read(ctx, Range.WHOLE)
     local bufdoc = buflines_to_bufdoc_attrs_driven(ctx, r_result)
     doc_to_buflines(ctx, r_result, bufdoc, no_undo, no_normalize)

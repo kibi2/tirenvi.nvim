@@ -14,13 +14,14 @@ local bo = vim.bo
 ---@class Check_options
 ---@field supported? boolean
 ---@field has_parser? boolean
----@field is_formatted? boolean
+---@field is_tirbuf? boolean
 ---@field no_vscode? boolean
 
 local DEFAULT_OPTS = {
 	supported = true,
 	has_parser = true,
-	is_formatted = true,
+	is_tirbuf = true,
+	has_grid = false,
 	no_vscode = true,
 }
 local REPAIR_OFF = "REPAIR_OFF"
@@ -100,8 +101,14 @@ local checks = {
 		return buffer.get(bufnr, buffer.IKEY.FILETYPE) ~= nil
 	end,
 
-	is_formatted = function(bufnr)
-		return not M.is_flat(bufnr)
+	is_tirbuf = function(bufnr)
+		return M.is_flat(bufnr) ~= true
+	end,
+
+	has_grid = function(bufnr)
+		local ctx = Context.from_buf(bufnr)
+		local has_grid = M.has_grid(ctx)
+		return has_grid == nil or has_grid == true
 	end,
 
 	no_vscode = function()
