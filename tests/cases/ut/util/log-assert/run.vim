@@ -13,6 +13,11 @@ lua << EOF
   	},
   })
   log.assert(fale, "test case for log.assert ERROR", "bar")
+EOF
+
+call Snapshot({'desc': 'ERROR' })
+
+lua << EOF
   vim.g.tirenvi_initialized = false
   M.setup({
   	log = {
@@ -23,4 +28,4 @@ lua << EOF
   log.assert(fale, "test case for log.assert trace back", "bar")
 EOF
 
-call RunTest({})
+call RunTest({ "nomessage": 'true' })
