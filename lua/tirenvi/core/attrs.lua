@@ -96,17 +96,35 @@ end
 -----------------------------------------------------------------------
 
 ---@param self Attr[]|nil
----@return boolean|nil
-function M.has_grid(self)
+---@return table|nil
+function M.get_count(self)
+    local count = { plain = 0, grid = 0 }
     if not self then
         return nil
     end
     for _, attr in ipairs(self) do
         if Attr.is_grid(attr) then
+            count.grid = count.grid + 1
+        else
+            count.plain = count.plain + 1
+        end
+    end
+    return count
+end
+
+---@param self Attr[]|nil
+---@return boolean|nil
+function M.has_grid(self)
+    if not self then
+        return nil
+    end
+    local count = M.get_count(self)
+    for _, attr in ipairs(self) do
+        if Attr.is_grid(attr) then
             return true
         end
     end
-    return false
+    return count and count.grid > 0 or false
 end
 
 ---@param self Attr[]|nil

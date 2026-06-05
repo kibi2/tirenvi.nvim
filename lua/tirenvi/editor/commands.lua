@@ -1,16 +1,17 @@
 -- dependencies
 local Context = require("tirenvi.app.context")
 local Cell = require("tirenvi.core.cell")
-local guard = require("tirenvi.util.guard")
 local buf_state = require("tirenvi.io.buf_state")
 local buffer = require("tirenvi.io.buffer")
 local init = require("tirenvi.init")
+local ui = require("tirenvi.ui")
+local guard = require("tirenvi.util.guard")
 local notify = require("tirenvi.util.notify")
 local errors = require("tirenvi.util.errors")
 local Range = require("tirenvi.util.range")
 local util = require("tirenvi.util.util")
-local ui = require("tirenvi.ui")
 local log = require("tirenvi.util.log")
+local debug = require("tirenvi.editor.debug")
 
 -- module
 local M = {}
@@ -208,16 +209,15 @@ local function on_tir(opts)
 		command = "width"
 	end
 	local ctx = Context.from_buf()
-	local filetype = bo[ctx.bufnr].filetype
-	local format = buf_state.get_buffer_format(ctx.bufnr)
-	log.debug("===+===+===+===+=== %s %s %s[%d] %s : %s ===+===+===+===+===",
-		opts.name, opts.fargs[1], opts.fargs[2] or "", ctx.bufnr, filetype, format)
+	local name = string.format("%s %s %s", opts.name, opts.fargs[1], opts.fargs[2] or "")
+	debug.ui_entry(ctx.bufnr, name)
 	local func = commands[command]
 	if not func then
 		notify.error(errors.err_unknown_command(sub))
 		return
 	end
 	func(ctx, opts)
+	debug.ui_exit(ctx.bufnr, name)
 end
 
 local function register_user_command()

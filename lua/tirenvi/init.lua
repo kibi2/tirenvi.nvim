@@ -150,14 +150,14 @@ end
 ---@param ctx Context
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
-	log.watch("UNDO", "===+=== ENTRY on_lines[#%d]%s", ctx.bufnr, Range3.short(range3))
 	pipeline.on_lines(ctx, range3)
+	pipeline.check_and_repair(ctx, range3)
 end
 
 ---@param ctx Context
-function M.on_insert_leave(ctx)
-	log.watch("UNDO", "===+=== ENTRY insert_leave[#%d]", ctx.bufnr)
-	pipeline.insert_leave(ctx)
+---@param range3 Range3|nil
+function M.check_and_repair(ctx, range3)
+	pipeline.check_and_repair(ctx, range3)
 end
 
 ---@param ctx Context
@@ -172,7 +172,8 @@ function M.on_filetype(ctx)
 		pipeline.to_flat(ctx)
 	end
 	buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, new_filetype)
-	attr_store.write(ctx.bufnr, nil, true)
+	buf_state.set_buffer_flat(ctx.bufnr, true)
+	attr_store.write(ctx.bufnr, nil)
 	ctx = Context.from_buf(ctx.bufnr)
 	if not ctx.parser then
 		buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, nil)

@@ -116,6 +116,10 @@ local checks = {
 	end,
 }
 
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
+
 ---@return boolean
 function M.is_vscode()
 	return vim.g.vscode ~= nil
@@ -145,6 +149,7 @@ end
 ---@param ctx Context
 ---@param range3 Range3|nil
 ---@return boolean
+---@return boolean|nil
 function M.is_repair(ctx, range3)
 	local status = get_status(ctx, range3)
 	log_watch(ctx.bufnr, status, range3)
@@ -152,7 +157,7 @@ function M.is_repair(ctx, range3)
 		return false
 	end
 	if status == UNDO_REDO_MODE then
-		return false
+		return false, true
 	end
 	if status == REPAIR_OFF then
 		return false
@@ -162,33 +167,44 @@ end
 
 ---@param bufnr number
 ---@param value boolean
-function M.set_buffer_format(bufnr, value)
+function M.set_buffer_flat(bufnr, value)
 	buffer.set(bufnr, buffer.IKEY.FLAT, value)
+end
+
+---@param ctx Context
+---@return string
+local function get_count(ctx)
+	if not Context.is_allow_plain(ctx) then
+		return "P0G1"
+	end
+	local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+	local count = Attrs.get_count(attrs)
+	if not count then
+		return "NIL"
+	end
+	return string.format("P%dG%d", count.plain, count.grid)
 end
 
 ---@param bufnr number
 ---@return string
-function M.get_buffer_format(bufnr)
+function M.debug_state(bufnr)
+	if not log.is_debug() then
+		return ""
+	end
 	local ctx = Context.from_buf(bufnr)
 	local allow_plain = Context.is_allow_plain(ctx)
 	local flat
 	local is_flat = buffer.get(bufnr, buffer.IKEY.FLAT)
 	if is_flat == nil then
-		flat = "nil"
+		flat = "NIL"
 	else
-		flat = is_flat and "flat" or "tir"
+		flat = is_flat and ",A," or "|A|"
 	end
-	local grid
-	local has_grid = M.has_grid(ctx)
-	if has_grid == nil then
-		grid = "nil"
-	else
-		grid = has_grid and "grid" or "no-grid"
-	end
+	local count = get_count(ctx)
 	if not allow_plain then
-		log.assert(grid == "grid", "grid must be enabled when plain is not allowed")
+		log.assert(count == "P0G1", "grid must be enabled when plain is not allowed")
 	end
-	return string.format("%s/%s/%s", allow_plain and "gfm" or "csv", flat, grid)
+	return string.format("%s/%s/%s", allow_plain and "GFM" or "CSV", flat, count)
 end
 
 ---@return boolean|nil

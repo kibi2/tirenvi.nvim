@@ -60,10 +60,8 @@ end
 
 ---@param bufnr number
 ---@param attrs Attr[]|nil
----@param is_flat boolean
-function M.write(bufnr, attrs, is_flat)
+function M.write(bufnr, attrs)
     set_attrs(bufnr, attrs)
-    buf_state.set_buffer_format(bufnr, is_flat)
 end
 
 ---@param bufnr number

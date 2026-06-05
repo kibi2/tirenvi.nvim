@@ -8,6 +8,7 @@ local dirty_range = require("tirenvi.core.dirty_range")
 local Request = require("tirenvi.app.request")
 local flat_parser = require("tirenvi.parser.flat_parser")
 local buf_parser = require("tirenvi.parser.buf_parser")
+local buffer = require("tirenvi.io.buffer")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
 local buf_state = require("tirenvi.io.buf_state")
 local writer = require("tirenvi.io.writer")
@@ -19,6 +20,7 @@ local Range3 = require("tirenvi.util.range3")
 local errors = require("tirenvi.util.errors")
 local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
+--local debug = require("tirenvi.editor.debug")
 
 -----------------------------------------------------------------------
 -- Module
@@ -82,7 +84,8 @@ local function doc_to_buflines(ctx, r_result, doc, no_undo, no_normalize)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[9]DOC ATTR:"))
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
-    attr_store.write(ctx.bufnr, attrs, false)
+    buf_state.set_buffer_flat(ctx.bufnr, false)
+    attr_store.write(ctx.bufnr, attrs)
     local buf_lines = buf_parser.unparse(bufdoc)
     if not util.same_str_array(buf_lines, r_result.lines) then
         local req_w = Request.new_writer(r_result.range, buf_lines, no_undo or false)
@@ -100,7 +103,8 @@ local function tirdoc_to_flat(ctx, r_result, tirdoc, no_undo)
     --TODO
     --Attrs.remove_range(attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
-    attr_store.write(ctx.bufnr, attrs, true)
+    buf_state.set_buffer_flat(ctx.bufnr, true)
+    attr_store.write(ctx.bufnr, attrs)
     writer.write(ctx, req_w)
 end
 
@@ -172,9 +176,25 @@ local function schedule_repair(ctx, range3)
 end
 
 ---@param ctx Context
+---@param range3 Range3
+local function recover_flat(ctx, range3)
+    local r_result = reader.read(ctx, Range3.get_new_range(range3))
+    local nlines = buffer.line_count(ctx.bufnr)
+    if #r_result.lines ~= nlines then
+        return
+    end
+    buf_state.set_buffer_flat(ctx.bufnr, not Bufline.has_pipe(r_result.lines))
+end
+
+---@param ctx Context
 ---@param range3 Range3|nil
 local function repair_request(ctx, range3)
-    if not buf_state.is_repair(ctx, range3) then
+    local is_repair, undo_mode = buf_state.is_repair(ctx, range3)
+    if undo_mode then
+        ---@cast range3 -nil
+        recover_flat(ctx, range3)
+    end
+    if not is_repair then
         return
     end
     schedule_repair(ctx, range3)
@@ -208,26 +228,18 @@ local function need_repair(ctx)
 end
 
 ---@param ctx Context
----@param range3 Range3|nil
-local function check_and_repair(ctx, range3)
-    local bufnr = ctx.bufnr
-    vim.schedule(function()
-        if not api.nvim_buf_is_valid(bufnr) then
-            return
-        end
-        if api.nvim_get_current_buf() ~= bufnr then
-            return
-        end
-        local ok, err = xpcall(
-            function()
-                repair_request(ctx, range3)
-            end,
-            debug.traceback
-        )
-        if not ok then
-            error(err)
-        end
-    end)
+---@param range3 Range3
+---@param r_result ReadResult
+local function update_attrs(ctx, range3, r_result)
+    r_result.attrs = Attrs.adjust(r_result.attrs, range3)
+    log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[0]UPDATE CHACHED:"))
+    local opts = { range3 = range3, first = r_result.range.first }
+    local bufdoc = buf_parser.parse(ctx, r_result, opts)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
+    local attrs = reconcile_attrs(r_result, bufdoc, range3)
+    buf_state.set_buffer_flat(ctx.bufnr, false)
+    attr_store.write(ctx.bufnr, attrs)
+    reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
 end
 
 -----------------------------------------------------------------------
@@ -249,8 +261,6 @@ function M.read_post(ctx)
 end
 
 local backup_buffer
-local backup_format
-
 ---@param ctx Context
 function M.write_pre(ctx)
     backup_buffer = M.to_flat(ctx, true)
@@ -261,9 +271,9 @@ function M.write_post(ctx)
     if not backup_buffer then
         return
     end
+    buf_state.set_buffer_flat(ctx.bufnr, false)
     local req = Request.new_writer(Range.WHOLE, backup_buffer, true)
     writer.write(ctx, req)
-    buf_state.set_buffer_format(ctx.bufnr, backup_format)
     backup_buffer = nil
 end
 
@@ -315,36 +325,35 @@ function M.cmd_repair(ctx, no_undo, no_normalize)
 end
 
 ---@param ctx Context
----@param r_result ReadResult
----@return boolean
-local function check_flat_case(ctx, r_result)
-    if not buf_state.is_flat(ctx.bufnr) then
-        return false
-    end
-    return true
-end
-
----@param ctx Context
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
     local r_result = reader.read(ctx, Range3.get_new_range(range3))
-    if check_flat_case(ctx, r_result) then
-        return
+    if not buf_state.is_flat(ctx.bufnr) then
+        update_attrs(ctx, range3, r_result)
     end
-    r_result.attrs = Attrs.adjust(r_result.attrs, range3)
-    log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[0]UPDATE CHACHED:"))
-    local opts = { range3 = range3, first = r_result.range.first }
-    local bufdoc = buf_parser.parse(ctx, r_result, opts)
-    log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
-    local attrs = reconcile_attrs(r_result, bufdoc, range3)
-    attr_store.write(ctx.bufnr, attrs, false)
-    reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
-    check_and_repair(ctx, range3)
 end
 
 ---@param ctx Context
-function M.insert_leave(ctx)
-    check_and_repair(ctx)
+---@param range3 Range3|nil
+function M.check_and_repair(ctx, range3)
+    local bufnr = ctx.bufnr
+    vim.schedule(function()
+        if not api.nvim_buf_is_valid(bufnr) then
+            return
+        end
+        if api.nvim_get_current_buf() ~= bufnr then
+            return
+        end
+        local ok, err = xpcall(
+            function()
+                repair_request(ctx, range3)
+            end,
+            debug.traceback
+        )
+        if not ok then
+            error(err)
+        end
+    end)
 end
 
 return M

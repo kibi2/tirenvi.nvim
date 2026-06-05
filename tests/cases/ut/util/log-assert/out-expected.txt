@@ -1,11 +1,11 @@
 === MESSAGE ===
-[TIR][ERROR][log.lua 411] test case for log.assert ERROR
+[TIR][ERROR][log.lua 414] test case for log.assert ERROR
 Error detected while processing command line..script /Users/ogawa/oss/tirenvi.nvim/tests/cases/ut/util/log-assert/run.vim:
 line   24:
-E5108: Error executing lua /Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/util/log.lua:408: test case for log.assert trace back
+E5108: Error executing lua /Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/util/log.lua:411: test case for log.assert trace back
 stack traceback:
 	[C]: in function 'assert'
-	/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/util/log.lua:408: in function 'assert'
+	/Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/util/log.lua:411: in function 'assert'
 	[string ":lua"]:18: in main chunk
 
 === DISPLAY ===

@@ -403,6 +403,9 @@ function M.is_debug()
 	return levels.DEBUG >= config.log.level
 end
 
+---@param condition boolean
+---@param message string
+---@param ... unknown
 function M.assert(condition, message, ...)
 	if M.is_debug() then
 		assert(condition, message, ...)
