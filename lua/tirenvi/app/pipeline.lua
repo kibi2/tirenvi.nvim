@@ -3,8 +3,7 @@
 -----------------------------------------------------------------------
 local Document = require("tirenvi.core.document")
 local Attrs = require("tirenvi.core.attrs")
-local Blocks = require("tirenvi.core.blocks")
-local tir_buf = require("tirenvi.core.tir_buf")
+local Bufline = require("tirenvi.core.bufline")
 local dirty_range = require("tirenvi.core.dirty_range")
 local Request = require("tirenvi.app.request")
 local flat_parser = require("tirenvi.parser.flat_parser")
@@ -32,88 +31,78 @@ local api = vim.api
 -- private helpers
 
 ---@param ctx Context
----@param req_r Request
+---@param r_result ReadResult
 ---@return Document
-local function flat_to_doc(ctx, req_r)
-    local doc = flat_parser.parse(ctx, req_r)
-    log.watch("ATTR", Document.debug_attrs(doc, "1DOC ATTR:"))
-    Document.apply_attrs_by_id(doc, req_r.attrs)
-    log.watch("ATTR", Document.debug_attrs(doc, "4CACHED:"))
-    return doc
+local function fllines_to_tirdoc(ctx, r_result)
+    local tirdoc = flat_parser.parse(ctx, r_result)
+    log.watch("ATTR", Document.debug_attrs(tirdoc, "[1]DOC ATTR:"))
+    Document.apply_attrs(tirdoc, r_result.attrs)
+    log.watch("ATTR", Document.debug_attrs(tirdoc, "[4]CACHED:"))
+    return tirdoc
 end
 
 ---@param ctx Context
----@param req_r Request
----@param range3 Range3|nil
+---@param r_result ReadResult
 ---@return Document
-local function buf_to_bdoc_text_driven(ctx, req_r, range3)
-    log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
-    req_r.attrs = Attrs.adjust(req_r.attrs or {}, range3)
-    if range3 then log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "0UPDATE CHACHED:")) end
-    local buf_doc = buf_parser.parse_text_driven(ctx, req_r, range3)
-    log.watch("ATTR", Document.debug_attrs(buf_doc, "1DOC ATTR:"))
-    return buf_doc
+local function buflines_to_bufdoc_text_driven(ctx, r_result)
+    local opts = { first = r_result.range.first }
+    local bufdoc = buf_parser.parse(ctx, r_result, opts)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
+    Document.apply_attrs(bufdoc, r_result.attrs)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[4]CACHED:"))
+    return bufdoc
 end
 
 ---@param ctx Context
----@param req_r Request
----@return Document
-local function buf_to_bdoc_attr_driven(ctx, req_r)
-    log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
-    local buf_doc = buf_parser.parse_attr_driven(ctx, req_r)
-    log.watch("ATTR", Document.debug_attrs(buf_doc, "1DOC ATTR:"))
-    return buf_doc
-end
-
----@param ctx Context
----@param req_r Request
----@return Document
-local function buf_to_doc_text_driven(ctx, req_r)
-    local buf_doc = buf_to_bdoc_text_driven(ctx, req_r)
-    Document.apply_cached_attr(buf_doc, req_r.attrs)
-    log.watch("ATTR", Document.debug_attrs(buf_doc, "4CACHED:"))
-    return Document.from_buf_doc(buf_doc)
-end
-
----@param ctx Context
----@param req_r Request
----@param no_normalize boolean -- If true, skip nomalizing.
+---@param r_result ReadResult
 -- Prevents line count changes that would break put(); used for repair.
 ---@return Document
-local function buf_to_doc_attrs_driven(ctx, req_r, no_normalize)
-    local buf_doc = buf_to_bdoc_attr_driven(ctx, req_r)
-    Document.insert_empty_lines(buf_doc)
-    local doc = Document.from_buf_doc(buf_doc, no_normalize)
-    log.watch("ATTR", Document.debug_attrs(doc, "7INSERT EMPTY:"))
-    return doc
+local function buflines_to_bufdoc_attrs_driven(ctx, r_result)
+    log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "CHACHED ATTRS:"))
+    local opts = { attrs = r_result.attrs }
+    local bufdoc = buf_parser.parse(ctx, r_result, opts)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
+    Document.insert_empty_lines(bufdoc)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[7]INSERT EMPTY:"))
+    return bufdoc
 end
 
 ---@param ctx Context
----@param req_r Request
----@param buf_doc Document
+---@param r_result ReadResult
+---@param doc Document
 ---@param no_undo boolean|nil
-local function doc_to_buf(ctx, req_r, buf_doc, no_undo)
-    local vi_lines = buf_parser.unparse(buf_doc, req_r)
-    log.watch("ATTR", Document.debug_attrs(buf_doc, "9DOC ATTR:"))
-    local req_w = Request.new_writer(req_r.range, vi_lines, no_undo or false)
-    req_w.attrs = Document.replace_attrs(buf_doc, req_r.range, req_r.attrs)
-    log.watch("ATTR", Attrs.debug_attrs(req_w.attrs, "9CHACHED:"))
-    attr_store.write(ctx, req_w.attrs)
-    if not util.same_str_array(vi_lines, req_r.lines) then
+---@param no_normalize boolean|nil
+local function doc_to_buflines(ctx, r_result, doc, no_undo, no_normalize)
+    local tirdoc = doc
+    if not doc._tir then
+        tirdoc = Document.from_bufdoc(doc, no_normalize)
+    end
+    Document.set_auto_attr(tirdoc)
+    local bufdoc = Document.to_bufdoc(tirdoc)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[9]DOC ATTR:"))
+    local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
+    log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
+    buf_state.set_buffer_flat(ctx.bufnr, false)
+    attr_store.write(ctx.bufnr, attrs)
+    local buf_lines = buf_parser.unparse(bufdoc)
+    if not util.same_str_array(buf_lines, r_result.lines) then
+        local req_w = Request.new_writer(r_result.range, buf_lines, no_undo or false)
         writer.write(ctx, req_w)
     end
 end
 
 ---@param ctx Context
----@param doc Document
+---@param tirdoc Document
 ---@param no_undo boolean|nil
-local function doc_to_flat(ctx, req_r, doc, no_undo)
-    local fl_lines = flat_parser.unparse(ctx, doc)
-    local req_w = Request.new_writer(req_r.range, fl_lines, no_undo or false)
-    req_w.attrs = vim.deepcopy(req_r.attrs)
-    Attrs.remove_range(req_w.attrs)
-    log.watch("ATTR", Attrs.debug_attrs(req_w.attrs, "9CHACHED:"))
-    attr_store.write(ctx, req_w.attrs, true)
+local function tirdoc_to_flat(ctx, r_result, tirdoc, no_undo)
+    local fllines = flat_parser.unparse(ctx, tirdoc)
+    local req_w = Request.new_writer(r_result.range, fllines, no_undo or false)
+    local attrs = vim.deepcopy(r_result.attrs)
+    --TODO
+    --Attrs.remove_range(attrs)
+    log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
+    buf_state.set_buffer_flat(ctx.bufnr, true)
+    attr_store.write(ctx.bufnr, attrs)
     writer.write(ctx, req_w)
 end
 
@@ -121,8 +110,8 @@ end
 ---@param irow integer
 local function get_range(ctx, irow)
     local line_provider = LinProvider.new(ctx.bufnr)
-    local top = tir_buf.get_block_top_nrow(ctx, line_provider, irow)
-    local bottom = tir_buf.get_block_bottom_nrow(ctx, line_provider, irow)
+    local top = Bufline.get_block_top_nrow(ctx, line_provider, irow)
+    local bottom = Bufline.get_block_bottom_nrow(ctx, line_provider, irow)
     return top, bottom
 end
 
@@ -139,23 +128,20 @@ local function expand_rect(ctx, row)
     row.last = bottom
 end
 
----@param ctx Context
----@param req_r Request
+---@param r_result ReadResult
+---@param bufdoc  Document
 ---@param range3 Range3
 ---@return Attr[]
-local function reconcile_attrs(ctx, req_r, range3)
-    local buf_doc = buf_to_bdoc_text_driven(ctx, req_r, range3)
-    Document.inherit_neighbor_attr(buf_doc, req_r.attrs, range3)
-    log.watch("ATTR", Document.debug_attrs(buf_doc, "2NEIGHBOR:"))
-    Document.infer_consistent_attr(buf_doc)
-    log.watch("ATTR", Document.debug_attrs(buf_doc, "3CONSISTENT:"))
-    Document.apply_cached_attr(buf_doc, req_r.attrs)
-    log.watch("ATTR", Document.debug_attrs(buf_doc, "4CACHED:"))
-    Document.set_auto_attr(buf_doc)
-    log.watch("ATTR", Document.debug_attrs(buf_doc, "5AUTO ATTR:"))
-    local attrs = Document.replace_attrs(buf_doc, req_r.range, req_r.attrs)
-    log.watch("ATTR", Attrs.debug_attrs(attrs, "6RESULT:"))
-    attr_store.write(ctx, attrs)
+local function reconcile_attrs(r_result, bufdoc, range3)
+    Document.inherit_neighbor_attr(bufdoc, r_result.attrs, range3)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[2]NEIGHBOR:"))
+    Document.infer_consistent_attr(bufdoc)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[3]CONSISTENT:"))
+    Document.apply_attrs(bufdoc, r_result.attrs)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[4]CACHED:"))
+    Document.set_auto_attr(bufdoc)
+    local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
+    log.watch("ATTR", Attrs.debug_attrs(attrs, "[6]RESULT:"))
     return attrs
 end
 
@@ -166,47 +152,168 @@ local function reconcile_dirty_ranges(bufnr, attrs, range3)
     local prev_ranges = dirty.get_ranges(bufnr)
     local line_provider = LinProvider.new(bufnr)
     local inv_ranges = dirty_range.reconcile(line_provider, prev_ranges, attrs, range3)
+    log.watch("INVD", inv_ranges)
     dirty.set_ranges(bufnr, inv_ranges)
 end
 
-local local_range = nil
+local schedule_repair_flag = false
 ---@param ctx Context
-local function apply_local_range(ctx)
-    ---@cast local_range Range
-    M.cmd_format(ctx, true, true)
-    local_range = nil
-end
-
----@param ctx Context
-local function schedule_new_range(ctx)
-    local new_ranges = dirty.get_ranges(ctx.bufnr)
-    if #new_ranges == 0 then
-        return
-    end
-    if local_range == nil then
-        local_range = Range.bounding(new_ranges)
+---@param range3 Range3|nil
+local function schedule_repair(ctx, range3)
+    if not schedule_repair_flag then
         vim.schedule(function()
-            apply_local_range(ctx)
+            schedule_repair_flag = false
+            local no_normalize = range3 and Range3.get_delta(range3) == 0 or false
+            M.cmd_repair(ctx, true, no_normalize)
         end)
+        schedule_repair_flag = true
     else
-        log.watch("UNDO", ctx.bufnr, { "multi time on_lines", local_range })
-        new_ranges[#new_ranges + 1] = local_range
-        local_range = Range.bounding(new_ranges)
+        local dirty_ranges = dirty.get_ranges(ctx.bufnr)
+        log.watch("UNDO", ctx.bufnr, { "multi time on_lines", dirty_ranges })
     end
 end
 
 ---@param ctx Context
 ---@param range3 Range3|nil
 local function repair_request(ctx, range3)
-    if not buf_state.is_repair(ctx, range3) then
+    if buf_state.is_repair(ctx, range3) then
+        schedule_repair(ctx, range3)
+    end
+end
+
+---@param bufnr number
+---@param range Range|nil
+---@return boolean
+local function has_dirty(bufnr, range)
+    local dirty_ranges = dirty.get_ranges(bufnr)
+    if range then
+        dirty_ranges = Range.slice(dirty_ranges, range)
+    end
+    return #dirty_ranges > 0
+end
+
+---@param ctx Context
+---@return boolean
+local function need_repair(ctx)
+    if buf_state.is_flat(ctx.bufnr) then
+        return false
+    end
+    if buf_state.has_grid(ctx) == false then
+        return false
+    end
+    -- repair must remove redundant padding,
+    -- so it does not check whether dirty exists.
+    return true
+end
+
+---@param ctx Context
+---@param range3 Range3
+---@param r_result ReadResult
+local function update_attrs(ctx, range3, r_result)
+    r_result.attrs = Attrs.adjust(r_result.attrs, range3)
+    log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[0]UPDATE CHACHED:"))
+    local opts = { range3 = range3, first = r_result.range.first }
+    local bufdoc = buf_parser.parse(ctx, r_result, opts)
+    log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
+    local attrs = reconcile_attrs(r_result, bufdoc, range3)
+    buf_state.set_buffer_flat(ctx.bufnr, false)
+    attr_store.write(ctx.bufnr, attrs)
+    reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
+end
+
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
+
+---@param ctx Context
+---@return nil
+function M.read_post(ctx)
+    local r_result = reader.read(ctx, Range.WHOLE)
+    if not Bufline.has_pipe(r_result.lines) then
+        util.ensure_no_reserved_marks(r_result.lines)
+        local tirdoc = fllines_to_tirdoc(ctx, r_result)
+        doc_to_buflines(ctx, r_result, tirdoc, true)
+    else
+        local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
+        doc_to_buflines(ctx, r_result, bufdoc, true)
+    end
+end
+
+local backup_buffer
+---@param ctx Context
+function M.write_pre(ctx)
+    backup_buffer = M.to_flat(ctx, true)
+end
+
+---@param ctx Context
+function M.write_post(ctx)
+    if not backup_buffer then
         return
     end
-    schedule_new_range(ctx)
+    buf_state.set_buffer_flat(ctx.bufnr, false)
+    local req = Request.new_writer(Range.WHOLE, backup_buffer, true)
+    writer.write(ctx, req)
+    backup_buffer = nil
+end
+
+---@param ctx Context
+---@return nil
+function M.from_flat(ctx)
+    local r_result = reader.read(ctx, Range.WHOLE)
+    util.ensure_no_reserved_marks(r_result.lines)
+    local tirdoc = fllines_to_tirdoc(ctx, r_result)
+    doc_to_buflines(ctx, r_result, tirdoc)
+end
+
+---@param ctx Context
+---@param no_undo boolean|nil
+---@return string[]
+function M.to_flat(ctx, no_undo)
+    local r_result = reader.read(ctx, Range.WHOLE)
+    local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
+    local tirdoc = Document.from_bufdoc(bufdoc)
+    tirdoc_to_flat(ctx, r_result, tirdoc, no_undo)
+    return r_result.lines
+end
+
+---@param ctx Context
+---@param sel Rect
+---@param width_op WidthOp
+function M.cmd_width(ctx, sel, width_op)
+    if has_dirty(ctx.bufnr, sel.row) then
+        error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
+    end
+    expand_rect(ctx, sel.row)
+    log.debug("row%s, col%s", Range.short(sel.row), Range.short(sel.col))
+    local r_result = reader.read(ctx, sel.row)
+    Attrs.change_width(r_result.attrs, sel, width_op)
+    local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
+    doc_to_buflines(ctx, r_result, bufdoc)
+end
+
+---@param ctx Context
+---@param no_undo boolean|nil
+---@param no_normalize boolean|nil
+function M.cmd_repair(ctx, no_undo, no_normalize)
+    if not need_repair(ctx) then
+        return
+    end
+    log.debug("===+=== START ===+=== %s[#%d] ===", "REPAIR", ctx.bufnr)
+    local r_result = reader.read(ctx, Range.WHOLE)
+    local bufdoc = buflines_to_bufdoc_attrs_driven(ctx, r_result)
+    doc_to_buflines(ctx, r_result, bufdoc, no_undo, no_normalize)
+end
+
+---@param ctx Context
+---@param range3 Range3
+function M.on_lines(ctx, range3)
+    local r_result = reader.read(ctx, Range3.get_new_range(range3))
+    update_attrs(ctx, range3, r_result)
 end
 
 ---@param ctx Context
 ---@param range3 Range3|nil
-local function repair(ctx, range3)
+function M.check_and_repair(ctx, range3)
     local bufnr = ctx.bufnr
     vim.schedule(function()
         if not api.nvim_buf_is_valid(bufnr) then
@@ -225,104 +332,6 @@ local function repair(ctx, range3)
             error(err)
         end
     end)
-end
-
----@param ctx Context
----@param range Range
----@return boolean
-local function has_dirty(ctx, range)
-    local dirty_ranges = dirty.get_ranges(ctx.bufnr)
-    local ranges = Range.slice(dirty_ranges, range)
-    return #ranges > 0
-end
-
------------------------------------------------------------------------
--- Public API
------------------------------------------------------------------------
-
----@param ctx Context
----@param no_undo boolean|nil
----@return nil
-function M.from_flat(ctx, no_undo)
-    local req_r = Request.new_reader(Range.WHOLE)
-    reader.read(ctx, req_r)
-    log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "CHACHED ATTRS:"))
-    local doc
-    if Request.is_flat(req_r) or not tir_buf.has_pipe(req_r.lines) then
-        util.ensure_no_reserved_marks(req_r.lines)
-        doc = flat_to_doc(ctx, req_r)
-    else
-        doc = buf_to_doc_text_driven(ctx, req_r)
-    end
-    Document.set_auto_attr(doc)
-    log.watch("ATTR", Document.debug_attrs(doc, "5AUTO ATTR:"))
-    local buf_doc = Document.to_buf(doc)
-    doc_to_buf(ctx, req_r, buf_doc, no_undo)
-end
-
----@param ctx Context
----@param no_undo boolean|nil
-function M.to_flat(ctx, no_undo)
-    local req_r = Request.new_reader(Range.WHOLE)
-    reader.read(ctx, req_r)
-    if Request.is_flat(req_r) then
-        return
-    end
-    local doc = buf_to_doc_text_driven(ctx, req_r)
-    doc_to_flat(ctx, req_r, doc, no_undo)
-end
-
----@param ctx Context
----@param sel Rect
----@param width_op WidthOp
-function M.cmd_width(ctx, sel, width_op)
-    expand_rect(ctx, sel.row)
-    log.debug("row%s, col%s", Range.short(sel.row), Range.short(sel.col))
-    if has_dirty(ctx, sel.row) then
-        error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
-    end
-    local req_r = Request.new_reader(sel.row)
-    reader.read(ctx, req_r)
-    if Request.is_flat(req_r) then
-        return
-    end
-    local doc = buf_to_doc_text_driven(ctx, req_r)
-    Blocks.change_width(doc.blocks, sel.col, width_op)
-    local buf_doc = Document.to_buf(doc)
-    doc_to_buf(ctx, req_r, buf_doc)
-end
-
----@param ctx Context
----@param no_normalize boolean|nil
----@param no_undo boolean|nil
-function M.cmd_format(ctx, no_normalize, no_undo)
-    no_normalize = no_normalize or false
-    local req_r = Request.new_reader(Range.WHOLE)
-    reader.read(ctx, req_r)
-    if Request.is_flat(req_r) then
-        return
-    end
-    local doc = buf_to_doc_attrs_driven(ctx, req_r, no_normalize)
-    local buf_doc = Document.to_buf(doc)
-    doc_to_buf(ctx, req_r, buf_doc, no_undo)
-end
-
----@param ctx Context
----@param range3 Range3
-function M.on_lines(ctx, range3)
-    local req_r = Request.new_reader(Range3.get_new_range(range3))
-    reader.read(ctx, req_r)
-    if Request.is_flat(req_r) then
-        return
-    end
-    local attrs = reconcile_attrs(ctx, req_r, range3)
-    reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
-    repair(ctx, range3)
-end
-
----@param ctx Context
-function M.insert_leave(ctx)
-    repair(ctx)
 end
 
 return M

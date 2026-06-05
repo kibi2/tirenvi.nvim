@@ -12,10 +12,10 @@ local log = require("tirenvi.util.log")
 
 local M = {}
 
----@class Request
+---@class ReadResult
 ---@field range Range
 ---@field lines string[]
----@field no_undo boolean
+---@field attrs Attr[]
 
 -- private helpers
 
@@ -24,28 +24,18 @@ local M = {}
 -----------------------------------------------------------------------
 
 ---@param range Range
----@param lines string[]
----@param no_undo boolean|nil
----@return Request
-function M.new_writer(range, lines, no_undo)
+---@return ReadResult
+function M.new_reader(range)
     return {
         range = range,
-        lines = lines,
-        no_undo = no_undo or false,
     }
 end
 
----@param self Request
----@return Range3
-function M:get_range3()
-    local first, last = Range.to_lua(self.range)
-    return Range3.new(first, last, first + #self.lines - 1)
-end
-
----@param self Request
----@return boolean
-function M:is_no_undo()
-    return self.no_undo == true
+---@param self ReadResult
+---@return integer -- 1-based
+---@return integer -- 1-based
+function M:lua_range()
+    return Range.to_lua(self.range)
 end
 
 return M

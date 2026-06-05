@@ -73,6 +73,7 @@ function! s:CollectAll(opts) abort
   " MESSAGE
   if !has_key(a:opts, 'nomessage')
     let l:msgs = s:CollectMessages()
+    call filter(l:msgs, 'v:val !~# " written$"')
     if !empty(l:msgs)
       call add(l:out, '=== MESSAGE ===')
       let l:out += l:msgs

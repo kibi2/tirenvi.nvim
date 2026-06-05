@@ -40,21 +40,27 @@ local function prepare_replace_map(map)
     return out
 end
 
-local ESCAPE_MAP = prepare_replace_map({
-    ["\n"] = config.marks.lf,
-    ["\t"] = config.marks.tab,
-})
-
-local UNESCAPE_MAP = prepare_replace_map({
-    [config.marks.lf] = "\n",
-    [config.marks.tab] = "\t",
-})
-
 -----------------------------------------------------------------------
 -- Private helpers
 -----------------------------------------------------------------------
 
 local function nop(...) end
+
+---@return {[string]: string}
+local function get_escape_map()
+    return prepare_replace_map({
+        ["\n"] = config.marks.lf,
+        ["\t"] = config.marks.tab,
+    })
+end
+
+---@return {[string]: string}
+local function get_un_escape_map()
+    return prepare_replace_map({
+        [config.marks.lf] = "\n",
+        [config.marks.tab] = "\t",
+    })
+end
 
 ---@self Block
 ---@param kind Block_kind
@@ -116,7 +122,7 @@ end
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 local function apply_column_count(self, ncol)
-    assert(ncol ~= 0, "column count must be greater than 0")
+    log.assert(ncol ~= 0, "column count must be greater than 0")
     apply(self, "apply_column_count", ncol)
 end
 
@@ -125,7 +131,7 @@ end
 ---@param replace {[string]:string}
 local function apply_replacements(self, replace)
     for _, record in ipairs(self.records) do
-        assert(record.kind == CONST.KIND.GRID, "unexpected record kind")
+        log.assert(record.kind == CONST.KIND.GRID, "unexpected record kind")
         for icol, cell in ipairs(record.row) do
             for key, val in pairs(replace) do
                 cell = cell:gsub(key, val)
@@ -176,7 +182,7 @@ function M:set_kind(kind)
     if self.kind == kind then
         return
     end
-    assert(not self.kind, "Block kind already set")
+    log.assert(not self.kind, "Block kind already set")
     initialize(self, kind)
 end
 
@@ -189,7 +195,7 @@ end
 function M.plain.new()
     local self = M.new()
     M.set_kind(self, CONST.KIND.PLAIN)
-    M.add(self, Record.plain.new_from_vi_line(""))
+    M.add(self, Record.plain.new_from_bufline(""))
     return self
 end
 
@@ -219,7 +225,7 @@ end
 ---@self Block
 function M.plain:to_flat()
     for _, record in ipairs(self.records) do
-        for key, val in pairs(UNESCAPE_MAP) do
+        for key, val in pairs(get_un_escape_map()) do
             record.line = record.line:gsub(key, val)
         end
     end
@@ -239,22 +245,15 @@ function M.grid:to_grid()
     return self
 end
 
----@self Block_grid
----@param sel Range
----@param width_op WidthOp
-function M.grid:change_width(sel, width_op)
-    Attr.change_width(self.attr, self.records, sel, width_op)
-end
-
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 function M.grid:from_flat()
-    apply_replacements(self, ESCAPE_MAP)
+    apply_replacements(self, get_escape_map())
 end
 
 ---@self Block_grid
 function M.grid:to_flat()
-    apply_replacements(self, UNESCAPE_MAP)
+    apply_replacements(self, get_un_escape_map())
 end
 
 ---@param no_normalize boolean
@@ -268,7 +267,7 @@ end
 
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
-function M.grid:to_buf()
+function M.grid:to_bufdoc()
     apply_column_count(self, #self.attr.columns)
     wrap(self)
     fill_padding(self)
@@ -290,7 +289,7 @@ end
 
 ---@self Block_grid
 ---@param attrs Attr[]
-function M.grid:apply_cached_attr(attrs)
+function M.grid:apply_attrs_by_range(attrs)
     local attr = Attrs.get_attr(attrs, self.attr.range)
     if not attr or not Attr.is_grid(attr) then
         return

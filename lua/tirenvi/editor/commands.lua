@@ -1,22 +1,22 @@
 -- dependencies
 local Context = require("tirenvi.app.context")
 local Cell = require("tirenvi.core.cell")
-local guard = require("tirenvi.util.guard")
 local buf_state = require("tirenvi.io.buf_state")
 local buffer = require("tirenvi.io.buffer")
 local init = require("tirenvi.init")
+local ui = require("tirenvi.ui")
+local guard = require("tirenvi.util.guard")
 local notify = require("tirenvi.util.notify")
 local errors = require("tirenvi.util.errors")
 local Range = require("tirenvi.util.range")
 local util = require("tirenvi.util.util")
-local ui = require("tirenvi.ui")
 local log = require("tirenvi.util.log")
+local debug = require("tirenvi.editor.debug")
 
 -- module
 local M = {}
 
 local api = vim.api
-local fn = vim.fn
 
 ---@class WidthOp
 ---@field operator '"="'|'"+"'|'"-"'
@@ -81,15 +81,6 @@ function WidthOp:apply(current)
 	end
 end
 
----@param ctx Context
----@param opts {[string]:any}
----@return nil
-local function cmd_toggle(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr) then return end
-	ui.special_apply()
-	init.toggle(ctx)
-end
-
 ---@param opts {[string]:any}
 ---@return Rect
 local function get_selection(opts)
@@ -120,7 +111,7 @@ end
 ---@param opts {[string]:any}
 ---@return nil
 local function cmd_width(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr) then return end
+	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
 	local width_op = WidthOp.new(opts.args)
 	local sel      = get_selection(opts)
 	log.debug("row[%d-%d], col[%d-%d] %s", sel.row.first, sel.row.last, sel.col.first, sel.col.last,
@@ -131,11 +122,22 @@ end
 ---@param ctx Context
 ---@param opts {[string]:any}
 ---@return nil
+local function cmd_toggle(ctx, opts)
+	if buf_state.should_skip(ctx.bufnr, { is_tirbuf = false, has_grid = true, }) then
+		return
+	end
+	ui.special_apply()
+	init.toggle(ctx)
+end
+
+---@param ctx Context
+---@param opts {[string]:any}
+---@return nil
 local function cmd_repair(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr) then return end
 	local arg = opts.fargs[2]
 	if arg == nil then
-		init.format(ctx)
+		init.repair(ctx)
 		return
 	elseif arg == "toggle" then
 		buffer.set_repair(ctx.bufnr, not buffer.get_repair(ctx.bufnr))
@@ -174,7 +176,6 @@ local commands = {
 	redraw = cmd_redraw,
 }
 
-
 local function get_command_keys()
 	local keys = {}
 	for key, _ in pairs(commands) do
@@ -206,14 +207,15 @@ local function on_tir(opts)
 		command = "width"
 	end
 	local ctx = Context.from_buf()
-	log.debug("===+===+===+===+=== %s %s %s[%d] ===+===+===+===+===",
-		opts.name, opts.fargs[1], opts.fargs[2] or "", ctx.bufnr)
+	local name = string.format("%s %s %s", opts.name, opts.fargs[1], opts.fargs[2] or "")
+	debug.ui_entry(ctx.bufnr, name)
 	local func = commands[command]
 	if not func then
 		notify.error(errors.err_unknown_command(sub))
 		return
 	end
 	func(ctx, opts)
+	debug.ui_exit(ctx.bufnr, name)
 end
 
 local function register_user_command()
@@ -246,7 +248,9 @@ local function register_keymaps()
 	})
 end
 
+-----------------------------------------------------------------------
 -- Public API
+-----------------------------------------------------------------------
 
 ---@return string
 function M.keymap_lf()

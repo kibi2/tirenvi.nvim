@@ -72,22 +72,59 @@ local function get_index(self, irow)
     return nil
 end
 
+---@param self Attr
+---@param sel Range
+---@param width_op WidthOp
+local function change_width(self, sel, width_op)
+    local start_col = 1
+    for _, column in ipairs(self.columns) do
+        local old_width = column.width
+        local cel_range = Range.from_lua(start_col, start_col + old_width)
+        if Range.intersects(sel, cel_range) then
+            if width_op.kind == "auto" then
+                column.width = 0
+            else
+                column.width = width_op:apply(old_width)
+            end
+        end
+        start_col = cel_range.last + 1
+    end
+end
+
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
 
 ---@param self Attr[]|nil
----@return boolean
+---@return table|nil
+function M.get_count(self)
+    local count = { plain = 0, grid = 0 }
+    if not self then
+        return nil
+    end
+    for _, attr in ipairs(self) do
+        if Attr.is_grid(attr) then
+            count.grid = count.grid + 1
+        else
+            count.plain = count.plain + 1
+        end
+    end
+    return count
+end
+
+---@param self Attr[]|nil
+---@return boolean|nil
 function M.has_grid(self)
     if not self then
-        return false
+        return nil
     end
+    local count = M.get_count(self)
     for _, attr in ipairs(self) do
         if Attr.is_grid(attr) then
             return true
         end
     end
-    return false
+    return count and count.grid > 0 or false
 end
 
 ---@param self Attr[]|nil
@@ -149,10 +186,10 @@ function M:remove_range()
 end
 
 ---@param attrs Attr[]
----@param range3 Range3|nil
+---@param range3 Range3
 ---@return Attr[]
 function M.adjust(attrs, range3)
-    if #attrs == 0 or not range3 then
+    if #attrs == 0 then
         return attrs
     end
     if not attrs[1].range then
@@ -180,11 +217,11 @@ function M.adjust(attrs, range3)
     return new_attrs
 end
 
----@param self Attr[]
+---@param attrs Attr[]
 ---@param range Range
 ---@return Attr|nil
-function M.get_attr(self, range)
-    for _, attr in ipairs(self) do
+function M.get_attr(attrs, range)
+    for _, attr in ipairs(attrs) do
         if Range.intersects(attr.range, range) then
             return attr
         end
@@ -197,6 +234,32 @@ end
 ---@return Attr|nil
 function M:get(irow)
     return self[get_index(self, irow)]
+end
+
+---@param self Attr[]
+---@param rect Rect
+---@param width_op WidthOp
+function M:change_width(rect, width_op)
+    for _, attr in ipairs(self) do
+        if Attr.is_grid(attr) and Range.intersects(rect.row, attr.range) then
+            change_width(attr, rect.col, width_op)
+        end
+    end
+end
+
+---@param self Attr[]
+---@return Attr[]
+function M:get_invalid_attrs()
+    local invalid = {}
+    local prev = self[1]
+    for iattr = 2, #self do
+        local attr = self[iattr]
+        if not Attr.is_consistent(prev, attr) then
+            invalid[#invalid + 1] = attr
+        end
+        prev = attr
+    end
+    return invalid
 end
 
 return M

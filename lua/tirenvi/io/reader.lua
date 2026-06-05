@@ -1,9 +1,7 @@
-local tir_buf = require("tirenvi.core.tir_buf")
+local Attrs = require("tirenvi.core.attrs")
 local buffer = require("tirenvi.io.buffer")
-local buf_state = require("tirenvi.io.buf_state")
 local attr_store = require("tirenvi.io.attr_store")
-local Request = require("tirenvi.app.request")
-local Range = require("tirenvi.util.range")
+local ReadResult = require("tirenvi.app.read_result")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -17,12 +15,15 @@ local M = {}
 -----------------------------------------------------------------------
 
 ---@param ctx Context
----@param req Request
-function M.read(ctx, req)
-    req.attrs = attr_store.read(ctx)
-    req.is_flat = buf_state.is_flat(ctx.bufnr)
-    local first, last = Request.lua_range(req)
-    req.lines = buffer.get_lines(ctx.bufnr, first, last)
+---@param range Range
+---@return ReadResult
+function M.read(ctx, range)
+    local result = ReadResult.new_reader(range)
+    result.attrs = attr_store.read(ctx.bufnr)
+    local first, last = ReadResult.lua_range(result)
+    result.lines = buffer.get_lines(ctx.bufnr, first, last)
+    log.watch("ATTR", Attrs.debug_attrs(result.attrs, "[0]CHACHED ATTRS:"))
+    return result
 end
 
 return M

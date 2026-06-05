@@ -29,23 +29,23 @@ local M = {}
 -- private helpers
 
 --- Convert flat lines to NDJSON lines
----@param fl_lines string[]
+---@param fllines string[]
 ---@param parser Parser
 ---@return string[] NDJSON lines
-local function flat_to_js_lines(fl_lines, parser)
-	local js_string = Parser.run(parser, "parse", fl_lines)
+local function flat_to_jslines(fllines, parser)
+	local js_string = Parser.run(parser, "parse", fllines)
 	return vim.split(js_string, "\n", { plain = true })
 end
 
----@param js_lines  string[]
+---@param jslines  string[]
 ---@return Ndjson[]
-local function js_lines_to_ndjsons(js_lines)
+local function jslines_to_ndjsons(jslines)
 	local ndjsons = {}
-	for _, js_line in ipairs(js_lines) do
-		if js_line ~= nil and js_line ~= "" then
-			local ok, ndjson = pcall(vim.json.decode, js_line)
+	for _, jsline in ipairs(jslines) do
+		if jsline ~= nil and jsline ~= "" then
+			local ok, ndjson = pcall(vim.json.decode, jsline)
 			if not ok then
-				error(errors.new_domain_error(errors.invalid_json_error(js_line, ndjson)))
+				error(errors.new_domain_error(errors.invalid_json_error(jsline, ndjson)))
 			end
 			ndjsons[#ndjsons + 1] = ndjson
 		end
@@ -57,7 +57,7 @@ end
 ---@return string|nil
 local function ndjson_to_line(ndjson)
 	local ok, line = pcall(vim.json.encode, ndjson)
-	assert(ok, ("tirenvi: internal JSON encode failure\n%s\nerror: %s"):format(vim.inspect(ndjson), line))
+	log.assert(ok, ("tirenvi: internal JSON encode failure\n%s\nerror: %s"):format(vim.inspect(ndjson), line))
 	return line
 end
 
@@ -75,37 +75,36 @@ local function ndjsons_to_lines(ndjsons)
 end
 
 --- Convert NDJSON lines to flat lines
----@param js_lines string[]
+---@param jslines string[]
 ---@param parser Parser
 ---@return string[] flat lines
-local function js_lines_to_flat(js_lines, parser)
-	local fl_string = Parser.run(parser, "unparse", js_lines)
-	local fl_lines = vim.split(fl_string, "\n")
-	--log.debug(util.to_hex(table.concat(fl_lines, "\n")):sub(1, 80) .. " ")
-	return fl_lines
+local function jslines_to_flat(jslines, parser)
+	local fl_string = Parser.run(parser, "unparse", jslines)
+	local fllines = vim.split(fl_string, "\n")
+	--log.debug(util.to_hex(table.concat(fllines, "\n")):sub(1, 80) .. " ")
+	return fllines
 end
 
 -- public API
 
 ---@param ctx Context
----@param req Request
+---@param r_result ReadResult
 ---@return Document
-function M.parse(ctx, req)
-	local js_lines = flat_to_js_lines(req.lines, ctx.parser)
-	local ndjsons = js_lines_to_ndjsons(js_lines)
-	return Document.new_flat_doc(ndjsons, Context.is_allow_plain(ctx))
+function M.parse(ctx, r_result)
+	local jslines = flat_to_jslines(r_result.lines, ctx.parser)
+	local ndjsons = jslines_to_ndjsons(jslines)
+	return Document.new_tirdoc(ndjsons, Context.is_allow_plain(ctx))
 end
 
 --- Convert display lines back to TSV format
 ---@param ctx Context
----@param document Document	
+---@param tirdoc Document	
 ---@return string[]
-function M.unparse(ctx, document)
-	local flat_doc = Document.to_flat_doc(document)
-	local ndjsons = Document.serialize_to_flat(flat_doc)
-	local js_lines = ndjsons_to_lines(ndjsons)
-	log.debug("[%d]='%s'...[%d]='%s'", 1, tostring(js_lines[1]), #js_lines, tostring(js_lines[#js_lines]))
-	return js_lines_to_flat(js_lines, ctx.parser)
+function M.unparse(ctx, tirdoc)
+	local ndjsons = Document.serialize_to_flat(tirdoc)
+	local jslines = ndjsons_to_lines(ndjsons)
+	log.debug("[%d]='%s'...[%d]='%s'", 1, tostring(jslines[1]), #jslines, tostring(jslines[#jslines]))
+	return jslines_to_flat(jslines, ctx.parser)
 end
 
 return M

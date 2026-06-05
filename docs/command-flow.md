@@ -40,7 +40,7 @@ intermediate representation.
        (render-ready rows)
                 │
                 ▼
-            vi_lines
+            buflines
                 │
                 ▼
            vim buffer
@@ -67,7 +67,7 @@ Blocks     : Block[]    (TIR block structure)
    ↓
 records    : Record[]   (unparsed Record objects)
    ↓
-vi_lines   : string[]   (lines rendered for vim buffer)
+buflines   : string[]   (lines rendered for vim buffer)
    ↓
 vim buffer
 ```
@@ -85,7 +85,7 @@ flat_parser
     fl_lines  ↔ Blocks
 
 buf_parser
-    vi_lines  ↔ Blocks
+    buflines  ↔ Blocks
 
 external parser
     fl_lines  ↔ js_lines
@@ -107,7 +107,7 @@ Blocks ↔ records
       • padding marks are inserted
       • column width and alignment are embedded as padding
 
-records ↔ vi_lines
+records ↔ buflines
     insert/remove pipe marks for Vim table rendering
 ```
 
@@ -121,7 +121,7 @@ records ↔ vi_lines
 flat file
   → (neovim)             read file into fl_lines
   → (flat_parser.parse)  fl_lines → Blocks
-  → (buf_parser.unparse) Blocks → vi_lines
+  → (buf_parser.unparse) Blocks → buflines
   → (neovim)             replace vim buffer
 ```
 
@@ -131,8 +131,8 @@ flat file
 
 ```text
 vim buffer
-  → (neovim)               get lines into vi_lines
-  → (buf_parser.parse)     vi_lines → Blocks
+  → (neovim)               get lines into buflines
+  → (buf_parser.parse)     buflines → Blocks
   → (flat_parser.unparse)  Blocks → fl_lines
   → (neovim)               write to file
 ```
@@ -160,9 +160,9 @@ init.from_flat
 
 ```text
 vim buffer
-  → (neovim)             get lines into vi_lines
-  → (buf_parser.parse)   vi_lines → Blocks
-  → (buf_parser.unparse) Blocks → vi_lines
+  → (neovim)             get lines into buflines
+  → (buf_parser.parse)   buflines → Blocks
+  → (buf_parser.unparse) Blocks → buflines
   → (neovim)             replace vim buffer
 ```
 
@@ -188,9 +188,9 @@ init.from_flat
 
 ```text
 vim buffer
-  → (neovim)             get lines into vi_lines
-  → (buf_parser.parse)   vi_lines → Blocks
+  → (neovim)             get lines into buflines
+  → (buf_parser.parse)   buflines → Blocks
   → (rapair.repair)      Blocks.repair()
-  → (buf_parser.unparse) Blocks → vi_lines
+  → (buf_parser.unparse) Blocks → buflines
   → (neovim)             replace vim buffer
 ```

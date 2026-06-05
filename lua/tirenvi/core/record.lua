@@ -1,7 +1,7 @@
 local config = require("tirenvi.config")
 local CONST = require("tirenvi.constants")
 local Cell = require("tirenvi.core.cell")
-local tir_buf = require("tirenvi.core.tir_buf")
+local Bufline = require("tirenvi.core.bufline")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -14,15 +14,15 @@ M.grid = {}
 -- Private helpers
 -----------------------------------------------------------------------
 
----@param vi_line string
+---@param bufline string
 ---@return Record
-local function from_vi_line(vi_line)
+local function from_bufline(bufline)
     local pipec = config.marks.pipec
-    local pipe = tir_buf.get_pipe_char(vi_line)
+    local pipe = Bufline.get_pipe_char(bufline)
     if pipe then
-        return M.grid.new_from_vi_line(vi_line, pipe == pipec)
+        return M.grid.new_from_bufline(bufline, pipe == pipec)
     else
-        return M.plain.new_from_vi_line(vi_line)
+        return M.plain.new_from_bufline(bufline)
     end
 end
 
@@ -38,10 +38,10 @@ function M:apply_column_count(ncol)
     self.row = Cell.merge_tail(self.row, ncol)
 end
 
----@param vi_line string
+---@param bufline string
 ---@return Record_plain
-function M.plain.new_from_vi_line(vi_line)
-    return { kind = CONST.KIND.PLAIN, line = vi_line }
+function M.plain.new_from_bufline(bufline)
+    return { kind = CONST.KIND.PLAIN, line = bufline }
 end
 
 ---@param self Record_plain
@@ -71,12 +71,12 @@ function M.grid.new(cells)
     return { kind = CONST.KIND.GRID, row = cells or {} }
 end
 
----@param vi_line string
+---@param bufline string
 ---@param has_continuation boolean
 ---@return Record_grid
-function M.grid.new_from_vi_line(vi_line, has_continuation)
-    vi_line = vi_line or ""
-    local cells = tir_buf.get_cells(vi_line)
+function M.grid.new_from_bufline(bufline, has_continuation)
+    bufline = bufline or ""
+    local cells = Bufline.get_cells(bufline)
     local record = M.grid.new(cells)
     record._has_continuation = has_continuation
     return record
@@ -152,35 +152,35 @@ function M.get_max_ncol(records)
     return max_col
 end
 
----@param vi_lines string[]
+---@param buflines string[]
 ---@return Record[]
-function M.from_tir_buf(vi_lines)
+function M.from_buflines(buflines)
     local records = {}
-    for index = 1, #vi_lines do
-        records[index] = from_vi_line(vi_lines[index])
+    for index = 1, #buflines do
+        records[index] = from_bufline(buflines[index])
     end
     return records
 end
 
----@param ndjsons Ndjson[]
+---@param records Record[]
 ---@return string[]
-function M.to_tir_buf(ndjsons)
+function M.to_buflines(records)
     local pipec = config.marks.pipec
     local pipen = config.marks.pipe
-    local tir_buf = {}
-    for _, record in ipairs(ndjsons) do
+    local buflines = {}
+    for _, record in ipairs(records) do
         local kind = record.kind
         if kind == CONST.KIND.PLAIN then
-            tir_buf[#tir_buf + 1] = record.line or ""
+            buflines[#buflines + 1] = record.line or ""
         elseif kind == CONST.KIND.GRID then
             local pipe = record._has_continuation and pipec or pipen
             local row_items = record.row
             local row = table.concat(row_items, pipe)
             row = pipe .. row .. pipe
-            tir_buf[#tir_buf + 1] = row
+            buflines[#buflines + 1] = row
         end
     end
-    return tir_buf
+    return buflines
 end
 
 ---@param self Record_grid[]

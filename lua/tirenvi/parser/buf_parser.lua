@@ -27,14 +27,14 @@ local M = {}
 -----------------------------------------------------------------------
 
 ---@param records Record[]
----@param req Request
+---@param r_result ReadResult
 ---@param range3 Range3
-local function promote_empty_lines_gfm(records, req, range3)
+local function promote_empty_lines_gfm(records, r_result, range3)
 	if not Range3.is_insert(range3) then
 		return records
 	end
-	local first = Range.to_lua(req.range)
-	local prev_attr = Attrs.get(req.attrs, first - 1)
+	local first = Range.to_lua(r_result.range)
+	local prev_attr = Attrs.get(r_result.attrs, first - 1)
 	if not Attr.is_grid(prev_attr) then
 		return records
 	end
@@ -49,11 +49,11 @@ local function promote_empty_lines_gfm(records, req, range3)
 end
 
 ---@param records Record[]
----@param req Request
-local function promote_empty_lines_csv(records, req)
-	local first, last = Range.to_lua(req.range)
-	local prev_attr = Attrs.get(req.attrs, first - 1)
-	local next_attr = Attrs.get(req.attrs, last + 1)
+---@param r_result ReadResult
+local function promote_empty_lines_csv(records, r_result)
+	local first, last = Range.to_lua(r_result.range)
+	local prev_attr = Attrs.get(r_result.attrs, first - 1)
+	local next_attr = Attrs.get(r_result.attrs, last + 1)
 	if not Attr.is_grid(prev_attr) and not Attr.is_grid(next_attr) then
 		return records
 	end
@@ -63,61 +63,46 @@ local function promote_empty_lines_csv(records, req)
 end
 
 ---@param records Record[]
----@param req Request
+---@param r_result ReadResult
 ---@param range3 Range3|nil
 ---@param allow_plain boolean
-local function promote_empty_lines(records, req, allow_plain, range3)
+local function promote_empty_lines(records, r_result, allow_plain, range3)
 	if not range3 then
-		return records
+		return
 	end
 	if allow_plain then
-		return promote_empty_lines_gfm(records, req, range3)
+		promote_empty_lines_gfm(records, r_result, range3)
 	else
-		return promote_empty_lines_csv(records, req)
+		promote_empty_lines_csv(records, r_result)
 	end
 end
 
 ---@param ctx Context
----@param req Request
----@param range3 Range3|nil
+---@param r_result ReadResult
+---@param opts any
 ---@return Document
-function M.parse_text_driven(ctx, req, range3)
-	local records = Record.from_tir_buf(req.lines)
+function M.parse(ctx, r_result, opts)
+	local records = Record.from_buflines(r_result.lines)
 	local allow_plain = Context.is_allow_plain(ctx)
-	promote_empty_lines(records, req, allow_plain, range3)
-	local buf_doc = Document.new_buf_doc(records, allow_plain)
-	local first = Request.lua_range(req)
-	Document.set_attr_range(buf_doc, first)
-	return buf_doc
+	promote_empty_lines(records, r_result, allow_plain, opts.range3)
+	local bufdoc = Document.new_bufdoc(records, allow_plain, opts.attrs, opts.first)
+	return bufdoc
 end
 
----@param ctx Context
----@param req Request
----@return Document
-function M.parse_attr_driven(ctx, req)
-	local records = Record.from_tir_buf(req.lines)
-	--local attr = Attrs.slice(req.attrs, req.range) TODO
-	local buf_doc = Document.new_buf_doc(records, Context.is_allow_plain(ctx), req.attrs)
-	return buf_doc
-end
-
----@param buf_doc Document
----@param req Request
+---@param bufdoc Document
 ---@return string[]
-function M.unparse(buf_doc, req)
-	local first = Request.lua_range(req)
-	Document.set_attr_range(buf_doc, first)
-	local ndjsons = Document.serialize(buf_doc)
-	return Record.to_tir_buf(ndjsons)
+function M.unparse(bufdoc)
+	local records = Document.serialize_to_buf(bufdoc)
+	return Record.to_buflines(records)
 end
 
 ---@param lines string[]
 ---@return boolean
 function M.table_is_aligned(lines)
-	local records = Record.from_tir_buf(lines)
-	local buf_doc = Document.new_buf_doc(records, false)
-	Document.infer_consistent_attr(buf_doc)
-	return Document.has_width(buf_doc)
+	local records = Record.from_buflines(lines)
+	local bufdoc = Document.new_bufdoc(records, false)
+	Document.infer_consistent_attr(bufdoc)
+	return Document.has_width(bufdoc)
 end
 
 return M

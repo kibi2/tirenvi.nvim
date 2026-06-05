@@ -16,17 +16,19 @@ lua << EOF
 
   local Context = require("tirenvi.app.context")
   local Attrs = require("tirenvi.core.attrs")
+  local ReadResult = require("tirenvi.app.read_result")
   local Request = require("tirenvi.app.request")
   local Range = require("tirenvi.util.range")
-  local req_r = Request.new_reader(Range.WHOLE)
   local reader = require("tirenvi.io.reader")
   local buf_parser = require("tirenvi.parser.buf_parser")
   local Document = require("tirenvi.core.document")
 	local ctx =  Context.from_buf(bufnr)
-  reader.read(ctx, req_r)
-  log.watch("ATTR", Attrs.debug_attrs(req_r.attrs, "UPDATE CHACHED ATTRS:")) 
-  local buf_doc = buf_parser.parse_text_driven(ctx, req_r, range3)
-  log.watch("ATTR", Document.debug_attrs(buf_doc, "1DOC ATTR:"))
+  local r_result = reader.read(ctx, Range.WHOLE)
+  log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "UPDATE CHACHED ATTRS:")) 
+  local bufdoc = buf_parser.parse(ctx, r_result, {range3 = range3} )
+  local first = ReadResult.lua_range(r_result)
+  Document.replace_attrs(bufdoc, r_result.range)
+  log.watch("ATTR", Document.debug_attrs(bufdoc, "1DOC ATTR:"))
 EOF
 
 

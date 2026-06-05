@@ -41,7 +41,7 @@ M.IKEY              = {
 	-- dirty row #
 	DIRTY = "dirty",
 
-	-- is tir-buf
+	-- buffer is flat or tir-buffer
 	FLAT = "flat",
 }
 
@@ -194,7 +194,7 @@ function M.set_lines(bufnr, range, lines, no_undo)
 	log.watch("UNDO", "%s[%d->%d]set_lines lines[%d]='%s'...[%d]='%s'", tostring(no_undo),
 		before, after, first, tostring(lines[1]), last, tostring(lines[#lines]))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) - 1)
-	assert(M.get(bufnr, M.IKEY.PATCH_DEPTH) == 0)
+	log.assert(M.get(bufnr, M.IKEY.PATCH_DEPTH) == 0, "PATCH_DEPTH should be 0 after set_lines")
 	if not ok then
 		error(err)
 	end

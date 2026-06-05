@@ -39,7 +39,7 @@ end
 ---@parma self Context
 ---@return boolean
 function M:is_allow_plain()
-    return self.parser and self.parser.allow_plain or false
+    return self.parser and (self.parser.allow_plain or false) or false
 end
 
 return M

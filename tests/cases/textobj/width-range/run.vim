@@ -12,10 +12,16 @@ EOF
 edit $TIRENVI_ROOT/tests/data/table2.md
 sleep 1m
 1Tir width=8
+echomsg b:tirenvi.attrs[1]
+echomsg b:tirenvi.attrs[3]
 call Snapshot({'desc': 'width = 5, 6 / 5, 3, 6' })
 1,6Tir width=8
+echomsg b:tirenvi.attrs[1]
+echomsg b:tirenvi.attrs[3]
 call Snapshot({'desc': 'width = 8, 8 / 5, 3, 6' })
 6,8Tir width-2
+echomsg b:tirenvi.attrs[1]
+echomsg b:tirenvi.attrs[3]
 call Snapshot({'desc': 'width = 6, 6 / 3, 2, 4' })
 Tir toggle
 6,8Tir width+2

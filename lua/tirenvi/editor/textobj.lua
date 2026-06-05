@@ -1,5 +1,5 @@
 local Context = require("tirenvi.app.context")
-local tir_buf = require("tirenvi.core.tir_buf")
+local Bufline = require("tirenvi.core.bufline")
 local buf_parser = require("tirenvi.parser.buf_parser")
 local config = require("tirenvi.config")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
@@ -18,7 +18,7 @@ local M = {}
 local function setup_vl(ctx, line_provider, is_around)
     is_around = is_around or false
     local count = vim.v.count1
-    local rect, lines = tir_buf.get_block_rect(ctx, line_provider, count, is_around)
+    local rect, lines = Bufline.get_block_rect(ctx, line_provider, count, is_around)
     if not rect then
         return
     end
@@ -44,7 +44,9 @@ local function setup_val()
     setup_vl(ctx, line_provider, true)
 end
 
--- public API
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
 
 function M.setup()
     vim.keymap.set({ "x" }, "i" .. config.textobj.column, setup_vil, {

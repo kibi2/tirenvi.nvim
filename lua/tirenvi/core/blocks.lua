@@ -49,9 +49,9 @@ end
 -----------------------------------------------------------------------
 
 --- Split NDJSON records into plain/grid blocks.
----@param records Ndjson[]
+---@param ndjsons Ndjson[]
 ---@return Blocks
-local function build_blocks_text_driven(records)
+local function build_blocks_text_driven(ndjsons)
 	local self = {}
 	---@type Block
 	local block = Block.new()
@@ -61,18 +61,18 @@ local function build_blocks_text_driven(records)
 		end
 		block = Block.new()
 	end
-	for _, record in ipairs(records) do
-		local kind = record.kind
+	for _, ndjson in ipairs(ndjsons) do
+		local kind = ndjson.kind
 		if kind == CONST.KIND.ATTR_FILE then
 			flush_block()
-		elseif record.kind == "plain" or record.kind == "grid" then
+		elseif ndjson.kind == "plain" or ndjson.kind == "grid" then
 			if block.kind ~= kind then
 				flush_block()
 			end
-			Block.set_kind(block, record.kind)
-			Block.add(block, record)
+			Block.set_kind(block, ndjson.kind)
+			Block.add(block, ndjson)
 		else
-			log.error(record)
+			log.error(ndjson)
 		end
 	end
 	flush_block()
@@ -80,17 +80,17 @@ local function build_blocks_text_driven(records)
 end
 
 --- Split NDJSON records into plain/grid blocks.
----@param records Ndjson[]
+---@param ndjsons Ndjson[]
 ---@param attrs Attr[]
 ---@return Blocks
-local function build_blocks_attr_driven(records, attrs)
+local function build_blocks_attr_driven(ndjsons, attrs)
 	local self = {}
 	for iattr, attr in ipairs(attrs) do
 		local block = Block.new()
 		Block.set_kind(block, Attr.is_plain(attr) and CONST.KIND.PLAIN or CONST.KIND.GRID)
 		local has_continuation = false
 		for irow = attr.range.first, attr.range.last do
-			local record = records[irow]
+			local record = ndjsons[irow]
 			if not record then
 				log.error(string.format("Record not found for row %d", irow))
 				break
@@ -114,18 +114,6 @@ local function build_blocks_attr_driven(records, attrs)
 	return self
 end
 
---- Split NDJSON records into plain/grid blocks.
----@param records Ndjson[]
----@param attrs Attr[]|nil
----@return Blocks
-local function build_blocks(records, attrs)
-	if attrs then
-		return build_blocks_attr_driven(records, attrs)
-	else
-		return build_blocks_text_driven(records)
-	end
-end
-
 -----------------------------------------------------------------------
 -- Attribute handling
 -----------------------------------------------------------------------
@@ -134,10 +122,10 @@ end
 ---| "conflict"
 ---| "grid in plain"
 
----@param self Blocks
+---@param bufblocks Blocks
 ---@param first integer
-local function rebuild_attr_range(self, first)
-	for _, block in ipairs(self) do
+local function rebuild_attr_range(bufblocks, first)
+	for _, block in ipairs(bufblocks) do
 		local attr = block.attr or Attr.new()
 		block.attr = attr
 		local last = first + #block.records - 1
@@ -150,54 +138,27 @@ end
 -- Public API
 -----------------------------------------------------------------------
 
----@param self Blocks
-function M.merge_blocks(self)
-	if #self <= 1 then
-		return
-	end
-	for index, block in ipairs(self) do
-		local new_block = Block[block.kind].to_grid(block)
-		self[index] = new_block
-	end
-	local first = self[1]
-	local records = first.records
-	for index = 2, #self do
-		util.extend(records, self[index].records)
-	end
-	for i = #self, 2, -1 do
-		self[i] = nil
-	end
-end
-
 ---@self Blocks
 ---@return Attr[]
 function M:collect_attrs()
 	local attrs = {}
 	for _, block in ipairs(self) do
-		assert(block.attr, "block.attr is nil")
+		log.assert(block.attr, "block.attr is nil")
 		attrs[#attrs + 1] = block.attr
 	end
 	return attrs
 end
 
----@self Blocks
----@param sel Range
----@param width_op WidthOp
-function M:change_width(sel, width_op)
-	apply(self, "change_width", sel, width_op)
-end
-
 --- Convert NDJSON records into normalized blocks.
 ---@param ndjsons Ndjson[]
 ---@param attrs Attr[]|nil
----@param allow_plain boolean
 ---@return Blocks
-function M.new_from_records(ndjsons, allow_plain, attrs)
-	local self = build_blocks(ndjsons, attrs)
-	if not allow_plain and M.has_grid(self) then
-		M.merge_blocks(self)
+function M.new_from_records(ndjsons, attrs)
+	if attrs then
+		return build_blocks_attr_driven(ndjsons, attrs)
+	else
+		return build_blocks_text_driven(ndjsons)
 	end
-	return self
 end
 
 --- Convert NDJSON records into normalized blocks.
@@ -220,8 +181,8 @@ function M.from_buf(self, no_normalize)
 end
 
 ---@self Blocks
-function M:to_buf()
-	apply(self, "to_buf")
+function M:to_bufdoc()
+	apply(self, "to_bufdoc")
 end
 
 ---@self Blocks
@@ -234,10 +195,13 @@ function M:set_auto_attr()
 	apply(self, "set_auto_attr")
 end
 
----@self Blocks
----@param first integer
-function M:set_attr_range(first)
-	rebuild_attr_range(self, first)
+---@parama bufblocks Blocks
+---@param first integer|nil
+function M.set_attr_range(bufblocks, first)
+	if not first then
+		return
+	end
+	rebuild_attr_range(bufblocks, first)
 end
 
 ---@param self Blocks
@@ -252,8 +216,8 @@ end
 
 ---@self Blocks
 ---@param attrs Attr[]
-function M:apply_cached_attr(attrs)
-	apply(self, "apply_cached_attr", attrs)
+function M:apply_attrs_by_range(attrs)
+	apply(self, "apply_attrs_by_range", attrs)
 end
 
 ---@param self Blocks

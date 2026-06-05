@@ -1,0 +1,10 @@
+
+--- ERROR ---
+=== MESSAGE ===
+[TIR][ERROR][log.lua 414] test case for log.assert ERROR
+
+=== DISPLAY ===
+
+
+=== DISPLAY ===
+

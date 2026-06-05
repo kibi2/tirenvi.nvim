@@ -2,6 +2,8 @@
 --- width = 5, 6 / 5, 3, 6 ---
 === MESSAGE ===
 tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
+{'columns': [{'width': 5}, {'width': 6}], 'range': {'first': 2, 'last': 6}}
+{'columns': [{'width': 5}, {'width': 3}, {'width': 6}], 'range': {'first': 8, 'last': 12}}
 
 === DISPLAY ===
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
@@ -20,6 +22,9 @@ tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
 
 
 --- width = 8, 8 / 5, 3, 6 ---
+=== MESSAGE ===
+{'columns': [{'width': 8}, {'width': 8}], 'range': {'first': 2, 'last': 6}}
+{'columns': [{'width': 5}, {'width': 3}, {'width': 6}], 'range': {'first': 8, 'last': 12}}
 
 === DISPLAY ===
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
@@ -38,6 +43,9 @@ tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
 
 
 --- width = 6, 6 / 3, 2, 4 ---
+=== MESSAGE ===
+{'columns': [{'width': 6}, {'width': 6}], 'range': {'first': 2, 'last': 6}}
+{'columns': [{'width': 3}, {'width': 2}, {'width': 4}], 'range': {'first': 8, 'last': 17}}
 
 === DISPLAY ===
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0

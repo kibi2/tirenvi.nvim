@@ -1,5 +1,7 @@
+local Context = require("tirenvi.app.context")
 local config = require("tirenvi.config")
 local Range3 = require("tirenvi.util.range3")
+local Attrs = require("tirenvi.core.attrs")
 local buffer = require("tirenvi.io.buffer")
 local log = require("tirenvi.util.log")
 
@@ -12,11 +14,14 @@ local bo = vim.bo
 ---@class Check_options
 ---@field supported? boolean
 ---@field has_parser? boolean
+---@field is_tirbuf? boolean
 ---@field no_vscode? boolean
 
 local DEFAULT_OPTS = {
 	supported = true,
 	has_parser = true,
+	is_tirbuf = true,
+	has_grid = false,
 	no_vscode = true,
 }
 local REPAIR_OFF = "REPAIR_OFF"
@@ -96,10 +101,24 @@ local checks = {
 		return buffer.get(bufnr, buffer.IKEY.FILETYPE) ~= nil
 	end,
 
+	is_tirbuf = function(bufnr)
+		return M.is_flat(bufnr) ~= true
+	end,
+
+	has_grid = function(bufnr)
+		local ctx = Context.from_buf(bufnr)
+		local has_grid = M.has_grid(ctx)
+		return has_grid == nil or has_grid == true
+	end,
+
 	no_vscode = function()
 		return not M.is_vscode()
 	end,
 }
+
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
 
 ---@return boolean
 function M.is_vscode()
@@ -146,15 +165,60 @@ function M.is_repair(ctx, range3)
 end
 
 ---@param bufnr number
----@return boolean
-function M.is_flat(bufnr)
-	return buffer.get(bufnr, buffer.IKEY.FLAT) == true
+---@param value boolean
+function M.set_buffer_flat(bufnr, value)
+	buffer.set(bufnr, buffer.IKEY.FLAT, value)
+end
+
+---@param ctx Context
+---@return string
+local function get_count(ctx)
+	if not Context.is_allow_plain(ctx) then
+		return "P0G1"
+	end
+	local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+	local count = Attrs.get_count(attrs)
+	if not count then
+		return "NIL"
+	end
+	return string.format("P%dG%d", count.plain, count.grid)
 end
 
 ---@param bufnr number
----@param value boolean
-function M.set_flat(bufnr, value)
-	buffer.set(bufnr, buffer.IKEY.FLAT, value)
+---@return string
+function M.debug_state(bufnr)
+	if not log.is_debug() then
+		return ""
+	end
+	local ctx = Context.from_buf(bufnr)
+	local allow_plain = Context.is_allow_plain(ctx)
+	local flat
+	local is_flat = buffer.get(bufnr, buffer.IKEY.FLAT)
+	if is_flat == nil then
+		flat = "NIL"
+	else
+		flat = is_flat and ",A," or "|A|"
+	end
+	local count = get_count(ctx)
+	if not allow_plain then
+		log.assert(count == "P0G1", "grid must be enabled when plain is not allowed")
+	end
+	return string.format("%s/%s/%s", allow_plain and "GFM" or "CSV", flat, count)
+end
+
+---@return boolean|nil
+function M.is_flat(bufnr)
+	return buffer.get(bufnr, buffer.IKEY.FLAT)
+end
+
+---@param ctx Context
+---@return boolean|nil
+function M.has_grid(ctx)
+	if not Context.is_allow_plain(ctx) then
+		return true
+	end
+	local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+	return Attrs.has_grid(attrs)
 end
 
 return M

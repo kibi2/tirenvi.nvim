@@ -1,13 +1,11 @@
 ----- dependencies
 local Context = require("tirenvi.app.context")
-local Request = require("tirenvi.app.request")
 local pipeline = require("tirenvi.app.pipeline")
 local config = require("tirenvi.config")
 local buffer = require("tirenvi.io.buffer")
+local buf_state = require("tirenvi.io.buf_state")
 local attr_store = require("tirenvi.io.attr_store")
-local writer = require("tirenvi.io.writer")
-local reader = require("tirenvi.io.reader")
-local tir_buf = require("tirenvi.core.tir_buf")
+local Bufline = require("tirenvi.core.bufline")
 local Range = require("tirenvi.util.range")
 local Range3 = require("tirenvi.util.range3")
 local util = require("tirenvi.util.util")
@@ -25,15 +23,7 @@ M.motion = require("tirenvi.editor.motion")
 
 -- private helpers
 
----@param ctx Context
----@param no_undo boolean|nil
----@return nil
-local function from_flat(ctx, no_undo)
-	pipeline.from_flat(ctx, no_undo)
-end
-
 local warned = false
-
 ---@param command string
 local function set_repeat(command)
 	local ok = pcall(function()
@@ -69,66 +59,38 @@ end
 --- Convert current buffer (or specified buffer) from plain format to tir-vim format
 ---@param ctx Context
 ---@return nil
-function M.import_flat(ctx)
-	from_flat(ctx, true)
+function M.read_post(ctx)
+	pipeline.read_post(ctx)
 end
-
----@param ctx Context
----@return nil
-function M.enable(ctx)
-	from_flat(ctx)
-end
-
-local buffer_backup
 
 --- Convert current buffer (or specified buffer) from display format back to file format (tsv)
 ---@param ctx Context
 ---@return nil
-function M.export_flat(ctx)
-	local req = Request.new_reader(Range.WHOLE)
-	reader.read(ctx, req)
-	if Request.is_flat(req) then
-		buffer_backup = nil
-		return
-	else
-		buffer_backup = req.lines
-		pipeline.to_flat(ctx, true)
-	end
+function M.write_pre(ctx)
+	pipeline.write_pre(ctx)
 end
 
 --- Convert current buffer (or specified buffer) from plain format to view format
 ---@param ctx Context
 ---@return nil
-function M.restore_tir_buf(ctx)
-	if not buffer_backup then
-		return
-	end
-	local req = Request.new_writer(Range.WHOLE, buffer_backup, true)
-	writer.write(ctx, req)
-	buffer_backup = nil
-end
-
----@param ctx Context
----@return nil
-function M.disable(ctx)
-	pipeline.to_flat(ctx)
+function M.write_post(ctx)
+	pipeline.write_post(ctx)
 end
 
 ---@param ctx Context
 ---@return nil
 function M.toggle(ctx)
-	local req = Request.new_reader(Range.WHOLE)
-	reader.read(ctx, req)
-	if Request.is_flat(req) then
-		M.enable(ctx)
-	else
-		M.disable(ctx)
+	local is_flat = buf_state.is_flat(ctx.bufnr)
+	if is_flat == nil or is_flat then
+		pipeline.from_flat(ctx)
+	elseif buf_state.has_grid(ctx) then
+		pipeline.to_flat(ctx)
 	end
 end
 
 ---@param ctx Context
-function M.format(ctx)
-	pipeline.cmd_format(ctx)
+function M.repair(ctx)
+	pipeline.cmd_repair(ctx)
 end
 
 ---@param ctx Context	
@@ -153,7 +115,7 @@ function M.insert_char_in_newline(ctx)
 	if not Context.is_allow_plain(ctx) then
 		line_ref = line_ref or line_next
 	end
-	local pipe = tir_buf.get_pipe_char(line_ref)
+	local pipe = Bufline.get_pipe_char(line_ref)
 	if not pipe then
 		return
 	end
@@ -164,7 +126,7 @@ end
 function M.keymap_lf()
 	local col = fn.col(".")
 	local line = fn.getline(".")
-	if not tir_buf.get_pipe_char(line) then
+	if not Bufline.get_pipe_char(line) then
 		return util.get_termcodes("<CR>")
 	end
 	if col == 1 or col > #line then
@@ -176,7 +138,7 @@ end
 ---@return string
 function M.keymap_tab()
 	local line = fn.getline(".")
-	if not tir_buf.get_pipe_char(line) then
+	if not Bufline.get_pipe_char(line) then
 		return util.get_termcodes("<Tab>")
 	end
 	if bo.expandtab then
@@ -188,14 +150,14 @@ end
 ---@param ctx Context
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
-	log.watch("UNDO", "===+=== ENTRY on_lines[#%d]%s", ctx.bufnr, Range3.short(range3))
 	pipeline.on_lines(ctx, range3)
+	pipeline.check_and_repair(ctx, range3)
 end
 
 ---@param ctx Context
-function M.on_insert_leave(ctx)
-	log.watch("UNDO", "===+=== ENTRY insert_leave[#%d]", ctx.bufnr)
-	pipeline.insert_leave(ctx)
+---@param range3 Range3|nil
+function M.check_and_repair(ctx, range3)
+	pipeline.check_and_repair(ctx, range3)
 end
 
 ---@param ctx Context
@@ -210,7 +172,8 @@ function M.on_filetype(ctx)
 		pipeline.to_flat(ctx)
 	end
 	buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, new_filetype)
-	attr_store.write(ctx, nil)
+	buf_state.set_buffer_flat(ctx.bufnr, true)
+	attr_store.write(ctx.bufnr, nil)
 	ctx = Context.from_buf(ctx.bufnr)
 	if not ctx.parser then
 		buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, nil)

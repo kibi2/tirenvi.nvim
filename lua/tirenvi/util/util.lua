@@ -35,12 +35,12 @@ local function collect_reserved_chars()
 	return set
 end
 
----@param fl_lines string[]
+---@param fllines string[]
 ---@return string[]
-local function find_reserved_marks(fl_lines)
+local function find_reserved_marks(fllines)
 	local char_to_name = collect_reserved_chars()
 	local found_names = {}
-	for _, line in ipairs(fl_lines) do
+	for _, line in ipairs(fllines) do
 		for _, ch in ipairs(M.utf8_chars(line)) do
 			local name = char_to_name[ch]
 			if name then
@@ -94,9 +94,9 @@ function M.extend(array1, array2)
 	table.move(array2, 1, #array2, #array1 + 1, array1)
 end
 
----@param fl_lines string[]
-function M.ensure_no_reserved_marks(fl_lines)
-	local found = find_reserved_marks(fl_lines)
+---@param fllines string[]
+function M.ensure_no_reserved_marks(fllines)
+	local found = find_reserved_marks(fllines)
 	if #found > 0 then
 		error(errors.new_domain_error(errors.err_no_usable_characters(found)))
 	end

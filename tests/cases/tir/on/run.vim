@@ -19,5 +19,11 @@ Tir toggle
 sleep 1m
 Tir toggle
 sleep 1m
+call Snapshot({'desc': 'simple.md' })
 
-call RunTest({})
+edit $TIRENVI_ROOT/tests/data/table0.md
+sleep 1m
+Tir toggle
+sleep 1m
+
+call RunTest({'desc': 'table0.md' })

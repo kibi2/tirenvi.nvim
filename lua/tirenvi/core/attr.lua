@@ -112,29 +112,30 @@ function M.get_width_array(columns)
     return widths
 end
 
----@param self Attr
----@param records Record_grid[]
----@param sel Range
----@param width_op WidthOp
-function M:change_width(records, sel, width_op)
-    local start_col = 1
-    for icol, column in ipairs(self.columns) do
-        local old_width = column.width
-        local cel_range = Range.from_lua(start_col, start_col + old_width)
-        if Range.intersects(sel, cel_range) then
-            if width_op.kind == "auto" then
-                column.width = get_max_width(records, icol)
-            else
-                column.width = width_op:apply(old_width)
-            end
-        end
-        start_col = cel_range.last + 1
+---@param source Attr
+---@param target Attr
+---@return boolean
+function M.is_same_columns(source, target)
+    local columns1 = source.columns or {}
+    local columns2 = target.columns or {}
+    if #columns1 ~= #columns2 then
+        return false
     end
+    for icol = 1, #columns1 do
+        if columns1[icol].width ~= columns2[icol].width then
+            return false
+        end
+    end
+    return true
 end
 
 ---@param source Attr
 ---@param target Attr
-function M.is_same_columns(source, target)
+---@return boolean
+function M.is_consistent(source, target)
+    if M.is_plain(source) or M.is_plain(target) then
+        return true
+    end
     local columns1 = source.columns or {}
     local columns2 = target.columns or {}
     if #columns1 ~= #columns2 then

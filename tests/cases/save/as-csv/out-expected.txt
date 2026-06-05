@@ -1,5 +1,7 @@
 
 --- write ---
+=== MESSAGE ===
+tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
 
 === DISPLAY ===
 │1a│2 a⠀⠀⠀⠀⠀│ 3a│
@@ -19,6 +21,8 @@ b	"
 
 
 ",,	c
+=== MESSAGE ===
+[Tirenvi] repair:disable 
 
 === DISPLAY ===
 │1a│2 a⠀⠀⠀⠀⠀│ 3a│

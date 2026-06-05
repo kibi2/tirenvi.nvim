@@ -1,6 +1,7 @@
 local config = require("tirenvi.config")
 local Attr = require("tirenvi.core.attr")
 local Attrs = require("tirenvi.core.attrs")
+local bufline = require("tirenvi.core.bufline")
 local namespaces = require("tirenvi.io.namespaces")
 local buffer = require("tirenvi.io.buffer")
 local buf_state = require("tirenvi.io.buf_state")
@@ -53,33 +54,20 @@ local function set_attrs(bufnr, attrs)
     end)
 end
 
----@param bufnr number
----@param attrs Attr[]|nil
----@param is_flat boolean|nil
-local function set_flat(bufnr, attrs, is_flat)
-    if not attrs then
-        return
-    end
-    is_flat = is_flat or not Attrs.has_grid(attrs)
-    buf_state.set_flat(bufnr, is_flat)
-end
-
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
 
----@param ctx Context
+---@param bufnr number
 ---@param attrs Attr[]|nil
----@param is_flat boolean|nil
-function M.write(ctx, attrs, is_flat)
-    set_attrs(ctx.bufnr, attrs)
-    set_flat(ctx.bufnr, attrs, is_flat)
+function M.write(bufnr, attrs)
+    set_attrs(bufnr, attrs)
 end
 
----@param ctx Context
----@return Attr[]|nil
-function M.read(ctx)
-    return buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+---@param bufnr number
+---@return Attr[]
+function M.read(bufnr)
+    return buffer.get(bufnr, buffer.IKEY.ATTRS) or {}
 end
 
 return M
