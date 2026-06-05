@@ -149,7 +149,6 @@ end
 ---@param ctx Context
 ---@param range3 Range3|nil
 ---@return boolean
----@return boolean|nil
 function M.is_repair(ctx, range3)
 	local status = get_status(ctx, range3)
 	log_watch(ctx.bufnr, status, range3)
@@ -157,7 +156,7 @@ function M.is_repair(ctx, range3)
 		return false
 	end
 	if status == UNDO_REDO_MODE then
-		return false, true
+		return false
 	end
 	if status == REPAIR_OFF then
 		return false

@@ -176,28 +176,11 @@ local function schedule_repair(ctx, range3)
 end
 
 ---@param ctx Context
----@param range3 Range3
-local function recover_flat(ctx, range3)
-    local r_result = reader.read(ctx, Range3.get_new_range(range3))
-    local nlines = buffer.line_count(ctx.bufnr)
-    if #r_result.lines ~= nlines then
-        return
-    end
-    buf_state.set_buffer_flat(ctx.bufnr, not Bufline.has_pipe(r_result.lines))
-end
-
----@param ctx Context
 ---@param range3 Range3|nil
 local function repair_request(ctx, range3)
-    local is_repair, undo_mode = buf_state.is_repair(ctx, range3)
-    if undo_mode then
-        ---@cast range3 -nil
-        recover_flat(ctx, range3)
+    if buf_state.is_repair(ctx, range3) then
+        schedule_repair(ctx, range3)
     end
-    if not is_repair then
-        return
-    end
-    schedule_repair(ctx, range3)
 end
 
 ---@param bufnr number
@@ -319,6 +302,7 @@ function M.cmd_repair(ctx, no_undo, no_normalize)
     if not need_repair(ctx) then
         return
     end
+    log.debug("===+=== START ===+=== %s[#%d] ===", "REPAIR", ctx.bufnr)
     local r_result = reader.read(ctx, Range.WHOLE)
     local bufdoc = buflines_to_bufdoc_attrs_driven(ctx, r_result)
     doc_to_buflines(ctx, r_result, bufdoc, no_undo, no_normalize)
@@ -328,9 +312,7 @@ end
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
     local r_result = reader.read(ctx, Range3.get_new_range(range3))
-    if not buf_state.is_flat(ctx.bufnr) then
-        update_attrs(ctx, range3, r_result)
-    end
+    update_attrs(ctx, range3, r_result)
 end
 
 ---@param ctx Context

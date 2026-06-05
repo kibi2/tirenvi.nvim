@@ -1,5 +1,7 @@
 -- dependencies
 local Context = require("tirenvi.app.context")
+local Bufline = require("tirenvi.core.bufline")
+local reader = require("tirenvi.io.reader")
 local buffer = require("tirenvi.io.buffer")
 local init = require("tirenvi.init")
 local buf_state = require("tirenvi.io.buf_state")
@@ -26,6 +28,15 @@ local function get_context(bufnr)
 	return Context.from_buf(bufnr)
 end
 
+---@param bufnr number
+local function recover_flat(bufnr, range3)
+	local r_result = reader.read(get_context(bufnr), Range3.get_new_range(range3))
+	if #r_result.lines ~= buffer.line_count(bufnr) then
+		return
+	end
+	buf_state.set_buffer_flat(bufnr, not Bufline.has_pipe(r_result.lines))
+end
+
 ---@param _ string
 ---@param bufnr number
 ---@param tick integer
@@ -33,16 +44,13 @@ end
 ---@param bytecount integer
 local function on_lines(_, bufnr, tick, range3, bytecount)
 	buffer.clear_cache()
-	if buf_state.should_skip(bufnr, { is_tirbuf = false, }) then return end
+	recover_flat(bufnr, range3)
+	if buf_state.should_skip(bufnr) then return end
 	local ctx = get_context(bufnr)
 	debug.ui_entry(bufnr, Range3.short(range3))
 	init.on_lines(ctx, range3)
 	debug.ui_exit(bufnr, Range3.short(range3))
-
-	local is_repair = buf_state.is_repair(ctx, range3)
-	if is_repair then debug.ui_entry(bufnr, "auto-repair") end
 	init.check_and_repair(ctx, range3)
-	if is_repair then debug.ui_exit(bufnr, "auto-repair") end
 end
 
 ---@param bufnr number
