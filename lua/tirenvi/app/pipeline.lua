@@ -8,7 +8,6 @@ local dirty_range = require("tirenvi.core.dirty_range")
 local Request = require("tirenvi.app.request")
 local flat_parser = require("tirenvi.parser.flat_parser")
 local buf_parser = require("tirenvi.parser.buf_parser")
-local buffer = require("tirenvi.io.buffer")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
 local buf_state = require("tirenvi.io.buf_state")
 local writer = require("tirenvi.io.writer")
@@ -20,7 +19,6 @@ local Range3 = require("tirenvi.util.range3")
 local errors = require("tirenvi.util.errors")
 local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
---local debug = require("tirenvi.editor.debug")
 
 -----------------------------------------------------------------------
 -- Module
@@ -77,7 +75,7 @@ end
 local function doc_to_buflines(ctx, r_result, doc, no_undo, no_normalize)
     local tirdoc = doc
     if not doc._tir then
-        tirdoc = Document.from_bufdoc(doc, no_normalize or false)
+        tirdoc = Document.from_bufdoc(doc, no_normalize)
     end
     Document.set_auto_attr(tirdoc)
     local bufdoc = Document.to_bufdoc(tirdoc)
@@ -203,11 +201,9 @@ local function need_repair(ctx)
     if buf_state.has_grid(ctx) == false then
         return false
     end
-    if has_dirty(ctx.bufnr) then
-        return true
-    end
-    local attrs = dirty.get_invalid_attrs(ctx.bufnr)
-    return #attrs > 0
+    -- repair must remove redundant padding,
+    -- so it does not check whether dirty exists.
+    return true
 end
 
 ---@param ctx Context

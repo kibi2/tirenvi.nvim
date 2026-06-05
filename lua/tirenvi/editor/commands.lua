@@ -17,8 +17,6 @@ local debug = require("tirenvi.editor.debug")
 local M = {}
 
 local api = vim.api
-local bo = vim.bo
-local fn = vim.fn
 
 ---@class WidthOp
 ---@field operator '"="'|'"+"'|'"-"'
