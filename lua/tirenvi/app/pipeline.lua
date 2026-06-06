@@ -86,23 +86,24 @@ local function doc_to_buflines(ctx, r_result, doc, no_undo, no_normalize)
     attr_store.write(ctx.bufnr, attrs)
     local buf_lines = buf_parser.unparse(bufdoc)
     if not util.same_str_array(buf_lines, r_result.lines) then
-        local req_w = Request.new_writer(r_result.range, buf_lines, no_undo or false)
+        local req_w = Request.new_writer(r_result.range, buf_lines, no_undo)
         writer.write(ctx, req_w)
     end
 end
 
 ---@param ctx Context
 ---@param tirdoc Document
----@param no_undo boolean|nil
-local function tirdoc_to_flat(ctx, r_result, tirdoc, no_undo)
+---@param is_write_pre boolean|nil
+local function tirdoc_to_flat(ctx, r_result, tirdoc, is_write_pre)
     local fllines = flat_parser.unparse(ctx, tirdoc)
-    local req_w = Request.new_writer(r_result.range, fllines, no_undo or false)
+    local req_w = Request.new_writer(r_result.range, fllines, is_write_pre)
     local attrs = vim.deepcopy(r_result.attrs)
-    --TODO
-    --Attrs.remove_range(attrs)
-    log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
-    buf_state.set_buffer_flat(ctx.bufnr, true)
-    attr_store.write(ctx.bufnr, attrs)
+    if not is_write_pre then
+        Attrs.remove_range(attrs)
+        log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
+        buf_state.set_buffer_flat(ctx.bufnr, true)
+        attr_store.write(ctx.bufnr, attrs)
+    end
     writer.write(ctx, req_w)
 end
 
@@ -247,13 +248,11 @@ end
 
 ---@param ctx Context
 function M.write_post(ctx)
-    if not backup_buffer then
-        return
+    if backup_buffer then
+        local req = Request.new_writer(Range.WHOLE, backup_buffer, true)
+        writer.write(ctx, req)
+        backup_buffer = nil
     end
-    buf_state.set_buffer_flat(ctx.bufnr, false)
-    local req = Request.new_writer(Range.WHOLE, backup_buffer, true)
-    writer.write(ctx, req)
-    backup_buffer = nil
 end
 
 ---@param ctx Context
@@ -266,13 +265,13 @@ function M.from_flat(ctx)
 end
 
 ---@param ctx Context
----@param no_undo boolean|nil
+---@param is_write_pre boolean|nil
 ---@return string[]
-function M.to_flat(ctx, no_undo)
+function M.to_flat(ctx, is_write_pre)
     local r_result = reader.read(ctx, Range.WHOLE)
     local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
     local tirdoc = Document.from_bufdoc(bufdoc)
-    tirdoc_to_flat(ctx, r_result, tirdoc, no_undo)
+    tirdoc_to_flat(ctx, r_result, tirdoc, is_write_pre)
     return r_result.lines
 end
 
