@@ -218,6 +218,26 @@ local function on_tir(opts)
 	debug.ui_exit(ctx.bufnr, name)
 end
 
+local function complete_tir(arglead, cmdline)
+	local args = vim.split(cmdline, "%s+", { trimempty = true })
+	if #args <= 1 then
+		return get_command_keys()
+	elseif #args == 2 then
+		if args[2] == "width" then
+			return {
+				"=",
+				"+",
+				"-",
+				"fit",
+				"max",
+				"fix",
+				"toggle",
+			}
+		end
+	end
+	return {}
+end
+
 local function register_user_command()
 	api.nvim_create_user_command("Tir", function(opts)
 		guard.guarded(function()
@@ -226,9 +246,7 @@ local function register_user_command()
 	end, {
 		nargs = "*",
 		range = true,
-		complete = function()
-			return get_command_keys()
-		end,
+		complete = complete_tir,
 		desc = build_desc()
 	})
 end
