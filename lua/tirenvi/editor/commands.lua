@@ -19,39 +19,37 @@ local M = {}
 local api = vim.api
 
 ---@class WidthOp
----@field operator '"="'|'"+"'|'"-"'
----@field kind '"set"'|'"add"'|'"sub"'|'"auto"'|nil
+---@field token '"="'|'"+"'|'"-"'
+---@field kind '"set"'|'"add"'|'"sub"'|'"auto"'|'"fit"'|'"max"'|'"fix"'|'"toggle"'|nil
 ---@field count_str string
 ---@field count integer
 local WidthOp = {}
 WidthOp.__index = WidthOp
-
 local map = {
+	["="] = "set",
 	["+"] = "add",
 	["-"] = "sub",
-	["="] = "set",
+	fit = "fit",
+	max = "max",
+	fix = "fix",
+	toggle = "toggle",
 }
 
----@param width_op WidthOp
----@return '"set"'|'"add"'|'"sub"'|'"auto"'|nil
-local function to_kind(width_op)
-	local operator = width_op.operator
-	if operator == "" then
-		operator = "="
-	end
-	return map[operator]
-end
-
----@param args string
+---@param opts {[string]:any}
 ---@return WidthOp
-function WidthOp.new(args)
-	local self                    = setmetatable({}, WidthOp)
-	self.operator, self.count_str = args:match("^width%s*([=+-]?)(%d*)")
-	self.kind                     = to_kind(self)
-	self.count                    = tonumber(self.count_str) or 1
-	if self.count < 1 then
-		self.count = 1
+function WidthOp.new(opts)
+	local self = setmetatable({}, WidthOp)
+	self.token, self.count_str = opts.args:match("^width%s*([=%+%-])(.*)")
+	if not self.token then
+		self.token = opts.fargs[2]
+		self.count_str = opts.fargs[3] or ""
 	end
+	local count = tonumber(self.count_str == "" and "1" or self.count_str)
+	if not count then
+		return self
+	end
+	self.kind = map[self.token]
+	self.count = math.max(count, 1)
 	if self.kind == "set" and self.count <= 1 then
 		self.kind = "auto"
 		self.count = 0
@@ -60,7 +58,7 @@ function WidthOp.new(args)
 end
 
 function WidthOp:to_cmd()
-	return string.format(":<C-u>Tir width %s%s<CR>", self.operator, self.count_str)
+	return string.format(":<C-u>Tir width %s%s<CR>", self.token, self.count_str)
 end
 
 function WidthOp:to_string()
@@ -112,8 +110,12 @@ end
 ---@return nil
 local function cmd_width(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
-	local width_op = WidthOp.new(opts.args)
-	local sel      = get_selection(opts)
+	local width_op = WidthOp.new(opts)
+	if not width_op.kind then
+		notify.error(errors.err_unknown_command(opts.args))
+		return
+	end
+	local sel = get_selection(opts)
 	log.debug("row[%d-%d], col[%d-%d] %s", sel.row.first, sel.row.last, sel.col.first, sel.col.last,
 		width_op:to_string())
 	init.width(ctx, sel, width_op)
@@ -207,11 +209,11 @@ local function on_tir(opts)
 		command = "width"
 	end
 	local ctx = Context.from_buf()
-	local name = string.format("%s %s %s", opts.name, opts.fargs[1], opts.fargs[2] or "")
+	local name = string.format("%s %s", opts.name, table.concat(opts.fargs, " "))
 	debug.ui_entry(ctx.bufnr, name)
 	local func = commands[command]
 	if not func then
-		notify.error(errors.err_unknown_command(sub))
+		notify.error(errors.err_unknown_command(opts.args))
 		return
 	end
 	func(ctx, opts)

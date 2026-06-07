@@ -75,7 +75,9 @@ end
 ---@param self Attr
 ---@param sel Range
 ---@param width_op WidthOp
+---@return boolean
 local function change_width(self, sel, width_op)
+    local changed = false
     local start_col = 1
     for _, column in ipairs(self.columns) do
         local old_width = column.width
@@ -86,9 +88,11 @@ local function change_width(self, sel, width_op)
             else
                 column.width = width_op:apply(old_width)
             end
+            changed = true
         end
         start_col = cel_range.last + 1
     end
+    return changed
 end
 
 -----------------------------------------------------------------------
@@ -239,12 +243,15 @@ end
 ---@param self Attr[]
 ---@param rect Rect
 ---@param width_op WidthOp
+---@return boolean
 function M:change_width(rect, width_op)
+    local changed = false
     for _, attr in ipairs(self) do
         if Attr.is_grid(attr) and Range.intersects(rect.row, attr.range) then
-            change_width(attr, rect.col, width_op)
+            changed = change_width(attr, rect.col, width_op) or changed
         end
     end
+    return changed
 end
 
 ---@param self Attr[]

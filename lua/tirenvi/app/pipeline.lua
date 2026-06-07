@@ -222,6 +222,29 @@ local function update_attrs(ctx, range3, r_result)
     reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
 end
 
+---@param ctx Context
+---@param sel Rect
+---@param width_op WidthOp
+local function change_mode(ctx, sel, width_op)
+    M.cmd_repair(ctx)
+end
+
+---@param ctx Context
+---@param sel Rect
+---@param width_op WidthOp
+local function change_width(ctx, sel, width_op)
+    if has_dirty(ctx.bufnr, sel.row) then
+        error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
+    end
+    expand_rect(ctx, sel.row)
+    log.debug("row%s, col%s", Range.short(sel.row), Range.short(sel.col))
+    local r_result = reader.read(ctx, sel.row)
+    if Attrs.change_width(r_result.attrs, sel, width_op) then
+        local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
+        doc_to_buflines(ctx, r_result, bufdoc)
+    end
+end
+
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
@@ -275,19 +298,19 @@ function M.to_flat(ctx, is_write_pre)
     return r_result.lines
 end
 
+local repeatable_kind = { set = true, add = true, sub = true, auto = true }
 ---@param ctx Context
 ---@param sel Rect
 ---@param width_op WidthOp
+---@return boolean
 function M.cmd_width(ctx, sel, width_op)
-    if has_dirty(ctx.bufnr, sel.row) then
-        error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
+    if repeatable_kind[width_op.kind] then
+        change_width(ctx, sel, width_op)
+        return true
+    else
+        change_mode(ctx, sel, width_op)
+        return false
     end
-    expand_rect(ctx, sel.row)
-    log.debug("row%s, col%s", Range.short(sel.row), Range.short(sel.col))
-    local r_result = reader.read(ctx, sel.row)
-    Attrs.change_width(r_result.attrs, sel, width_op)
-    local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
-    doc_to_buflines(ctx, r_result, bufdoc)
 end
 
 ---@param ctx Context

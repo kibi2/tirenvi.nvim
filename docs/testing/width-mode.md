@@ -58,5 +58,5 @@
 | --- | --- | --- | --- | --- | --- | --- |
 |  | Tir width | <tab> | サブサブコマンド補完を出す<br>=+- fix, max, fit, toggle | 26/06/07 |  | feat: add completion for width subcommands |
 |  |  | 起動時 | b:tirenvi.width_mode=fit | 26/06/07 |  | feat: add buffer-local width_mode with default fit mode |
-|  | width_mode=fit | Tir width fix | b:tirenvi.width_mode=fix |  |  |  |
+|  | Tir width mode= | fit,fix, max | b:tirenvi.width_mode=fit, fix, max |  |  |  |
 
