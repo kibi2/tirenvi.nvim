@@ -9,6 +9,7 @@ local Request = require("tirenvi.app.request")
 local flat_parser = require("tirenvi.parser.flat_parser")
 local buf_parser = require("tirenvi.parser.buf_parser")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
+local buffer = require("tirenvi.io.buffer")
 local buf_state = require("tirenvi.io.buf_state")
 local writer = require("tirenvi.io.writer")
 local attr_store = require("tirenvi.io.attr_store")
@@ -225,13 +226,6 @@ end
 ---@param ctx Context
 ---@param sel Rect
 ---@param width_op WidthOp
-local function change_mode(ctx, sel, width_op)
-    M.cmd_repair(ctx)
-end
-
----@param ctx Context
----@param sel Rect
----@param width_op WidthOp
 local function change_width(ctx, sel, width_op)
     if has_dirty(ctx.bufnr, sel.row) then
         error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
@@ -242,7 +236,26 @@ local function change_width(ctx, sel, width_op)
     if Attrs.change_width(r_result.attrs, sel, width_op) then
         local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
         doc_to_buflines(ctx, r_result, bufdoc)
+        buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, "fix")
     end
+end
+
+---@param ctx Context
+---@param width_op WidthOp
+local function change_mode(ctx, width_op)
+    if width_op.kind == "toggle" then
+        if buffer.get(ctx.bufnr, buffer.IKEY.WIDTH_MODE) == "fit" then
+            buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, "max")
+        else -- max or fix
+            buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, "fit")
+        end
+    else
+        buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, width_op.kind)
+        if width_op.kind == "fit" then
+            buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_FIT_PAGES, width_op.count)
+        end
+    end
+    M.cmd_repair(ctx)
 end
 
 -----------------------------------------------------------------------
@@ -308,7 +321,7 @@ function M.cmd_width(ctx, sel, width_op)
         change_width(ctx, sel, width_op)
         return true
     else
-        change_mode(ctx, sel, width_op)
+        change_mode(ctx, width_op)
         return false
     end
 end

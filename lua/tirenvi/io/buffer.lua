@@ -46,6 +46,9 @@ M.IKEY              = {
 
 	-- Width_mode
 	WIDTH_MODE = "width_mode",
+
+	-- width fit pages
+	WIDTH_FIT_PAGES = "width_fit_pages",
 }
 
 local initial_value = {
@@ -59,6 +62,7 @@ local initial_value = {
 	[M.IKEY.DIRTY] = nil,
 	[M.IKEY.FLAT] = nil,
 	[M.IKEY.WIDTH_MODE] = "fit",
+	[M.IKEY.WIDTH_FIT_PAGES] = 1,
 }
 
 -----------------------------------------------------------------------
