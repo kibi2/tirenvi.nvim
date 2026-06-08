@@ -4,52 +4,43 @@
 source $TIRENVI_ROOT/tests/common.vim
 
 edit $TIRENVI_ROOT/tests/data/simple.md
-echomsg b:tirenvi.width_mode
-echomsg b:tirenvi.width_fit_pages
+echomsg "init" b:tirenvi.prev_width_mode b:tirenvi.width_mode
 sleep 1m
 Tir width fix
-echomsg b:tirenvi.width_mode
-echomsg b:tirenvi.width_fit_pages
+echomsg "-> fix" b:tirenvi.prev_width_mode b:tirenvi.width_mode
 sleep 1m
 Tir width max
-echomsg b:tirenvi.width_mode
-echomsg b:tirenvi.width_fit_pages
+echomsg "-> max" b:tirenvi.prev_width_mode b:tirenvi.width_mode
 sleep 1m
 Tir width fit 3
-echomsg b:tirenvi.width_mode
-echomsg b:tirenvi.width_fit_pages
+echomsg "-> fit 3" b:tirenvi.prev_width_mode b:tirenvi.width_mode
 sleep 1m
 Tir width fix 5
-echomsg b:tirenvi.width_mode
-echomsg b:tirenvi.width_fit_pages
+echomsg "-> fix 5" b:tirenvi.prev_width_mode b:tirenvi.width_mode
 sleep 1m
 Tir width toggle
-echomsg b:tirenvi.width_mode
-echomsg b:tirenvi.width_fit_pages
+echomsg "toggle" b:tirenvi.prev_width_mode b:tirenvi.width_mode
 sleep 1m
 Tir width toggle
-echomsg b:tirenvi.width_mode
-echomsg b:tirenvi.width_fit_pages
+echomsg "toggle" b:tirenvi.prev_width_mode b:tirenvi.width_mode
 sleep 1m
 Tir width toggle
-echomsg b:tirenvi.width_mode
-echomsg b:tirenvi.width_fit_pages
+echomsg "toggle" b:tirenvi.prev_width_mode b:tirenvi.width_mode
 sleep 1m
 Tir width toggle
-echomsg b:tirenvi.width_mode
-echomsg b:tirenvi.width_fit_pages
+echomsg "toggle" b:tirenvi.prev_width_mode b:tirenvi.width_mode
 sleep 1m
 Tir width fit 99
-echomsg b:tirenvi.width_mode
-echomsg b:tirenvi.width_fit_pages
+echomsg "-> fit 99" b:tirenvi.prev_width_mode b:tirenvi.width_mode
 sleep 1m
 Tir width=
-echomsg b:tirenvi.width_mode
-echomsg b:tirenvi.width_fit_pages
+echomsg "-> set" b:tirenvi.prev_width_mode b:tirenvi.width_mode
 sleep 1m
 execute "normal! 3G"
 Tir width=
-echomsg b:tirenvi.width_mode
-echomsg b:tirenvi.width_fit_pages
+echomsg "-> set" b:tirenvi.prev_width_mode b:tirenvi.width_mode
+sleep 1m
+Tir width auto
+echomsg "-> auto" b:tirenvi.prev_width_mode b:tirenvi.width_mode
 
 call RunTest({})

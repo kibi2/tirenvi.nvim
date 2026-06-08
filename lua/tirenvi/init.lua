@@ -96,10 +96,10 @@ end
 ---@param sel Rect
 ---@param width_op WidthOp
 function M.width(ctx, sel, width_op)
-	local repeatable = pipeline.cmd_width(ctx, sel, width_op)
-	if repeatable then
-		local command = util.get_termcodes(width_op:to_cmd())
-		set_repeat(command)
+	pipeline.cmd_width(ctx, sel, width_op)
+	local command = width_op:to_cmd()
+	if command then
+		set_repeat(util.get_termcodes(command))
 	end
 end
 

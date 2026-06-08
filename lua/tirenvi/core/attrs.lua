@@ -83,11 +83,7 @@ local function change_width(self, sel, width_op)
         local old_width = column.width
         local cel_range = Range.from_lua(start_col, start_col + old_width)
         if Range.intersects(sel, cel_range) then
-            if width_op.kind == "auto" then
-                column.width = 0
-            else
-                column.width = width_op:apply(old_width)
-            end
+            column.width = width_op:apply(old_width)
             changed = true
         end
         start_col = cel_range.last + 1

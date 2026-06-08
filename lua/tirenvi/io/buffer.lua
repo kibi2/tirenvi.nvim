@@ -2,21 +2,22 @@
 -- Module
 -----------------------------------------------------------------------
 ----- dependencies
-local config        = require("tirenvi.config")
-local Range         = require("tirenvi.util.range")
-local log           = require("tirenvi.util.log")
+local config         = require("tirenvi.config")
+local WidthModeState = require("tirenvi.width.state")
+local Range          = require("tirenvi.util.range")
+local log            = require("tirenvi.util.log")
 
-local M             = {}
+local M              = {}
 
-local api           = vim.api
-local fn            = vim.fn
-local bo            = vim.bo
-local b             = vim.b
-local cache         = { bufnr = -1, start = -1, lines = {}, }
-local STEP          = 25
+local api            = vim.api
+local fn             = vim.fn
+local bo             = vim.bo
+local b              = vim.b
+local cache          = { bufnr = -1, start = -1, lines = {}, }
+local STEP           = 25
 
 -- Buffer-local flags.
-M.IKEY              = {
+M.IKEY               = {
 	-- true when in insert mode
 	INSERT_MODE = "insert_mode",
 
@@ -47,11 +48,11 @@ M.IKEY              = {
 	-- Width_mode
 	WIDTH_MODE = "width_mode",
 
-	-- width fit pages
-	WIDTH_FIT_PAGES = "width_fit_pages",
+	-- previous Width_mode
+	PREV_WIDTH_MODE = "prev_width_mode",
 }
 
-local initial_value = {
+local initial_value  = {
 	[M.IKEY.INSERT_MODE] = false,
 	[M.IKEY.ATTACHED] = false,
 	[M.IKEY.PATCH_DEPTH] = 0,
@@ -61,8 +62,8 @@ local initial_value = {
 	[M.IKEY.ATTRS] = nil,
 	[M.IKEY.DIRTY] = nil,
 	[M.IKEY.FLAT] = nil,
-	[M.IKEY.WIDTH_MODE] = "fit",
-	[M.IKEY.WIDTH_FIT_PAGES] = 1,
+	[M.IKEY.WIDTH_MODE] = WidthModeState.new("fit"),
+	[M.IKEY.PREV_WIDTH_MODE] = WidthModeState.new("fit"),
 }
 
 -----------------------------------------------------------------------

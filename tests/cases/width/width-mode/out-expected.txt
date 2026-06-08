@@ -1,29 +1,18 @@
 === MESSAGE ===
-fit
-1
-fix
-1
-max
-1
-fit
-3
-fix
-3
-fit
-3
-max
-3
-fit
-3
-max
-3
-fit
-99
+init {'mode': 'fit', 'width': 0, 'count': 0} {'mode': 'fit', 'width': 0, 'count': 0}
+-> fix {'mode': 'fit', 'width': 0, 'count': 0} {'mode': 'fix'}
+-> max {'mode': 'fix'} {'mode': 'max'}
+-> fit 3 {'mode': 'max'} {'pages': 3, 'mode': 'fit', 'width': 1}
+-> fix 5 {'pages': 3, 'mode': 'fit', 'width': 1} {'mode': 'fix'}
+toggle {'mode': 'fix'} {'mode': 'max', 'width': 0, 'count': 0}
+toggle {'mode': 'fix'} {'mode': 'fix'}
+toggle {'mode': 'fix'} {'mode': 'max', 'width': 0, 'count': 0}
+toggle {'mode': 'fix'} {'mode': 'fix'}
+-> fit 99 {'mode': 'fix'} {'pages': 99, 'mode': 'fit', 'width': 1}
 tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
-fit
-99
-fix
-99
+-> set {'pages': 99, 'mode': 'fit', 'width': 1} {'mode': 'fix'}
+-> set {'mode': 'fix'} {'mode': 'fix'}
+-> auto {'mode': 'fix'} {'mode': 'auto'}
 
 === DISPLAY ===
 gfm

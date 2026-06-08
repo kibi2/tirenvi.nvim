@@ -6,6 +6,7 @@ local Attrs = require("tirenvi.core.attrs")
 local Bufline = require("tirenvi.core.bufline")
 local dirty_range = require("tirenvi.core.dirty_range")
 local Request = require("tirenvi.app.request")
+local WidthModeState = require("tirenvi.width.state")
 local flat_parser = require("tirenvi.parser.flat_parser")
 local buf_parser = require("tirenvi.parser.buf_parser")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
@@ -242,20 +243,20 @@ end
 
 ---@param ctx Context
 ---@param width_op WidthOp
-local function change_mode(ctx, width_op)
-    if width_op.kind == "toggle" then
-        if buffer.get(ctx.bufnr, buffer.IKEY.WIDTH_MODE) == "fit" then
-            buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, "max")
-        else -- max or fix
-            buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, "fit")
+---@param now_mode WidthModeState
+local function change_mode(ctx, width_op, now_mode)
+    if width_op.opts.kind == "toggle" then
+        if now_mode.mode == "max" then
+            local prev_mode = buffer.get(ctx.bufnr, buffer.IKEY.PREV_WIDTH_MODE)
+            buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, prev_mode)
+        else
+            buffer.set(ctx.bufnr, buffer.IKEY.PREV_WIDTH_MODE, now_mode)
+            buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, WidthModeState.new("max"))
         end
     else
-        buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, width_op.kind)
-        if width_op.kind == "fit" then
-            buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_FIT_PAGES, width_op.count)
-        end
+        buffer.set(ctx.bufnr, buffer.IKEY.PREV_WIDTH_MODE, now_mode)
+        buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, width_op:get_state())
     end
-    M.cmd_repair(ctx)
 end
 
 -----------------------------------------------------------------------
@@ -311,18 +312,17 @@ function M.to_flat(ctx, is_write_pre)
     return r_result.lines
 end
 
-local repeatable_kind = { set = true, add = true, sub = true, auto = true }
 ---@param ctx Context
 ---@param sel Rect
 ---@param width_op WidthOp
----@return boolean
 function M.cmd_width(ctx, sel, width_op)
-    if repeatable_kind[width_op.kind] then
+    local now_mode = buffer.get(ctx.bufnr, buffer.IKEY.WIDTH_MODE)
+    if width_op.opts.repeatable then
         change_width(ctx, sel, width_op)
-        return true
-    else
-        change_mode(ctx, width_op)
-        return false
+    end
+    change_mode(ctx, width_op, now_mode)
+    if not (now_mode.mode == "fix" and width_op.opts.kind == "fix") then
+        M.cmd_repair(ctx)
     end
 end
 

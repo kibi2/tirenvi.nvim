@@ -1,6 +1,6 @@
 -- dependencies
 local Context = require("tirenvi.app.context")
-local Cell = require("tirenvi.core.cell")
+local WidthOp = require("tirenvi.width.op")
 local buf_state = require("tirenvi.io.buf_state")
 local buffer = require("tirenvi.io.buffer")
 local init = require("tirenvi.init")
@@ -17,67 +17,6 @@ local debug = require("tirenvi.editor.debug")
 local M = {}
 
 local api = vim.api
-
----@class WidthOp
----@field token '"="'|'"+"'|'"-"'
----@field kind '"set"'|'"add"'|'"sub"'|'"auto"'|'"fit"'|'"max"'|'"fix"'|'"toggle"'|nil
----@field count_str string
----@field count integer
-local WidthOp = {}
-WidthOp.__index = WidthOp
-local map = {
-	["="] = "set",
-	["+"] = "add",
-	["-"] = "sub",
-	fit = "fit",
-	max = "max",
-	fix = "fix",
-	toggle = "toggle",
-}
-
----@param opts {[string]:any}
----@return WidthOp
-function WidthOp.new(opts)
-	local self = setmetatable({}, WidthOp)
-	self.token, self.count_str = opts.args:match("^width%s*([=%+%-])(.*)")
-	if not self.token then
-		self.token = opts.fargs[2]
-		self.count_str = opts.fargs[3] or ""
-	end
-	local count = tonumber(self.count_str == "" and "1" or self.count_str)
-	if not count then
-		return self
-	end
-	self.kind = map[self.token]
-	self.count = math.max(count, 1)
-	if self.kind == "set" and self.count <= 1 then
-		self.kind = "auto"
-		self.count = 0
-	end
-	return self
-end
-
-function WidthOp:to_cmd()
-	return string.format(":<C-u>Tir width %s%s<CR>", self.token, self.count_str)
-end
-
-function WidthOp:to_string()
-	return string.format("WidthOp %s:%d %s", self.kind, self.count, self:to_cmd())
-end
-
----@param current integer
----@return integer
-function WidthOp:apply(current)
-	if self.kind == "set" then
-		return math.max(self.count, Cell.MIN_WIDTH)
-	elseif self.kind == "add" then
-		return current + self.count
-	elseif self.kind == "sub" then
-		return math.max(current - self.count, Cell.MIN_WIDTH)
-	else
-		return current
-	end
-end
 
 ---@param opts {[string]:any}
 ---@return Rect
@@ -111,7 +50,7 @@ end
 local function cmd_width(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
 	local width_op = WidthOp.new(opts)
-	if not width_op.kind then
+	if not width_op.opts then
 		notify.error(errors.err_unknown_command(opts.args))
 		return
 	end

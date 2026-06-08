@@ -71,6 +71,8 @@
 | --- | --- | --- | --- | --- | --- | --- |
 |  | Tir width | <tab> | サブサブコマンド補完を出す<br>=+- fix, max, fit, toggle | 26/06/07 |  | feat: add completion for width subcommands |
 |  |  | 起動時 | b:tirenvi.width_mode=fit | 26/06/07 |  | feat: add buffer-local width_mode with default fit mode |
-|  | Tir width mode= | fit,fix, max | b:tirenvi.width_mode=fit, fix, max | 26/06/07 |  | feat: implement width mode switching |
+|  | Tir width mode= | fit,fix, max,auto | width_mode=fit, fix, max, auto | 26/06/07 |  | feat: implement width mode switching |
+|  |  | width toggle | max <-> fit, auto, fix | 26/06/08 |  | feat(width): add width mode toggle command |
+|  | fit  | pages省略 |  |  |  |  |
 |  | width-mode=max | repair | width = no wrap |  |  |  |
 
