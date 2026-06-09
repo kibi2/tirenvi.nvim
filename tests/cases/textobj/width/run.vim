@@ -21,43 +21,54 @@ Tir width=5
 call Snapshot({'desc': 'width = 5, 5, 8' })
 execute "normal! 0gg4j5l"
 Tir width=9
+echomsg b:tirenvi.attrs[1]
 sleep 1m
 "                              9, 5, 8
 execute "normal! 0gg3j9l"
 Tir width+9
+echomsg b:tirenvi.attrs[1]
 sleep 1m
 "                              18, 5, 8
 Tir width+5
+echomsg b:tirenvi.attrs[1]
 sleep 1m
 "                              23, 5, 8
 Tir width+
+echomsg b:tirenvi.attrs[1]
 sleep 1m
 "                              24, 5, 8
 call feedkeys("u", "x")
+echomsg b:tirenvi.attrs[1]
 sleep 1m
 "                              23, 5, 8
 execute "normal! 0gg6j6l"
 Tir width-10
+echomsg b:tirenvi.attrs[1]
 sleep 1m
 "                              13, 5, 8
 execute "normal! 0gg8j1l"
 Tir width=10
+echomsg b:tirenvi.attrs[1]
 sleep 1m
 "                              13, 5, 8
 execute "normal! 0gg3j$"
 Tir width=20
+echomsg b:tirenvi.attrs[1]
 sleep 1m
 "                              13, 5, 8
 call cursor(2, 1)
 Tir width-100
+echomsg b:tirenvi.attrs[1]
 sleep 1m
 "                              2, 5, 8
 call cursor(1, 1)
 Tir width-
+echomsg b:tirenvi.attrs[1]
 sleep 1m
 "                              2, 5, 8
 execute "normal! 0gg3j3l"
 Tir width=
+echomsg b:tirenvi.attrs[1]
 sleep 1m
 "                              2, 3, 8
 
