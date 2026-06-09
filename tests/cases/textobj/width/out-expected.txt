@@ -32,7 +32,18 @@ markdown
 
 --- width = 2, 3, 8 ---
 === MESSAGE ===
+{'columns': [{'width': 9}, {'width': 5}, {'width': 8}], 'range': {'first': 2, 'last': 8}}
+{'columns': [{'width': 18}, {'width': 5}, {'width': 8}], 'range': {'first': 2, 'last': 8}}
+{'columns': [{'width': 23}, {'width': 5}, {'width': 8}], 'range': {'first': 2, 'last': 8}}
+{'columns': [{'width': 24}, {'width': 5}, {'width': 8}], 'range': {'first': 2, 'last': 8}}
 7 changes; before #6  0 seconds ago
+{'columns': [{'width': 23}, {'width': 5}, {'width': 8}], 'range': {'first': 2, 'last': 8}}
+{'columns': [{'width': 13}, {'width': 5}, {'width': 8}], 'range': {'first': 2, 'last': 8}}
+{'columns': [{'width': 13}, {'width': 5}, {'width': 8}], 'range': {'first': 2, 'last': 8}}
+{'columns': [{'width': 13}, {'width': 5}, {'width': 8}], 'range': {'first': 2, 'last': 8}}
+{'columns': [{'width': 2}, {'width': 5}, {'width': 8}], 'range': {'first': 2, 'last': 14}}
+{'columns': [{'width': 2}, {'width': 5}, {'width': 8}], 'range': {'first': 2, 'last': 14}}
+{'columns': [{'width': 2}, {'width': 3}, {'width': 8}], 'range': {'first': 2, 'last': 14}}
 
 === DISPLAY ===
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
