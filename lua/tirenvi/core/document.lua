@@ -49,6 +49,7 @@ local M = {}
 
 ---@class Attr_column
 ---@field width integer                 display width (logical column width)
+---@field fix_width integer             width for fix mode
 
 ---@alias Record Record_plain|Record_grid
 

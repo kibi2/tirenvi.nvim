@@ -69,6 +69,45 @@ local function buflines_to_bufdoc_attrs_driven(ctx, r_result)
     return bufdoc
 end
 
+local function apply_width_mode(bufnr, tirdoc)
+    --log.probe("apply_width_mode")
+    local width_mode = buffer.get(bufnr, buffer.IKEY.WIDTH_MODE)
+    --log.probe(width_mode)
+    Document.set_auto_attr(tirdoc)
+    if width_mode.mode == "fix" then
+        for _, block in ipairs(tirdoc.blocks) do
+            if block.kind == "grid" then
+                for _, column in ipairs(block.attr.columns or {}) do
+                    -- log.probe(column.width or "NIL")
+                    -- log.probe(column.fix_width or "NIL")
+                    column.width = column.fix_width or column.width
+                    -- log.probe(column.width or "NIL")
+                end
+            end
+        end
+    elseif width_mode.mode == "max" then
+        for _, block in ipairs(tirdoc.blocks) do
+            if block.kind == "grid" then
+                for _, column in ipairs(block.attr.columns or {}) do
+                    column.width = 0
+                end
+            end
+        end
+    elseif width_mode.mode == "fit" then
+        local size = buffer.get_text_width()
+        -- log.probe(size)
+        for _, block in ipairs(tirdoc.blocks) do
+            if block.kind == "grid" then
+                local ncol = block.attr.columns and #block.attr.columns or #block.records
+                local width = math.floor((size - ncol - 1) / ncol)
+                for _, column in ipairs(block.attr.columns or {}) do
+                    column.width = width
+                end
+            end
+        end
+    end
+end
+
 ---@param ctx Context
 ---@param r_result ReadResult
 ---@param doc Document
@@ -79,13 +118,14 @@ local function doc_to_buflines(ctx, r_result, doc, no_undo, no_normalize)
     if not doc._tir then
         tirdoc = Document.from_bufdoc(doc, no_normalize)
     end
-    Document.set_auto_attr(tirdoc)
+    apply_width_mode(ctx.bufnr, tirdoc)
     local bufdoc = Document.to_bufdoc(tirdoc)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[9]DOC ATTR:"))
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
     buf_state.set_buffer_flat(ctx.bufnr, false)
     attr_store.write(ctx.bufnr, attrs)
+    log.watch("ATTR", Attrs.debug_attrs(attrs, "[88]MODE:"))
     local buf_lines = buf_parser.unparse(bufdoc)
     if not util.same_str_array(buf_lines, r_result.lines) then
         local req_w = Request.new_writer(r_result.range, buf_lines, no_undo)
@@ -224,20 +264,21 @@ local function update_attrs(ctx, range3, r_result)
     reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
 end
 
+local function change_attrs_width(attrs, sel, width_op)
+    return Attrs.change_width(attrs, sel, width_op)
+end
+
 ---@param ctx Context
 ---@param sel Rect
 ---@param width_op WidthOp
 local function change_width(ctx, sel, width_op)
-    if has_dirty(ctx.bufnr, sel.row) then
-        error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
-    end
     expand_rect(ctx, sel.row)
     log.debug("row%s, col%s", Range.short(sel.row), Range.short(sel.col))
     local r_result = reader.read(ctx, sel.row)
-    if Attrs.change_width(r_result.attrs, sel, width_op) then
+    if change_attrs_width(r_result.attrs, sel, width_op) then
         local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
         doc_to_buflines(ctx, r_result, bufdoc)
-        buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, "fix")
+        log.watch("ATTR", Document.debug_attrs(bufdoc, "[88]MODE"))
     end
 end
 
@@ -317,11 +358,13 @@ end
 ---@param width_op WidthOp
 function M.cmd_width(ctx, sel, width_op)
     local now_mode = buffer.get(ctx.bufnr, buffer.IKEY.WIDTH_MODE)
-    if width_op.opts.repeatable then
-        change_width(ctx, sel, width_op)
-    end
     change_mode(ctx, width_op, now_mode)
-    if not (now_mode.mode == "fix" and width_op.opts.kind == "fix") then
+    if width_op.opts.repeatable then
+        if has_dirty(ctx.bufnr, sel.row) then
+            error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
+        end
+        change_width(ctx, sel, width_op)
+    else
         M.cmd_repair(ctx)
     end
 end
@@ -335,6 +378,7 @@ function M.cmd_repair(ctx, no_undo, no_normalize)
     end
     log.debug("===+=== START ===+=== %s[#%d] ===", "REPAIR", ctx.bufnr)
     local r_result = reader.read(ctx, Range.WHOLE)
+    log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[88]MODE:"))
     local bufdoc = buflines_to_bufdoc_attrs_driven(ctx, r_result)
     doc_to_buflines(ctx, r_result, bufdoc, no_undo, no_normalize)
 end

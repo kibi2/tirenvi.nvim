@@ -1,6 +1,6 @@
 === MESSAGE ===
-init {'mode': 'fit', 'width': 0, 'count': 0} {'mode': 'fit', 'width': 0, 'count': 0}
--> fix {'mode': 'fit', 'width': 0, 'count': 0} {'mode': 'fix'}
+init {'mode': 'fix', 'width': 0, 'count': 0} {'mode': 'fix', 'width': 0, 'count': 0}
+-> fix {'mode': 'fix', 'width': 0, 'count': 0} {'mode': 'fix'}
 -> max {'mode': 'fix'} {'mode': 'max'}
 -> fit 3 {'mode': 'max'} {'pages': 3, 'mode': 'fit', 'width': 1}
 -> fix 5 {'pages': 3, 'mode': 'fit', 'width': 1} {'mode': 'fix'}

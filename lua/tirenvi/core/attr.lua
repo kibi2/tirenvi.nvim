@@ -108,6 +108,7 @@ function M.get_width_array(columns)
     local widths = {}
     for _, column in ipairs(columns) do
         widths[#widths + 1] = column.width
+        widths[#widths + 1] = column.fix_width
     end
     return widths
 end

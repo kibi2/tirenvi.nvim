@@ -62,8 +62,8 @@ local initial_value  = {
 	[M.IKEY.ATTRS] = nil,
 	[M.IKEY.DIRTY] = nil,
 	[M.IKEY.FLAT] = nil,
-	[M.IKEY.WIDTH_MODE] = WidthModeState.new("fit"),
-	[M.IKEY.PREV_WIDTH_MODE] = WidthModeState.new("fit"),
+	[M.IKEY.WIDTH_MODE] = WidthModeState.new("fix"),
+	[M.IKEY.PREV_WIDTH_MODE] = WidthModeState.new("fix"),
 }
 
 -----------------------------------------------------------------------
@@ -309,6 +309,14 @@ end
 function M.set_cursor(winid, irow, icol)
 	winid = (winid == nil or winid == 0) and api.nvim_get_current_win() or winid
 	vim.api.nvim_win_set_cursor(winid, { irow, icol - 1 })
+end
+
+---@param winid integer|nil
+---@return integer
+function M.get_text_width(winid)
+	winid = (winid == nil or winid == 0) and api.nvim_get_current_win() or winid
+	local info = vim.fn.getwininfo(winid)[1]
+	return info.width - info.textoff
 end
 
 return M
