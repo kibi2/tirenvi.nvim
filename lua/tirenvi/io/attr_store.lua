@@ -47,15 +47,27 @@ local function set_fix_width(attrs)
     for _, attr in ipairs(attrs) do
         for _, column in ipairs(attr.columns or {}) do
             column.fix_width = column.width
+            column.width = nil
         end
     end
+end
+
+---@param bufnr number
+local function get_attrs(bufnr)
+    local attrs = buffer.get(bufnr, buffer.IKEY.ATTRS) or {}
+    local width_mode = buffer.get(bufnr, buffer.IKEY.WIDTH_MODE)
+    for _, attr in ipairs(attrs) do
+        for _, column in ipairs(attr.columns or {}) do
+            column.width = width_mode.mode == "fix" and column.fix_width or 0
+        end
+    end
+    return attrs
 end
 
 ---@param bufnr number
 ---@param attrs Attr[]|nil
 local function set_attrs(bufnr, attrs)
     local width_mode = buffer.get(bufnr, buffer.IKEY.WIDTH_MODE)
-    --log.probe(width_mode.mode)
     if width_mode.mode == "fix" then
         set_fix_width(attrs or {})
     end
@@ -73,15 +85,15 @@ end
 -----------------------------------------------------------------------
 
 ---@param bufnr number
----@param attrs Attr[]|nil
-function M.write(bufnr, attrs)
-    set_attrs(bufnr, attrs)
+---@return Attr[]
+function M.read(bufnr)
+    return get_attrs(bufnr)
 end
 
 ---@param bufnr number
----@return Attr[]
-function M.read(bufnr)
-    return buffer.get(bufnr, buffer.IKEY.ATTRS) or {}
+---@param attrs Attr[]|nil
+function M.write(bufnr, attrs)
+    set_attrs(bufnr, attrs)
 end
 
 return M

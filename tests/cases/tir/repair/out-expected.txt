@@ -6,7 +6,7 @@
 5 substitutions on 4 lines
 3 lines yanked
 3 more lines
-[{'range': {'first': 1, 'last': 2}}, {'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 11, 'width': 11}], 'range': {'first': 3, 'last': 5}}, {'range': {'first': 6, 'last': 6}}, {'columns': [{'fix_width': 6, 'width': 6}, {'fix_width': 3, 'width': 3}, {'fix_width': 12, 'width': 12}], 'range': {'first': 7, 'last': 9}}, {'range': {'first': 10, 'last': 11}}]
+[{'range': {'first': 1, 'last': 2}}, {'columns': [{'fix_width': 5}, {'fix_width': 3}, {'fix_width': 11}], 'range': {'first': 3, 'last': 5}}, {'range': {'first': 6, 'last': 6}}, {'columns': [{'fix_width': 6}, {'fix_width': 3}, {'fix_width': 12}], 'range': {'first': 7, 'last': 9}}, {'range': {'first': 10, 'last': 11}}]
 
 === DISPLAY ===
 gfm
@@ -23,7 +23,7 @@ markdQWwn
 
 --- after format ---
 === MESSAGE ===
-[{'range': {'first': 1, 'last': 2}}, {'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 11, 'width': 11}], 'range': {'first': 3, 'last': 7}}, {'range': {'first': 8, 'last': 8}}, {'columns': [{'fix_width': 6, 'width': 6}, {'fix_width': 3, 'width': 3}, {'fix_width': 12, 'width': 12}], 'range': {'first': 9, 'last': 11}}, {'range': {'first': 12, 'last': 13}}]
+[{'range': {'first': 1, 'last': 2}}, {'columns': [{'fix_width': 5}, {'fix_width': 3}, {'fix_width': 11}], 'range': {'first': 3, 'last': 7}}, {'range': {'first': 8, 'last': 8}}, {'columns': [{'fix_width': 6}, {'fix_width': 3}, {'fix_width': 12}], 'range': {'first': 9, 'last': 11}}, {'range': {'first': 12, 'last': 13}}]
 
 === DISPLAY ===
 gfm

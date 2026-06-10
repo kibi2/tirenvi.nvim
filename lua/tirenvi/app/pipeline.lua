@@ -70,32 +70,15 @@ local function buflines_to_bufdoc_attrs_driven(ctx, r_result)
 end
 
 local function apply_width_mode(bufnr, tirdoc)
-    --log.probe("apply_width_mode")
     local width_mode = buffer.get(bufnr, buffer.IKEY.WIDTH_MODE)
-    --log.probe(width_mode)
-    Document.set_auto_attr(tirdoc)
     if width_mode.mode == "fix" then
-        for _, block in ipairs(tirdoc.blocks) do
-            if block.kind == "grid" then
-                for _, column in ipairs(block.attr.columns or {}) do
-                    -- log.probe(column.width or "NIL")
-                    -- log.probe(column.fix_width or "NIL")
-                    column.width = column.fix_width or column.width
-                    -- log.probe(column.width or "NIL")
-                end
-            end
-        end
+        Document.set_auto_attr(tirdoc)
     elseif width_mode.mode == "max" then
-        for _, block in ipairs(tirdoc.blocks) do
-            if block.kind == "grid" then
-                for _, column in ipairs(block.attr.columns or {}) do
-                    column.width = 0
-                end
-            end
-        end
+        Document.set_auto_attr(tirdoc)
+    elseif width_mode.mode == "auto" then
+        Document.set_auto_attr(tirdoc)
     elseif width_mode.mode == "fit" then
         local size = buffer.get_text_width()
-        -- log.probe(size)
         for _, block in ipairs(tirdoc.blocks) do
             if block.kind == "grid" then
                 local ncol = block.attr.columns and #block.attr.columns or #block.records
@@ -260,8 +243,8 @@ local function update_attrs(ctx, range3, r_result)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
     local attrs = reconcile_attrs(r_result, bufdoc, range3)
     buf_state.set_buffer_flat(ctx.bufnr, false)
-    attr_store.write(ctx.bufnr, attrs)
     reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
+    attr_store.write(ctx.bufnr, attrs)
 end
 
 local function change_attrs_width(attrs, sel, width_op)
@@ -277,6 +260,7 @@ local function change_width(ctx, sel, width_op)
     local r_result = reader.read(ctx, sel.row)
     if change_attrs_width(r_result.attrs, sel, width_op) then
         local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
+        log.watch("ATTR", Document.debug_attrs(bufdoc, "[88]MODE"))
         doc_to_buflines(ctx, r_result, bufdoc)
         log.watch("ATTR", Document.debug_attrs(bufdoc, "[88]MODE"))
     end
