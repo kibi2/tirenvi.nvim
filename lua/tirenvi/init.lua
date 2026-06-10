@@ -157,7 +157,7 @@ end
 
 ---@param ctx Context
 ---@param range3 Range3|nil
-function M.check_and_repair(ctx, range3)
+function M.on_insert_leave(ctx, range3)
 	pipeline.check_and_repair(ctx, range3)
 end
 

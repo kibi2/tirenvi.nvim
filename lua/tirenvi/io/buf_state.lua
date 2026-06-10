@@ -193,7 +193,7 @@ function M.debug_state(bufnr)
 	local ctx = Context.from_buf(bufnr)
 	local allow_plain = Context.is_allow_plain(ctx)
 	local flat
-	local is_flat = buffer.get(bufnr, buffer.IKEY.FLAT)
+	local is_flat = M.is_flat(bufnr)
 	if is_flat == nil then
 		flat = "NIL"
 	else

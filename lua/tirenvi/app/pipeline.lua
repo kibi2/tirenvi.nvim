@@ -7,6 +7,7 @@ local Bufline = require("tirenvi.core.bufline")
 local dirty_range = require("tirenvi.core.dirty_range")
 local Request = require("tirenvi.app.request")
 local WidthModeState = require("tirenvi.width.state")
+local width_layout = require("tirenvi.width.layout")
 local flat_parser = require("tirenvi.parser.flat_parser")
 local buf_parser = require("tirenvi.parser.buf_parser")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
@@ -71,24 +72,7 @@ end
 
 local function apply_width_mode(bufnr, tirdoc)
     local width_mode = buffer.get(bufnr, buffer.IKEY.WIDTH_MODE)
-    if width_mode.mode == "fix" then
-        Document.set_auto_attr(tirdoc)
-    elseif width_mode.mode == "max" then
-        Document.set_auto_attr(tirdoc)
-    elseif width_mode.mode == "auto" then
-        Document.set_auto_attr(tirdoc)
-    elseif width_mode.mode == "fit" then
-        local size = buffer.get_text_width()
-        for _, block in ipairs(tirdoc.blocks) do
-            if block.kind == "grid" then
-                local ncol = block.attr.columns and #block.attr.columns or #block.records
-                local width = math.floor((size - ncol - 1) / ncol)
-                for _, column in ipairs(block.attr.columns or {}) do
-                    column.width = width
-                end
-            end
-        end
-    end
+    width_layout.compute(width_mode, tirdoc)
 end
 
 ---@param ctx Context
@@ -242,7 +226,6 @@ local function update_attrs(ctx, range3, r_result)
     local bufdoc = buf_parser.parse(ctx, r_result, opts)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
     local attrs = reconcile_attrs(r_result, bufdoc, range3)
-    buf_state.set_buffer_flat(ctx.bufnr, false)
     reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
     attr_store.write(ctx.bufnr, attrs)
 end

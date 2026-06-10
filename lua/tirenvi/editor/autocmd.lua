@@ -50,7 +50,6 @@ local function on_lines(_, bufnr, tick, range3, bytecount)
 	debug.ui_entry(bufnr, Range3.short(range3))
 	init.on_lines(ctx, range3)
 	debug.ui_exit(bufnr, Range3.short(range3))
-	init.check_and_repair(ctx, range3)
 end
 
 ---@param bufnr number
@@ -85,7 +84,7 @@ end
 
 ---@param ctx Context
 local function on_insert_leave(ctx)
-	init.check_and_repair(ctx)
+	init.on_insert_leave(ctx)
 end
 
 ---@param ctx Context
