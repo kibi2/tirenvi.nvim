@@ -191,17 +191,6 @@ local function repair_request(ctx, range3)
     end
 end
 
----@param bufnr number
----@param range Range|nil
----@return boolean
-local function has_dirty(bufnr, range)
-    local dirty_ranges = dirty.get_ranges(bufnr)
-    if range then
-        dirty_ranges = Range.slice(dirty_ranges, range)
-    end
-    return #dirty_ranges > 0
-end
-
 ---@param ctx Context
 ---@return boolean
 local function need_repair(ctx)

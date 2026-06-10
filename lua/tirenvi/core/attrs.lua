@@ -18,7 +18,7 @@ local function connect(self)
     local attrs = { self[1] }
     for iattr = 2, #self do
         local attr = self[iattr]
-        if Attr.is_same_columns(attrs[#attrs], attr) then
+        if Attr.is_same_ncol(attrs[#attrs], attr) then
             attrs[#attrs].range.last = attr.range.last
         else
             attrs[#attrs + 1] = attr
