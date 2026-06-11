@@ -24,6 +24,9 @@ M.setup({
 		probe = true,
 		output = "print",
 	},
+  table = {
+    width_mode = "fix"
+  }
 })
 vim.g.tirenvi_initialized = false
 local buffer = require("tirenvi.io.buffer")

@@ -45,7 +45,7 @@ M.IKEY               = {
 	-- buffer is flat or tir-buffer
 	FLAT = "flat",
 
-	-- Width_mode
+	-- WidthMode
 	WIDTH_MODE = "width_mode",
 
 	-- previous Width_mode
@@ -62,8 +62,8 @@ local initial_value  = {
 	[M.IKEY.ATTRS] = nil,
 	[M.IKEY.DIRTY] = nil,
 	[M.IKEY.FLAT] = nil,
-	[M.IKEY.WIDTH_MODE] = WidthModeState.new("fix"),
-	[M.IKEY.PREV_WIDTH_MODE] = WidthModeState.new("fix"),
+	[M.IKEY.WIDTH_MODE] = nil,
+	[M.IKEY.PREV_WIDTH_MODE] = nil,
 }
 
 -----------------------------------------------------------------------
@@ -167,6 +167,8 @@ end
 function M.get_state(bufnr)
 	bufnr = M.normalize_bufnr(bufnr)
 	if not b[bufnr].tirenvi then
+		initial_value.width_mode = WidthModeState.new(config.table.width_mode)
+		initial_value.prev_width_mode = WidthModeState.new(config.table.width_mode)
 		b[bufnr].tirenvi = initial_value
 	end
 	return b[bufnr].tirenvi

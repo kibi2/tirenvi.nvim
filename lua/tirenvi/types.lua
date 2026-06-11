@@ -7,7 +7,8 @@
 ---@field line_count fun(): integer
 ---@field get_lines fun(first: integer, last: integer): string[]
 
----@alias Width_mode
+---@alias WidthMode
+---| "auto"
 ---| "fit"
 ---| "max"
 ---| "fix"

@@ -1,6 +1,7 @@
 -----------------------------------------------------------------------
 -- Dependencies
 -----------------------------------------------------------------------
+local config = require("tirenvi.config")
 local Document = require("tirenvi.core.document")
 local Attrs = require("tirenvi.core.attrs")
 local Bufline = require("tirenvi.core.bufline")
@@ -17,10 +18,9 @@ local writer = require("tirenvi.io.writer")
 local attr_store = require("tirenvi.io.attr_store")
 local reader = require("tirenvi.io.reader")
 local dirty = require("tirenvi.io.dirty")
+local util = require("tirenvi.util.util")
 local Range = require("tirenvi.util.range")
 local Range3 = require("tirenvi.util.range3")
-local errors = require("tirenvi.util.errors")
-local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
 
 -----------------------------------------------------------------------

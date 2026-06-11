@@ -30,8 +30,9 @@ local function fit(tirdoc, ratio)
             local ncol = block.attr.columns and #block.attr.columns or #block.records
             local width = math.floor((size - ncol - 1) / ncol)
             for _, column in ipairs(block.attr.columns or {}) do
-                local auto = math.floor(math.max(column.width, 1) * ratio)
-                column.width = math.min(width, auto)
+                local auto_plus = math.floor(math.max(column.width, 1) * ratio)
+                auto_plus = math.min(auto_plus, 6)
+                column.width = math.min(width, column.width + auto_plus)
             end
         end
     end
@@ -40,7 +41,7 @@ end
 ---@param tirdoc Document
 local function auto(tirdoc)
     max(tirdoc)
-    fit(tirdoc, 1.5)
+    fit(tirdoc, 0.5)
 end
 
 -----------------------------------------------------------------------

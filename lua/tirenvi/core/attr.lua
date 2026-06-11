@@ -157,7 +157,7 @@ function M:set_ncol(ncol)
         return
     end
     for icol = 1, ncol do
-        self.columns[icol] = { fix_width = -1, width = -1 }
+        self.columns[icol] = { fix_width = 0, width = 0 }
     end
 end
 
