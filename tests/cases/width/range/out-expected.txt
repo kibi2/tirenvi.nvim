@@ -2,8 +2,8 @@
 --- width = 5, 6 / 5, 3, 6 ---
 === MESSAGE ===
 tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
-{'columns': [{'fix_width': 5}, {'fix_width': 6}], 'range': {'first': 2, 'last': 6}}
-{'columns': [{'fix_width': 5}, {'fix_width': 3}, {'fix_width': 6}], 'range': {'first': 8, 'last': 12}}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 6, 'width': 6}], 'range': {'first': 2, 'last': 6}}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 6, 'width': 6}], 'range': {'first': 8, 'last': 12}}
 
 === DISPLAY ===
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
@@ -23,8 +23,8 @@ tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
 
 --- width = 8, 8 / 5, 3, 6 ---
 === MESSAGE ===
-{'columns': [{'fix_width': 8}, {'fix_width': 8}], 'range': {'first': 2, 'last': 6}}
-{'columns': [{'fix_width': 5}, {'fix_width': 3}, {'fix_width': 6}], 'range': {'first': 8, 'last': 12}}
+{'columns': [{'fix_width': 8, 'width': 8}, {'fix_width': 8, 'width': 8}], 'range': {'first': 2, 'last': 6}}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 6, 'width': 6}], 'range': {'first': 8, 'last': 12}}
 
 === DISPLAY ===
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
@@ -44,8 +44,8 @@ tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
 
 --- width = 6, 6 / 3, 2, 4 ---
 === MESSAGE ===
-{'columns': [{'fix_width': 6}, {'fix_width': 6}], 'range': {'first': 2, 'last': 6}}
-{'columns': [{'fix_width': 3}, {'fix_width': 2}, {'fix_width': 4}], 'range': {'first': 8, 'last': 17}}
+{'columns': [{'fix_width': 6, 'width': 6}, {'fix_width': 6, 'width': 6}], 'range': {'first': 2, 'last': 6}}
+{'columns': [{'fix_width': 3, 'width': 3}, {'fix_width': 2, 'width': 2}, {'fix_width': 4, 'width': 4}], 'range': {'first': 8, 'last': 17}}
 
 === DISPLAY ===
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0

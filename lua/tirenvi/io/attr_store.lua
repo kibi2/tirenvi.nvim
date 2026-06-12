@@ -1,10 +1,7 @@
 local config = require("tirenvi.config")
 local Attr = require("tirenvi.core.attr")
-local Attrs = require("tirenvi.core.attrs")
-local bufline = require("tirenvi.core.bufline")
 local namespaces = require("tirenvi.io.namespaces")
 local buffer = require("tirenvi.io.buffer")
-local buf_state = require("tirenvi.io.buf_state")
 local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
@@ -47,21 +44,8 @@ local function set_fix_width(attrs)
     for _, attr in ipairs(attrs) do
         for _, column in ipairs(attr.columns or {}) do
             column.fix_width = column.width
-            column.width = nil
         end
     end
-end
-
----@param bufnr number
-local function get_attrs(bufnr)
-    local attrs = buffer.get(bufnr, buffer.IKEY.ATTRS) or {}
-    local width_mode = buffer.get(bufnr, buffer.IKEY.WIDTH_MODE)
-    for _, attr in ipairs(attrs) do
-        for _, column in ipairs(attr.columns or {}) do
-            column.width = width_mode.mode == "fix" and column.fix_width or 0
-        end
-    end
-    return attrs
 end
 
 ---@param bufnr number
@@ -87,7 +71,7 @@ end
 ---@param bufnr number
 ---@return Attr[]
 function M.read(bufnr)
-    return get_attrs(bufnr)
+    return buffer.get(bufnr, buffer.IKEY.ATTRS) or {}
 end
 
 ---@param bufnr number

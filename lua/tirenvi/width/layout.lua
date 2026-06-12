@@ -1,4 +1,5 @@
 local Document = require("tirenvi.core.document")
+local Bolck    = require("tirenvi.core.block")
 local buffer   = require("tirenvi.io.buffer")
 local log      = require("tirenvi.util.log")
 
@@ -17,6 +18,13 @@ end
 
 ---@param tirdoc Document
 local function max(tirdoc)
+    for _, block in ipairs(tirdoc.blocks) do
+        if block.kind == "grid" then
+            for _, column in ipairs(block.attr.columns) do
+                column.width = 0
+            end
+        end
+    end
     Document.set_auto_attr(tirdoc)
 end
 
