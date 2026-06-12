@@ -1,5 +1,6 @@
 local Document = require("tirenvi.core.document")
-local Bolck    = require("tirenvi.core.block")
+local Cell     = require("tirenvi.core.cell")
+local Attr     = require("tirenvi.core.attr")
 local buffer   = require("tirenvi.io.buffer")
 local log      = require("tirenvi.util.log")
 
@@ -10,6 +11,24 @@ local M        = {}
 -----------------------------------------------------------------------
 -- Private helpers
 -----------------------------------------------------------------------
+
+---@param columns { width: integer }[]
+---@return integer[]
+local function sort_column_indices(columns)
+    local indices = {}
+    for index = 1, #columns do
+        indices[index] = index
+    end
+    table.sort(indices, function(index1, index2)
+        local width1 = columns[index1].width
+        local width2 = columns[index2].width
+        if width1 ~= width2 then
+            return width1 > width2
+        end
+        return index1 > index2
+    end)
+    return indices
+end
 
 ---@param tirdoc Document
 local function fix(tirdoc)
@@ -36,21 +55,37 @@ local function max(tirdoc)
 end
 
 ---@param block Block
----@param size integer
-local function fit_block(block, size)
-    local ncol = block.attr.columns and #block.attr.columns or #block.records
-    local width = math.floor((size - ncol - 1) / ncol)
-    for _, column in ipairs(block.attr.columns or {}) do
-        column.width = width
+---@param win_size integer
+---@return integer
+local function get_size(block, win_size)
+    local columns = block.attr.columns
+    local ncol = columns and #columns or #block.records
+    return win_size - ncol - 1
+end
+
+---@param block Block
+---@param win_size integer
+local function fit_block(block, win_size)
+    local total = Attr.get_total_width(block.attr)
+    local columns = block.attr.columns
+    local size = get_size(block, win_size)
+    for _, column in ipairs(columns or {}) do
+        column.width = math.max(math.ceil(size * column.width / total), Cell.MIN_WIDTH)
+    end
+    local indieces = sort_column_indices(columns)
+    local over = Attr.get_total_width(block.attr) - size
+    for index = 1, over do
+        columns[indieces[index]].width = math.max(columns[indieces[index]].width - 1, Cell.MIN_WIDTH)
     end
 end
 
 ---@param tirdoc Document
 local function fit(tirdoc)
-    local size = buffer.get_text_width()
+    local win_size = buffer.get_win_width()
+    Document.set_max_attr(tirdoc)
     for _, block in ipairs(tirdoc.blocks) do
         if block.kind == "grid" then
-            fit_block(block, size)
+            fit_block(block, win_size)
             log.watch("ATTR", Document.debug_attrs(tirdoc, "[88]MODE"))
         end
     end

@@ -108,7 +108,7 @@ function M.get_width_array(columns)
     local widths = {}
     for _, column in ipairs(columns) do
         widths[#widths + 1] = column.width
-        widths[#widths + 1] = column.fix_width
+        -- widths[#widths + 1] = column.fix_width
     end
     return widths
 end
@@ -159,6 +159,16 @@ function M:set_ncol(ncol)
     for icol = 1, ncol do
         self.columns[icol] = { fix_width = 0, width = 0 }
     end
+end
+
+---@param self Attr
+---@return integer
+function M:get_total_width()
+    local total = 0
+    for _, column in ipairs(self.columns) do
+        total = total + column.width
+    end
+    return total
 end
 
 return M

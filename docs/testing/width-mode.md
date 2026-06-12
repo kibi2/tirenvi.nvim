@@ -34,19 +34,14 @@
 * 列の最小幅は2
 * fitで指定画面内に収まらない場合は全ての列幅が2になる
 
-### fit アルゴリズム:貪欲法
+### fit アルゴリズム
 * 現在表示している範囲を計算対象とする
 * natural_width[i] を計算
-* wrapなしで収まる場合: natural_total <= width * pages
-  * 残り幅分配処理へ
-* 最小幅2で開始
-* 残り幅が分配できる間、行数を減らす方向で分配する
-  * 列毎にwrap行が最大のセルを選び出す(そのセルがその列のボトルネックとみなす)
-  * 列毎にそのセルの行数を減らす最小増加幅を求める
-  * 最小増加幅が分配可能であればその列に分配する
-  * 複数ある場合、減少行数の多いもの、左側の順で優先
-* 残り幅分配処理
-  * 比例配分(配分量が1以下なら1、floor、現在幅が小さい順)して終了
+* 比例配分(切り上げ)する
+* はみ出している場合は幅を1だけ削る
+* 削る列は次の順番
+  * 幅の広い順
+  * 同じ場合は右側
 
 ### auto アルゴリズム
 * fitを基準とする
@@ -74,5 +69,5 @@
 |  | Tir width mode= | fit,fix, max,auto | width_mode=fit, fix, max, auto | 26/06/07 |  | feat: implement width mode switching |
 |  |  | width toggle | max <-> fit, auto, fix | 26/06/08 |  | feat(width): add width mode toggle command |
 |  | width-mode=max | repair | width = no wrap | 26/0/6/12 |  | feat: implement width max mode with no-wrap column sizing |
-|  | fit | pages省略 |  |  |  |  |
+|  | fit | pages省略 | 画面サイズに表が収まる | 26/06/13 |  | feat: use fit width mode when pages width is omitted |
 

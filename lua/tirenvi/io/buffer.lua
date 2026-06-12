@@ -315,7 +315,7 @@ end
 
 ---@param winid integer|nil
 ---@return integer
-function M.get_text_width(winid)
+function M.get_win_width(winid)
 	winid = (winid == nil or winid == 0) and api.nvim_get_current_win() or winid
 	local info = vim.fn.getwininfo(winid)[1]
 	return info.width - info.textoff

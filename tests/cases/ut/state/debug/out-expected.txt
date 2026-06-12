@@ -1,7 +1,7 @@
 === MESSAGE ===
 [TIR][DEBUG][buffer.lua === cache[#1] lines[1]='----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0'...[14]=''
-[TIR][ATTR][reader.lua [0]CHACHED ATTRS: p(1,1) g(2,6)[5,5,6,6] p(7,7) g(8,12)[5,5,3,3,6,6]
-[TIR][ATTR][[string ":lua"] UPDATE CHACHED ATTRS: p(1,1) g(2,6)[5,5,6,6] p(7,7) g(8,12)[5,5,3,3,6,6]
+[TIR][ATTR][reader.lua [0]CHACHED ATTRS: p(1,1) g(2,6)[5,6] p(7,7) g(8,12)[5,3,6]
+[TIR][ATTR][[string ":lua"] UPDATE CHACHED ATTRS: p(1,1) g(2,6)[5,6] p(7,7) g(8,12)[5,3,6]
 [TIR][ATTR][[string ":lua"] 1DOC ATTR: p(1,1) g(2,6) p(7,7) g(8,12)
 
 === DISPLAY ===

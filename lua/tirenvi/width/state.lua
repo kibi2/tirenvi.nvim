@@ -21,8 +21,7 @@ local M   = {}
 ---@return WidthModeState
 function M.new(mode)
     assert(mode == "auto" or mode == "fit" or mode == "max" or mode == "fix")
-    local self = { mode = mode, count = 0, width = 0 }
-    return self
+    return { mode = mode, count = 0, width = 0 }
 end
 
 return M
