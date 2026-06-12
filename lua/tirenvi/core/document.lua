@@ -216,7 +216,7 @@ function M.infer_consistent_attr(bufdoc)
 end
 
 ---@param bufdoc Document
-function M.set_auto_attr(bufdoc)
+function M.set_max_attr(bufdoc)
     --log.assert(not bufdoc._tir, "set_auto_attr should be called only for bufdoc")
     Blocks.set_auto_attr(bufdoc.blocks)
     log.watch("ATTR", M.debug_attrs(bufdoc, "[5]AUTO ATTR:"))

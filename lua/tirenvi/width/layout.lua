@@ -13,7 +13,7 @@ local M        = {}
 
 ---@param tirdoc Document
 local function fix(tirdoc)
-    Document.set_auto_attr(tirdoc)
+    Document.set_max_attr(tirdoc)
 end
 
 ---@param tirdoc Document
@@ -25,7 +25,7 @@ local function max(tirdoc)
             end
         end
     end
-    Document.set_auto_attr(tirdoc)
+    Document.set_max_attr(tirdoc)
 end
 
 ---@param tirdoc Document

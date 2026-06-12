@@ -149,7 +149,7 @@ local function reconcile_attrs(r_result, bufdoc, range3)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[3]CONSISTENT:"))
     Document.apply_attrs(bufdoc, r_result.attrs)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[4]CACHED:"))
-    Document.set_auto_attr(bufdoc)
+    Document.set_max_attr(bufdoc)
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[6]RESULT:"))
     return attrs
