@@ -283,8 +283,8 @@ function M.grid:infer_consistent_attr()
 end
 
 ---@self Block_grid
-function M.grid:set_auto_attr()
-    Attr.grid.set_auto_attr(self.attr, self.records)
+function M.grid:set_max_attr()
+    Attr.grid.set_max_attr(self.attr, self.records)
 end
 
 ---@self Block_grid

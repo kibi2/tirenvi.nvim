@@ -70,7 +70,7 @@ end
 
 ---@self Attr
 ---@param records Record_grid[]
-function M.grid:set_auto_attr(records)
+function M.grid:set_max_attr(records)
     local ncol = #self.columns
     if ncol == 0 then
         ncol = Record.get_max_ncol(records)

@@ -218,8 +218,8 @@ end
 ---@param bufdoc Document
 function M.set_max_attr(bufdoc)
     --log.assert(not bufdoc._tir, "set_auto_attr should be called only for bufdoc")
-    Blocks.set_auto_attr(bufdoc.blocks)
-    log.watch("ATTR", M.debug_attrs(bufdoc, "[5]AUTO ATTR:"))
+    Blocks.set_max_attr(bufdoc.blocks)
+    log.watch("ATTR", M.debug_attrs(bufdoc, "[5]MAX ATTR:"))
 end
 
 ---@param doc Document
