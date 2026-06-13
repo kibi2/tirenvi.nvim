@@ -1,5 +1,3 @@
-" Change a file name with an extension to one without an extension.
-
 source $TIRENVI_ROOT/tests/common.vim
 let outfile = 'gen.foo'
 

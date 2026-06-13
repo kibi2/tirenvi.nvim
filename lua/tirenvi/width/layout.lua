@@ -56,20 +56,20 @@ local function max(tirdoc)
 end
 
 ---@param block Block
----@param win_size integer
+---@param win_width integer
 ---@return integer
-local function get_size(block, win_size)
+local function get_size(block, win_width)
     local columns = block.attr.columns
     local ncol = columns and #columns or #block.records
-    return win_size - ncol - 1
+    return win_width - ncol - 1
 end
 
 ---@param block Block
----@param win_size integer
-local function fit_block(block, win_size)
+---@param win_width integer
+local function fit_block(block, win_width)
     local total = Attr.get_total_width(block.attr)
     local columns = block.attr.columns
-    local size = get_size(block, win_size)
+    local size = get_size(block, win_width)
     for _, column in ipairs(columns or {}) do
         column.width = math.max(math.ceil(size * column.width / total), Cell.MIN_WIDTH)
     end
@@ -85,11 +85,11 @@ end
 local function fit(tirdoc, width_mode)
     local pages = width_mode.pages or 1
     local width = width_mode.width or buffer.get_win_width()
-    local win_size = pages * width
+    local win_width = pages * width
     Document.set_max_attr(tirdoc)
     for _, block in ipairs(tirdoc.blocks) do
         if block.kind == "grid" then
-            fit_block(block, win_size)
+            fit_block(block, win_width)
             log.watch("ATTR", Document.debug_attrs(tirdoc, "[88]MODE"))
         end
     end
@@ -97,34 +97,49 @@ end
 
 ---@param column Attr_column
 ---@param max Attr_column
----@param win_size integer
-local function auto_attr(column, max, win_size)
+local function auto_expand(column, max)
+    local delta = column.width - max.width
+    local delta = math.min(delta, 6, math.ceil(max.width / 3))
+    column.width = max.width + delta
+end
+
+---@param column Attr_column
+---@param max Attr_column
+---@param win_width integer
+local function auto_shrink(column, max, win_width)
+    local width = math.sqrt(max.width * 3 / 2)
+    column.width = math.max(column.width, math.ceil(width))
+    column.width = math.min(column.width, math.floor(win_width / 4))
+end
+
+---@param column Attr_column
+---@param max Attr_column
+---@param win_width integer
+local function auto_attr(column, max, win_width)
     if column.width > max.width then
-        local delta = column.width - max.width
-        local delta = math.min(delta, 6, math.ceil(max.width / 3))
-        column.width = max.width + delta
+        auto_expand(column, max)
+    else
+        auto_shrink(column, max, win_width)
     end
 end
 
 ---@param block Block
----@param win_size integer
-local function auto_block(block, win_size)
+---@param win_width integer
+local function auto_block(block, win_width)
     local max_columns = vim.deepcopy(block.attr.columns)
-    fit_block(block, win_size)
-    log.probe(block.attr.columns)
-    log.probe(max_columns)
+    fit_block(block, win_width)
     for icol = 1, #max_columns do
-        auto_attr(block.attr.columns[icol], max_columns[icol], win_size)
+        auto_attr(block.attr.columns[icol], max_columns[icol], win_width)
     end
 end
 
 ---@param tirdoc Document
 local function auto(tirdoc)
     Document.set_max_attr(tirdoc)
-    local win_size = buffer.get_win_width()
+    local win_width = buffer.get_win_width()
     for _, block in ipairs(tirdoc.blocks) do
         if block.kind == "grid" then
-            auto_block(block, win_size)
+            auto_block(block, win_width)
         end
     end
 end

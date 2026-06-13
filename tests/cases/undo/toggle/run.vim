@@ -1,6 +1,3 @@
-" Verify the screen display after executing the Tir toggle command.
-" Display in the tir-vim file format.
-
 source $TIRENVI_ROOT/tests/common.vim
 let outfile = 'gen.csv'
 
