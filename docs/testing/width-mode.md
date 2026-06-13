@@ -2,37 +2,37 @@
 
 ## width mode
 
-* fit mode:画面幅にfitし全ての列を見渡せるようにする。俯瞰して把握する。
-  * 列全体を見渡して修正場所と修正内容を考えるため
-* max mode:wrapしない状態にする。セル内改行はそのまま表示する
-  * wrapしているとvimコマンド実行時に邪魔になり十分活用できないため
+* fix: 列幅固定。幅はユーザーが変更可能
+  * セル内の文字数増減により幅は変化しないが行数が変化する
+* max: 行数固定。セル内でwrapしない様に列幅を自動調整する
+  * セル内の文字数増減により幅は変化するが改行以外で行数は変化しない
+* fit: 表幅が指定幅に収まる様に列幅を自動調整する
+  * セル内の文字数増減により行数・列幅は変化するが表幅は変化しない
+  * 指定幅で表示できない場合は表幅を自動的に拡大する
+  * 列数が増えた場合に表幅が増えることがある
+* auto: 見やすさ優先。画面内になるべく多くの情報を表示する
+  * 見やすさを優先して列幅を自動調整する
+  * セル内の文字数増減により列幅、行数、表幅が可変
 
 ### command
 
 ```
- b:tirenvi.width_mode = WidthModeState
- b:tirenvi.prev_width_mode = WidthModeState
- ---@class WidthModeState
- ---@field mode WidthMode fit|max|auto|fix
- ---@field pages? integer
- ---@field width? integer
- 
- :Tir width fit [pages] [width] : -> fit mode。横幅をpages*widthにする。省略時pages=1,width=画面横幅
- :Tir width max : -> max mode。wrapなしにする。ただしセル内改行はそのまま表示する
- :Tir width fix : -> fix mode。固定幅(前回のfix幅、なければ今の幅)
- :Tir width auto : -> auto mode。編集性を優先し、縦横比と最大列幅の制約下で列幅を最適化する
+ :Tir width fix : -> fix mode。列幅固定
+ :Tir width max : -> max mode。行数固定
+ :Tir width fit [pages] [width] : -> fit mode。表横幅をpages*widthにする。省略時pages=1,width=画面横幅
+ :Tir width auto : -> auto mode。見やすさ優先
  :Tir width toggle : 今のモードとmaxを切り替える
  :Tir width[=+-][n] : fix mode。今の列幅に対して列幅を指定・増減する
 ```
 
-* fit, max はコマンド実行時に見えている行で幅を計算する
-  * 見えないところに非常に長い文字列があっても考慮しない
-  * コマンド実行後見えなかった行が見える様になるかもしれないが、そこは考慮しない
-* スクロールしても表の幅は変化しない
 * 画面横幅を変更しても表の幅は変化しない
 * 再度fitしたい場合はTir repairを実行する
 * 列の最小幅は2
 * fitで指定画面内に収まらない場合は全ての列幅が2になる
+* fit, max はコマンド実行時に見えている行で幅を計算する
+  * 見えないところに非常に長い文字列があっても考慮しない
+  * コマンド実行後見えなかった行が見える様になるかもしれないが、そこは考慮しない
+* スクロールしても表の幅は変化しない
 
 ### fit アルゴリズム
 * 現在表示している範囲を計算対象とする
@@ -71,4 +71,5 @@
 |  | width-mode=max | repair | width = no wrap | 26/0/6/12 |  | feat: implement width max mode with no-wrap column sizing |
 |  | fit | pages省略 | 画面サイズに表が収まる | 26/06/13 |  | feat: use fit width mode when pages width is omitted |
 |  | fit | pages,width指定 | 画面サイズに表が収まる | 26/06/13 |  | feat: implement fit width calculation for pages |
+|  |  | auto | 画面サイズに表が収まる | 26/06/13 |  | feat: implement auto width |
 

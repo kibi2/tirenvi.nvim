@@ -66,6 +66,40 @@ end
 
 ---@param block Block
 ---@param win_width integer
+local function fit_auto_block(block, win_width)
+    local total = 0
+    local logws = {}
+    for _, column in ipairs(block.attr.columns) do
+        -- local logw = math.log(column.width)
+        local logw = column.width
+        logws[#logws + 1] = logw
+        total = total + logw
+    end
+    local columns = block.attr.columns
+    local size = get_size(block, win_width)
+    for icol = 1, #columns do
+        columns[icol].width = math.max(math.ceil(size * logws[icol] / total), Cell.MIN_WIDTH)
+    end
+    local indieces = sort_column_indices(columns)
+    local over = math.min(Attr.get_total_width(block.attr) - size, #columns)
+    for index = 1, over do
+        columns[indieces[index]].width = math.max(columns[indieces[index]].width - 1, Cell.MIN_WIDTH)
+    end
+end
+
+---@param attr Attr
+---@param size integer
+local function shrink_to_fit(attr, size)
+    local columns = attr.columns
+    local indieces = sort_column_indices(columns)
+    local over = math.min(Attr.get_total_width(attr) - size, #columns)
+    for index = 1, over do
+        columns[indieces[index]].width = math.max(columns[indieces[index]].width - 1, Cell.MIN_WIDTH)
+    end
+end
+
+---@param block Block
+---@param win_width integer
 local function fit_block(block, win_width)
     local total = Attr.get_total_width(block.attr)
     local columns = block.attr.columns
@@ -73,11 +107,7 @@ local function fit_block(block, win_width)
     for _, column in ipairs(columns or {}) do
         column.width = math.max(math.ceil(size * column.width / total), Cell.MIN_WIDTH)
     end
-    local indieces = sort_column_indices(columns)
-    local over = math.min(Attr.get_total_width(block.attr) - size, #columns)
-    for index = 1, over do
-        columns[indieces[index]].width = math.max(columns[indieces[index]].width - 1, Cell.MIN_WIDTH)
-    end
+    shrink_to_fit(block.attr, size)
 end
 
 ---@param tirdoc Document
@@ -97,7 +127,7 @@ end
 
 ---@param column Attr_column
 ---@param max Attr_column
-local function auto_expand(column, max)
+local function auto_shrink(column, max)
     local delta = column.width - max.width
     local delta = math.min(delta, 6, math.ceil(max.width / 3))
     column.width = max.width + delta
@@ -106,20 +136,25 @@ end
 ---@param column Attr_column
 ---@param max Attr_column
 ---@param win_width integer
-local function auto_shrink(column, max, win_width)
-    local width = math.sqrt(max.width * 3 / 2)
-    column.width = math.max(column.width, math.ceil(width))
-    column.width = math.min(column.width, math.floor(win_width / 4))
+local function auto_expand(column, max, win_width)
+    local width = math.ceil(math.sqrt(max.width * 3 / 2))
+    if width <= column.width then
+        return
+    end
+    column.width = math.min(width, math.floor(win_width / 4))
 end
 
 ---@param column Attr_column
 ---@param max Attr_column
 ---@param win_width integer
+---@return boolean
 local function auto_attr(column, max, win_width)
-    if column.width > max.width then
-        auto_expand(column, max)
+    if max.width < column.width then
+        auto_shrink(column, max)
+        return false
     else
-        auto_shrink(column, max, win_width)
+        auto_expand(column, max, win_width)
+        return true
     end
 end
 
@@ -127,9 +162,10 @@ end
 ---@param win_width integer
 local function auto_block(block, win_width)
     local max_columns = vim.deepcopy(block.attr.columns)
-    fit_block(block, win_width)
+    fit_auto_block(block, win_width)
+    local is_wrap = false
     for icol = 1, #max_columns do
-        auto_attr(block.attr.columns[icol], max_columns[icol], win_width)
+        is_wrap = is_wrap or auto_attr(block.attr.columns[icol], max_columns[icol], win_width)
     end
 end
 

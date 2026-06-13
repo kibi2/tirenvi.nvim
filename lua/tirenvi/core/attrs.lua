@@ -80,6 +80,7 @@ local function change_width(self, sel, width_op)
     local changed = false
     local start_col = 1
     for _, column in ipairs(self.columns) do
+        column.fix_width = column.width
         local old_width = column.fix_width
         local cel_range = Range.from_lua(start_col, start_col + old_width)
         if Range.intersects(sel, cel_range) then

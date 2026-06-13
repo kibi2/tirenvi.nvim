@@ -87,7 +87,7 @@ end
 ---@return integer
 function WidthOp:apply(current)
     local kind = self.opts.kind
-    local count = self.count or 1
+    local count = math.max(self.count or 1, 1)
     if kind == "set" then
         if not self.count or count <= 1 then
             return 0
