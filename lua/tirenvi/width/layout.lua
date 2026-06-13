@@ -1,10 +1,11 @@
-local Document = require("tirenvi.core.document")
-local Cell     = require("tirenvi.core.cell")
-local Attr     = require("tirenvi.core.attr")
-local buffer   = require("tirenvi.io.buffer")
-local log      = require("tirenvi.util.log")
+local Document    = require("tirenvi.core.document")
+local Cell        = require("tirenvi.core.cell")
+local Attr        = require("tirenvi.core.attr")
+local buffer      = require("tirenvi.io.buffer")
+local width_state = require("tirenvi.width.state")
+local log         = require("tirenvi.util.log")
 
-local M        = {}
+local M           = {}
 
 -- constants / defaults
 
@@ -94,17 +95,36 @@ local function fit(tirdoc, width_mode)
     end
 end
 
+---@param column Attr_column
+---@param max Attr_column
+---@param win_size integer
+local function auto_attr(column, max, win_size)
+    if column.width > max.width then
+        local delta = column.width - max.width
+        local delta = math.min(delta, 6, math.ceil(max.width / 3))
+        column.width = max.width + delta
+    end
+end
+
+---@param block Block
+---@param win_size integer
+local function auto_block(block, win_size)
+    local max_columns = vim.deepcopy(block.attr.columns)
+    fit_block(block, win_size)
+    log.probe(block.attr.columns)
+    log.probe(max_columns)
+    for icol = 1, #max_columns do
+        auto_attr(block.attr.columns[icol], max_columns[icol], win_size)
+    end
+end
+
 ---@param tirdoc Document
 local function auto(tirdoc)
     Document.set_max_attr(tirdoc)
+    local win_size = buffer.get_win_width()
     for _, block in ipairs(tirdoc.blocks) do
         if block.kind == "grid" then
-            for _, column in ipairs(block.attr.columns or {}) do
-                local plus = math.floor(column.width * 0.3)
-                plus = math.max(plus, 1)
-                plus = math.min(plus, 5)
-                column.width = column.width + plus
-            end
+            auto_block(block, win_size)
         end
     end
 end
