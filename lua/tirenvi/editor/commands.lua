@@ -1,6 +1,6 @@
 -- dependencies
 local Context = require("tirenvi.app.context")
-local Cell = require("tirenvi.core.cell")
+local WidthOp = require("tirenvi.width.op")
 local buf_state = require("tirenvi.io.buf_state")
 local buffer = require("tirenvi.io.buffer")
 local init = require("tirenvi.init")
@@ -17,69 +17,6 @@ local debug = require("tirenvi.editor.debug")
 local M = {}
 
 local api = vim.api
-
----@class WidthOp
----@field operator '"="'|'"+"'|'"-"'
----@field kind '"set"'|'"add"'|'"sub"'|'"auto"'|nil
----@field count_str string
----@field count integer
-local WidthOp = {}
-WidthOp.__index = WidthOp
-
-local map = {
-	["+"] = "add",
-	["-"] = "sub",
-	["="] = "set",
-}
-
----@param width_op WidthOp
----@return '"set"'|'"add"'|'"sub"'|'"auto"'|nil
-local function to_kind(width_op)
-	local operator = width_op.operator
-	if operator == "" then
-		operator = "="
-	end
-	return map[operator]
-end
-
----@param args string
----@return WidthOp
-function WidthOp.new(args)
-	local self                    = setmetatable({}, WidthOp)
-	self.operator, self.count_str = args:match("^width%s*([=+-]?)(%d*)")
-	self.kind                     = to_kind(self)
-	self.count                    = tonumber(self.count_str) or 1
-	if self.count < 1 then
-		self.count = 1
-	end
-	if self.kind == "set" and self.count <= 1 then
-		self.kind = "auto"
-		self.count = 0
-	end
-	return self
-end
-
-function WidthOp:to_cmd()
-	return string.format(":<C-u>Tir width %s%s<CR>", self.operator, self.count_str)
-end
-
-function WidthOp:to_string()
-	return string.format("WidthOp %s:%d %s", self.kind, self.count, self:to_cmd())
-end
-
----@param current integer
----@return integer
-function WidthOp:apply(current)
-	if self.kind == "set" then
-		return math.max(self.count, Cell.MIN_WIDTH)
-	elseif self.kind == "add" then
-		return current + self.count
-	elseif self.kind == "sub" then
-		return math.max(current - self.count, Cell.MIN_WIDTH)
-	else
-		return current
-	end
-end
 
 ---@param opts {[string]:any}
 ---@return Rect
@@ -112,8 +49,12 @@ end
 ---@return nil
 local function cmd_width(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
-	local width_op = WidthOp.new(opts.args)
-	local sel      = get_selection(opts)
+	local width_op = WidthOp.new(opts)
+	if not width_op.opts then
+		notify.error(errors.err_unknown_command(opts.args))
+		return
+	end
+	local sel = get_selection(opts)
 	log.debug("row[%d-%d], col[%d-%d] %s", sel.row.first, sel.row.last, sel.col.first, sel.col.last,
 		width_op:to_string())
 	init.width(ctx, sel, width_op)
@@ -207,15 +148,35 @@ local function on_tir(opts)
 		command = "width"
 	end
 	local ctx = Context.from_buf()
-	local name = string.format("%s %s %s", opts.name, opts.fargs[1], opts.fargs[2] or "")
+	local name = string.format("%s %s", opts.name, table.concat(opts.fargs, " "))
 	debug.ui_entry(ctx.bufnr, name)
 	local func = commands[command]
 	if not func then
-		notify.error(errors.err_unknown_command(sub))
+		notify.error(errors.err_unknown_command(opts.args))
 		return
 	end
 	func(ctx, opts)
 	debug.ui_exit(ctx.bufnr, name)
+end
+
+local function complete_tir(arglead, cmdline)
+	local args = vim.split(cmdline, "%s+", { trimempty = true })
+	if #args <= 1 then
+		return get_command_keys()
+	elseif #args == 2 then
+		if args[2] == "width" then
+			return {
+				"=",
+				"+",
+				"-",
+				"fit",
+				"max",
+				"fix",
+				"toggle",
+			}
+		end
+	end
+	return {}
 end
 
 local function register_user_command()
@@ -226,9 +187,7 @@ local function register_user_command()
 	end, {
 		nargs = "*",
 		range = true,
-		complete = function()
-			return get_command_keys()
-		end,
+		complete = complete_tir,
 		desc = build_desc()
 	})
 end

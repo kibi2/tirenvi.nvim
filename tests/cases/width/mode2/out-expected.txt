@@ -1,0 +1,31 @@
+=== MESSAGE ===
+init {'mode': 'fix'} {'mode': 'fix'}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 11, 'width': 11}], 'range': {'first': 3, 'last': 8}}
+-> fix {'mode': 'fix'} {'mode': 'fix'}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 11, 'width': 11}], 'range': {'first': 3, 'last': 8}}
+-> auto {'mode': 'fix'} {'mode': 'auto'}
+{'columns': [{'fix_width': 5, 'width': 7}, {'fix_width': 3, 'width': 4}, {'fix_width': 11, 'width': 15}], 'range': {'first': 3, 'last': 8}}
+tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
+widt=10 {'mode': 'auto'} {'mode': 'fix'}
+{'columns': [{'fix_width': 10, 'width': 10}, {'fix_width': 4, 'width': 4}, {'fix_width': 15, 'width': 15}], 'range': {'first': 3, 'last': 8}}
+row:col=2:3 {'mode': 'fix'} {'mode': 'auto'}
+{'columns': [{'fix_width': 10, 'width': 59}, {'fix_width': 4, 'width': 4}, {'fix_width': 15, 'width': 12}], 'range': {'first': 3, 'last': 8}}
+row:col=2:3 {'mode': 'fix'} {'mode': 'auto'}
+{'columns': [{'fix_width': 10, 'width': 66}, {'fix_width': 4, 'width': 2}, {'fix_width': 15, 'width': 8}], 'range': {'first': 3, 'last': 12}}
+
+=== DISPLAY ===
+gfm
+----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
+┊Name⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀┊Ag┊City⠀⠀⠀⠀┊
+│⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│e⠀│⠀⠀⠀⠀⠀⠀⠀⠀│
+┊----⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀┊--┊----⠀⠀⠀⠀┊
+│⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│-⠀│⠀⠀⠀⠀⠀⠀⠀⠀│
+│Alice⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│23│Tokyo⠀⠀⠀│
+┊GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG┊31┊Osaka↲⠀⠀┊
+┊GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGBob⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀┊⠀⠀┊⠀⠀⠀⠀⠀⠀⠀⠀┊
+┊⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀┊⠀⠀┊nipponba┊
+│⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│⠀⠀│shi⠀⠀⠀⠀⠀│
+│Carol⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│27│Nagoya⠀⠀│
+----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
+markdown
+

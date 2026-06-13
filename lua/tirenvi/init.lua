@@ -7,7 +7,6 @@ local buf_state = require("tirenvi.io.buf_state")
 local attr_store = require("tirenvi.io.attr_store")
 local Bufline = require("tirenvi.core.bufline")
 local Range = require("tirenvi.util.range")
-local Range3 = require("tirenvi.util.range3")
 local util = require("tirenvi.util.util")
 local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
@@ -98,8 +97,10 @@ end
 ---@param width_op WidthOp
 function M.width(ctx, sel, width_op)
 	pipeline.cmd_width(ctx, sel, width_op)
-	local command = util.get_termcodes(width_op:to_cmd())
-	set_repeat(command)
+	local command = width_op:to_cmd()
+	if command then
+		set_repeat(util.get_termcodes(command))
+	end
 end
 
 ---@param ctx Context
@@ -156,7 +157,7 @@ end
 
 ---@param ctx Context
 ---@param range3 Range3|nil
-function M.check_and_repair(ctx, range3)
+function M.on_insert_leave(ctx, range3)
 	pipeline.check_and_repair(ctx, range3)
 end
 

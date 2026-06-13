@@ -23,6 +23,8 @@ function M.read(ctx, range)
     local first, last = ReadResult.lua_range(result)
     result.lines = buffer.get_lines(ctx.bufnr, first, last)
     log.watch("ATTR", Attrs.debug_attrs(result.attrs, "[0]CHACHED ATTRS:"))
+    local sample_first = vim.fn.line("w0")
+    local sample_last = vim.fn.line("w$")
     return result
 end
 

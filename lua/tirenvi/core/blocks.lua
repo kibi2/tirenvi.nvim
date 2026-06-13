@@ -191,8 +191,8 @@ function M:infer_consistent_attr()
 end
 
 ---@self Blocks
-function M:set_auto_attr()
-	apply(self, "set_auto_attr")
+function M:set_max_attr()
+	apply(self, "set_max_attr")
 end
 
 ---@parama bufblocks Blocks

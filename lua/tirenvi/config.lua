@@ -40,6 +40,7 @@ local defaults = {
 	},
 	table = {
 		auto_reconcile = true,
+		width_mode = "auto",
 	},
 	ui = {
 		conceal = {

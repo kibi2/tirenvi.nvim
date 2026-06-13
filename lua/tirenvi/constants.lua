@@ -7,4 +7,6 @@ M.KIND = {
 	GRID = "grid",
 }
 
+M.WIDTH_SAMPLE_ROWS = 10
+
 return M

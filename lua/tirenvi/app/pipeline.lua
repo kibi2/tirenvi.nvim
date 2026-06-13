@@ -1,23 +1,26 @@
 -----------------------------------------------------------------------
 -- Dependencies
 -----------------------------------------------------------------------
+local config = require("tirenvi.config")
 local Document = require("tirenvi.core.document")
 local Attrs = require("tirenvi.core.attrs")
 local Bufline = require("tirenvi.core.bufline")
 local dirty_range = require("tirenvi.core.dirty_range")
 local Request = require("tirenvi.app.request")
+local WidthModeState = require("tirenvi.width.state")
+local width_layout = require("tirenvi.width.layout")
 local flat_parser = require("tirenvi.parser.flat_parser")
 local buf_parser = require("tirenvi.parser.buf_parser")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
+local buffer = require("tirenvi.io.buffer")
 local buf_state = require("tirenvi.io.buf_state")
 local writer = require("tirenvi.io.writer")
 local attr_store = require("tirenvi.io.attr_store")
 local reader = require("tirenvi.io.reader")
 local dirty = require("tirenvi.io.dirty")
+local util = require("tirenvi.util.util")
 local Range = require("tirenvi.util.range")
 local Range3 = require("tirenvi.util.range3")
-local errors = require("tirenvi.util.errors")
-local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
 
 -----------------------------------------------------------------------
@@ -67,6 +70,11 @@ local function buflines_to_bufdoc_attrs_driven(ctx, r_result)
     return bufdoc
 end
 
+local function apply_width_mode(bufnr, tirdoc)
+    local width_mode = buffer.get(bufnr, buffer.IKEY.WIDTH_MODE)
+    width_layout.compute(width_mode, tirdoc)
+end
+
 ---@param ctx Context
 ---@param r_result ReadResult
 ---@param doc Document
@@ -77,32 +85,34 @@ local function doc_to_buflines(ctx, r_result, doc, no_undo, no_normalize)
     if not doc._tir then
         tirdoc = Document.from_bufdoc(doc, no_normalize)
     end
-    Document.set_auto_attr(tirdoc)
+    apply_width_mode(ctx.bufnr, tirdoc)
     local bufdoc = Document.to_bufdoc(tirdoc)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[9]DOC ATTR:"))
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
     buf_state.set_buffer_flat(ctx.bufnr, false)
     attr_store.write(ctx.bufnr, attrs)
+    log.watch("ATTR", Attrs.debug_attrs(attrs, "[88]MODE:"))
     local buf_lines = buf_parser.unparse(bufdoc)
     if not util.same_str_array(buf_lines, r_result.lines) then
-        local req_w = Request.new_writer(r_result.range, buf_lines, no_undo or false)
+        local req_w = Request.new_writer(r_result.range, buf_lines, no_undo)
         writer.write(ctx, req_w)
     end
 end
 
 ---@param ctx Context
 ---@param tirdoc Document
----@param no_undo boolean|nil
-local function tirdoc_to_flat(ctx, r_result, tirdoc, no_undo)
+---@param is_write_pre boolean|nil
+local function tirdoc_to_flat(ctx, r_result, tirdoc, is_write_pre)
     local fllines = flat_parser.unparse(ctx, tirdoc)
-    local req_w = Request.new_writer(r_result.range, fllines, no_undo or false)
+    local req_w = Request.new_writer(r_result.range, fllines, is_write_pre)
     local attrs = vim.deepcopy(r_result.attrs)
-    --TODO
-    --Attrs.remove_range(attrs)
-    log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
-    buf_state.set_buffer_flat(ctx.bufnr, true)
-    attr_store.write(ctx.bufnr, attrs)
+    if not is_write_pre then
+        Attrs.remove_range(attrs)
+        log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
+        buf_state.set_buffer_flat(ctx.bufnr, true)
+        attr_store.write(ctx.bufnr, attrs)
+    end
     writer.write(ctx, req_w)
 end
 
@@ -139,7 +149,7 @@ local function reconcile_attrs(r_result, bufdoc, range3)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[3]CONSISTENT:"))
     Document.apply_attrs(bufdoc, r_result.attrs)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[4]CACHED:"))
-    Document.set_auto_attr(bufdoc)
+    Document.set_max_attr(bufdoc)
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[6]RESULT:"))
     return attrs
@@ -181,17 +191,6 @@ local function repair_request(ctx, range3)
     end
 end
 
----@param bufnr number
----@param range Range|nil
----@return boolean
-local function has_dirty(bufnr, range)
-    local dirty_ranges = dirty.get_ranges(bufnr)
-    if range then
-        dirty_ranges = Range.slice(dirty_ranges, range)
-    end
-    return #dirty_ranges > 0
-end
-
 ---@param ctx Context
 ---@return boolean
 local function need_repair(ctx)
@@ -216,9 +215,45 @@ local function update_attrs(ctx, range3, r_result)
     local bufdoc = buf_parser.parse(ctx, r_result, opts)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
     local attrs = reconcile_attrs(r_result, bufdoc, range3)
-    buf_state.set_buffer_flat(ctx.bufnr, false)
-    attr_store.write(ctx.bufnr, attrs)
     reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
+    attr_store.write(ctx.bufnr, attrs)
+end
+
+local function change_attrs_width(attrs, sel, width_op)
+    return Attrs.change_width(attrs, sel, width_op)
+end
+
+---@param ctx Context
+---@param sel Rect
+---@param width_op WidthOp
+local function change_width(ctx, sel, width_op)
+    expand_rect(ctx, sel.row)
+    log.debug("row%s, col%s", Range.short(sel.row), Range.short(sel.col))
+    local r_result = reader.read(ctx, sel.row)
+    if change_attrs_width(r_result.attrs, sel, width_op) then
+        local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
+        log.watch("ATTR", Document.debug_attrs(bufdoc, "[88]MODE"))
+        doc_to_buflines(ctx, r_result, bufdoc)
+        log.watch("ATTR", Document.debug_attrs(bufdoc, "[88]MODE"))
+    end
+end
+
+---@param ctx Context
+---@param width_op WidthOp
+---@param now_mode WidthModeState
+local function change_mode(ctx, width_op, now_mode)
+    if width_op.opts.kind == "toggle" then
+        if now_mode.mode == "max" then
+            local prev_mode = buffer.get(ctx.bufnr, buffer.IKEY.PREV_WIDTH_MODE)
+            buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, prev_mode)
+        else
+            buffer.set(ctx.bufnr, buffer.IKEY.PREV_WIDTH_MODE, now_mode)
+            buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, WidthModeState.new("max"))
+        end
+    else
+        buffer.set(ctx.bufnr, buffer.IKEY.PREV_WIDTH_MODE, now_mode)
+        buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, width_op:get_state())
+    end
 end
 
 -----------------------------------------------------------------------
@@ -247,13 +282,11 @@ end
 
 ---@param ctx Context
 function M.write_post(ctx)
-    if not backup_buffer then
-        return
+    if backup_buffer then
+        local req = Request.new_writer(Range.WHOLE, backup_buffer, true)
+        writer.write(ctx, req)
+        backup_buffer = nil
     end
-    buf_state.set_buffer_flat(ctx.bufnr, false)
-    local req = Request.new_writer(Range.WHOLE, backup_buffer, true)
-    writer.write(ctx, req)
-    backup_buffer = nil
 end
 
 ---@param ctx Context
@@ -266,13 +299,13 @@ function M.from_flat(ctx)
 end
 
 ---@param ctx Context
----@param no_undo boolean|nil
+---@param is_write_pre boolean|nil
 ---@return string[]
-function M.to_flat(ctx, no_undo)
+function M.to_flat(ctx, is_write_pre)
     local r_result = reader.read(ctx, Range.WHOLE)
     local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
     local tirdoc = Document.from_bufdoc(bufdoc)
-    tirdoc_to_flat(ctx, r_result, tirdoc, no_undo)
+    tirdoc_to_flat(ctx, r_result, tirdoc, is_write_pre)
     return r_result.lines
 end
 
@@ -280,15 +313,13 @@ end
 ---@param sel Rect
 ---@param width_op WidthOp
 function M.cmd_width(ctx, sel, width_op)
-    if has_dirty(ctx.bufnr, sel.row) then
-        error(errors.new_domain_error(errors.ERR.TABLE_IS_NOT_ALIGNED))
+    local now_mode = buffer.get(ctx.bufnr, buffer.IKEY.WIDTH_MODE)
+    change_mode(ctx, width_op, now_mode)
+    if width_op.opts.repeatable then
+        change_width(ctx, sel, width_op)
+    else
+        M.cmd_repair(ctx)
     end
-    expand_rect(ctx, sel.row)
-    log.debug("row%s, col%s", Range.short(sel.row), Range.short(sel.col))
-    local r_result = reader.read(ctx, sel.row)
-    Attrs.change_width(r_result.attrs, sel, width_op)
-    local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
-    doc_to_buflines(ctx, r_result, bufdoc)
 end
 
 ---@param ctx Context
@@ -300,6 +331,7 @@ function M.cmd_repair(ctx, no_undo, no_normalize)
     end
     log.debug("===+=== START ===+=== %s[#%d] ===", "REPAIR", ctx.bufnr)
     local r_result = reader.read(ctx, Range.WHOLE)
+    log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[88]MODE:"))
     local bufdoc = buflines_to_bufdoc_attrs_driven(ctx, r_result)
     doc_to_buflines(ctx, r_result, bufdoc, no_undo, no_normalize)
 end

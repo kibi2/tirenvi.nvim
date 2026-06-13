@@ -70,7 +70,7 @@ end
 
 ---@self Attr
 ---@param records Record_grid[]
-function M.grid:set_auto_attr(records)
+function M.grid:set_max_attr(records)
     local ncol = #self.columns
     if ncol == 0 then
         ncol = Record.get_max_ncol(records)
@@ -108,6 +108,7 @@ function M.get_width_array(columns)
     local widths = {}
     for _, column in ipairs(columns) do
         widths[#widths + 1] = column.width
+        -- widths[#widths + 1] = column.fix_width
     end
     return widths
 end
@@ -115,18 +116,10 @@ end
 ---@param source Attr
 ---@param target Attr
 ---@return boolean
-function M.is_same_columns(source, target)
+function M.is_same_ncol(source, target)
     local columns1 = source.columns or {}
     local columns2 = target.columns or {}
-    if #columns1 ~= #columns2 then
-        return false
-    end
-    for icol = 1, #columns1 do
-        if columns1[icol].width ~= columns2[icol].width then
-            return false
-        end
-    end
-    return true
+    return #columns1 == #columns2
 end
 
 ---@param source Attr
@@ -136,17 +129,7 @@ function M.is_consistent(source, target)
     if M.is_plain(source) or M.is_plain(target) then
         return true
     end
-    local columns1 = source.columns or {}
-    local columns2 = target.columns or {}
-    if #columns1 ~= #columns2 then
-        return false
-    end
-    for icol = 1, #columns1 do
-        if columns1[icol].width ~= columns2[icol].width then
-            return false
-        end
-    end
-    return true
+    return M.is_same_ncol(source, target)
 end
 
 ---@self Attr|nil
@@ -174,8 +157,18 @@ function M:set_ncol(ncol)
         return
     end
     for icol = 1, ncol do
-        self.columns[icol] = { width = -1 }
+        self.columns[icol] = { fix_width = 0, width = 0 }
     end
+end
+
+---@param self Attr
+---@return integer
+function M:get_total_width()
+    local total = 0
+    for _, column in ipairs(self.columns) do
+        total = total + column.width
+    end
+    return total
 end
 
 return M

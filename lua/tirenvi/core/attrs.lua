@@ -18,7 +18,7 @@ local function connect(self)
     local attrs = { self[1] }
     for iattr = 2, #self do
         local attr = self[iattr]
-        if Attr.is_same_columns(attrs[#attrs], attr) then
+        if Attr.is_same_ncol(attrs[#attrs], attr) then
             attrs[#attrs].range.last = attr.range.last
         else
             attrs[#attrs + 1] = attr
@@ -75,20 +75,21 @@ end
 ---@param self Attr
 ---@param sel Range
 ---@param width_op WidthOp
+---@return boolean
 local function change_width(self, sel, width_op)
+    local changed = false
     local start_col = 1
     for _, column in ipairs(self.columns) do
-        local old_width = column.width
+        column.fix_width = column.width
+        local old_width = column.fix_width
         local cel_range = Range.from_lua(start_col, start_col + old_width)
         if Range.intersects(sel, cel_range) then
-            if width_op.kind == "auto" then
-                column.width = 0
-            else
-                column.width = width_op:apply(old_width)
-            end
+            column.fix_width = width_op:apply(old_width)
+            changed = true
         end
         start_col = cel_range.last + 1
     end
+    return changed
 end
 
 -----------------------------------------------------------------------
@@ -239,12 +240,15 @@ end
 ---@param self Attr[]
 ---@param rect Rect
 ---@param width_op WidthOp
+---@return boolean
 function M:change_width(rect, width_op)
+    local changed = false
     for _, attr in ipairs(self) do
         if Attr.is_grid(attr) and Range.intersects(rect.row, attr.range) then
-            change_width(attr, rect.col, width_op)
+            changed = change_width(attr, rect.col, width_op) or changed
         end
     end
+    return changed
 end
 
 ---@param self Attr[]

@@ -49,6 +49,7 @@ local M = {}
 
 ---@class Attr_column
 ---@field width integer                 display width (logical column width)
+---@field fix_width integer             width for fix mode
 
 ---@alias Record Record_plain|Record_grid
 
@@ -215,10 +216,10 @@ function M.infer_consistent_attr(bufdoc)
 end
 
 ---@param bufdoc Document
-function M.set_auto_attr(bufdoc)
+function M.set_max_attr(bufdoc)
     --log.assert(not bufdoc._tir, "set_auto_attr should be called only for bufdoc")
-    Blocks.set_auto_attr(bufdoc.blocks)
-    log.watch("ATTR", M.debug_attrs(bufdoc, "[5]AUTO ATTR:"))
+    Blocks.set_max_attr(bufdoc.blocks)
+    log.watch("ATTR", M.debug_attrs(bufdoc, "[5]MAX ATTR:"))
 end
 
 ---@param doc Document

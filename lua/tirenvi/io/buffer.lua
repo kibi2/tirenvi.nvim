@@ -2,21 +2,22 @@
 -- Module
 -----------------------------------------------------------------------
 ----- dependencies
-local config        = require("tirenvi.config")
-local Range         = require("tirenvi.util.range")
-local log           = require("tirenvi.util.log")
+local config         = require("tirenvi.config")
+local WidthModeState = require("tirenvi.width.state")
+local Range          = require("tirenvi.util.range")
+local log            = require("tirenvi.util.log")
 
-local M             = {}
+local M              = {}
 
-local api           = vim.api
-local fn            = vim.fn
-local bo            = vim.bo
-local b             = vim.b
-local cache         = { bufnr = -1, start = -1, lines = {}, }
-local STEP          = 25
+local api            = vim.api
+local fn             = vim.fn
+local bo             = vim.bo
+local b              = vim.b
+local cache          = { bufnr = -1, start = -1, lines = {}, }
+local STEP           = 25
 
 -- Buffer-local flags.
-M.IKEY              = {
+M.IKEY               = {
 	-- true when in insert mode
 	INSERT_MODE = "insert_mode",
 
@@ -43,9 +44,15 @@ M.IKEY              = {
 
 	-- buffer is flat or tir-buffer
 	FLAT = "flat",
+
+	-- WidthMode
+	WIDTH_MODE = "width_mode",
+
+	-- previous Width_mode
+	PREV_WIDTH_MODE = "prev_width_mode",
 }
 
-local initial_value = {
+local initial_value  = {
 	[M.IKEY.INSERT_MODE] = false,
 	[M.IKEY.ATTACHED] = false,
 	[M.IKEY.PATCH_DEPTH] = 0,
@@ -55,6 +62,8 @@ local initial_value = {
 	[M.IKEY.ATTRS] = nil,
 	[M.IKEY.DIRTY] = nil,
 	[M.IKEY.FLAT] = nil,
+	[M.IKEY.WIDTH_MODE] = nil,
+	[M.IKEY.PREV_WIDTH_MODE] = nil,
 }
 
 -----------------------------------------------------------------------
@@ -158,6 +167,8 @@ end
 function M.get_state(bufnr)
 	bufnr = M.normalize_bufnr(bufnr)
 	if not b[bufnr].tirenvi then
+		initial_value.width_mode = WidthModeState.new(config.table.width_mode)
+		initial_value.prev_width_mode = WidthModeState.new(config.table.width_mode)
 		b[bufnr].tirenvi = initial_value
 	end
 	return b[bufnr].tirenvi
@@ -300,6 +311,14 @@ end
 function M.set_cursor(winid, irow, icol)
 	winid = (winid == nil or winid == 0) and api.nvim_get_current_win() or winid
 	vim.api.nvim_win_set_cursor(winid, { irow, icol - 1 })
+end
+
+---@param winid integer|nil
+---@return integer
+function M.get_win_width(winid)
+	winid = (winid == nil or winid == 0) and api.nvim_get_current_win() or winid
+	local info = vim.fn.getwininfo(winid)[1]
+	return info.width - info.textoff
 end
 
 return M

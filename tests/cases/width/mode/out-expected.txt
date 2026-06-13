@@ -1,0 +1,28 @@
+=== MESSAGE ===
+init {'mode': 'fix'} {'mode': 'fix'}
+-> fix {'mode': 'fix'} {'mode': 'fix'}
+-> max {'mode': 'fix'} {'mode': 'max'}
+-> fit 3 {'mode': 'max'} {'pages': 3, 'mode': 'fit'}
+-> fix 5 {'pages': 3, 'mode': 'fit'} {'mode': 'fix'}
+toggle {'mode': 'fix'} {'mode': 'max'}
+toggle {'mode': 'fix'} {'mode': 'fix'}
+toggle {'mode': 'fix'} {'mode': 'max'}
+toggle {'mode': 'fix'} {'mode': 'fix'}
+-> fit 99 {'mode': 'fix'} {'pages': 99, 'mode': 'fit'}
+tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
+-> set {'pages': 99, 'mode': 'fit'} {'mode': 'fix'}
+-> set {'mode': 'fix'} {'mode': 'fix'}
+-> auto {'mode': 'fix'} {'mode': 'auto'}
+
+=== DISPLAY ===
+gfm
+----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
+│Name⠀⠀⠀│Age⠀│City⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│
+│----⠀⠀⠀│---⠀│----⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│
+│Alice⠀⠀│23⠀⠀│Tokyo⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│
+┊Bob⠀⠀⠀⠀┊31⠀⠀┊Osaka↲⠀⠀⠀⠀⠀⠀⠀⠀⠀┊
+│⠀⠀⠀⠀⠀⠀⠀│⠀⠀⠀⠀│nipponbashi⠀⠀⠀⠀│
+│Carol⠀⠀│27⠀⠀│Nagoya⠀⠀⠀⠀⠀⠀⠀⠀⠀│
+----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
+markdown
+
