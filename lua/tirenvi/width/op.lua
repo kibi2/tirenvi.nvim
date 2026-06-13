@@ -1,13 +1,13 @@
 ---@class WidthOp
 ---@field opts {kind:string, mode:string|nil, repeatable:boolean|nil}
 ---@field args string
----@field count integer|nil
----@field width integer|nil
-local WidthOp   = {}
-WidthOp.__index = WidthOp
+---@field number number[]
+local WidthOp        = {}
+WidthOp.__index      = WidthOp
 
-local Cell      = require("tirenvi.core.cell")
-local log       = require("tirenvi.util.log")
+local Cell           = require("tirenvi.core.cell")
+local WidthModeState = require("tirenvi.width.state")
+local log            = require("tirenvi.util.log")
 
 -- constants / defaults
 
@@ -19,7 +19,7 @@ local log       = require("tirenvi.util.log")
 -- Public API
 -----------------------------------------------------------------------
 
-local map       = {
+local map            = {
     ["="] = { kind = "set", mode = "fix", repeatable = true },
     ["+"] = { kind = "add", mode = "fix", repeatable = true },
     ["-"] = { kind = "sub", mode = "fix", repeatable = true },
@@ -48,14 +48,15 @@ end
 local function try_new(opts)
     local self = setmetatable({}, WidthOp)
     self.args = opts.args
+    self.number = {}
     local token, count_str = opts.args:match("^width%s*([=%+%-])(.*)")
     if token then
-        self.count = get_int(count_str)
-        self.width = nil
+        self.number[1] = get_int(count_str)
     else
         token = opts.fargs[2]
-        self.count = get_int(opts.fargs[3])
-        self.width = get_int(opts.fargs[4])
+        for index = 3, #opts.args do
+            self.number[#self.number + 1] = get_int(opts.fargs[index])
+        end
     end
     self.opts = map[token]
     return self
@@ -79,17 +80,20 @@ function WidthOp:to_cmd()
     end
 end
 
+---@param self WidthOp
 function WidthOp:to_string()
-    return string.format("WidthOp %s[%s,%s] %s", self.opts.kind, self.count or "nil", self.width or "nil", self:to_cmd())
+    return string.format("WidthOp %s[%s,%s] %s",
+        self.opts.kind, self.number[1] or "nil", self.number[2] or "nil", self:to_cmd())
 end
 
+---@param self WidthOp
 ---@param current integer
 ---@return integer
 function WidthOp:apply(current)
     local kind = self.opts.kind
-    local count = math.max(self.count or 1, 1)
+    local count = math.max(self.number[1] or 1, 1)
     if kind == "set" then
-        if not self.count or count <= 1 then
+        if not self.number[1] or count <= 1 then
             return 0
         else
             return math.max(count, Cell.MIN_WIDTH)
@@ -103,13 +107,10 @@ function WidthOp:apply(current)
     end
 end
 
+---@param self WidthOp
+---@return WidthModeState
 function WidthOp:get_state()
-    local state = { mode = self.opts.mode }
-    if self.opts.kind == "fit" then
-        state.pages = self.count
-        state.width = self.width
-    end
-    return state
+    return WidthModeState.new(self.opts.mode, self.number)
 end
 
 return WidthOp

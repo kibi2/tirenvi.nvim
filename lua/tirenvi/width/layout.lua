@@ -113,8 +113,8 @@ end
 ---@param tirdoc Document
 ---@param width_mode WidthModeState
 local function fit(tirdoc, width_mode)
-    local pages = width_mode.pages or 1
-    local width = width_mode.width or buffer.get_win_width()
+    local pages = width_mode.number[1] or 1
+    local width = width_mode.number[2] or buffer.get_win_width()
     local win_width = pages * width
     Document.set_max_attr(tirdoc)
     for _, block in ipairs(tirdoc.blocks) do
