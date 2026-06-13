@@ -1,7 +1,6 @@
 ---@class WidthModeState
 ---@field mode '"fit"'|'"max"'|'"auto"'|'"fix"'
----@field pages? integer
----@field width? integer
+---@field number number[]
 
 local log = require("tirenvi.util.log")
 
@@ -18,12 +17,13 @@ local M   = {}
 -----------------------------------------------------------------------
 
 ---@param mode WidthMode
----@param pages integer|nil
----@param width integer|nil
+---@param number number[]|nil
 ---@return WidthModeState
-function M.new(mode, pages, width)
+function M.new(mode, number)
     assert(mode == "auto" or mode == "fit" or mode == "max" or mode == "fix")
-    return { mode = mode, pages = pages, width = width }
+    local self = { mode = mode }
+    self.number = number or {}
+    return self
 end
 
 return M
