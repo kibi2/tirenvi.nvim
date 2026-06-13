@@ -73,15 +73,18 @@ local function fit_block(block, win_size)
         column.width = math.max(math.ceil(size * column.width / total), Cell.MIN_WIDTH)
     end
     local indieces = sort_column_indices(columns)
-    local over = Attr.get_total_width(block.attr) - size
+    local over = math.min(Attr.get_total_width(block.attr) - size, #columns)
     for index = 1, over do
         columns[indieces[index]].width = math.max(columns[indieces[index]].width - 1, Cell.MIN_WIDTH)
     end
 end
 
 ---@param tirdoc Document
-local function fit(tirdoc)
-    local win_size = buffer.get_win_width()
+---@param width_mode WidthModeState
+local function fit(tirdoc, width_mode)
+    local pages = width_mode.pages or 1
+    local width = width_mode.width or buffer.get_win_width()
+    local win_size = pages * width
     Document.set_max_attr(tirdoc)
     for _, block in ipairs(tirdoc.blocks) do
         if block.kind == "grid" then
@@ -120,7 +123,7 @@ function M.compute(width_mode, tirdoc)
         if width_mode.mode == "max" then
             max(tirdoc)
         elseif width_mode.mode == "fit" then
-            fit(tirdoc)
+            fit(tirdoc, width_mode)
         elseif width_mode.mode == "auto" then
             auto(tirdoc)
         end

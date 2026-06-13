@@ -70,4 +70,5 @@
 |  |  | width toggle | max <-> fit, auto, fix | 26/06/08 |  | feat(width): add width mode toggle command |
 |  | width-mode=max | repair | width = no wrap | 26/0/6/12 |  | feat: implement width max mode with no-wrap column sizing |
 |  | fit | pages省略 | 画面サイズに表が収まる | 26/06/13 |  | feat: use fit width mode when pages width is omitted |
+|  | fit | pages,width指定 | 画面サイズに表が収まる | 26/06/13 |  | feat: implement fit width calculation for pages |
 

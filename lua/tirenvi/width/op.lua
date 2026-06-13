@@ -1,8 +1,8 @@
 ---@class WidthOp
 ---@field opts {kind:string, mode:string|nil, repeatable:boolean|nil}
 ---@field args string
----@field count integer
----@field width integer
+---@field count integer|nil
+---@field width integer|nil
 local WidthOp   = {}
 WidthOp.__index = WidthOp
 
@@ -33,39 +33,40 @@ local map       = {
 ---@param str string
 ---@return integer|nil
 local function get_int(str)
-    local num
-    if str and str ~= "" then
-        num = tonumber(str)
-        if not num then
-            return nil
-        end
+    if not str or str == "" then
+        return nil
     end
-    return math.max(num or 0, 1)
+    local num = tonumber(str)
+    if not num then
+        error(string.format("%s is not number", str))
+    end
+    return num
+end
+
+---@param opts {[string]:any}
+---@return WidthOp
+local function try_new(opts)
+    local self = setmetatable({}, WidthOp)
+    self.args = opts.args
+    local token, count_str = opts.args:match("^width%s*([=%+%-])(.*)")
+    if token then
+        self.count = get_int(count_str)
+        self.width = nil
+    else
+        token = opts.fargs[2]
+        self.count = get_int(opts.fargs[3])
+        self.width = get_int(opts.fargs[4])
+    end
+    self.opts = map[token]
+    return self
 end
 
 ---@param opts {[string]:any}
 ---@return WidthOp
 function WidthOp.new(opts)
-    local self = setmetatable({}, WidthOp)
-    self.args = opts.args
-    local token, count_str = opts.args:match("^width%s*([=%+%-])(.*)")
-    local width, count
-    if not token then
-        token = opts.fargs[2]
-        count = get_int(opts.fargs[3])
-        width = get_int(opts.fargs[4])
-    else
-        count = get_int(count_str)
-        width = 0
-    end
-    if not count or not width then
-        return self
-    end
-    self.opts = map[token]
-    self.count = count
-    self.width = width
-    if self.opts.kind == "set" and self.count <= 1 then
-        self.count = 0
+    local ok, self = pcall(try_new, opts)
+    if not ok then
+        return {}
     end
     return self
 end
@@ -79,21 +80,24 @@ function WidthOp:to_cmd()
 end
 
 function WidthOp:to_string()
-    return string.format("WidthOp %s:%d %s", self.opts.kind, self.count, self:to_cmd())
+    return string.format("WidthOp %s[%s,%s] %s", self.opts.kind, self.count or "nil", self.width or "nil", self:to_cmd())
 end
 
 ---@param current integer
 ---@return integer
 function WidthOp:apply(current)
     local kind = self.opts.kind
-    if kind == "set" and self.count == 0 then
-        return 0
-    elseif kind == "set" then
-        return math.max(self.count, Cell.MIN_WIDTH)
+    local count = self.count or 1
+    if kind == "set" then
+        if not self.count or count <= 1 then
+            return 0
+        else
+            return math.max(count, Cell.MIN_WIDTH)
+        end
     elseif kind == "add" then
-        return current + self.count
+        return current + count
     elseif kind == "sub" then
-        return math.max(current - self.count, Cell.MIN_WIDTH)
+        return math.max(current - count, Cell.MIN_WIDTH)
     else
         return current
     end
