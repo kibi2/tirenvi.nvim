@@ -8,9 +8,11 @@ init {'number': [], 'mode': 'fix'} {'number': [], 'mode': 'fix'}
 tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
 widt=10 {'number': [], 'mode': 'auto'} {'number': [10], 'mode': 'fix'}
 {'columns': [{'fix_width': 10, 'width': 10}, {'fix_width': 4, 'width': 4}, {'fix_width': 15, 'width': 15}], 'range': {'first': 3, 'last': 8}}
-row:col=2:3 {'number': [10], 'mode': 'fix'} {'number': [], 'mode': 'auto'}
+fit 1 10 {'number': [10], 'mode': 'fix'} {'number': [1, 10], 'mode': 'fit'}
+{'columns': [{'fix_width': 10, 'width': 2}, {'fix_width': 4, 'width': 2}, {'fix_width': 15, 'width': 2}], 'range': {'first': 3, 'last': 21}}
+row:col=2:3 {'number': [1, 10], 'mode': 'fit'} {'number': [], 'mode': 'auto'}
 {'columns': [{'fix_width': 10, 'width': 59}, {'fix_width': 4, 'width': 4}, {'fix_width': 15, 'width': 12}], 'range': {'first': 3, 'last': 8}}
-row:col=2:3 {'number': [10], 'mode': 'fix'} {'number': [], 'mode': 'auto'}
+row:col=2:3 {'number': [1, 10], 'mode': 'fit'} {'number': [], 'mode': 'auto'}
 {'columns': [{'fix_width': 10, 'width': 66}, {'fix_width': 4, 'width': 2}, {'fix_width': 15, 'width': 8}], 'range': {'first': 3, 'last': 12}}
 
 === DISPLAY ===

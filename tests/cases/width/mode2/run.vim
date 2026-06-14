@@ -17,6 +17,10 @@ Tir width=10
 echomsg "widt=10" b:tirenvi.prev_width_mode b:tirenvi.width_mode
 echomsg b:tirenvi.attrs[1]
 sleep 1m
+Tir width fit 1 10
+echomsg "fit 1 10" b:tirenvi.prev_width_mode b:tirenvi.width_mode
+echomsg b:tirenvi.attrs[1]
+sleep 1m
 Tir width auto
 execute "normal! 6G050aG\<Esc>"
 sleep 1m
