@@ -221,17 +221,6 @@ function M:apply_attrs_by_range(attrs)
 end
 
 ---@param self Blocks
----@return boolean
-function M.has_grid(self)
-	for _, block in ipairs(self) do
-		if block.kind == CONST.KIND.GRID then
-			return true
-		end
-	end
-	return false
-end
-
----@param self Blocks
 function M:insert_empty_lines()
 	local prev_kind = self[#self].kind
 	for iblock = #self - 1, 1, -1 do

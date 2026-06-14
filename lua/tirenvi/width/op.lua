@@ -1,5 +1,5 @@
 ---@class WidthOp
----@field opts {kind:string, mode:string|nil, repeatable:boolean|nil}
+---@field opts {kind:string, mode:string|nil, repeatable:boolean|nil, change_cell:boolean|nil}
 ---@field args string
 ---@field number number[]
 local WidthOp        = {}
@@ -20,10 +20,13 @@ local log            = require("tirenvi.util.log")
 -----------------------------------------------------------------------
 
 local map            = {
-    ["="] = { kind = "set", mode = "fix", repeatable = true },
-    ["+"] = { kind = "add", mode = "fix", repeatable = true },
-    ["-"] = { kind = "sub", mode = "fix", repeatable = true },
+    ["="] = { kind = "set", mode = "fix", repeatable = true, change_cell = true },
+    ["+"] = { kind = "add", mode = "fix", repeatable = true, change_cell = true },
+    ["-"] = { kind = "sub", mode = "fix", repeatable = true, change_cell = true },
     fit = { kind = "fit", mode = "fit" },
+    ["fit="] = { kind = "fit", mode = "fit" },
+    ["fit+"] = { kind = "fit_add", mode = "fit", repeatable = true },
+    ["fit-"] = { kind = "fit_sub", mode = "fit", repeatable = true },
     max = { kind = "max", mode = "max" },
     fix = { kind = "fix", mode = "fix" },
     auto = { kind = "auto", mode = "auto" },
@@ -32,7 +35,7 @@ local map            = {
 
 ---@param str string
 ---@return integer|nil
-local function get_int(str)
+local function get_number(str)
     if not str or str == "" then
         return nil
     end
@@ -49,16 +52,20 @@ local function try_new(opts)
     local self = setmetatable({}, WidthOp)
     self.args = opts.args
     self.number = {}
-    local token, count_str = opts.args:match("^width%s*([=%+%-])(.*)")
-    if token then
-        self.number[1] = get_int(count_str)
-    else
-        token = opts.fargs[2]
-        for index = 3, #opts.args do
-            self.number[#self.number + 1] = get_int(opts.fargs[index])
-        end
+    local op, value = opts.args:match("^width%s*([=%+%-])(.*)")
+    if op then
+        self.opts = map[op]
+        self.number[1] = get_number(value)
+        return self
     end
-    self.opts = map[token]
+    local mode, op, value = opts.args:match("^width%s+(fit)%s*([=%+%-])(.*)")
+    if mode then
+        self.opts = map[mode .. op]
+        self.number[1] = get_number(value)
+        return self
+    end
+    op = opts.fargs[2]
+    self.opts = map[op]
     return self
 end
 
@@ -110,7 +117,7 @@ end
 ---@param self WidthOp
 ---@return WidthModeState
 function WidthOp:get_state()
-    return WidthModeState.new(self.opts.mode, self.number)
+    return WidthModeState.new(self.opts.mode, self.opts.kind, self.number)
 end
 
 return WidthOp

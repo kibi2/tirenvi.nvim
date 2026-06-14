@@ -1,18 +1,37 @@
 === MESSAGE ===
 init {'number': [], 'mode': 'fix'} {'number': [], 'mode': 'fix'}
--> fix {'number': [], 'mode': 'fix'} {'number': [], 'mode': 'fix'}
--> max {'number': [], 'mode': 'fix'} {'number': [], 'mode': 'max'}
--> fit 3 {'number': [], 'mode': 'max'} {'number': [3], 'mode': 'fit'}
--> fix 5 {'number': [3], 'mode': 'fit'} {'number': [5], 'mode': 'fix'}
-toggle {'number': [5], 'mode': 'fix'} {'number': [], 'mode': 'max'}
-toggle {'number': [5], 'mode': 'fix'} {'number': [5], 'mode': 'fix'}
-toggle {'number': [5], 'mode': 'fix'} {'number': [], 'mode': 'max'}
-toggle {'number': [5], 'mode': 'fix'} {'number': [5], 'mode': 'fix'}
--> fit 99 {'number': [5], 'mode': 'fix'} {'number': [99], 'mode': 'fit'}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 11, 'width': 11}], 'range': {'first': 3, 'last': 8}}
+-> fix {'number': [], 'mode': 'fix'} {'number': [], 'mode': 'fix', 'kind': 'fix'}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 11, 'width': 11}], 'range': {'first': 3, 'last': 8}}
+-> max {'number': [], 'mode': 'fix', 'kind': 'fix'} {'number': [], 'mode': 'max', 'kind': 'max'}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 11, 'width': 11}], 'range': {'first': 3, 'last': 8}}
+-> fit {'number': [], 'mode': 'max', 'kind': 'max'} {'number': [], 'mode': 'fit', 'kind': 'fit'}
+{'columns': [{'fix_width': 5, 'width': 24}, {'fix_width': 3, 'width': 18}, {'fix_width': 11, 'width': 34}], 'range': {'first': 3, 'last': 8}}
+-> fix 5 {'number': [], 'mode': 'fit', 'kind': 'fit'} {'number': [], 'mode': 'fix', 'kind': 'fix'}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 11, 'width': 11}], 'range': {'first': 3, 'last': 8}}
+toggle {'number': [], 'mode': 'fix', 'kind': 'fix'} {'number': [], 'mode': 'max'}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 11, 'width': 11}], 'range': {'first': 3, 'last': 8}}
+toggle {'number': [], 'mode': 'fix', 'kind': 'fix'} {'number': [], 'mode': 'fix', 'kind': 'fix'}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 11, 'width': 11}], 'range': {'first': 3, 'last': 8}}
+toggle {'number': [], 'mode': 'fix', 'kind': 'fix'} {'number': [], 'mode': 'max'}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 11, 'width': 11}], 'range': {'first': 3, 'last': 8}}
+toggle {'number': [], 'mode': 'fix', 'kind': 'fix'} {'number': [], 'mode': 'fix', 'kind': 'fix'}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 11, 'width': 11}], 'range': {'first': 3, 'last': 8}}
+-> fit=1 {'number': [], 'mode': 'fix', 'kind': 'fix'} {'number': [1], 'mode': 'fit', 'kind': 'fit'}
+{'columns': [{'fix_width': 5, 'width': 2}, {'fix_width': 3, 'width': 2}, {'fix_width': 11, 'width': 2}], 'range': {'first': 3, 'last': 21}}
+-> fit=99 {'number': [1], 'mode': 'fit', 'kind': 'fit'} {'number': [99], 'mode': 'fit', 'kind': 'fit'}
+{'columns': [{'fix_width': 5, 'width': 30}, {'fix_width': 3, 'width': 22}, {'fix_width': 11, 'width': 43}], 'range': {'first': 3, 'last': 8}}
 tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
--> set {'number': [99], 'mode': 'fit'} {'number': [], 'mode': 'fix'}
--> set {'number': [], 'mode': 'fix'} {'number': [], 'mode': 'fix'}
--> auto {'number': [], 'mode': 'fix'} {'number': [], 'mode': 'auto'}
+-> fit+2 {'number': [99], 'mode': 'fit', 'kind': 'fit'} {'number': [2], 'mode': 'fit', 'kind': 'fit_add'}
+{'columns': [{'fix_width': 5, 'width': 31}, {'fix_width': 3, 'width': 22}, {'fix_width': 11, 'width': 44}], 'range': {'first': 3, 'last': 8}}
+-> fit-1 {'number': [2], 'mode': 'fit', 'kind': 'fit_add'} {'number': [1], 'mode': 'fit', 'kind': 'fit_sub'}
+{'columns': [{'fix_width': 5, 'width': 30}, {'fix_width': 3, 'width': 22}, {'fix_width': 11, 'width': 44}], 'range': {'first': 3, 'last': 8}}
+-> set= {'number': [1], 'mode': 'fit', 'kind': 'fit_sub'} {'number': [], 'mode': 'fix', 'kind': 'set'}
+{'columns': [{'fix_width': 5, 'width': 30}, {'fix_width': 3, 'width': 22}, {'fix_width': 11, 'width': 44}], 'range': {'first': 3, 'last': 8}}
+-> set= {'number': [], 'mode': 'fix', 'kind': 'set'} {'number': [], 'mode': 'fix', 'kind': 'set'}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 22, 'width': 22}, {'fix_width': 44, 'width': 44}], 'range': {'first': 3, 'last': 8}}
+-> auto {'number': [], 'mode': 'fix', 'kind': 'set'} {'number': [], 'mode': 'auto', 'kind': 'auto'}
+{'columns': [{'fix_width': 5, 'width': 7}, {'fix_width': 22, 'width': 4}, {'fix_width': 44, 'width': 15}], 'range': {'first': 3, 'last': 8}}
 
 === DISPLAY ===
 gfm

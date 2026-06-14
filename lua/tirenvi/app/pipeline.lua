@@ -315,7 +315,7 @@ end
 function M.cmd_width(ctx, sel, width_op)
     local now_mode = buffer.get(ctx.bufnr, buffer.IKEY.WIDTH_MODE)
     change_mode(ctx, width_op, now_mode)
-    if width_op.opts.repeatable then
+    if width_op.opts.change_cell then
         change_width(ctx, sel, width_op)
     else
         M.cmd_repair(ctx)
