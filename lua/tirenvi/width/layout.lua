@@ -1,11 +1,10 @@
-local Document    = require("tirenvi.core.document")
-local Cell        = require("tirenvi.core.cell")
-local Attr        = require("tirenvi.core.attr")
-local buffer      = require("tirenvi.io.buffer")
-local width_state = require("tirenvi.width.state")
-local log         = require("tirenvi.util.log")
+local Document = require("tirenvi.core.document")
+local Cell     = require("tirenvi.core.cell")
+local Attr     = require("tirenvi.core.attr")
+local buffer   = require("tirenvi.io.buffer")
+local log      = require("tirenvi.util.log")
 
-local M           = {}
+local M        = {}
 
 -- constants / defaults
 
@@ -98,16 +97,40 @@ local function shrink_to_fit(attr, size)
     end
 end
 
+---@param columns Attr_column[]
+local function set_mini_width(columns)
+    for _, column in ipairs(columns) do
+        column.width = Cell.MIN_WIDTH
+    end
+end
+
+---@param columns Attr_column[]
+---@param extra_space integer
+local function distribute_log_width(columns, extra_space)
+    local total = 0
+    local logws = {}
+    for _, column in ipairs(columns) do
+        local logw = math.log(column.width)
+        logws[#logws + 1] = logw
+        total = total + logw
+    end
+    for icol = 1, #columns do
+        columns[icol].width = Cell.MIN_WIDTH + math.ceil(extra_space * logws[icol] / total)
+    end
+end
+
 ---@param block Block
 ---@param max_size integer
 local function fit_block(block, max_size)
-    local total = Attr.get_total_width(block.attr)
-    local columns = block.attr.columns
+    local columns = block.attr.columns or {}
     local size = get_size(block, max_size)
-    for _, column in ipairs(columns or {}) do
-        column.width = math.max(math.ceil(size * column.width / total), Cell.MIN_WIDTH)
+    local extra_space = size - #columns * Cell.MIN_WIDTH
+    if extra_space <= 0 then
+        set_mini_width(columns)
+    else
+        distribute_log_width(columns, extra_space)
+        shrink_to_fit(block.attr, size)
     end
-    shrink_to_fit(block.attr, size)
 end
 
 ---@param tirdoc Document
