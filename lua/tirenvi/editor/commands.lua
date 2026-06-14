@@ -19,7 +19,8 @@ local M = {}
 local api = vim.api
 
 ---@param opts {[string]:any}
----@return Rect
+---@return integer
+---@return integer
 local function get_selection(opts)
 	local row_start = opts.line1
 	local row_end   = opts.line2
@@ -38,10 +39,7 @@ local function get_selection(opts)
 		col_start = col
 		col_end   = col
 	end
-	return {
-		row = Range.from_lua(math.min(row_start, row_end), math.max(row_start, row_end)),
-		col = Range.from_lua(math.min(col_start, col_end), math.max(col_start, col_end)),
-	}
+	return math.min(row_start, row_end), math.min(col_start, col_end)
 end
 
 ---@param ctx Context
@@ -54,10 +52,9 @@ local function cmd_width(ctx, opts)
 		notify.error(errors.err_unknown_command(opts.args))
 		return
 	end
-	local sel = get_selection(opts)
-	log.debug("row[%d-%d], col[%d-%d] %s", sel.row.first, sel.row.last, sel.col.first, sel.col.last,
-		width_op:to_string())
-	init.width(ctx, sel, width_op)
+	local irow, icol = get_selection(opts)
+	log.debug("row:%d, col:%d %s", irow, icol, width_op:to_string())
+	init.width(ctx, irow, icol, width_op)
 end
 
 ---@param ctx Context

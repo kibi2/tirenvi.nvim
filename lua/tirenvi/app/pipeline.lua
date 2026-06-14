@@ -118,24 +118,11 @@ end
 
 ---@param ctx Context
 ---@param irow integer
-local function get_range(ctx, irow)
+local function expand_rect(ctx, irow)
     local line_provider = LinProvider.new(ctx.bufnr)
     local top = Bufline.get_block_top_nrow(ctx, line_provider, irow)
     local bottom = Bufline.get_block_bottom_nrow(ctx, line_provider, irow)
-    return top, bottom
-end
-
----@param ctx Context
----@param row Range
-local function expand_rect(ctx, row)
-    local top, bottom = get_range(ctx, row.first)
-    row.first = top
-    local irow = bottom + 1
-    while irow <= row.last do
-        _, bottom = get_range(ctx, irow)
-        irow = bottom + 1
-    end
-    row.last = bottom
+    return Range.from_lua(top, bottom)
 end
 
 ---@param r_result ReadResult
@@ -219,18 +206,22 @@ local function update_attrs(ctx, range3, r_result)
     attr_store.write(ctx.bufnr, attrs)
 end
 
-local function change_attrs_width(attrs, sel, width_op)
-    return Attrs.change_width(attrs, sel, width_op)
+---@param irow integer
+---@param icol integer
+---@param width_op WidthOp
+local function change_attrs_width(attrs, irow, icol, width_op)
+    return Attrs.change_width(attrs, irow, icol, width_op)
 end
 
 ---@param ctx Context
----@param sel Rect
+---@param irow integer
+---@param icol integer
 ---@param width_op WidthOp
-local function change_width(ctx, sel, width_op)
-    expand_rect(ctx, sel.row)
-    log.debug("row%s, col%s", Range.short(sel.row), Range.short(sel.col))
-    local r_result = reader.read(ctx, sel.row)
-    if change_attrs_width(r_result.attrs, sel, width_op) then
+local function change_width(ctx, irow, icol, width_op)
+    log.debug("row%d, col%d", irow, icol)
+    local row_range = expand_rect(ctx, irow)
+    local r_result = reader.read(ctx, row_range)
+    if change_attrs_width(r_result.attrs, irow, icol, width_op) then
         local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
         log.watch("ATTR", Document.debug_attrs(bufdoc, "[88]MODE"))
         doc_to_buflines(ctx, r_result, bufdoc)
@@ -310,13 +301,14 @@ function M.to_flat(ctx, is_write_pre)
 end
 
 ---@param ctx Context
----@param sel Rect
+---@param irow integer
+---@param icol integer
 ---@param width_op WidthOp
-function M.cmd_width(ctx, sel, width_op)
+function M.cmd_width(ctx, irow, icol, width_op)
     local now_mode = buffer.get(ctx.bufnr, buffer.IKEY.WIDTH_MODE)
     change_mode(ctx, width_op, now_mode)
     if width_op.opts.change_cell then
-        change_width(ctx, sel, width_op)
+        change_width(ctx, irow, icol, width_op)
     else
         M.cmd_repair(ctx)
     end

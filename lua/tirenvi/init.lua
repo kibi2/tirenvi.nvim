@@ -93,10 +93,11 @@ function M.repair(ctx)
 end
 
 ---@param ctx Context	
----@param sel Rect
+---@param irow integer
+---@param icol integer
 ---@param width_op WidthOp
-function M.width(ctx, sel, width_op)
-	pipeline.cmd_width(ctx, sel, width_op)
+function M.width(ctx, irow, icol, width_op)
+	pipeline.cmd_width(ctx, irow, icol, width_op)
 	local command = width_op:to_cmd()
 	if command then
 		set_repeat(util.get_termcodes(command))

@@ -73,17 +73,17 @@ local function get_index(self, irow)
 end
 
 ---@param self Attr
----@param sel Range
+---@param icol integer
 ---@param width_op WidthOp
 ---@return boolean
-local function change_width(self, sel, width_op)
+local function change_width(self, icol, width_op)
     local changed = false
     local start_col = 1
     for _, column in ipairs(self.columns) do
         column.fix_width = column.width
         local old_width = column.fix_width
         local cel_range = Range.from_lua(start_col, start_col + old_width)
-        if Range.intersects(sel, cel_range) then
+        if Range.contains(cel_range, icol) then
             column.fix_width = width_op:apply(old_width)
             changed = true
         end
@@ -238,14 +238,15 @@ function M:get(irow)
 end
 
 ---@param self Attr[]
----@param rect Rect
+---@param irow integer
+---@param icol integer
 ---@param width_op WidthOp
 ---@return boolean
-function M:change_width(rect, width_op)
+function M:change_width(irow, icol, width_op)
     local changed = false
     for _, attr in ipairs(self) do
-        if Attr.is_grid(attr) and Range.intersects(rect.row, attr.range) then
-            changed = change_width(attr, rect.col, width_op) or changed
+        if Attr.is_grid(attr) and Range.contains(attr.range, irow) then
+            changed = change_width(attr, icol, width_op) or changed
         end
     end
     return changed
