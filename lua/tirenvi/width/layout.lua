@@ -1,10 +1,11 @@
-local Document = require("tirenvi.core.document")
-local Cell     = require("tirenvi.core.cell")
-local Attr     = require("tirenvi.core.attr")
-local buffer   = require("tirenvi.io.buffer")
-local log      = require("tirenvi.util.log")
+local Document   = require("tirenvi.core.document")
+local Cell       = require("tirenvi.core.cell")
+local Attr       = require("tirenvi.core.attr")
+local buffer     = require("tirenvi.io.buffer")
+local attr_store = require("tirenvi.io.attr_store")
+local log        = require("tirenvi.util.log")
 
-local M        = {}
+local M          = {}
 
 -- constants / defaults
 
@@ -133,12 +134,41 @@ local function fit_block(block, max_size)
     end
 end
 
+---@return integer|nil
+local function get_max_pre()
+    local attrs = attr_store.read()
+    for _, attr in ipairs(attrs) do
+        if Attr.is_grid(attr) then
+            local total = #attr.columns + 1
+            for _, column in ipairs(attr.columns) do
+                total = total + column.width
+            end
+            return total
+        end
+    end
+    return nil
+end
+
+---@param tirdoc Document
+---@param width_mode WidthModeState
+---@return integer
+local function get_max_size(tirdoc, width_mode)
+    if width_mode.kind == "fit" then
+        return width_mode.number[1] or buffer.get_win_width()
+    end
+    local max_size = get_max_pre() or buffer.get_win_width()
+    if width_mode.kind == "fit_add" then
+        max_size = max_size + width_mode.number[1]
+    elseif width_mode.kind == "fit_sub" then
+        max_size = max_size - width_mode.number[1]
+    end
+    return max_size
+end
+
 ---@param tirdoc Document
 ---@param width_mode WidthModeState
 local function fit(tirdoc, width_mode)
-    local pages = width_mode.number[1] or 1
-    local width = width_mode.number[2] or buffer.get_win_width()
-    local max_size = pages * width
+    local max_size = get_max_size(tirdoc, width_mode)
     Document.set_max_attr(tirdoc)
     for _, block in ipairs(tirdoc.blocks) do
         if block.kind == "grid" then

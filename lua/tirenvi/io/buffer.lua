@@ -162,7 +162,7 @@ function M.normalize_bufnr(bufnr)
 	return bufnr
 end
 
----@param bufnr number
+---@param bufnr number|nil
 ---@return {[string]: boolean|integer|string|integer[][]|nil}
 function M.get_state(bufnr)
 	bufnr = M.normalize_bufnr(bufnr)
@@ -174,7 +174,7 @@ function M.get_state(bufnr)
 	return b[bufnr].tirenvi
 end
 
----@param bufnr number
+---@param bufnr number|nil
 ---@param key string
 ---@return any
 function M.get(bufnr, key)

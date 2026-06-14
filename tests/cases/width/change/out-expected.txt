@@ -44,6 +44,7 @@ markdown
 2,5,8 {'columns': [{'fix_width': 2, 'width': 2}, {'fix_width': 5, 'width': 5}, {'fix_width': 8, 'width': 8}], 'range': {'first': 2, 'last': 14}}
 2,5,8 {'columns': [{'fix_width': 2, 'width': 2}, {'fix_width': 5, 'width': 5}, {'fix_width': 8, 'width': 8}], 'range': {'first': 2, 'last': 14}}
 2,3,8 {'columns': [{'fix_width': 2, 'width': 2}, {'fix_width': 3, 'width': 3}, {'fix_width': 8, 'width': 8}], 'range': {'first': 2, 'last': 14}}
+tirenvi: Unknown Tir command: width=x
 
 === DISPLAY ===
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0

@@ -71,5 +71,6 @@ Tir width=
 echomsg "2,3,8" b:tirenvi.attrs[1]
 sleep 1m
 "                              2, 3, 8
+Tir width=x
 
 call RunTest({ 'desc': 'width = 2, 3, 8' })
