@@ -56,12 +56,12 @@ local function max(tirdoc)
 end
 
 ---@param block Block
----@param max_size integer
+---@param grid_size integer
 ---@return integer
-local function get_size(block, max_size)
+local function get_size(block, grid_size)
     local columns = block.attr.columns
     local ncol = columns and #columns or #block.records
-    return max_size - ncol - 1
+    return grid_size - ncol - 1
 end
 
 ---@param block Block
@@ -121,10 +121,10 @@ local function distribute_log_width(columns, extra_space)
 end
 
 ---@param block Block
----@param max_size integer
-local function fit_block(block, max_size)
+---@param grid_size integer
+local function fit_block(block, grid_size)
     local columns = block.attr.columns or {}
-    local size = get_size(block, max_size)
+    local size = get_size(block, grid_size)
     local extra_space = size - #columns * Cell.MIN_WIDTH
     if extra_space <= 0 then
         set_mini_width(columns)
@@ -135,8 +135,7 @@ local function fit_block(block, max_size)
 end
 
 ---@return integer|nil
-local function get_max_pre()
-    local attrs = attr_store.read()
+local function get_size_from_attrs(attrs)
     for _, attr in ipairs(attrs) do
         if Attr.is_grid(attr) then
             local total = #attr.columns + 1
@@ -149,30 +148,45 @@ local function get_max_pre()
     return nil
 end
 
+---@return integer|nil
+local function get_size_pre()
+    return get_size_from_attrs(attr_store.read())
+end
+
+---comment
+---@param tirdoc any
+---@param width_mode any
+---@return integer
+local function get_auto_size(tirdoc, width_mode)
+    --Document.set_max_attr(tirdoc)
+    local win_width = buffer.get_win_width()
+    return win_width
+end
+
 ---@param tirdoc Document
 ---@param width_mode WidthModeState
 ---@return integer
-local function get_max_size(tirdoc, width_mode)
+local function get_grid_size(tirdoc, width_mode)
     if width_mode.kind == "fit" then
-        return width_mode.number[1] or buffer.get_win_width()
+        return width_mode.number[1] or get_auto_size(tirdoc, width_mode)
     end
-    local max_size = get_max_pre() or buffer.get_win_width()
+    local grid_size = get_size_pre() or get_auto_size(tirdoc, width_mode)
     if width_mode.kind == "fit_add" then
-        max_size = max_size + width_mode.number[1]
+        grid_size = grid_size + width_mode.number[1]
     elseif width_mode.kind == "fit_sub" then
-        max_size = max_size - width_mode.number[1]
+        grid_size = grid_size - width_mode.number[1]
     end
-    return max_size
+    return grid_size
 end
 
 ---@param tirdoc Document
 ---@param width_mode WidthModeState
 local function fit(tirdoc, width_mode)
-    local max_size = get_max_size(tirdoc, width_mode)
+    local grid_size = get_grid_size(tirdoc, width_mode)
     Document.set_max_attr(tirdoc)
     for _, block in ipairs(tirdoc.blocks) do
         if block.kind == "grid" then
-            fit_block(block, max_size)
+            fit_block(block, grid_size)
             log.watch("ATTR", Document.debug_attrs(tirdoc, "[88]MODE"))
         end
     end
@@ -212,23 +226,23 @@ local function auto_attr(column, max, max_size)
 end
 
 ---@param block Block
----@param max_size integer
-local function auto_block(block, max_size)
+---@param win_width integer
+local function auto_block(block, win_width)
     local max_columns = vim.deepcopy(block.attr.columns)
-    fit_auto_block(block, max_size)
+    fit_auto_block(block, win_width)
     local is_wrap = false
     for icol = 1, #max_columns do
-        is_wrap = is_wrap or auto_attr(block.attr.columns[icol], max_columns[icol], max_size)
+        is_wrap = is_wrap or auto_attr(block.attr.columns[icol], max_columns[icol], win_width)
     end
 end
 
 ---@param tirdoc Document
 local function auto(tirdoc)
     Document.set_max_attr(tirdoc)
-    local max_size = buffer.get_win_width()
+    local win_width = buffer.get_win_width()
     for _, block in ipairs(tirdoc.blocks) do
         if block.kind == "grid" then
-            auto_block(block, max_size)
+            auto_block(block, win_width)
         end
     end
 end
