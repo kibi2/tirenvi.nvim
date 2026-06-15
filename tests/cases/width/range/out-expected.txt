@@ -2,8 +2,8 @@
 --- width = 5, 6 / 5, 3, 6 ---
 === MESSAGE ===
 tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
-{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 6, 'width': 6}], 'range': {'first': 2, 'last': 6}}
-{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 6, 'width': 6}], 'range': {'first': 8, 'last': 12}}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 6, 'width': 6}], 'width_mode': 'fit', 'range': {'first': 2, 'last': 6}, 'prev_width_mode': 'fit'}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 6, 'width': 6}], 'width_mode': 'fit', 'range': {'first': 8, 'last': 12}, 'prev_width_mode': 'fit'}
 
 === DISPLAY ===
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
@@ -23,8 +23,8 @@ tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
 
 --- width = 5, 6 / 5, 3, 6 ---
 === MESSAGE ===
-{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 6, 'width': 6}], 'range': {'first': 2, 'last': 6}}
-{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 6, 'width': 6}], 'range': {'first': 8, 'last': 12}}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 6, 'width': 6}], 'width_mode': 'fit', 'range': {'first': 2, 'last': 6}, 'prev_width_mode': 'fit'}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 6, 'width': 6}], 'width_mode': 'fit', 'range': {'first': 8, 'last': 12}, 'prev_width_mode': 'fit'}
 
 === DISPLAY ===
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
@@ -44,8 +44,8 @@ tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
 
 --- width = 3, 6 / 5, 3, 6 ---
 === MESSAGE ===
-{'columns': [{'fix_width': 3, 'width': 3}, {'fix_width': 6, 'width': 6}], 'range': {'first': 2, 'last': 10}}
-{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 6, 'width': 6}], 'range': {'first': 12, 'last': 16}}
+{'columns': [{'fix_width': 3, 'width': 3}, {'fix_width': 6, 'width': 6}], 'width_mode': 'fit', 'range': {'first': 2, 'last': 10}, 'prev_width_mode': 'fit'}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 6, 'width': 6}], 'width_mode': 'fit', 'range': {'first': 12, 'last': 16}, 'prev_width_mode': 'fit'}
 
 === DISPLAY ===
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
@@ -69,8 +69,8 @@ tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
 
 --- width = 5, 6 / 5, 3, 6 ---
 === MESSAGE ===
-{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 6, 'width': 6}], 'range': {'first': 2, 'last': 6}}
-{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 6, 'width': 6}], 'range': {'first': 8, 'last': 12}}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 6, 'width': 6}], 'width_mode': 'fit', 'range': {'first': 2, 'last': 6}, 'prev_width_mode': 'fit'}
+{'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 6, 'width': 6}], 'width_mode': 'fit', 'range': {'first': 8, 'last': 12}, 'prev_width_mode': 'fit'}
 
 === DISPLAY ===
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0

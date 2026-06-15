@@ -1,6 +1,5 @@
 local Record = require("tirenvi.core.record")
 local Cell = require("tirenvi.core.cell")
-local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -61,11 +60,15 @@ end
 ---@param record Record_grid|nil
 ---@return Attr
 function M.grid.new(record)
+    local self
     if record then
-        return new_from_columns(get_columns(record.row))
+        self = new_from_columns(get_columns(record.row))
     else
-        return new_from_columns({})
+        self = new_from_columns({})
     end
+    self.prev_width_mode = "fit"
+    self.width_mode = "fit"
+    return self
 end
 
 ---@self Attr
