@@ -30,7 +30,9 @@ local map            = {
     max = { kind = "max", mode = "max" },
     fix = { kind = "fix", mode = "fix" },
     auto = { kind = "auto", mode = "auto" },
-    toggle = { kind = "toggle" }
+    toggle = { kind = "toggle" },
+    wrap = { mode = "wrap" },
+    nowrap = { mode = "nowrap" },
 }
 
 ---@param str string

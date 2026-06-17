@@ -68,7 +68,7 @@ function M.grid.new(record)
         self = new_from_columns({})
     end
     self.prev_width_mode = WidthModeState.new("fix", "fit")
-    self.width_mode = WidthModeState.new("fix", "fit")
+    self.width_mode_old = WidthModeState.new("fix", "fit")
     return self
 end
 
@@ -81,9 +81,9 @@ function M.grid:set_max_attr(records)
         M.set_ncol(self, ncol)
     end
     for icol, column in pairs(self.columns) do
-        if column.width <= 0 then
-            column.width = get_max_width(records, icol)
-        end
+        --if column.width <= 0 then
+        column.width = get_max_width(records, icol)
+        --end
     end
 end
 
@@ -98,22 +98,22 @@ end
 ---@param attr Attr
 ---@return string
 local function get_mode_short(attr)
-    if not attr.width_mode then
+    if not attr.width_mode_old then
         return ""
-    elseif attr.width_mode.mode == "auto" then
+    elseif attr.width_mode_old.mode == "auto" then
         return "a"
-    elseif attr.width_mode.mode == "fix" then
+    elseif attr.width_mode_old.mode == "fix" then
         return "x"
-    elseif attr.width_mode.mode == "fit" then
+    elseif attr.width_mode_old.mode == "fit" then
         return "t"
-    elseif attr.width_mode.mode == "max" then
+    elseif attr.width_mode_old.mode == "max" then
         return "m"
-    elseif attr.width_mode.mode == "wrap" then
+    elseif attr.width_mode_old.mode == "wrap" then
         return "w"
-    elseif attr.width_mode.mode == "nowrap" then
+    elseif attr.width_mode_old.mode == "nowrap" then
         return "n"
     else
-        return attr.width_mode.mode
+        return attr.width_mode_old.mode
     end
 end
 
@@ -195,6 +195,11 @@ function M:get_total_width()
         total = total + column.width
     end
     return total
+end
+
+---@param self Attr
+function M:is_width_wrap()
+    return not self.width_mode or self.width_mode == "wrap"
 end
 
 return M
