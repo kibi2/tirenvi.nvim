@@ -214,15 +214,14 @@ end
 ---@param ctx Context
 ---@param width_op WidthOp
 local function change_width(ctx, width_op)
-    log.debug("row%d, col%d", width_op.irow, width_op.icol)
     local row_range = expand_rect(ctx, width_op.irow)
     local r_result = reader.read(ctx, row_range)
-    if change_attrs_width(r_result.attrs, width_op) then
-        local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
-        log.watch("ATTR", Document.debug_attrs(bufdoc, "[88]MODE"))
-        doc_to_buflines(ctx, r_result, bufdoc)
-        log.watch("ATTR", Document.debug_attrs(bufdoc, "[88]MODE"))
-    end
+    local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
+    log.assert(#bufdoc.blocks == 1, "only one block")
+    local attr = bufdoc.blocks[1].attr
+    if Attr.is_plain(attr) then return end
+    Attr.change_width(attr, width_op)
+    doc_to_buflines(ctx, r_result, bufdoc)
 end
 
 ---@param ctx Context
@@ -263,7 +262,7 @@ local function change_mode(ctx, width_op)
     if not attr or Attr.is_plain(attr) then
         return
     end
-    if width_op.opts.kind == "toggle" then
+    if width_op.command == "toggle" then
         if Attr.is_width_wrap(attr) then
             attr.width_mode = "nowrap"
         else
@@ -334,34 +333,21 @@ end
 ---@param ctx Context
 ---@param width_op WidthOp
 function M.cmd_width(ctx, width_op)
-    change_mode(ctx, width_op)
-    if width_op.opts.change_cell then
-        change_width(ctx, width_op)
-    else
-        M.cmd_repair(ctx)
-    end
+    change_width(ctx, width_op)
 end
 
 ---@param ctx Context
 ---@param width_op WidthOp
 function M.cmd_fit(ctx, width_op)
     change_mode(ctx, width_op)
-    if width_op.opts.change_cell then
-        change_fit(ctx, width_op)
-    else
-        M.cmd_repair(ctx)
-    end
+    change_fit(ctx, width_op)
 end
 
 ---@param ctx Context
 ---@param width_op WidthOp
 function M.cmd_wrap(ctx, width_op)
     change_mode(ctx, width_op)
-    if width_op.opts.change_cell then
-        change_wrap(ctx, width_op)
-    else
-        M.cmd_repair(ctx)
-    end
+    M.cmd_repair(ctx)
 end
 
 ---@param ctx Context

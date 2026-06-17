@@ -8,7 +8,6 @@ local ui = require("tirenvi.ui")
 local guard = require("tirenvi.util.guard")
 local notify = require("tirenvi.util.notify")
 local errors = require("tirenvi.util.errors")
-local Range = require("tirenvi.util.range")
 local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
 local debug = require("tirenvi.editor.debug")
@@ -112,11 +111,12 @@ end
 ----------------------------------------------------------------------
 
 local commands = {
+	toggle = cmd_toggle,
+	redraw = cmd_redraw,
 	width = cmd_width,
 	fit = cmd_fit,
 	wrap = cmd_wrap,
 	repair = cmd_repair,
-	redraw = cmd_redraw,
 }
 
 local function get_command_keys()

@@ -96,20 +96,14 @@ end
 ---@param width_op WidthOp
 function M.width(ctx, width_op)
 	pipeline.cmd_width(ctx, width_op)
-	local command = width_op:to_cmd()
-	if command then
-		set_repeat(util.get_termcodes(command))
-	end
+	set_repeat(util.get_termcodes(width_op:to_cmd()))
 end
 
 ---@param ctx Context	
 ---@param width_op WidthOp
 function M.fit(ctx, width_op)
 	pipeline.cmd_fit(ctx, width_op)
-	local command = width_op:to_cmd()
-	if command then
-		set_repeat(util.get_termcodes(command))
-	end
+	set_repeat(util.get_termcodes(width_op:to_cmd()))
 end
 
 ---@param ctx Context	
