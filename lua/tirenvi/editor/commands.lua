@@ -60,6 +60,36 @@ end
 ---@param ctx Context
 ---@param opts {[string]:any}
 ---@return nil
+local function cmd_fit(ctx, opts)
+	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
+	local width_op = WidthOp.new(opts)
+	if not width_op.opts then
+		notify.error(errors.err_unknown_command(opts.args))
+		return
+	end
+	local irow, icol = get_selection(opts)
+	log.debug("row:%d, col:%d %s", irow, icol, width_op:to_string())
+	init.width(ctx, irow, icol, width_op)
+end
+
+---@param ctx Context
+---@param opts {[string]:any}
+---@return nil
+local function cmd_wrap(ctx, opts)
+	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
+	local width_op = WidthOp.new(opts)
+	if not width_op.opts then
+		notify.error(errors.err_unknown_command(opts.args))
+		return
+	end
+	local irow, icol = get_selection(opts)
+	log.debug("row:%d, col:%d %s", irow, icol, width_op:to_string())
+	init.width(ctx, irow, icol, width_op)
+end
+
+---@param ctx Context
+---@param opts {[string]:any}
+---@return nil
 local function cmd_toggle(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr, { is_tirbuf = false, has_grid = true, }) then
 		return
@@ -110,6 +140,8 @@ end
 local commands = {
 	toggle = cmd_toggle,
 	width = cmd_width,
+	fit = cmd_fit,
+	wrap = cmd_wrap,
 	repair = cmd_repair,
 	redraw = cmd_redraw,
 }

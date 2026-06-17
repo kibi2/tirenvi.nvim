@@ -45,15 +45,12 @@ local M = {}
 
 ---@class Attr
 ---@field range Range
----@field prev_width_mode WidthModeState
----@field width_mode_old WidthModeState
 ---@field width_mode WidthMode|nil
 ---@field fit_width integer|nil
 ---@field columns Attr_column[]
 
 ---@class Attr_column
 ---@field width integer                 display width (logical column width)
----@field fix_width integer             width for fix mode
 
 ---@alias Record Record_plain|Record_grid
 

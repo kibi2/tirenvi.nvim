@@ -35,9 +35,6 @@ end
 ---@param block Block_grid
 local function wrap(block)
     log.probe(block.attr.columns)
-    for _, column in ipairs(block.attr.columns or {}) do
-        column.width = column.fix_width
-    end
     log.probe(block.attr.columns)
     Block.grid.set_max_attr(block)
 end
@@ -45,9 +42,6 @@ end
 ---@param block Block_grid
 local function fix(block)
     log.probe(block.attr.columns)
-    for _, column in ipairs(block.attr.columns or {}) do
-        column.width = column.fix_width
-    end
     log.probe(block.attr.columns)
     Block.grid.set_max_attr(block)
 end
@@ -167,37 +161,22 @@ local function get_size_pre()
     return get_size_from_attrs(attr_store.read())
 end
 
----comment
----@param block Block_grid
----@param width_mode any
 ---@return integer
-local function get_auto_size(block, width_mode)
-    --Document.set_max_attr(tirdoc)
-    local win_width = buffer.get_win_width()
-    return win_width
+local function get_auto_size()
+    return buffer.get_win_width()
 end
 
 ---@param block Block_grid
----@param width_mode WidthModeState
+---@param fit_width integer
 ---@return integer
-local function get_grid_size(block, width_mode)
-    if width_mode.kind == "fit" then
-        return width_mode.number[1] or get_auto_size(block, width_mode)
-    end
-    local grid_size = get_size_pre() or get_auto_size(block, width_mode)
-    if width_mode.kind == "fit_add" then
-        grid_size = grid_size + width_mode.number[1]
-    elseif width_mode.kind == "fit_sub" then
-        grid_size = grid_size - width_mode.number[1]
-    end
-    return grid_size
+local function get_grid_size(block, fit_width)
+    return fit_width or get_auto_size()
 end
 
 ---@param block Block_grid
 local function fit(block)
     log.probe(block.attr.columns)
-    local width_mode = block.attr.width_mode_old
-    local grid_size = get_grid_size(block, width_mode)
+    local grid_size = get_grid_size(block, block.attr.fit_width)
     Block.grid.set_max_attr(block)
     fit_block(block, grid_size)
     log.watch("ATTR", block.attr)
@@ -263,27 +242,11 @@ end
 function M.compute(tirdoc)
     log.probe(Document.debug_attrs(tirdoc, "[88]MODE:"))
     for _, block in ipairs(tirdoc.blocks) do
-        local width_mode = block.attr.width_mode_old
         if block.kind == "grid" then
-            log.probe("🟥" .. (block.attr.width_mode or ""))
-            if block.attr.width_mode == "nowrap" then
-                nowrap(block)
-            elseif block.attr.width_mode == "wrap" then
+            if Attr.is_width_wrap(block.attr) then
                 wrap(block)
-            end
-            if width_mode.mode == "fix" then
-                log.probe(Document.debug_attrs(tirdoc, "[88]MODE:"))
-                fix(block)
             else
-                log.probe(Document.debug_attrs(tirdoc, "[88]MODE:"))
-                clear_width(block)
-                if width_mode.mode == "max" then
-                    max(block)
-                elseif width_mode.mode == "fit" then
-                    fit(block)
-                elseif width_mode.mode == "auto" then
-                    auto(block)
-                end
+                nowrap(block)
             end
         end
     end
