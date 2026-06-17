@@ -44,12 +44,6 @@ M.IKEY               = {
 
 	-- buffer is flat or tir-buffer
 	FLAT = "flat",
-
-	-- WidthMode
-	WIDTH_MODE = "width_mode",
-
-	-- previous Width_mode
-	--PREV_WIDTH_MODE = "prev_width_mode",
 }
 
 local initial_value  = {
@@ -62,8 +56,6 @@ local initial_value  = {
 	[M.IKEY.ATTRS] = nil,
 	[M.IKEY.DIRTY] = nil,
 	[M.IKEY.FLAT] = nil,
-	[M.IKEY.WIDTH_MODE] = nil,
-	--[M.IKEY.PREV_WIDTH_MODE] = nil,
 }
 
 -----------------------------------------------------------------------

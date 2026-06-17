@@ -40,26 +40,11 @@ local function show_debug_marks(bufnr, attr, iattr)
     vim.api.nvim_buf_set_extmark(bufnr, namespaces.ATTR, start0, 0, opts)
 end
 
----@param attrs Attr[]
-local function set_fix_width(attrs)
-    for _, attr in ipairs(attrs) do
-        if attr.width_mode_old and attr.width_mode_old.mode == "fix" then
-            for _, column in ipairs(attr.columns or {}) do
-                column.fix_width = column.width
-            end
-        end
-    end
-end
-
 ---@param bufnr number
 ---@param attrs Attr[]|nil
 local function set_attrs(bufnr, attrs)
-    --local width_mode = buffer.get(bufnr, buffer.IKEY.WIDTH_MODE)
-    --if width_mode.mode == "fix" then
-    set_fix_width(attrs or {})
-    --end
     buffer.set(bufnr, buffer.IKEY.ATTRS, attrs)
-    log.probe(Attrs.debug_attrs(attrs, "[88]MODE:"))
+    log.probe(Attrs.debug_attrs(attrs or {}, "[88]MODE:"))
     vim.schedule(function()
         vim.api.nvim_buf_clear_namespace(bufnr, namespaces.ATTR, 0, -1)
         for iattr, attr in ipairs(attrs or {}) do

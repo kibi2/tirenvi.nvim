@@ -67,8 +67,6 @@ function M.grid.new(record)
     else
         self = new_from_columns({})
     end
-    self.prev_width_mode = WidthModeState.new("fix", "fit")
-    self.width_mode_old = WidthModeState.new("fix", "fit")
     return self
 end
 
@@ -98,22 +96,12 @@ end
 ---@param attr Attr
 ---@return string
 local function get_mode_short(attr)
-    if not attr.width_mode_old then
-        return ""
-    elseif attr.width_mode_old.mode == "auto" then
-        return "a"
-    elseif attr.width_mode_old.mode == "fix" then
-        return "x"
-    elseif attr.width_mode_old.mode == "fit" then
-        return "t"
-    elseif attr.width_mode_old.mode == "max" then
-        return "m"
-    elseif attr.width_mode_old.mode == "wrap" then
+    if not attr.width_mode then
         return "w"
-    elseif attr.width_mode_old.mode == "nowrap" then
-        return "n"
+    elseif M.is_width_wrap(attr) == "wrap" then
+        return "w"
     else
-        return attr.width_mode_old.mode
+        return "n"
     end
 end
 
@@ -134,7 +122,6 @@ function M.get_width_array(columns)
     local widths = {}
     for _, column in ipairs(columns) do
         widths[#widths + 1] = column.width
-        widths[#widths + 1] = column.fix_width
     end
     return widths
 end
@@ -183,7 +170,7 @@ function M:set_ncol(ncol)
         return
     end
     for icol = 1, ncol do
-        self.columns[icol] = { fix_width = 0, width = 0 }
+        self.columns[icol] = { width = 0 }
     end
 end
 
