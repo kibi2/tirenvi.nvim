@@ -18,43 +18,18 @@ local M = {}
 
 local api = vim.api
 
----@param opts {[string]:any}
----@return integer
----@return integer
-local function get_selection(opts)
-	local row_start = opts.line1
-	local row_end   = opts.line2
-	local is_block  = (vim.fn.visualmode() == "\22")
-	local col_start, col_end
-	if opts.range > 0 then
-		if is_block then
-			col_start = vim.fn.virtcol("'<")
-			col_end   = vim.fn.virtcol("'>")
-		else
-			col_start = 1
-			col_end   = math.huge
-		end
-	else
-		local col = vim.fn.virtcol(".")
-		col_start = col
-		col_end   = col
-	end
-	return math.min(row_start, row_end), math.min(col_start, col_end)
-end
-
 ---@param ctx Context
 ---@param opts {[string]:any}
 ---@return nil
 local function cmd_width(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
-	local width_op = WidthOp.new(opts)
-	if not width_op.opts then
+	local width_op = WidthOp.new(opts, "width")
+	if not width_op then
 		notify.error(errors.err_unknown_command(opts.args))
 		return
 	end
-	local irow, icol = get_selection(opts)
-	log.debug("row:%d, col:%d %s", irow, icol, width_op:to_string())
-	init.width(ctx, irow, icol, width_op)
+	log.debug(width_op:to_string())
+	init.width(ctx, width_op)
 end
 
 ---@param ctx Context
@@ -62,14 +37,13 @@ end
 ---@return nil
 local function cmd_fit(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
-	local width_op = WidthOp.new(opts)
-	if not width_op.opts then
+	local width_op = WidthOp.new(opts, "fit")
+	if not width_op then
 		notify.error(errors.err_unknown_command(opts.args))
 		return
 	end
-	local irow, icol = get_selection(opts)
-	log.debug("row:%d, col:%d %s", irow, icol, width_op:to_string())
-	init.width(ctx, irow, icol, width_op)
+	log.debug("row:%d, col:%d %s", width_op:to_string())
+	init.fit(ctx, width_op)
 end
 
 ---@param ctx Context
@@ -77,14 +51,13 @@ end
 ---@return nil
 local function cmd_wrap(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
-	local width_op = WidthOp.new(opts)
-	if not width_op.opts then
+	local width_op = WidthOp.new(opts, "wrap")
+	if not width_op then
 		notify.error(errors.err_unknown_command(opts.args))
 		return
 	end
-	local irow, icol = get_selection(opts)
-	log.debug("row:%d, col:%d %s", irow, icol, width_op:to_string())
-	init.width(ctx, irow, icol, width_op)
+	log.debug("row:%d, col:%d %s", width_op:to_string())
+	init.wrap(ctx, width_op)
 end
 
 ---@param ctx Context

@@ -35,13 +35,11 @@ end
 ---@param block Block_grid
 local function wrap(block)
     log.probe(block.attr.columns)
-    log.probe(block.attr.columns)
     Block.grid.set_max_attr(block)
 end
 
 ---@param block Block_grid
 local function fix(block)
-    log.probe(block.attr.columns)
     log.probe(block.attr.columns)
     Block.grid.set_max_attr(block)
 end

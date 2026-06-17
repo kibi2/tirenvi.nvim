@@ -93,15 +93,29 @@ function M.repair(ctx)
 end
 
 ---@param ctx Context	
----@param irow integer
----@param icol integer
 ---@param width_op WidthOp
-function M.width(ctx, irow, icol, width_op)
-	pipeline.cmd_width(ctx, irow, icol, width_op)
+function M.width(ctx, width_op)
+	pipeline.cmd_width(ctx, width_op)
 	local command = width_op:to_cmd()
 	if command then
 		set_repeat(util.get_termcodes(command))
 	end
+end
+
+---@param ctx Context	
+---@param width_op WidthOp
+function M.fit(ctx, width_op)
+	pipeline.cmd_fit(ctx, width_op)
+	local command = width_op:to_cmd()
+	if command then
+		set_repeat(util.get_termcodes(command))
+	end
+end
+
+---@param ctx Context	
+---@param width_op WidthOp
+function M.wrap(ctx, width_op)
+	pipeline.cmd_wrap(ctx, width_op)
 end
 
 ---@param ctx Context

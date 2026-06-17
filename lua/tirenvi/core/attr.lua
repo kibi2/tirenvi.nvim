@@ -79,9 +79,9 @@ function M.grid:set_max_attr(records)
         M.set_ncol(self, ncol)
     end
     for icol, column in pairs(self.columns) do
-        --if column.width <= 0 then
-        column.width = get_max_width(records, icol)
-        --end
+        if column.width <= 0 then
+            column.width = get_max_width(records, icol)
+        end
     end
 end
 
@@ -98,7 +98,7 @@ end
 local function get_mode_short(attr)
     if not attr.width_mode then
         return "w"
-    elseif M.is_width_wrap(attr) == "wrap" then
+    elseif M.is_width_wrap(attr) then
         return "w"
     else
         return "n"
@@ -185,6 +185,7 @@ function M:get_total_width()
 end
 
 ---@param self Attr
+---@return boolean
 function M:is_width_wrap()
     return not self.width_mode or self.width_mode == "wrap"
 end

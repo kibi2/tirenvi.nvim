@@ -237,15 +237,13 @@ function M:get(irow)
 end
 
 ---@param self Attr[]
----@param irow integer
----@param icol integer
 ---@param width_op WidthOp
 ---@return boolean
-function M:change_width(irow, icol, width_op)
+function M:change_width(width_op)
     local changed = false
     for _, attr in ipairs(self) do
-        if Attr.is_grid(attr) and Range.contains(attr.range, irow) then
-            changed = change_width(attr, icol, width_op) or changed
+        if Attr.is_grid(attr) and Range.contains(attr.range, width_op.irow) then
+            changed = change_width(attr, width_op.icol, width_op) or changed
         end
     end
     return changed

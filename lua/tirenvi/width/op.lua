@@ -2,6 +2,8 @@
 ---@field opts {kind:string, mode:string|nil, repeatable:boolean|nil, change_cell:boolean|nil}
 ---@field args string
 ---@field number number[]
+---@field irow integer
+---@field icol integer
 local WidthOp        = {}
 WidthOp.__index      = WidthOp
 
@@ -15,14 +17,10 @@ local log            = require("tirenvi.util.log")
 -- Private helpers
 -----------------------------------------------------------------------
 
------------------------------------------------------------------------
--- Public API
------------------------------------------------------------------------
-
 local map            = {
-    ["="] = { kind = "set", mode = "fix", repeatable = true, change_cell = true },
-    ["+"] = { kind = "add", mode = "fix", repeatable = true, change_cell = true },
-    ["-"] = { kind = "sub", mode = "fix", repeatable = true, change_cell = true },
+    ["="] = { kind = "set", mode = "wrap", repeatable = true, change_cell = true },
+    ["+"] = { kind = "add", mode = "wrap", repeatable = true, change_cell = true },
+    ["-"] = { kind = "sub", mode = "wrap", repeatable = true, change_cell = true },
     fit = { kind = "fit", mode = "fit" },
     ["fit="] = { kind = "fit", mode = "fit" },
     ["fit+"] = { kind = "fit_add", mode = "fit", repeatable = true },
@@ -31,7 +29,7 @@ local map            = {
     fix = { kind = "fix", mode = "fix" },
     auto = { kind = "auto", mode = "auto" },
     toggle = { kind = "toggle" },
-    wrap = { mode = "wrap" },
+    wrap = { kind = "toggle" },
     nowrap = { mode = "nowrap" },
 }
 
@@ -49,34 +47,55 @@ local function get_number(str)
 end
 
 ---@param opts {[string]:any}
----@return WidthOp
-local function try_new(opts)
-    local self = setmetatable({}, WidthOp)
-    self.args = opts.args
-    self.number = {}
-    local op, value = opts.args:match("^width%s*([=%+%-])(.*)")
-    if op then
-        self.opts = map[op]
-        self.number[1] = get_number(value)
-        return self
+---@return integer
+---@return integer
+local function get_selection(opts)
+    local row_start = opts.line1
+    local row_end   = opts.line2
+    local is_block  = (vim.fn.visualmode() == "\22")
+    local col_start, col_end
+    if opts.range > 0 then
+        if is_block then
+            col_start = vim.fn.virtcol("'<")
+            col_end   = vim.fn.virtcol("'>")
+        else
+            col_start = 1
+            col_end   = math.huge
+        end
+    else
+        local col = vim.fn.virtcol(".")
+        col_start = col
+        col_end   = col
     end
-    local mode, op, value = opts.args:match("^width%s+(fit)%s*([=%+%-])(.*)")
-    if mode then
-        self.opts = map[mode .. op]
-        self.number[1] = get_number(value)
-        return self
-    end
-    op = opts.fargs[2]
-    self.opts = map[op]
-    return self
+    return math.min(row_start, row_end), math.min(col_start, col_end)
 end
 
 ---@param opts {[string]:any}
----@return WidthOp
-function WidthOp.new(opts)
-    local ok, self = pcall(try_new, opts)
+---@return WidthOp|nil
+local function try_new(opts, key)
+    local op, value = opts.args:match("^" .. key .. "%s*([=%+%-])(.*)")
+    op = op or "="
+    local irow, icol = get_selection(opts)
+    return setmetatable({
+        args = opts.args,
+        number = { get_number(value) },
+        opts = map[op],
+        irow = irow,
+        icol = icol,
+    }, WidthOp)
+end
+
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
+
+---@param opts {[string]:any}
+---@param key string
+---@return WidthOp|nil
+function WidthOp.new(opts, key)
+    local ok, self = pcall(try_new, opts, key)
     if not ok then
-        return {}
+        return nil
     end
     return self
 end
@@ -91,8 +110,9 @@ end
 
 ---@param self WidthOp
 function WidthOp:to_string()
-    return string.format("WidthOp %s[%s,%s] %s",
-        self.opts.kind, self.number[1] or "nil", self.number[2] or "nil", self:to_cmd())
+    return string.format("WidthOp %s %s (%d, %d) [%s] %s",
+        self.opts.mode, self.opts.kind or "nil",
+        self.irow, self.icol, self.number[1] or "nil", self:to_cmd())
 end
 
 ---@param self WidthOp
