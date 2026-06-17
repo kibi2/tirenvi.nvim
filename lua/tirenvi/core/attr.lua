@@ -1,6 +1,7 @@
 local Record = require("tirenvi.core.record")
 local Cell = require("tirenvi.core.cell")
 local WidthModeState = require("tirenvi.width.state")
+local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -188,6 +189,21 @@ end
 ---@return boolean
 function M:is_width_wrap()
     return not self.width_mode or self.width_mode == "wrap"
+end
+
+---@param self Attr
+---@param width_op WidthOp
+function M:change_width(width_op)
+    local start_col = 1
+    for _, column in ipairs(self.columns) do
+        local old_width = column.width
+        local cel_range = Range.from_lua(start_col, start_col + old_width)
+        if Range.contains(cel_range, width_op.icol) then
+            column.width = width_op:apply(old_width)
+            return
+        end
+        start_col = cel_range.last + 1
+    end
 end
 
 return M

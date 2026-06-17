@@ -72,25 +72,6 @@ local function get_index(self, irow)
     return nil
 end
 
----@param self Attr
----@param icol integer
----@param width_op WidthOp
----@return boolean
-local function change_width(self, icol, width_op)
-    local changed = false
-    local start_col = 1
-    for _, column in ipairs(self.columns) do
-        local old_width = column.width
-        local cel_range = Range.from_lua(start_col, start_col + old_width)
-        if Range.contains(cel_range, icol) then
-            column.width = width_op:apply(old_width)
-            changed = true
-        end
-        start_col = cel_range.last + 1
-    end
-    return changed
-end
-
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
@@ -234,19 +215,6 @@ end
 ---@return Attr|nil
 function M:get(irow)
     return self[get_index(self, irow)]
-end
-
----@param self Attr[]
----@param width_op WidthOp
----@return boolean
-function M:change_width(width_op)
-    local changed = false
-    for _, attr in ipairs(self) do
-        if Attr.is_grid(attr) and Range.contains(attr.range, width_op.irow) then
-            changed = change_width(attr, width_op.icol, width_op) or changed
-        end
-    end
-    return changed
 end
 
 ---@param self Attr[]
