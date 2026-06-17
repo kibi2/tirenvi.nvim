@@ -194,15 +194,13 @@ end
 ---@param self Attr
 ---@param width_op WidthOp
 function M:change_width(width_op)
-    local start_col = 1
-    for _, column in ipairs(self.columns) do
-        local old_width = column.width
-        local cel_range = Range.from_lua(start_col, start_col + old_width)
-        if Range.contains(cel_range, width_op.icol) then
-            column.width = width_op:apply(old_width)
+    local last = 0
+    for icol, column in ipairs(self.columns) do
+        last = last + column.width + 1
+        if icol == #self.columns or width_op.icol <= last then
+            column.width = width_op:apply(column.width)
             return
         end
-        start_col = cel_range.last + 1
     end
 end
 
