@@ -1,5 +1,6 @@
 local Record = require("tirenvi.core.record")
 local Cell = require("tirenvi.core.cell")
+local WidthModeState = require("tirenvi.width.state")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -66,8 +67,8 @@ function M.grid.new(record)
     else
         self = new_from_columns({})
     end
-    self.prev_width_mode = "fit"
-    self.width_mode = "fit"
+    self.prev_width_mode = WidthModeState.new("fix", "fit")
+    self.width_mode = WidthModeState.new("fix", "fit")
     return self
 end
 
@@ -96,10 +97,32 @@ end
 
 ---@param attr Attr
 ---@return string
+local function get_mode_short(attr)
+    if not attr.width_mode then
+        return ""
+    elseif attr.width_mode.mode == "auto" then
+        return "a"
+    elseif attr.width_mode.mode == "fix" then
+        return "x"
+    elseif attr.width_mode.mode == "fit" then
+        return "t"
+    elseif attr.width_mode.mode == "max" then
+        return "m"
+    elseif attr.width_mode.mode == "wrap" then
+        return "w"
+    elseif attr.width_mode.mode == "nowrap" then
+        return "n"
+    else
+        return attr.width_mode.mode
+    end
+end
+
+---@param attr Attr
+---@return string
 function M.get_attr_long(attr)
     local widths = M.get_width_array(attr.columns)
     local long   = #widths > 0 and string.format("[%s]", table.concat(widths, ",")) or ""
-    return M.get_attr_short(attr) .. long
+    return M.get_attr_short(attr) .. get_mode_short(attr) .. long
 end
 
 ---@param columns Attr_column[]
@@ -111,7 +134,7 @@ function M.get_width_array(columns)
     local widths = {}
     for _, column in ipairs(columns) do
         widths[#widths + 1] = column.width
-        -- widths[#widths + 1] = column.fix_width
+        widths[#widths + 1] = column.fix_width
     end
     return widths
 end

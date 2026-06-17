@@ -49,7 +49,7 @@ M.IKEY               = {
 	WIDTH_MODE = "width_mode",
 
 	-- previous Width_mode
-	PREV_WIDTH_MODE = "prev_width_mode",
+	--PREV_WIDTH_MODE = "prev_width_mode",
 }
 
 local initial_value  = {
@@ -63,7 +63,7 @@ local initial_value  = {
 	[M.IKEY.DIRTY] = nil,
 	[M.IKEY.FLAT] = nil,
 	[M.IKEY.WIDTH_MODE] = nil,
-	[M.IKEY.PREV_WIDTH_MODE] = nil,
+	--[M.IKEY.PREV_WIDTH_MODE] = nil,
 }
 
 -----------------------------------------------------------------------

@@ -1,5 +1,6 @@
 local config = require("tirenvi.config")
 local Attr = require("tirenvi.core.attr")
+local Attrs = require("tirenvi.core.attrs")
 local namespaces = require("tirenvi.io.namespaces")
 local buffer = require("tirenvi.io.buffer")
 local Range = require("tirenvi.util.range")
@@ -42,8 +43,10 @@ end
 ---@param attrs Attr[]
 local function set_fix_width(attrs)
     for _, attr in ipairs(attrs) do
-        for _, column in ipairs(attr.columns or {}) do
-            column.fix_width = column.width
+        if attr.width_mode and attr.width_mode.mode == "fix" then
+            for _, column in ipairs(attr.columns or {}) do
+                column.fix_width = column.width
+            end
         end
     end
 end
@@ -51,11 +54,12 @@ end
 ---@param bufnr number
 ---@param attrs Attr[]|nil
 local function set_attrs(bufnr, attrs)
-    local width_mode = buffer.get(bufnr, buffer.IKEY.WIDTH_MODE)
-    if width_mode.mode == "fix" then
-        set_fix_width(attrs or {})
-    end
+    --local width_mode = buffer.get(bufnr, buffer.IKEY.WIDTH_MODE)
+    --if width_mode.mode == "fix" then
+    set_fix_width(attrs or {})
+    --end
     buffer.set(bufnr, buffer.IKEY.ATTRS, attrs)
+    log.probe(Attrs.debug_attrs(attrs, "[88]MODE:"))
     vim.schedule(function()
         vim.api.nvim_buf_clear_namespace(bufnr, namespaces.ATTR, 0, -1)
         for iattr, attr in ipairs(attrs or {}) do
