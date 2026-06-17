@@ -43,7 +43,7 @@ end
 ---@param attrs Attr[]
 local function set_fix_width(attrs)
     for _, attr in ipairs(attrs) do
-        if attr.width_mode and attr.width_mode.mode == "fix" then
+        if attr.width_mode_old and attr.width_mode_old.mode == "fix" then
             for _, column in ipairs(attr.columns or {}) do
                 column.fix_width = column.width
             end

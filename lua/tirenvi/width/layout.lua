@@ -33,6 +33,16 @@ local function sort_column_indices(columns)
 end
 
 ---@param block Block_grid
+local function wrap(block)
+    log.probe(block.attr.columns)
+    for _, column in ipairs(block.attr.columns or {}) do
+        column.width = column.fix_width
+    end
+    log.probe(block.attr.columns)
+    Block.grid.set_max_attr(block)
+end
+
+---@param block Block_grid
 local function fix(block)
     log.probe(block.attr.columns)
     for _, column in ipairs(block.attr.columns or {}) do
@@ -47,6 +57,11 @@ local function clear_width(block)
     for _, column in ipairs(block.attr.columns or {}) do
         column.width = 0
     end
+end
+
+---@param block Block_grid
+local function nowrap(block)
+    Block.grid.set_max_attr(block)
 end
 
 ---@param block Block_grid
@@ -181,7 +196,7 @@ end
 ---@param block Block_grid
 local function fit(block)
     log.probe(block.attr.columns)
-    local width_mode = block.attr.width_mode
+    local width_mode = block.attr.width_mode_old
     local grid_size = get_grid_size(block, width_mode)
     Block.grid.set_max_attr(block)
     fit_block(block, grid_size)
@@ -248,8 +263,14 @@ end
 function M.compute(tirdoc)
     log.probe(Document.debug_attrs(tirdoc, "[88]MODE:"))
     for _, block in ipairs(tirdoc.blocks) do
-        local width_mode = block.attr.width_mode
+        local width_mode = block.attr.width_mode_old
         if block.kind == "grid" then
+            log.probe("🟥" .. (block.attr.width_mode or ""))
+            if block.attr.width_mode == "nowrap" then
+                nowrap(block)
+            elseif block.attr.width_mode == "wrap" then
+                wrap(block)
+            end
             if width_mode.mode == "fix" then
                 log.probe(Document.debug_attrs(tirdoc, "[88]MODE:"))
                 fix(block)

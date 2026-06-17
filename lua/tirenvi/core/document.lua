@@ -46,7 +46,8 @@ local M = {}
 ---@class Attr
 ---@field range Range
 ---@field prev_width_mode WidthModeState
----@field width_mode WidthModeState
+---@field width_mode_old WidthModeState
+---@field width_mode WidthMode|nil
 ---@field fit_width integer|nil
 ---@field columns Attr_column[]
 

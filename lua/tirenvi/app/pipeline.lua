@@ -242,25 +242,33 @@ local function change_mode(ctx, irow, width_op)
     if not attr or Attr.is_plain(attr) then
         return
     end
-    local now_mode = attr.width_mode
-    if width_op.opts.kind == "toggle" then
-        if now_mode.mode == "max" then
-            -- local prev_mode = buffer.get(ctx.bufnr, buffer.IKEY.PREV_WIDTH_MODE)
-            -- buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, prev_mode)
-            attr.width_mode = attr.prev_width_mode
-        else
+    local now_mode = attr.width_mode_old
+    if width_op.opts.mode == "nowrap" then
+        log.probe("nowrap")
+        attr.width_mode = "nowrap"
+    elseif width_op.opts.mode == "wrap" then
+        log.probe("wrap")
+        attr.width_mode = "wrap"
+    elseif width_op.opts.kind == "toggle" then
+        if Attr.is_width_wrap(attr) then
             --buffer.set(ctx.bufnr, buffer.IKEY.PREV_WIDTH_MODE, now_mode)
             --buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, WidthModeState.new("max"))
             attr.prev_width_mode = now_mode
-            attr.width_mode = WidthModeState.new("max")
+            attr.width_mode_old = WidthModeState.new("max")
+            attr.width_mode = "nowrap"
+        else
+            -- local prev_mode = buffer.get(ctx.bufnr, buffer.IKEY.PREV_WIDTH_MODE)
+            -- buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, prev_mode)
+            attr.width_mode_old = attr.prev_width_mode
+            attr.width_mode = "wrap"
         end
     else
         --buffer.set(ctx.bufnr, buffer.IKEY.PREV_WIDTH_MODE, now_mode)
         --buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, width_op:get_state())
         attr.prev_width_mode = now_mode
-        attr.width_mode = width_op:get_state()
+        attr.width_mode_old = width_op:get_state()
         log.probe(attr.prev_width_mode)
-        log.probe(attr.width_mode)
+        log.probe(attr.width_mode_old)
     end
     log.probe(attrs)
     attr_store.write(ctx.bufnr, attrs)
