@@ -1,4 +1,5 @@
 local Document   = require("tirenvi.core.document")
+local Block      = require("tirenvi.core.block")
 local Cell       = require("tirenvi.core.cell")
 local Attr       = require("tirenvi.core.attr")
 local buffer     = require("tirenvi.io.buffer")
@@ -31,31 +32,29 @@ local function sort_column_indices(columns)
     return indices
 end
 
----@param tirdoc Document
-local function fix(tirdoc)
-    for _, block in ipairs(tirdoc.blocks) do
-        for _, column in ipairs(block.attr.columns or {}) do
-            column.width = column.fix_width
-        end
+---@param block Block_grid
+local function fix(block)
+    log.probe(block.attr.columns)
+    for _, column in ipairs(block.attr.columns or {}) do
+        column.width = column.fix_width
     end
-    Document.set_max_attr(tirdoc)
+    log.probe(block.attr.columns)
+    Block.grid.set_max_attr(block)
 end
 
----@param tirdoc Document
-local function clear_width(tirdoc)
-    for _, block in ipairs(tirdoc.blocks) do
-        for _, column in ipairs(block.attr.columns or {}) do
-            column.width = 0
-        end
+---@param block Block_grid
+local function clear_width(block)
+    for _, column in ipairs(block.attr.columns or {}) do
+        column.width = 0
     end
 end
 
----@param tirdoc Document
-local function max(tirdoc)
-    Document.set_max_attr(tirdoc)
+---@param block Block_grid
+local function max(block)
+    Block.grid.set_max_attr(block)
 end
 
----@param block Block
+---@param block Block_grid
 ---@param grid_size integer
 ---@return integer
 local function get_size(block, grid_size)
@@ -64,7 +63,7 @@ local function get_size(block, grid_size)
     return grid_size - ncol - 1
 end
 
----@param block Block
+---@param block Block_grid
 ---@param max_size integer
 local function fit_auto_block(block, max_size)
     local total = 0
@@ -120,7 +119,7 @@ local function distribute_log_width(columns, extra_space)
     end
 end
 
----@param block Block
+---@param block Block_grid
 ---@param grid_size integer
 local function fit_block(block, grid_size)
     local columns = block.attr.columns or {}
@@ -154,23 +153,23 @@ local function get_size_pre()
 end
 
 ---comment
----@param tirdoc any
+---@param block Block_grid
 ---@param width_mode any
 ---@return integer
-local function get_auto_size(tirdoc, width_mode)
+local function get_auto_size(block, width_mode)
     --Document.set_max_attr(tirdoc)
     local win_width = buffer.get_win_width()
     return win_width
 end
 
----@param tirdoc Document
+---@param block Block_grid
 ---@param width_mode WidthModeState
 ---@return integer
-local function get_grid_size(tirdoc, width_mode)
+local function get_grid_size(block, width_mode)
     if width_mode.kind == "fit" then
-        return width_mode.number[1] or get_auto_size(tirdoc, width_mode)
+        return width_mode.number[1] or get_auto_size(block, width_mode)
     end
-    local grid_size = get_size_pre() or get_auto_size(tirdoc, width_mode)
+    local grid_size = get_size_pre() or get_auto_size(block, width_mode)
     if width_mode.kind == "fit_add" then
         grid_size = grid_size + width_mode.number[1]
     elseif width_mode.kind == "fit_sub" then
@@ -179,17 +178,15 @@ local function get_grid_size(tirdoc, width_mode)
     return grid_size
 end
 
----@param tirdoc Document
----@param width_mode WidthModeState
-local function fit(tirdoc, width_mode)
-    local grid_size = get_grid_size(tirdoc, width_mode)
-    Document.set_max_attr(tirdoc)
-    for _, block in ipairs(tirdoc.blocks) do
-        if block.kind == "grid" then
-            fit_block(block, grid_size)
-            log.watch("ATTR", Document.debug_attrs(tirdoc, "[88]MODE"))
-        end
-    end
+---@param block Block_grid
+local function fit(block)
+    log.probe(block.attr.columns)
+    local width_mode = block.attr.width_mode
+    local grid_size = get_grid_size(block, width_mode)
+    Block.grid.set_max_attr(block)
+    fit_block(block, grid_size)
+    log.watch("ATTR", block.attr)
+    log.probe(block.attr.columns)
 end
 
 ---@param column Attr_column
@@ -225,7 +222,7 @@ local function auto_attr(column, max, max_size)
     end
 end
 
----@param block Block
+---@param block Block_grid
 ---@param win_width integer
 local function auto_block(block, win_width)
     local max_columns = vim.deepcopy(block.attr.columns)
@@ -236,34 +233,37 @@ local function auto_block(block, win_width)
     end
 end
 
----@param tirdoc Document
-local function auto(tirdoc)
-    Document.set_max_attr(tirdoc)
+---@param block Block_grid
+local function auto(block)
+    Block.grid.set_max_attr(block)
     local win_width = buffer.get_win_width()
-    for _, block in ipairs(tirdoc.blocks) do
-        if block.kind == "grid" then
-            auto_block(block, win_width)
-        end
-    end
+    auto_block(block, win_width)
 end
 
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
 
----@param width_mode  WidthModeState
 ---@param tirdoc Document
-function M.compute(width_mode, tirdoc)
-    if width_mode.mode == "fix" then
-        fix(tirdoc)
-    else
-        clear_width(tirdoc)
-        if width_mode.mode == "max" then
-            max(tirdoc)
-        elseif width_mode.mode == "fit" then
-            fit(tirdoc, width_mode)
-        elseif width_mode.mode == "auto" then
-            auto(tirdoc)
+function M.compute(tirdoc)
+    log.probe(Document.debug_attrs(tirdoc, "[88]MODE:"))
+    for _, block in ipairs(tirdoc.blocks) do
+        local width_mode = block.attr.width_mode
+        if block.kind == "grid" then
+            if width_mode.mode == "fix" then
+                log.probe(Document.debug_attrs(tirdoc, "[88]MODE:"))
+                fix(block)
+            else
+                log.probe(Document.debug_attrs(tirdoc, "[88]MODE:"))
+                clear_width(block)
+                if width_mode.mode == "max" then
+                    max(block)
+                elseif width_mode.mode == "fit" then
+                    fit(block)
+                elseif width_mode.mode == "auto" then
+                    auto(block)
+                end
+            end
         end
     end
 end

@@ -4,6 +4,7 @@
 local config = require("tirenvi.config")
 local Document = require("tirenvi.core.document")
 local Attrs = require("tirenvi.core.attrs")
+local Attr = require("tirenvi.core.attr")
 local Bufline = require("tirenvi.core.bufline")
 local dirty_range = require("tirenvi.core.dirty_range")
 local Request = require("tirenvi.app.request")
@@ -36,7 +37,7 @@ local api = vim.api
 ---@param ctx Context
 ---@param r_result ReadResult
 ---@return Document
-local function fllines_to_tirdoc(ctx, r_result)
+local function fltlines_to_tirdoc(ctx, r_result)
     local tirdoc = flat_parser.parse(ctx, r_result)
     log.watch("ATTR", Document.debug_attrs(tirdoc, "[1]DOC ATTR:"))
     Document.apply_attrs(tirdoc, r_result.attrs)
@@ -70,9 +71,10 @@ local function buflines_to_bufdoc_attrs_driven(ctx, r_result)
     return bufdoc
 end
 
-local function apply_width_mode(bufnr, tirdoc)
-    local width_mode = buffer.get(bufnr, buffer.IKEY.WIDTH_MODE)
-    width_layout.compute(width_mode, tirdoc)
+---@param tirdoc Document
+local function apply_width_mode(tirdoc)
+    --local width_mode = buffer.get(bufnr, buffer.IKEY.WIDTH_MODE)
+    width_layout.compute(tirdoc)
 end
 
 ---@param ctx Context
@@ -85,14 +87,13 @@ local function doc_to_buflines(ctx, r_result, doc, no_undo, no_normalize)
     if not doc._tir then
         tirdoc = Document.from_bufdoc(doc, no_normalize)
     end
-    apply_width_mode(ctx.bufnr, tirdoc)
+    apply_width_mode(tirdoc)
     local bufdoc = Document.to_bufdoc(tirdoc)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[9]DOC ATTR:"))
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
     buf_state.set_buffer_flat(ctx.bufnr, false)
     attr_store.write(ctx.bufnr, attrs)
-    log.watch("ATTR", Attrs.debug_attrs(attrs, "[88]MODE:"))
     local buf_lines = buf_parser.unparse(bufdoc)
     if not util.same_str_array(buf_lines, r_result.lines) then
         local req_w = Request.new_writer(r_result.range, buf_lines, no_undo)
@@ -104,8 +105,8 @@ end
 ---@param tirdoc Document
 ---@param is_write_pre boolean|nil
 local function tirdoc_to_flat(ctx, r_result, tirdoc, is_write_pre)
-    local fllines = flat_parser.unparse(ctx, tirdoc)
-    local req_w = Request.new_writer(r_result.range, fllines, is_write_pre)
+    local fltlines = flat_parser.unparse(ctx, tirdoc)
+    local req_w = Request.new_writer(r_result.range, fltlines, is_write_pre)
     local attrs = vim.deepcopy(r_result.attrs)
     if not is_write_pre then
         Attrs.remove_range(attrs)
@@ -230,21 +231,39 @@ local function change_width(ctx, irow, icol, width_op)
 end
 
 ---@param ctx Context
+---@param irow integer
 ---@param width_op WidthOp
----@param now_mode WidthModeState
-local function change_mode(ctx, width_op, now_mode)
+local function change_mode(ctx, irow, width_op)
+    --local now_mode = buffer.get(ctx.bufnr, buffer.IKEY.WIDTH_MODE)
+    local attrs = attr_store.read(ctx.bufnr)
+    log.probe(attrs)
+    local attr = Attrs.get(attrs, irow)
+    log.probe(attr)
+    if not attr or Attr.is_plain(attr) then
+        return
+    end
+    local now_mode = attr.width_mode
     if width_op.opts.kind == "toggle" then
         if now_mode.mode == "max" then
-            local prev_mode = buffer.get(ctx.bufnr, buffer.IKEY.PREV_WIDTH_MODE)
-            buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, prev_mode)
+            -- local prev_mode = buffer.get(ctx.bufnr, buffer.IKEY.PREV_WIDTH_MODE)
+            -- buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, prev_mode)
+            attr.width_mode = attr.prev_width_mode
         else
-            buffer.set(ctx.bufnr, buffer.IKEY.PREV_WIDTH_MODE, now_mode)
-            buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, WidthModeState.new("max"))
+            --buffer.set(ctx.bufnr, buffer.IKEY.PREV_WIDTH_MODE, now_mode)
+            --buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, WidthModeState.new("max"))
+            attr.prev_width_mode = now_mode
+            attr.width_mode = WidthModeState.new("max")
         end
     else
-        buffer.set(ctx.bufnr, buffer.IKEY.PREV_WIDTH_MODE, now_mode)
-        buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, width_op:get_state())
+        --buffer.set(ctx.bufnr, buffer.IKEY.PREV_WIDTH_MODE, now_mode)
+        --buffer.set(ctx.bufnr, buffer.IKEY.WIDTH_MODE, width_op:get_state())
+        attr.prev_width_mode = now_mode
+        attr.width_mode = width_op:get_state()
+        log.probe(attr.prev_width_mode)
+        log.probe(attr.width_mode)
     end
+    log.probe(attrs)
+    attr_store.write(ctx.bufnr, attrs)
 end
 
 -----------------------------------------------------------------------
@@ -257,7 +276,7 @@ function M.read_post(ctx)
     local r_result = reader.read(ctx, Range.WHOLE)
     if not Bufline.has_pipe(r_result.lines) then
         util.ensure_no_reserved_marks(r_result.lines)
-        local tirdoc = fllines_to_tirdoc(ctx, r_result)
+        local tirdoc = fltlines_to_tirdoc(ctx, r_result)
         doc_to_buflines(ctx, r_result, tirdoc, true)
     else
         local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
@@ -285,7 +304,7 @@ end
 function M.from_flat(ctx)
     local r_result = reader.read(ctx, Range.WHOLE)
     util.ensure_no_reserved_marks(r_result.lines)
-    local tirdoc = fllines_to_tirdoc(ctx, r_result)
+    local tirdoc = fltlines_to_tirdoc(ctx, r_result)
     doc_to_buflines(ctx, r_result, tirdoc)
 end
 
@@ -305,8 +324,7 @@ end
 ---@param icol integer
 ---@param width_op WidthOp
 function M.cmd_width(ctx, irow, icol, width_op)
-    local now_mode = buffer.get(ctx.bufnr, buffer.IKEY.WIDTH_MODE)
-    change_mode(ctx, width_op, now_mode)
+    change_mode(ctx, irow, width_op)
     if width_op.opts.change_cell then
         change_width(ctx, irow, icol, width_op)
     else
