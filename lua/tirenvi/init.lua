@@ -88,7 +88,7 @@ function M.toggle(ctx)
 end
 
 ---@param ctx Context
-function M.repair(ctx)
+function M.redraw(ctx)
 	pipeline.cmd_repair(ctx)
 end
 

@@ -74,11 +74,24 @@ end
 ---@param ctx Context
 ---@param opts {[string]:any}
 ---@return nil
+local function cmd_redraw(ctx, opts)
+	if buf_state.should_skip(ctx.bufnr) then return end
+	init.redraw(ctx)
+end
+
+local warned = false
+---@param ctx Context
+---@param opts {[string]:any}
+---@return nil
 local function cmd_repair(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr) then return end
 	local arg = opts.fargs[2]
 	if arg == nil then
-		init.repair(ctx)
+		if not warned then
+			warned = true
+			notify.warn("Tir repair is deprecated and will be removed in v0.5. Use :Tir redraw")
+		end
+		init.redraw(ctx)
 		return
 	elseif arg == "toggle" then
 		buffer.set_repair(ctx.bufnr, not buffer.get_repair(ctx.bufnr))
@@ -94,24 +107,11 @@ local function cmd_repair(ctx, opts)
 		buffer.get_repair(ctx.bufnr) and "enable" or "disable"))
 end
 
-local warned = false
----@param ctx Context
----@param opts {[string]:any}
----@return nil
-local function cmd_redraw(ctx, opts)
-	if not warned then
-		warned = true
-		notify.warn("Tir redraw is deprecated and will be removed in v0.5. Use :Tir repair")
-	end
-	cmd_repair(ctx, opts)
-end
-
 ----------------------------------------------------------------------
 -- Registration (private)
 ----------------------------------------------------------------------
 
 local commands = {
-	toggle = cmd_toggle,
 	width = cmd_width,
 	fit = cmd_fit,
 	wrap = cmd_wrap,
@@ -166,15 +166,17 @@ local function complete_tir(arglead, cmdline)
 	if #args <= 1 then
 		return get_command_keys()
 	elseif #args == 2 then
-		if args[2] == "width" then
+		if args[2] == "width" or args[2] == "fit" then
 			return {
 				"=",
 				"+",
 				"-",
-				"fit",
-				"max",
-				"fix",
+			}
+		elseif args[2] == "repair" then
+			return {
 				"toggle",
+				"enable",
+				"disable",
 			}
 		end
 	end
