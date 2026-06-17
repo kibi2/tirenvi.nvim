@@ -206,22 +206,18 @@ local function update_attrs(ctx, range3, r_result)
     attr_store.write(ctx.bufnr, attrs)
 end
 
----@param irow integer
----@param icol integer
 ---@param width_op WidthOp
-local function change_attrs_width(attrs, irow, icol, width_op)
-    return Attrs.change_width(attrs, irow, icol, width_op)
+local function change_attrs_width(attrs, width_op)
+    return Attrs.change_width(attrs, width_op)
 end
 
 ---@param ctx Context
----@param irow integer
----@param icol integer
 ---@param width_op WidthOp
-local function change_width(ctx, irow, icol, width_op)
-    log.debug("row%d, col%d", irow, icol)
-    local row_range = expand_rect(ctx, irow)
+local function change_width(ctx, width_op)
+    log.debug("row%d, col%d", width_op.irow, width_op.icol)
+    local row_range = expand_rect(ctx, width_op.irow)
     local r_result = reader.read(ctx, row_range)
-    if change_attrs_width(r_result.attrs, irow, icol, width_op) then
+    if change_attrs_width(r_result.attrs, width_op) then
         local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
         log.watch("ATTR", Document.debug_attrs(bufdoc, "[88]MODE"))
         doc_to_buflines(ctx, r_result, bufdoc)
@@ -230,29 +226,53 @@ local function change_width(ctx, irow, icol, width_op)
 end
 
 ---@param ctx Context
----@param irow integer
 ---@param width_op WidthOp
-local function change_mode(ctx, irow, width_op)
+local function change_fit(ctx, width_op)
+    log.debug("row%d, col%d", width_op.irow, width_op.icol)
+    local row_range = expand_rect(ctx, width_op.irow)
+    local r_result = reader.read(ctx, row_range)
+    if change_attrs_width(r_result.attrs, width_op) then
+        local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
+        log.watch("ATTR", Document.debug_attrs(bufdoc, "[88]MODE"))
+        doc_to_buflines(ctx, r_result, bufdoc)
+        log.watch("ATTR", Document.debug_attrs(bufdoc, "[88]MODE"))
+    end
+end
+
+---@param ctx Context
+---@param width_op WidthOp
+local function change_wrap(ctx, width_op)
+    log.debug("row%d, col%d", width_op.irow, width_op.icol)
+    local row_range = expand_rect(ctx, width_op.irow)
+    local r_result = reader.read(ctx, row_range)
+    if change_attrs_width(r_result.attrs, width_op) then
+        local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
+        log.watch("ATTR", Document.debug_attrs(bufdoc, "[88]MODE"))
+        doc_to_buflines(ctx, r_result, bufdoc)
+        log.watch("ATTR", Document.debug_attrs(bufdoc, "[88]MODE"))
+    end
+end
+
+---TODO 冗長
+---@param ctx Context
+---@param width_op WidthOp
+local function change_mode(ctx, width_op)
     local attrs = attr_store.read(ctx.bufnr)
-    log.probe(attrs)
-    local attr = Attrs.get(attrs, irow)
+    local attr = Attrs.get(attrs, width_op.irow)
     log.probe(attr)
     if not attr or Attr.is_plain(attr) then
         return
     end
-    if width_op.opts.mode == "nowrap" then
-        log.probe("nowrap")
-        attr.width_mode = "nowrap"
-    elseif width_op.opts.mode == "wrap" then
-        log.probe("wrap")
-        attr.width_mode = "wrap"
-    elseif width_op.opts.kind == "toggle" then
+    if width_op.opts.kind == "toggle" then
         if Attr.is_width_wrap(attr) then
             attr.width_mode = "nowrap"
         else
             attr.width_mode = "wrap"
         end
+    elseif width_op.opts.mode then
+        attr.width_mode = width_op.opts.mode
     else
+        log.assert(false, attr.width_mode)
     end
     log.probe(attrs)
     attr_store.write(ctx.bufnr, attrs)
@@ -312,13 +332,33 @@ function M.to_flat(ctx, is_write_pre)
 end
 
 ---@param ctx Context
----@param irow integer
----@param icol integer
 ---@param width_op WidthOp
-function M.cmd_width(ctx, irow, icol, width_op)
-    change_mode(ctx, irow, width_op)
+function M.cmd_width(ctx, width_op)
+    change_mode(ctx, width_op)
     if width_op.opts.change_cell then
-        change_width(ctx, irow, icol, width_op)
+        change_width(ctx, width_op)
+    else
+        M.cmd_repair(ctx)
+    end
+end
+
+---@param ctx Context
+---@param width_op WidthOp
+function M.cmd_fit(ctx, width_op)
+    change_mode(ctx, width_op)
+    if width_op.opts.change_cell then
+        change_fit(ctx, width_op)
+    else
+        M.cmd_repair(ctx)
+    end
+end
+
+---@param ctx Context
+---@param width_op WidthOp
+function M.cmd_wrap(ctx, width_op)
+    change_mode(ctx, width_op)
+    if width_op.opts.change_cell then
+        change_wrap(ctx, width_op)
     else
         M.cmd_repair(ctx)
     end
