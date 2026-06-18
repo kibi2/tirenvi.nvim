@@ -220,7 +220,8 @@ local function change_width(ctx, width_op)
     log.assert(#bufdoc.blocks == 1, "only one block")
     local attr = bufdoc.blocks[1].attr
     if Attr.is_plain(attr) then return end
-    Attr.change_width(attr, width_op)
+    local column = Attr.get(attr, width_op.icol)
+    column.width = width_op:apply(column.width)
     doc_to_buflines(ctx, r_result, bufdoc)
 end
 

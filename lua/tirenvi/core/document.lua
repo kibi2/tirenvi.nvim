@@ -67,6 +67,13 @@ local M = {}
 
 ---@alias Ndjson Attr_file|Record
 
+---@class Cell_pos
+---@field iblock integer
+---@field irow integer
+---@field icol integer
+---@field row_offset integer
+---@field col_offset integer
+
 local VERSION = "tir/0.1"
 
 -- private helpers
