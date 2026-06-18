@@ -232,4 +232,19 @@ function M:get_invalid_attrs()
     return invalid
 end
 
+---@param self Attr[]
+---@param cur_row integer
+---@param cur_col integer
+---@return Cell_pos
+function M:to_logical(cur_row, cur_col)
+    local cell_pos = {}
+    cell_pos.iblock = get_index(cell_pos, cur_row)
+    log.assert(cell_pos.iblock, "invalid position %d", cur_row)
+    cell_pos.irow = cur_row - self[cell_pos.iblock].range.first + 1
+    cell_pos.icol = nil
+    cell_pos.row_offset = 0
+    cell_pos.col_offset = 0
+    return cell_pos
+end
+
 return M

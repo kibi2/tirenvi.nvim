@@ -1,38 +1,27 @@
 source $TIRENVI_ROOT/tests/common.vim
 
 edit $TIRENVI_ROOT/tests/data/table2.md
-lua Debug = require("tirenvi.editor.debug")
-lua Motion = require("tirenvi.editor.motion")
 
-echomsg " "
-echomsg "----- initial cached attrs"
-lua print(Debug.debug_cached_attrs("init // "))
+call Case("initial cached attrs")
+lua print(Debug.debug_cached_attrs("init //"))
 
-echomsg " "
-echomsg "----- CASE: width+ on first plain block"
+call Case("width+ on first plain block")
 execute "normal! gg"
 Tir width+
-lua print(Debug.debug_cached_attrs("width+ // "))
+lua print(Debug.debug_cached_attrs("width+ //"))
 
-echomsg " "
-echomsg "----- CASE: width+3 on first grid block"
+call Case("width+3 on first grid block")
 lua require('tirenvi').motion.block_bottom()
 execute "normal! j"
 Tir width+3
-lua print(Debug.debug_cached_attrs("width+3 // "))
+lua print(Debug.debug_cached_attrs("width+3 //"))
 
-echomsg " "
-echomsg "----- CASE: width-2 on second grid block, column 2"
+call Case("width-2 on second grid block, column 2")
 " grid #2 col #2
-" execute "normal! 12G9l"   
-" execute "normal! /27\<CR>"
-execute "normal! 12G0l"   
-lua require('tirenvi').motion.f()
-" execute "normal! f│"
-execute "normal! ;"
-execute "normal! ;"
+execute "normal! 12G0"   
+execute "normal! " . luaeval("require('tirenvi.editor.motion').f()")
 Tir width-2
-lua print(Debug.debug_cached_attrs("width-2 // "))
+lua print(Debug.debug_cached_attrs("width-2 //"))
 
 call RunTest({ 'desc': 'Tir width nowrap' })
 

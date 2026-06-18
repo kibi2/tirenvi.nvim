@@ -104,7 +104,7 @@ local function get_mode_short(attr)
     elseif attr.width_mode == "nowrap" then
         return "n"
     else
-        log.assert(false, string.format("invalid mode %s", attr.width_mode))
+        log.assert(false, "invalid mode %s", attr.width_mode)
         return "X"
     end
 end
@@ -195,16 +195,27 @@ function M:is_width_wrap()
 end
 
 ---@param self Attr
----@param width_op WidthOp
-function M:change_width(width_op)
-    local last = 0
+---@param cur_col integer
+---@return integer
+---@return integer
+function M:to_cell_col(cur_col)
+    local start = 1
+    local last
     for icol, column in ipairs(self.columns) do
-        last = last + column.width + 1
-        if icol == #self.columns or width_op.icol <= last then
-            column.width = width_op:apply(column.width)
-            return
+        last = start + column.width
+        if icol == #self.columns or cur_col <= last then
+            return icol, cur_col - start - 1
         end
+        start = last + 1
     end
+    return #self.columns, 0
+end
+
+---@param self Attr
+---@param cur_col integer
+function M:get(cur_col)
+    local icol = M.to_cell_col(self, cur_col)
+    return self.columns[icol]
 end
 
 return M

@@ -26,12 +26,19 @@ M.setup({
 	},
 })
 vim.g.tirenvi_initialized = false
+Debug = require("tirenvi.editor.debug")
+Motion = require("tirenvi.editor.motion")
 local buffer = require("tirenvi.io.buffer")
 buffer.clear_cache()
 buffer.set_step(3)
 EOF
 
 " ----------------------------
+function! Case(desc) abort
+  echomsg " "
+  echomsg "----- CASE: " . a:desc
+endfunction
+
 function! SafeEdit(path)
   try
     execute 'edit ' . a:path
