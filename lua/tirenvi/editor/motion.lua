@@ -2,6 +2,7 @@ local Context = require("tirenvi.app.context")
 local buffer = require("tirenvi.io.buffer")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
 local Bufline = require("tirenvi.core.bufline")
+local log = require("tirenvi.util.log")
 
 local M = {}
 
@@ -17,9 +18,7 @@ end
 ---@return function
 local function build_motion(op)
 	return function()
-		local count = vim.v.count
-		local prefix = (count > 0) and tostring(count) or ""
-		return prefix .. op .. get_pipe()
+		return op .. get_pipe()
 	end
 end
 
