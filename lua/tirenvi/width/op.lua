@@ -109,7 +109,6 @@ end
 ---@param current integer
 ---@return integer
 function WidthOp:apply(current)
-    log.probe(self)
     local operation = self.operation
     local count = math.max(self.number[1] or 1, 1)
     if operation == "set" then

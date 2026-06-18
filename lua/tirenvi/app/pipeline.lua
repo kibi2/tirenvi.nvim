@@ -258,7 +258,6 @@ end
 local function change_mode(ctx, width_op)
     local attrs = attr_store.read(ctx.bufnr)
     local attr = Attrs.get(attrs, width_op.irow)
-    log.probe(attr)
     if not attr or Attr.is_plain(attr) then
         return
     end
@@ -273,7 +272,6 @@ local function change_mode(ctx, width_op)
     else
         log.assert(false, attr.width_mode)
     end
-    log.probe(attrs)
     attr_store.write(ctx.bufnr, attrs)
 end
 
