@@ -1,7 +1,5 @@
 source $TIRENVI_ROOT/tests/common.vim
 
-edit input.txt
-
 lua << EOF
   local M = require("tirenvi")
   local log = require("tirenvi.util.log")
@@ -12,7 +10,8 @@ lua << EOF
 		level = levels.ERROR,
   	},
   })
-  log.assert(fale, "test case for log.assert ERROR", "bar")
+  log.assert(true, "true", "bar")
+  log.assert(false, "test case for log.assert ERROR", "bar")
 EOF
 
 call Snapshot({'desc': 'ERROR' })
@@ -25,7 +24,7 @@ lua << EOF
   	},
   })
   local log = require("tirenvi.util.log")
-  log.assert(fale, "test case for log.assert trace back", "bar")
+  log.assert(false, "test case for log.assert trace back", "bar")
 EOF
 
 call RunTest({ "nomessage": 'true' })

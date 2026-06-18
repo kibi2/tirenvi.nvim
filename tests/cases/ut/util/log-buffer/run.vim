@@ -1,7 +1,5 @@
 source $TIRENVI_ROOT/tests/common.vim
 
-edit input.txt
-
 lua << EOF
   local M = require("tirenvi")
   local log = require("tirenvi.util.log")
