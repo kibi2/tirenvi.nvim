@@ -44,7 +44,6 @@ end
 ---@param attrs Attr[]|nil
 local function set_attrs(bufnr, attrs)
     buffer.set(bufnr, buffer.IKEY.ATTRS, attrs)
-    log.probe(Attrs.debug_attrs(attrs or {}, "[88]MODE:"))
     vim.schedule(function()
         vim.api.nvim_buf_clear_namespace(bufnr, namespaces.ATTR, 0, -1)
         for iattr, attr in ipairs(attrs or {}) do

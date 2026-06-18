@@ -34,13 +34,11 @@ end
 
 ---@param block Block_grid
 local function wrap(block)
-    log.probe(block.attr.columns)
     Block.grid.set_max_attr(block)
 end
 
 ---@param block Block_grid
 local function fix(block)
-    log.probe(block.attr.columns)
     Block.grid.set_max_attr(block)
 end
 
@@ -173,12 +171,10 @@ end
 
 ---@param block Block_grid
 local function fit(block)
-    log.probe(block.attr.columns)
     local grid_size = get_grid_size(block, block.attr.fit_width)
     Block.grid.set_max_attr(block)
     fit_block(block, grid_size)
     log.watch("ATTR", block.attr)
-    log.probe(block.attr.columns)
 end
 
 ---@param column Attr_column
@@ -238,7 +234,6 @@ end
 
 ---@param tirdoc Document
 function M.compute(tirdoc)
-    log.probe(Document.debug_attrs(tirdoc, "[88]MODE:"))
     for _, block in ipairs(tirdoc.blocks) do
         if block.kind == "grid" then
             if Attr.is_width_wrap(block.attr) then
