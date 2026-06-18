@@ -160,7 +160,6 @@ function M.get_state(bufnr)
 	bufnr = M.normalize_bufnr(bufnr)
 	if not b[bufnr].tirenvi then
 		initial_value.width_mode = WidthModeState.new(config.table.width_mode)
-		initial_value.prev_width_mode = WidthModeState.new(config.table.width_mode)
 		b[bufnr].tirenvi = initial_value
 	end
 	return b[bufnr].tirenvi

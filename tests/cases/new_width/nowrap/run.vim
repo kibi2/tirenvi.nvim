@@ -1,0 +1,103 @@
+source $TIRENVI_ROOT/tests/common.vim
+
+edit $TIRENVI_ROOT/tests/data/table2.md
+lua Debug = require("tirenvi.editor.debug")
+lua Motion = require("tirenvi.editor.motion")
+
+echomsg " "
+echomsg "----- initial cached attrs"
+lua print(Debug.debug_cached_attrs("init // "))
+
+echomsg " "
+echomsg "----- CASE: width+ on first plain block"
+execute "normal! gg"
+Tir width+
+lua print(Debug.debug_cached_attrs("width+ // "))
+
+echomsg " "
+echomsg "----- CASE: width+3 on first grid block"
+lua require('tirenvi').motion.block_bottom()
+execute "normal! j"
+Tir width+3
+lua print(Debug.debug_cached_attrs("width+3 // "))
+
+echomsg " "
+echomsg "----- CASE: width-2 on second grid block, column 2"
+" grid #2 col #2
+" execute "normal! 12G9l"   
+" execute "normal! /27\<CR>"
+execute "normal! 12G0l"   
+lua require('tirenvi').motion.f()
+" execute "normal! f│"
+execute "normal! ;"
+execute "normal! ;"
+Tir width-2
+lua print(Debug.debug_cached_attrs("width-2 // "))
+
+call RunTest({ 'desc': 'Tir width nowrap' })
+
+
+sleep 1m
+execute "normal! dd"
+"                              5, 3, 11
+execute "normal! 1j11l"
+Tir width=8
+call Snapshot({'desc': 'width = 5, 3, 8' })
+execute "normal! 0gg2j6l"
+Tir width=5
+call Snapshot({'desc': 'width = 5, 5, 8' })
+execute "normal! 0gg4j5l"
+Tir width=9
+echomsg "9,5,8" b:tirenvi.attrs[1]
+sleep 1m
+"                              9, 5, 8
+execute "normal! 0gg3j9l"
+Tir width+9
+echomsg "18,5,8" b:tirenvi.attrs[1]
+sleep 1m
+"                              18, 5, 8
+Tir width+5
+echomsg "23,5,8" b:tirenvi.attrs[1]
+sleep 1m
+"                              23, 5, 8
+Tir width+
+echomsg "24,5,8" b:tirenvi.attrs[1]
+sleep 1m
+"                              24, 5, 8
+call feedkeys("u", "x")
+echomsg "23,5,8" b:tirenvi.attrs[1]
+sleep 1m
+"                              23, 5, 8
+execute "normal! 0gg6j6l"
+Tir width-10
+echomsg "13,5,8" b:tirenvi.attrs[1]
+sleep 1m
+"                              13, 5, 8
+execute "normal! 0gg8j1l"
+Tir width=10
+echomsg "13,5,8" b:tirenvi.attrs[1]
+sleep 1m
+"                              13, 5, 8
+execute "normal! 0gg3j$"
+Tir width=20
+echomsg "13,5,8" b:tirenvi.attrs[1]
+sleep 1m
+"                              13, 5, 8
+call cursor(2, 1)
+Tir width-100
+echomsg "2,5,8" b:tirenvi.attrs[1]
+sleep 1m
+"                              2, 5, 8
+call cursor(1, 1)
+Tir width-
+echomsg "2,5,8" b:tirenvi.attrs[1]
+sleep 1m
+"                              2, 5, 8
+execute "normal! 0gg3j3l"
+Tir width=
+echomsg "2,3,8" b:tirenvi.attrs[1]
+sleep 1m
+"                              2, 3, 8
+Tir width=x
+
+call RunTest({ 'desc': 'width = 2, 3, 8' })

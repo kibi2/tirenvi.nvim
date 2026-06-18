@@ -98,11 +98,14 @@ end
 ---@return string
 local function get_mode_short(attr)
     if not attr.width_mode then
+        return "-"
+    elseif attr.width_mode == "wrap" then
         return "w"
-    elseif M.is_width_wrap(attr) then
-        return "w"
-    else
+    elseif attr.width_mode == "nowrap" then
         return "n"
+    else
+        log.assert(false, string.format("invalid mode %s", attr.width_mode))
+        return "X"
     end
 end
 

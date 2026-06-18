@@ -1,5 +1,7 @@
 -- dependencies
 local Context = require("tirenvi.app.context")
+local Attrs = require("tirenvi.core.attrs")
+local buffer = require("tirenvi.io.buffer")
 local buf_state = require("tirenvi.io.buf_state")
 local log = require("tirenvi.util.log")
 
@@ -34,6 +36,13 @@ end
 
 function M.ui_exit(bufnr, name)
     debug_trace(bufnr, "EXIT!", name)
+end
+
+---@param title string
+---@return string
+function M.debug_cached_attrs(title)
+    local attrs = buffer.get(nil, buffer.IKEY.ATTRS)
+    return Attrs.debug_attrs(attrs, title)
 end
 
 return M

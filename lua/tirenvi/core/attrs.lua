@@ -146,11 +146,11 @@ local nmax = 4
 ---@param title string
 ---@return string
 function M:debug_attrs(title)
-    if not log.is_debug() then
+    if not log.is_debug() and not vim.g.tirenvi_test_mode then
         return ""
     end
     if not self then
-        return title .. "nil"
+        return title .. " nil"
     end
     local strings = { title }
     for iattr = 1, math.min(#self, nmax) do

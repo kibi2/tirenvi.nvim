@@ -21,7 +21,7 @@ local M   = {}
 ---@param number number[]|nil
 ---@return WidthModeState
 function M.new(mode, kind, number)
-    assert(mode == "auto" or mode == "fit" or mode == "max" or mode == "fix")
+    assert(mode == "wrap" or mode == "nowrap")
     local self = { mode = mode, kind = kind }
     self.number = number or {}
     return self
