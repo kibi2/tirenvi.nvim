@@ -1,3 +1,4 @@
+local config = require("tirenvi.config")
 local Record = require("tirenvi.core.record")
 local Cell = require("tirenvi.core.cell")
 local WidthModeState = require("tirenvi.width.state")
@@ -197,7 +198,8 @@ end
 ---@param self Attr
 ---@return boolean
 function M:is_width_wrap()
-    return not self.width_mode or self.width_mode == "wrap"
+    local width_mode = self.width_mode or config.table.width_mode
+    return width_mode == "wrap"
 end
 
 ---@param self Attr
