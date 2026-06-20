@@ -1,4 +1,5 @@
 local config  = require("tirenvi.config")
+local buffer  = require("tirenvi.io.buffer")
 local log     = require("tirenvi.util.log")
 
 local matches = {}
@@ -95,7 +96,7 @@ end
 
 ---@param winid integer|nil
 function M.special_clear(winid)
-    winid = winid or api.nvim_get_current_win()
+    winid = buffer.normalize_winid(winid)
     local ids = matches[winid]
     if not ids then return end
     for _, id in ipairs(ids) do
@@ -108,7 +109,7 @@ end
 function M.special_apply(winid)
     local pipen = config.marks.pipe
     local pipec = config.marks.pipec
-    winid       = winid or api.nvim_get_current_win()
+    winid = buffer.normalize_winid(winid)
     M.special_clear(winid)
     add_match(winid, "TirenviPadding", pat_v(config.marks.padding), 10)
     add_match(winid, "TirenviSpecialChar", pat_v(config.marks.lf), 20)

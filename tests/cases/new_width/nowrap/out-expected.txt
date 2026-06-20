@@ -5,10 +5,12 @@
 init // p(1,1)- g(2,6)-[5,6] p(7,7)- g(8,12)-[5,3,6]
  
 ----- CASE: width+ on first plain block
+cur(1,1) b1:r1:c0 +(0,0)
 tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
 width+ // p(1,1)- g(2,6)-[5,6] p(7,7)- g(8,12)-[5,3,6]
  
 ----- CASE: width+3 on first grid block
+cur(2,2) b2:r1:c1 +(0,0)
 width+3 // p(1,1)- g(2,6)-[8,6] p(7,7)- g(8,12)-[5,3,6]
  
 ----- CASE: width-2 on second grid block, column 2

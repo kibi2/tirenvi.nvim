@@ -63,12 +63,12 @@ local initial_value  = {
 -----------------------------------------------------------------------
 local function fix_cursor_utf8()
 	local winid = api.nvim_get_current_win()
-	local irow, icol = M.get_cursor(winid)
+	local irow, icol = M.get_cursor_byte_pos(winid)
 	local line = M.get_line(0, irow)
-	local char_index0 = vim.str_utfindex(line, icol - 1)
-	local boundary = vim.str_byteindex(line, char_index0) + 1
+	local char_col0 = vim.str_utfindex(line, icol - 1)
+	local boundary = vim.str_byteindex(line, char_col0) + 1
 	if boundary ~= icol then
-		M.set_cursor(0, irow, boundary)
+		M.set_cursor_byte_pos(0, irow, boundary)
 	end
 end
 
@@ -154,6 +154,15 @@ function M.normalize_bufnr(bufnr)
 	return bufnr
 end
 
+---@param winid number|nil
+---@return number
+function M.normalize_winid(winid)
+	if not winid or winid == 0 then
+		return api.nvim_get_current_win()
+	end
+	return winid
+end
+
 ---@param bufnr number|nil
 ---@return {[string]: boolean|integer|string|integer[][]|nil}
 function M.get_state(bufnr)
@@ -226,7 +235,7 @@ function M.get_lines(bufnr, first, last)
 	return get_lines_from_cache(bufnr, first, last)
 end
 
----@param bufnr number
+---@param bufnr number|nil
 ---@param iline integer -- 1-based
 ---@return string|nil
 function M.get_line(bufnr, iline)
@@ -290,24 +299,48 @@ end
 ---@param winid integer|nil
 ---@return integer
 ---@return integer
-function M.get_cursor(winid)
-	winid = (winid == nil or winid == 0) and api.nvim_get_current_win() or winid
+function M.get_cursor_byte_pos(winid)
+	winid = M.normalize_winid(winid)
 	local irow, icol0 = unpack(api.nvim_win_get_cursor(winid))
 	return irow, icol0 + 1
 end
 
 ---@param winid integer|nil
+---@return integer
+---@return integer
+---@return integer
+function M.get_cursor_char_pos(winid)
+	local irow, byte_col1 = M.get_cursor_byte_pos(winid)
+	local byte_col0 = byte_col1 - 1
+	local line = M.get_line(0, irow)
+	local char_col0 = vim.str_utfindex(line, byte_col0)
+	local new_byte_col = vim.str_byteindex(line, char_col0) + 1
+	return irow, new_byte_col, char_col0 + 1
+end
+
+---@param winid integer|nil
 ---@param irow integer
 ---@param icol integer
-function M.set_cursor(winid, irow, icol)
-	winid = (winid == nil or winid == 0) and api.nvim_get_current_win() or winid
+function M.set_cursor_byte_pos(winid, irow, icol)
+	winid = M.normalize_winid(winid)
 	vim.api.nvim_win_set_cursor(winid, { irow, icol - 1 })
+end
+
+---@param winid integer|nil
+---@param char_row integer
+---@param char_col integer
+function M.set_cursor_char_pos(winid, char_row, char_col)
+	winid = M.normalize_winid(winid)
+	local bufnr = vim.api.nvim_win_get_buf(winid)
+	local line = M.get_line(bufnr, char_row)
+	local byte_col0 = vim.str_byteindex(line, char_col - 1)
+	vim.api.nvim_win_set_cursor(winid, { char_row, byte_col0 })
 end
 
 ---@param winid integer|nil
 ---@return integer
 function M.get_win_width(winid)
-	winid = (winid == nil or winid == 0) and api.nvim_get_current_win() or winid
+	winid = M.normalize_winid(winid)
 	local info = vim.fn.getwininfo(winid)[1]
 	return info.width - info.textoff
 end

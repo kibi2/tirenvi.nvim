@@ -179,11 +179,17 @@ function M:set_ncol(ncol)
 end
 
 ---@param self Attr
+---@param last_col integer
 ---@return integer
-function M:get_total_width()
+function M:get_total_width(last_col)
+    if M.is_plain(self) then
+        return 0
+    end
+    last_col = last_col or #self.columns
+    last_col = math.min(last_col, #self.columns)
     local total = 0
-    for _, column in ipairs(self.columns) do
-        total = total + column.width
+    for icol = 1, last_col do
+        total = total + self.columns[icol].width
     end
     return total
 end
@@ -199,16 +205,19 @@ end
 ---@return integer
 ---@return integer
 function M:to_cell_col(cur_col)
+    if M.is_plain(self) then
+        return 0, 0
+    end
     local start = 1
     local last
     for icol, column in ipairs(self.columns) do
         last = start + column.width
-        if icol == #self.columns or cur_col <= last then
+        if cur_col <= last then
             return icol, cur_col - start - 1
         end
         start = last + 1
     end
-    return #self.columns, 0
+    return #self.columns, self.columns[#self.columns].width
 end
 
 ---@param self Attr
@@ -216,6 +225,14 @@ end
 function M:get(cur_col)
     local icol = M.to_cell_col(self, cur_col)
     return self.columns[icol]
+end
+
+---@param self Attr
+---@param icol integer
+---@return integer
+function M:get_start_pos(icol)
+    local width = M.get_total_width(self, icol - 1)
+    return width + icol + 1
 end
 
 return M

@@ -71,8 +71,8 @@ local M = {}
 ---@field iblock integer
 ---@field irow integer
 ---@field icol integer
----@field row_offset integer
----@field col_offset integer
+---@field row_offset integer|nil
+---@field col_offset integer|nil
 
 local VERSION = "tir/0.1"
 

@@ -221,7 +221,7 @@ end
 function M.get_block_rect(ctx, line_provider, count, is_around)
     local pipen = config.marks.pipe
     local pipec = config.marks.pipec
-    local irow, icol = buffer.get_cursor()
+    local irow, icol = buffer.get_cursor_byte_pos()
     local cline = line_provider.get_line(irow) or ""
     local cbyte_pos = M.get_pipe_byte_position(cline)
     if #cbyte_pos == 0 then
