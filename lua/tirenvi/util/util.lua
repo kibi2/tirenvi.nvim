@@ -134,4 +134,18 @@ function M.same_str_array(source, target)
 	return true
 end
 
+---@param source integer
+---@param min integer
+---@param max integer
+function M.trim(source, min, max)
+	local result = source
+	if result > max then
+		result = max
+	end
+	if result < min then
+		result = min
+	end
+	return result
+end
+
 return M

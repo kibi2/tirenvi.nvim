@@ -5,6 +5,7 @@
 local config         = require("tirenvi.config")
 local WidthModeState = require("tirenvi.width.state")
 local Range          = require("tirenvi.util.range")
+local util           = require("tirenvi.util.util")
 local log            = require("tirenvi.util.log")
 
 local M              = {}
@@ -333,8 +334,12 @@ function M.set_cursor_char_pos(winid, char_row, char_col)
 	winid = M.normalize_winid(winid)
 	local bufnr = vim.api.nvim_win_get_buf(winid)
 	local line = M.get_line(bufnr, char_row)
+	local char_col = util.trim(char_col, 1, #line)
 	local byte_col0 = vim.str_byteindex(line, char_col - 1)
-	vim.api.nvim_win_set_cursor(winid, { char_row, byte_col0 })
+	local view = vim.fn.winsaveview()
+	view.lnum = char_row
+	view.col = byte_col0
+	vim.fn.winrestview(view)
 end
 
 ---@param winid integer|nil
