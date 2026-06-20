@@ -238,13 +238,24 @@ end
 ---@return Cell_pos
 function M:to_logical(cur_row, cur_col)
     local cell_pos = {}
-    cell_pos.iblock = get_index(cell_pos, cur_row)
-    log.assert(cell_pos.iblock, "invalid position %d", cur_row)
-    cell_pos.irow = cur_row - self[cell_pos.iblock].range.first + 1
-    cell_pos.icol = nil
+    cell_pos.iblock = get_index(self, cur_row)
+    local attr = self[cell_pos.iblock]
+    log.assert(attr, "invalid position %d", cur_row)
+    cell_pos.irow = cur_row - attr.range.first + 1
+    cell_pos.icol, cell_pos.col_offset = Attr.to_cell_col(attr, cur_col)
     cell_pos.row_offset = 0
-    cell_pos.col_offset = 0
     return cell_pos
+end
+
+---@param self Attr[]
+---@param cell_pos Cell_pos
+---@return integer
+---@return integer
+function M:to_cursor(cell_pos)
+    local attr = self[cell_pos.iblock]
+    local char_row = attr.range.first + cell_pos.irow - 1
+    local char_col = Attr.get_start_pos(attr, cell_pos.icol)
+    return char_row, char_col
 end
 
 return M

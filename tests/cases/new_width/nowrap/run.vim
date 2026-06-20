@@ -3,25 +3,25 @@ source $TIRENVI_ROOT/tests/common.vim
 edit $TIRENVI_ROOT/tests/data/table2.md
 
 call Case("initial cached attrs")
-lua print(Debug.debug_cached_attrs("init //"))
+lua print(Debug.cached_attrs("init //"))
 
 call Case("width+ on first plain block")
-execute "normal! gg"
+lua Debug.goto(1, 1, 1)
+lua print(Debug.cursor_pos())
 Tir width+
-lua print(Debug.debug_cached_attrs("width+ //"))
+lua print(Debug.cached_attrs("width+ //"))
 
 call Case("width+3 on first grid block")
-lua require('tirenvi').motion.block_bottom()
-execute "normal! j"
+lua Debug.goto(2, 1, 1)
+lua print(Debug.cursor_pos())
 Tir width+3
-lua print(Debug.debug_cached_attrs("width+3 //"))
+lua print(Debug.cached_attrs("width+3 //"))
 
 call Case("width-2 on second grid block, column 2")
-" grid #2 col #2
-execute "normal! 12G0"   
+lua Debug.goto(4, 2, 1)
 execute "normal! " . luaeval("require('tirenvi.editor.motion').f()")
 Tir width-2
-lua print(Debug.debug_cached_attrs("width-2 //"))
+lua print(Debug.cached_attrs("width-2 //"))
 
 call RunTest({ 'desc': 'Tir width nowrap' })
 
