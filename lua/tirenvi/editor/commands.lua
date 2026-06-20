@@ -145,10 +145,7 @@ local function on_tir(opts)
 		notify.info(build_usage())
 		return
 	end
-	local command = sub:match("^[A-Za-z_-]+") or ""
-	if command == "width-" then
-		command = "width"
-	end
+	local command = sub:match("^[A-Za-z_]+") or ""
 	local ctx = Context.from_buf()
 	local name = string.format("%s %s", opts.name, table.concat(opts.fargs, " "))
 	debug.ui_entry(ctx.bufnr, name)

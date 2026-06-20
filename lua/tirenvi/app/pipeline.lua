@@ -338,8 +338,9 @@ end
 ---@param ctx Context
 ---@param width_op WidthOp
 function M.cmd_fit(ctx, width_op)
-    change_mode(ctx, width_op)
-    change_fit(ctx, width_op)
+    log.probe(width_op)
+    --change_mode(ctx, width_op)
+    --change_fit(ctx, width_op)
 end
 
 ---@param ctx Context
