@@ -35,18 +35,16 @@ M.T = build_motion("T")
 function M.block_top()
 	local attrs                = buffer.get(nil, buffer.IKEY.ATTRS)
 	local cur_row, _, char_col = buffer.get_cursor_char_pos()
-	log.probe(char_col)
-	local pos     = Attrs.to_logical(attrs, cur_row, char_col)
-	local top_row = attrs[pos.iblock].range.first
+	local pos                  = Attrs.to_logical(attrs, cur_row, char_col)
+	local top_row              = attrs[pos.iblock].range.first
 	buffer.set_cursor_char_pos(0, top_row, char_col)
 end
 
 function M.block_bottom()
 	local attrs                = buffer.get(nil, buffer.IKEY.ATTRS)
 	local cur_row, _, char_col = buffer.get_cursor_char_pos()
-	log.probe(char_col)
-	local pos        = Attrs.to_logical(attrs, cur_row, char_col)
-	local bottom_row = attrs[pos.iblock].range.last
+	local pos                  = Attrs.to_logical(attrs, cur_row, char_col)
+	local bottom_row           = attrs[pos.iblock].range.last
 	buffer.set_cursor_char_pos(0, bottom_row, char_col)
 end
 
