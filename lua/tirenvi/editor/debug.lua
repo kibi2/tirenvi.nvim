@@ -48,8 +48,8 @@ end
 
 ---@return string
 function M.cursor_pos()
-    local cur_row, _, char_col = buffer.get_cursor_char_pos()
     local attrs = buffer.get(nil, buffer.IKEY.ATTRS)
+    local cur_row, _, char_col = buffer.get_cursor_char_pos()
     local pos = Attrs.to_logical(attrs, cur_row, char_col)
     local str = string.format("cur(%d,%d) b%s:r%s:c%s +(%s,%s)",
         cur_row, char_col,
