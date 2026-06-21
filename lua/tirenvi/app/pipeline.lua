@@ -262,16 +262,10 @@ local function change_mode(ctx, width_op)
     if not attr or Attr.is_plain(attr) then
         return
     end
-    if width_op.command == "toggle" then
-        if Attr.is_width_wrap(attr) then
-            attr.width_mode = "nowrap"
-        else
-            attr.width_mode = "wrap"
-        end
-    elseif width_op.opts.mode then
-        attr.width_mode = width_op.opts.mode
+    if Attr.is_width_wrap(attr) then
+        attr.width_mode = "nowrap"
     else
-        log.assert(false, attr.width_mode)
+        attr.width_mode = "wrap"
     end
     attr_store.write(ctx.bufnr, attrs)
 end
