@@ -17,13 +17,11 @@
 ### command
 
 ```
- :Tir width=[n] : fix mode。列幅を指定する。n省略時max幅(wrapなし)
- :Tir width[+|-][n] : fix mode。今の列幅に対して列幅を増減する。省略時n=1
- :Tir width fix : -> fix mode。列幅固定
- :Tir width max : -> max mode。行数固定(wrapしない)
- :Tir width fit [=][n] : -> fit mode。表横幅をnにする。省略時n=画面幅
- :Tir width fit [+|-][n] : -> fit mode。表横幅を増減する。省略時n=1
- :Tir width toggle : 今のモードとmaxを切り替える
+ :Tir width=[n] : -> wrap mode。カーソル位置の列幅を指定する。n省略時nowrap幅
+ :Tir width{+|-}[n] : -> wrap mode。カーソル位置の列幅を増減する。省略時n=1
+ :Tir fit=[n] : -> wrap mode。表横幅をnにする。省略時n=推奨値
+ :Tir fit{+|-}[n] : -> wrap mode。表横幅を増減する。省略時n=1
+ :Tir wrap : mode 切り替え。nowrap <-> wrap
 ```
 
 * 画面横幅を変更しても表の幅は変化しない

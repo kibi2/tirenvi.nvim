@@ -22,7 +22,7 @@ local api = vim.api
 ---@return nil
 local function cmd_width(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
-	local width_op = WidthOp.new(opts, "width")
+	local width_op = WidthOp.new(opts)
 	if not width_op then
 		notify.error(errors.err_unknown_command(opts.args))
 		return
@@ -36,7 +36,7 @@ end
 ---@return nil
 local function cmd_fit(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
-	local width_op = WidthOp.new(opts, "fit")
+	local width_op = WidthOp.new(opts)
 	if not width_op then
 		notify.error(errors.err_unknown_command(opts.args))
 		return
@@ -50,7 +50,7 @@ end
 ---@return nil
 local function cmd_wrap(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
-	local width_op = WidthOp.new(opts, "wrap")
+	local width_op = WidthOp.new(opts)
 	if not width_op then
 		notify.error(errors.err_unknown_command(opts.args))
 		return
@@ -111,12 +111,12 @@ end
 ----------------------------------------------------------------------
 
 local commands = {
-	toggle = cmd_toggle,
-	redraw = cmd_redraw,
-	width = cmd_width,
-	fit = cmd_fit,
-	wrap = cmd_wrap,
-	repair = cmd_repair,
+	toggle = { func = cmd_toggle, sub = {} },
+	redraw = { func = cmd_redraw, sub = {} },
+	width = { func = cmd_width, sub = { "=", "+", "-", "?" } },
+	fit = { func = cmd_fit, sub = { "=", "+", "-" } },
+	wrap = { func = cmd_wrap, sub = {} },
+	repair = { func = cmd_repair, sub = { "toggle", "enable", "diable" } },
 }
 
 local function get_command_keys()
@@ -145,16 +145,18 @@ local function on_tir(opts)
 		notify.info(build_usage())
 		return
 	end
-	local command = sub:match("^[A-Za-z_]+") or ""
+	local command_name = sub:match("^[A-Za-z_]+") or ""
 	local ctx = Context.from_buf()
 	local name = string.format("%s %s", opts.name, table.concat(opts.fargs, " "))
 	debug.ui_entry(ctx.bufnr, name)
-	local func = commands[command]
-	if not func then
+	local command = commands[command_name]
+	if not command or not command.func then
 		notify.error(errors.err_unknown_command(opts.args))
 		return
 	end
-	func(ctx, opts)
+	opts.command_name = command_name
+	opts.command = command
+	command.func(ctx, opts)
 	debug.ui_exit(ctx.bufnr, name)
 end
 
@@ -163,18 +165,9 @@ local function complete_tir(arglead, cmdline)
 	if #args <= 1 then
 		return get_command_keys()
 	elseif #args == 2 then
-		if args[2] == "width" or args[2] == "fit" then
-			return {
-				"=",
-				"+",
-				"-",
-			}
-		elseif args[2] == "repair" then
-			return {
-				"toggle",
-				"enable",
-				"disable",
-			}
+		local key = args[2]
+		if commands[key] then
+			return commands[key].sub
 		end
 	end
 	return {}
