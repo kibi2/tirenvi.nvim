@@ -68,7 +68,7 @@ end
 local function try_new(opts)
     local command_name = opts.command_name
     local op, value
-    if #opts.command.sub ~= 0 then
+    if opts.command.has_op then
         local sub = table.concat(opts.command.sub, "%")
         local regex = string.format("^%s%%s*([%s])(.*)", command_name, sub)
         op, value = opts.args:match(regex)

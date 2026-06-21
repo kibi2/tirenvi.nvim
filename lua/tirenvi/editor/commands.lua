@@ -113,8 +113,8 @@ end
 local commands = {
 	toggle = { func = cmd_toggle, sub = {} },
 	redraw = { func = cmd_redraw, sub = {} },
-	width = { func = cmd_width, sub = { "=", "+", "-", "?" } },
-	fit = { func = cmd_fit, sub = { "=", "+", "-" } },
+	width = { func = cmd_width, sub = { "=", "+", "-", "?" }, has_op = true },
+	fit = { func = cmd_fit, sub = { "=", "+", "-" }, has_op = true },
 	wrap = { func = cmd_wrap, sub = {} },
 	repair = { func = cmd_repair, sub = { "toggle", "enable", "diable" } },
 }
@@ -145,19 +145,19 @@ local function on_tir(opts)
 		notify.info(build_usage())
 		return
 	end
-	local command_name = sub:match("^[A-Za-z_]+") or ""
 	local ctx = Context.from_buf()
-	local name = string.format("%s %s", opts.name, table.concat(opts.fargs, " "))
-	debug.ui_entry(ctx.bufnr, name)
+	local debug_name = string.format("%s %s", opts.name, table.concat(opts.fargs, " "))
+	debug.ui_entry(ctx.bufnr, debug_name)
+	local command_name = sub:match("^[A-Za-z_]+") or ""
 	local command = commands[command_name]
-	if not command or not command.func then
-		notify.error(errors.err_unknown_command(opts.args))
+	if not command then
+		notify.info(build_usage())
 		return
 	end
 	opts.command_name = command_name
 	opts.command = command
 	command.func(ctx, opts)
-	debug.ui_exit(ctx.bufnr, name)
+	debug.ui_exit(ctx.bufnr, debug_name)
 end
 
 local function complete_tir(arglead, cmdline)
