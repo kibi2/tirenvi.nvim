@@ -8,7 +8,6 @@ local Attr = require("tirenvi.core.attr")
 local Bufline = require("tirenvi.core.bufline")
 local dirty_range = require("tirenvi.core.dirty_range")
 local Request = require("tirenvi.app.request")
-local WidthModeState = require("tirenvi.width.state")
 local width_layout = require("tirenvi.width.layout")
 local flat_parser = require("tirenvi.parser.flat_parser")
 local buf_parser = require("tirenvi.parser.buf_parser")
@@ -222,6 +221,7 @@ local function change_width(ctx, width_op)
     if Attr.is_plain(attr) then return end
     local column = Attr.get(attr, width_op.icol)
     column.width = width_op:apply(column.width)
+    attr.width_mode = "wrap_width"
     doc_to_buflines(ctx, r_result, bufdoc)
 end
 
@@ -253,20 +253,12 @@ local function change_wrap(ctx, width_op)
     end
 end
 
----TODO 冗長
 ---@param ctx Context
 ---@param width_op WidthOp
 local function change_mode(ctx, width_op)
     local attrs = attr_store.read(ctx.bufnr)
     local attr = Attrs.get(attrs, width_op.irow)
-    if not attr or Attr.is_plain(attr) then
-        return
-    end
-    if Attr.is_width_wrap(attr) then
-        attr.width_mode = "nowrap"
-    else
-        attr.width_mode = "wrap"
-    end
+    Attr.change_width_mode(attr or {})
     attr_store.write(ctx.bufnr, attrs)
 end
 

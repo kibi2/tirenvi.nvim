@@ -1,5 +1,17 @@
 source $TIRENVI_ROOT/tests/common.vim
 
+lua << EOF
+  Buffer = require("tirenvi.io.buffer")
+  Range = require("tirenvi.util.range")
+  Debug = require("tirenvi.editor.debug")
+  local M = require("tirenvi")
+  M.setup({
+	table = {
+		width_mode = "nowrap",
+	},
+  })
+EOF
+
 edit $TIRENVI_ROOT/tests/data/table2.md
 
 call Case("initial cached attrs")
@@ -28,7 +40,7 @@ lua Debug.goto(4, 2, 2)
 Tir width=10
 lua print(Debug.cached_attrs("width=10 //"))
 
-call Case("width=10 on second grid block, column 2")
+call Case("width= on second grid block, column 2")
 lua Debug.goto(4, 2, 2)
 Tir width=
 lua print(Debug.cached_attrs("width= //"))

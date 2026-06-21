@@ -2,23 +2,22 @@
 -- Module
 -----------------------------------------------------------------------
 ----- dependencies
-local config         = require("tirenvi.config")
-local WidthModeState = require("tirenvi.width.state")
-local Range          = require("tirenvi.util.range")
-local util           = require("tirenvi.util.util")
-local log            = require("tirenvi.util.log")
+local config        = require("tirenvi.config")
+local Range         = require("tirenvi.util.range")
+local util          = require("tirenvi.util.util")
+local log           = require("tirenvi.util.log")
 
-local M              = {}
+local M             = {}
 
-local api            = vim.api
-local fn             = vim.fn
-local bo             = vim.bo
-local b              = vim.b
-local cache          = { bufnr = -1, start = -1, lines = {}, }
-local STEP           = 25
+local api           = vim.api
+local fn            = vim.fn
+local bo            = vim.bo
+local b             = vim.b
+local cache         = { bufnr = -1, start = -1, lines = {}, }
+local STEP          = 25
 
 -- Buffer-local flags.
-M.IKEY               = {
+M.IKEY              = {
 	-- true when in insert mode
 	INSERT_MODE = "insert_mode",
 
@@ -47,7 +46,7 @@ M.IKEY               = {
 	FLAT = "flat",
 }
 
-local initial_value  = {
+local initial_value = {
 	[M.IKEY.INSERT_MODE] = false,
 	[M.IKEY.ATTACHED] = false,
 	[M.IKEY.PATCH_DEPTH] = 0,
@@ -169,7 +168,6 @@ end
 function M.get_state(bufnr)
 	bufnr = M.normalize_bufnr(bufnr)
 	if not b[bufnr].tirenvi then
-		initial_value.width_mode = WidthModeState.new(config.table.width_mode)
 		b[bufnr].tirenvi = initial_value
 	end
 	return b[bufnr].tirenvi

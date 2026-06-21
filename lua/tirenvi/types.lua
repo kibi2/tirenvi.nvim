@@ -8,9 +8,7 @@
 ---@field get_lines fun(first: integer, last: integer): string[]
 
 ---@alias WidthMode
----| "wrap"
 ---| "nowrap"
----| "auto"
----| "fit"
----| "max"
----| "fix"
+---| "wrap_auto"
+---| "wrap_fit"
+---| "wrap_width"

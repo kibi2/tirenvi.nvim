@@ -5,14 +5,6 @@ new
 lua << EOF
   Buffer = require("tirenvi.io.buffer")
   Range = require("tirenvi.util.range")
-  Debug = require("tirenvi.editor.debug")
-  local M = require("tirenvi")
-  M.setup({
-  	log = {
-		probe = true,
-  	},
-  })
-
   local lines = {
     "1234567890",
     "あいうえおかきくけこ",
