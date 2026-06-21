@@ -1,17 +1,15 @@
 ---@class WidthOp
----@field opts {kind:string, mode:string|nil}
 ---@field args string
 ---@field command string
 ---@field operation string
 ---@field number number[]
 ---@field irow integer
 ---@field icol integer
-local WidthOp        = {}
-WidthOp.__index      = WidthOp
+local WidthOp   = {}
+WidthOp.__index = WidthOp
 
-local Cell           = require("tirenvi.core.cell")
-local WidthModeState = require("tirenvi.width.state")
-local log            = require("tirenvi.util.log")
+local Cell      = require("tirenvi.core.cell")
+local log       = require("tirenvi.util.log")
 
 -- constants / defaults
 
@@ -19,7 +17,7 @@ local log            = require("tirenvi.util.log")
 -- Private helpers
 -----------------------------------------------------------------------
 
-local map            = {
+local map       = {
     ["="] = "set",
     ["+"] = "add",
     ["-"] = "sub",
@@ -131,12 +129,6 @@ function WidthOp:apply(current)
     else
         return current
     end
-end
-
----@param self WidthOp
----@return WidthModeState
-function WidthOp:get_state()
-    return WidthModeState.new(self.opts.mode, self.opts.kind, self.number)
 end
 
 return WidthOp

@@ -1,5 +1,17 @@
 source $TIRENVI_ROOT/tests/common.vim
 
+lua << EOF
+  Buffer = require("tirenvi.io.buffer")
+  Range = require("tirenvi.util.range")
+  Debug = require("tirenvi.editor.debug")
+  local M = require("tirenvi")
+  M.setup({
+	table = {
+		width_mode = "nowrap",
+	},
+  })
+EOF
+
 edit $TIRENVI_ROOT/tests/data/simple.md
 
 call Case("1. block#2 bottom")

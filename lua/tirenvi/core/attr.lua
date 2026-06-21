@@ -1,7 +1,6 @@
 local config = require("tirenvi.config")
 local Record = require("tirenvi.core.record")
 local Cell = require("tirenvi.core.cell")
-local WidthModeState = require("tirenvi.width.state")
 local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
@@ -89,25 +88,32 @@ function M.grid:set_max_attr(records, force)
     end
 end
 
----@param attr Attr
+---@param self Attr
 ---@return string
-function M.get_attr_short(attr)
-    local kind = M.is_plain(attr) and "p" or "g"
-    local range_str = attr.range and string.format("(%d,%d)", attr.range.first, attr.range.last) or "()"
+function M.get_attr_short(self)
+    local kind = M.is_plain(self) and "p" or "g"
+    local range_str = self.range and string.format("(%d,%d)", self.range.first, self.range.last) or "()"
     return kind .. range_str
 end
 
----@param attr Attr
+---@param self Attr
 ---@return string
-local function get_mode_short(attr)
-    if not attr.width_mode then
+local function get_mode_short(self)
+    local width_mode = M.get_width_mode(self)
+    if not self.width_mode then
         return "-"
-    elseif attr.width_mode == "wrap" then
-        return "w"
-    elseif attr.width_mode == "nowrap" then
+    elseif width_mode == "nowrap" then
         return "n"
+    elseif width_mode == "wrap_auto" then
+        return "a"
+    elseif width_mode == "wrap_fit" then
+        return "f"
+    elseif width_mode == "wrap_width" then
+        return "w"
+    elseif not width_mode then
+        return ""
     else
-        log.assert(false, "invalid mode %s", attr.width_mode)
+        log.assert(false, "invalid mode %s", width_mode)
         return "X"
     end
 end
@@ -117,7 +123,7 @@ end
 function M.get_attr_long(attr)
     local widths = M.get_width_array(attr.columns)
     local long   = #widths > 0 and string.format("[%s]", table.concat(widths, ",")) or ""
-    return M.get_attr_short(attr) .. get_mode_short(attr) .. long
+    return M.get_attr_short(attr) .. get_mode_short(attr) .. (attr.fit_width or "") .. long
 end
 
 ---@param columns Attr_column[]
@@ -198,10 +204,20 @@ function M:get_total_width(last_col)
 end
 
 ---@param self Attr
----@return boolean
-function M:is_width_wrap()
-    local width_mode = self.width_mode or config.table.width_mode
-    return width_mode == "wrap"
+---@return  WidthMode|nil
+function M:get_width_mode()
+    local width_mode = self.width_mode
+    if M.is_plain(self) then
+        log.assert(self.fit_width == nil, "attr.fit_width of plain is %s.", self.fit_width)
+        return nil
+    end
+    if not width_mode then
+        width_mode = config.table.width_mode == "nowrap" and "nowrap" or "wrap_auto"
+    end
+    if width_mode == "wrap_fit" and self.fit_width == nil then
+        width_mode = "wrap_auto"
+    end
+    return width_mode
 end
 
 ---@param self Attr
@@ -237,6 +253,19 @@ end
 function M:get_start_pos(icol)
     local width = M.get_total_width(self, icol - 1)
     return width + icol + 1
+end
+
+---@param self Attr
+function M:change_width_mode()
+    if not self or M.is_plain(self) then
+        return
+    end
+    if M.get_width_mode(self) == "nowrap" then
+        self.width_mode = "wrap_fit"
+    else
+        self.fit_width = M.get_total_width(self)
+        self.width_mode = "nowrap"
+    end
 end
 
 return M

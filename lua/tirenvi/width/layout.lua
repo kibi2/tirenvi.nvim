@@ -45,11 +45,6 @@ local function clear_width(block)
 end
 
 ---@param block Block_grid
-local function nowrap(block)
-    Block.grid.set_max_attr(block, true)
-end
-
----@param block Block_grid
 local function max(block)
     Block.grid.set_max_attr(block)
 end
@@ -251,17 +246,45 @@ local function deliver(block, extra_width)
 end
 
 ---@param block Block_grid
-local function wrap(block)
+local function nowrap(block)
+    Block.grid.set_max_attr(block, true)
+end
+
+---@param block Block_grid
+local function wrap_auto(block)
     Block.grid.set_max_attr(block, true)
     local win_width = buffer.get_win_width()
     local total_width = Attr.get_total_width(block.attr)
-    local grid_width = total_width + #block.attr + 1
+    local fit_width = total_width + #block.attr + 1
     local widths = {}
-    if grid_width < win_width then
-        widths = deliver(block, win_width - grid_width)
+    if fit_width < win_width then
+        widths = deliver(block, win_width - fit_width)
     end
     for icol = 1, #widths do
         block.attr.columns[icol].width = block.attr.columns[icol].width + widths[icol]
+    end
+end
+
+---@param block Block_grid
+local function wrap_fit(block)
+end
+
+---@param block Block_grid
+local function wrap_width(block)
+    Block.grid.set_max_attr(block)
+end
+
+---@param block Block_grid
+---@param width_mode WidthMode
+local function wrap(block, width_mode)
+    if width_mode == "wrap_auto" then
+        wrap_auto(block)
+    elseif width_mode == "wrap_fit" then
+        wrap_fit(block)
+    elseif width_mode == "wrap_width" then
+        wrap_width(block)
+    else
+        log.assert(false, "invalid mode %s", width_mode)
     end
 end
 
@@ -273,10 +296,11 @@ end
 function M.compute(tirdoc)
     for _, block in ipairs(tirdoc.blocks) do
         if block.kind == "grid" then
-            if Attr.is_width_wrap(block.attr) then
-                wrap(block)
-            else
+            local width_mode = Attr.get_width_mode(block.attr)
+            if width_mode == "nowrap" then
                 nowrap(block)
+            elseif width_mode then
+                wrap(block, width_mode)
             end
         end
     end
