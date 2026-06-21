@@ -23,6 +23,26 @@ execute "normal! " . luaeval("require('tirenvi.editor.motion').f()")
 Tir width-2
 lua print(Debug.cached_attrs("width-2 //"))
 
+call Case("width=10 on second grid block, column 2")
+lua Debug.goto(4, 2, 2)
+Tir width=10
+lua print(Debug.cached_attrs("width=10 //"))
+
+call Case("width=10 on second grid block, column 2")
+lua Debug.goto(4, 2, 2)
+Tir width=
+lua print(Debug.cached_attrs("width= //"))
+
+call Case("width- on second grid block, column 3")
+lua Debug.goto(4, 2, 3)
+Tir width-
+lua print(Debug.cached_attrs("width- //"))
+
+call Case("width on second grid block, column 3")
+lua Debug.goto(4, 2, 3)
+Tir width
+lua print(Debug.cached_attrs("width //"))
+
 call RunTest({ 'desc': 'Tir width nowrap' })
 
 

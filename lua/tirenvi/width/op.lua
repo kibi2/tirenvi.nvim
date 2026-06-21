@@ -23,7 +23,7 @@ local map            = {
     ["="] = "set",
     ["+"] = "add",
     ["-"] = "sub",
-    wrap = "toggle",
+    ["?"] = "info",
 }
 
 ---@param str string
@@ -65,13 +65,21 @@ end
 
 ---@param opts {[string]:any}
 ---@return WidthOp|nil
-local function try_new(opts, command)
-    local op, value = opts.args:match("^" .. command .. "%s*([=%+%-])(.*)")
-    op = op or "="
+local function try_new(opts)
+    local command_name = opts.command_name
+    local op, value
+    if #opts.command.sub ~= 0 then
+        local sub = table.concat(opts.command.sub, "%")
+        local regex = string.format("^%s%%s*([%s])(.*)", command_name, sub)
+        op, value = opts.args:match(regex)
+        if not op then
+            return nil
+        end
+    end
     local irow, icol = get_selection(opts)
     return setmetatable({
         args = opts.args,
-        command = command,
+        command = command_name,
         operation = map[op],
         number = { get_number(value) },
         irow = irow,
@@ -84,11 +92,10 @@ end
 -----------------------------------------------------------------------
 
 ---@param opts {[string]:any}
----@param command string
 ---@return WidthOp|nil
-function WidthOp.new(opts, command)
-    local ok, self = pcall(try_new, opts, command)
-    if not ok then
+function WidthOp.new(opts)
+    local ok, self = pcall(try_new, opts)
+    if not ok or not self then
         return nil
     end
     return self
