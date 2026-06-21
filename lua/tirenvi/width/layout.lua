@@ -33,11 +33,6 @@ local function sort_column_indices(columns)
 end
 
 ---@param block Block_grid
-local function wrap(block)
-    Block.grid.set_max_attr(block)
-end
-
----@param block Block_grid
 local function fix(block)
     Block.grid.set_max_attr(block)
 end
@@ -51,7 +46,7 @@ end
 
 ---@param block Block_grid
 local function nowrap(block)
-    Block.grid.set_max_attr(block)
+    Block.grid.set_max_attr(block, true)
 end
 
 ---@param block Block_grid
@@ -74,8 +69,8 @@ local function fit_auto_block(block, max_size)
     local total = 0
     local logws = {}
     for _, column in ipairs(block.attr.columns) do
-        -- local logw = math.log(column.width)
-        local logw = column.width
+        local logw = math.log(column.width)
+        --local logw = column.width
         logws[#logws + 1] = logw
         total = total + logw
     end
@@ -226,6 +221,48 @@ local function auto(block)
     Block.grid.set_max_attr(block)
     local win_width = buffer.get_win_width()
     auto_block(block, win_width)
+end
+
+---@param current_width integer[]
+---@param extra_width integer
+local function expand(current_width, extra_width)
+    local total = 0
+    local logws = {}
+    for _, width in ipairs(current_width) do
+        local logw = math.log(width)
+        logws[#logws + 1] = logw
+        total = total + logw
+    end
+    local widths = {}
+    for icol = 1, #current_width do
+        local extra = math.ceil(extra_width * logws[icol] / total)
+        extra = math.min(extra, math.ceil(current_width[icol] * 0.3), 6)
+        widths[icol] = extra
+    end
+    return widths
+end
+
+---@param block Block_grid
+---@param extra_width integer
+---@return integer[]
+local function deliver(block, extra_width)
+    local current_width = Attr.get_width_array(block.attr.columns)
+    return expand(current_width, extra_width)
+end
+
+---@param block Block_grid
+local function wrap(block)
+    Block.grid.set_max_attr(block, true)
+    local win_width = buffer.get_win_width()
+    local total_width = Attr.get_total_width(block.attr)
+    local grid_width = total_width + #block.attr + 1
+    local widths = {}
+    if grid_width < win_width then
+        widths = deliver(block, win_width - grid_width)
+    end
+    for icol = 1, #widths do
+        block.attr.columns[icol].width = block.attr.columns[icol].width + widths[icol]
+    end
 end
 
 -----------------------------------------------------------------------
