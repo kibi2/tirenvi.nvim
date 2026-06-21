@@ -282,9 +282,10 @@ function M.grid:infer_consistent_attr()
     set_consistent_width(self)
 end
 
----@self Block_grid
-function M.grid:set_max_attr()
-    Attr.grid.set_max_attr(self.attr, self.records)
+---@param self Block_grid
+---@param force boolean|nil
+function M.grid:set_max_attr(force)
+    Attr.grid.set_max_attr(self.attr, self.records, force)
 end
 
 ---@self Block_grid

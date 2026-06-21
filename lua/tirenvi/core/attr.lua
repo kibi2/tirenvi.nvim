@@ -74,14 +74,16 @@ end
 
 ---@self Attr
 ---@param records Record_grid[]
-function M.grid:set_max_attr(records)
+---@param force boolean|nil
+function M.grid:set_max_attr(records, force)
+    force = force or false
     local ncol = #self.columns
     if ncol == 0 then
         ncol = Record.get_max_ncol(records)
         M.set_ncol(self, ncol)
     end
     for icol, column in pairs(self.columns) do
-        if column.width <= 0 then
+        if force or column.width <= 0 then
             column.width = get_max_width(records, icol)
         end
     end
@@ -180,7 +182,7 @@ function M:set_ncol(ncol)
 end
 
 ---@param self Attr
----@param last_col integer
+---@param last_col integer|nil
 ---@return integer
 function M:get_total_width(last_col)
     if M.is_plain(self) then
