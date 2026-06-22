@@ -1,17 +1,5 @@
 source $TIRENVI_ROOT/tests/common.vim
 
-lua << EOF
-  Buffer = require("tirenvi.io.buffer")
-  Range = require("tirenvi.util.range")
-  Debug = require("tirenvi.editor.debug")
-  local M = require("tirenvi")
-  M.setup({
-	table = {
-		width_mode = "nowrap",
-	},
-  })
-EOF
-
 " ===== GFM =====
 edit $TIRENVI_ROOT/tests/data/simple.md
 

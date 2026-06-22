@@ -45,6 +45,15 @@ local function new_from_columns(columns)
     return { columns = columns }
 end
 
+---@param self Attr
+---@return integer
+local function get_fit_width(self)
+    if M.is_plain(self) then
+        return 0
+    end
+    return M.get_total_width(self) + #self.columns + 1
+end
+
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
@@ -263,7 +272,7 @@ function M:change_width_mode()
     if M.get_width_mode(self) == "nowrap" then
         self.width_mode = "wrap_fit"
     else
-        self.fit_width = M.get_total_width(self)
+        self.fit_width = get_fit_width(self)
         self.width_mode = "nowrap"
     end
 end
