@@ -11,12 +11,16 @@ local M = {}
 
 -- constants / defaults
 
+local DELIMITER = " //"
 local bo = vim.bo
 
 -----------------------------------------------------------------------
 -- Private helpers
 -----------------------------------------------------------------------
 
+---@param bufnr number
+---@param title string
+---@param name string
 local function debug_trace(bufnr, title, name)
     if not log.is_debug() then
         return
@@ -25,6 +29,15 @@ local function debug_trace(bufnr, title, name)
     local filetype = bo[ctx.bufnr].filetype
     local state = buf_state.debug_state(ctx.bufnr)
     log.debug("===+=== %s ===+=== %s[#%d] %s : %s ===", title, name or "", bufnr, filetype, state)
+end
+
+---@return string
+local function case_tage()
+    local tag = ""
+    if vim.g.case_no then
+        tag =string.format("CASE%d", vim.g.case_no) 
+    end
+    return tag
 end
 
 ----------------------------------------------------------------------
@@ -39,15 +52,18 @@ function M.ui_exit(bufnr, name)
     debug_trace(bufnr, "EXIT!", name)
 end
 
----@param title string
+---@param title string|nil
 ---@return string
 function M.cached_attrs(title)
+    title = case_tage() .. (title or "")
     local attrs = buffer.get(nil, buffer.IKEY.ATTRS)
-    return Attrs.debug_attrs(attrs, title)
+    return Attrs.debug_attrs(attrs, title .. DELIMITER)
 end
 
+---@param title string|nil
 ---@return string
-function M.cursor_pos()
+function M.cursor_pos(title)
+    title = case_tage() .. (title or "")
     local attrs = buffer.get(nil, buffer.IKEY.ATTRS)
     local cur_row, _, char_col = buffer.get_cursor_char_pos()
     local pos = Attrs.to_logical(attrs, cur_row, char_col)
@@ -57,7 +73,7 @@ function M.cursor_pos()
         pos.irow, pos.icol,
         pos.row_offset, pos.col_offset
     )
-    return str
+    return string.format("%s%s %s", title, DELIMITER, str)
 end
 
 ---@param iblock integer

@@ -1,47 +1,66 @@
 --- Tir width nowrap ---
 === MESSAGE ===
  
------ CASE: initial cached attrs
-init // p(1,1)- g(2,6)-[5,6] p(7,7)- g(8,12)-[5,3,6]
+=== CASE1: initial cached attrs ===
+CASE1 // p(1,1)- g(2,6)-[5,6] p(7,7)- g(8,12)-[5,3,6]
  
------ CASE: width+ on first plain block
-cur(1,1) b1:r1:c0 +(0,0)
+=== CASE2: width+ on first plain block ===
+CASE2 // cur(1,1) b1:r1:c0 +(0,0)
 tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
-width+ // p(1,1)- g(2,6)-[5,6] p(7,7)- g(8,12)-[5,3,6]
+CASE2 // p(1,1)- g(2,6)-[5,6] p(7,7)- g(8,12)-[5,3,6]
  
------ CASE: width+3 on first grid block
-cur(2,2) b2:r1:c1 +(0,0)
-width+3 // p(1,1)- g(2,6)w[8,6] p(7,7)- g(8,12)-[5,3,6]
+=== CASE3: width+3 on first grid block ===
+CASE3 // cur(2,2) b2:r1:c1 +(0,0)
+CASE3 // p(1,1)- g(2,6)w[8,6] p(7,7)- g(8,12)-[5,3,6]
  
------ CASE: width-2 on second grid block, column 2
-width-2 // p(1,1)- g(2,6)w[8,6] p(7,7)- g(8,14)w[5,2,6]
+=== CASE4: width-2 on second grid block, column 2 ===
+CASE4 // p(1,1)- g(2,6)w[8,6] p(7,7)- g(8,14)w[5,2,6]
  
------ CASE: width=10 on second grid block, column 2
-width=10 // p(1,1)- g(2,6)w[8,6] p(7,7)- g(8,12)w[5,10,6]
+=== CASE5: width=10 on second grid block, column 2 ===
+CASE5 // p(1,1)- g(2,6)w[8,6] p(7,7)- g(8,12)w[5,10,6]
  
------ CASE: width= on second grid block, column 2
-width= // p(1,1)- g(2,6)w[8,6] p(7,7)- g(8,12)w[5,3,6]
+=== CASE6: width= on second grid block, column 2 ===
+CASE6 // p(1,1)- g(2,6)w[8,6] p(7,7)- g(8,12)w[5,3,6]
  
------ CASE: width- on second grid block, column 3
-width- // p(1,1)- g(2,6)w[8,6] p(7,7)- g(8,13)w[5,3,5]
+=== CASE7: width- on second grid block, column 3 ===
+CASE7 // p(1,1)- g(2,6)w[8,6] p(7,7)- g(8,13)w[5,3,5]
  
------ CASE: width on second grid block, column 3
+=== CASE8: width on second grid block, column 3 ===
 tirenvi: Unknown Tir command: width
-width // p(1,1)- g(2,6)w[8,6] p(7,7)- g(8,13)w[5,3,5]
+CASE8 // p(1,1)- g(2,6)w[8,6] p(7,7)- g(8,13)w[5,3,5]
+tirenvi: Unknown Tir command: width=x
+ 
+=== CASE9: initial cached attrs ===
+CASE9 // g(1,7)-[2,3,3]
+ 
+=== CASE10: width+ on only one grid block ===
+CASE10 // cur(1,2) b1:r1:c1 +(0,0)
+CASE10 // g(1,7)w[3,3,3]
+ 
+=== CASE11: width=20 on only one grid block ===
+CASE11 // g(1,7)w[3,3,20]
+ 
+=== CASE12: undo ===
+7 changes; before #2  0 seconds ago
+CASE12 // g(1,7)-[3,3,3]
+ 
+=== CASE13: undo #2 ===
+7 changes; before #1  0 seconds ago
+CASE13 // g(1,7)-[2,3,3]
+ 
+=== CASE14: undo #3 ===
+Already at oldest change
+CASE14 // g(1,7)-[2,3,3]
+ 
+=== CASE15: redo ===
+7 changes; after #1  0 seconds ago
+CASE15 // g(1,7)-[3,3,3]
 
 === DISPLAY ===
-----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
-│Name⠀⠀⠀⠀│City⠀⠀│
-│----⠀⠀⠀⠀│----⠀⠀│
-│Alice⠀⠀⠀│Tokyo⠀│
-│Bob⠀⠀⠀⠀⠀│Osaka⠀│
-│Carol⠀⠀⠀│Nagoya│
-----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
-│Name⠀│Age│City⠀│
-│----⠀│---│----⠀│
-│Alice│23⠀│Tokyo│
-│Bob⠀⠀│31⠀│Osaka│
-┊Carol┊27⠀┊Nagoy┊
-│⠀⠀⠀⠀⠀│⠀⠀⠀│a⠀⠀⠀⠀│
-----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
-
+│1a⠀│2 a│ 3a│
+┊1↲⠀┊2b⠀┊3↲⠀┊
+│⠀⠀⠀│⠀⠀⠀│b⇥⠀│
+┊↲⠀⠀┊⠀⠀⠀┊⇥c⠀┊
+┊↲⠀⠀┊⠀⠀⠀┊⠀⠀⠀┊
+┊↲⠀⠀┊⠀⠀⠀┊⠀⠀⠀┊
+│⠀⠀⠀│⠀⠀⠀│⠀⠀⠀│
