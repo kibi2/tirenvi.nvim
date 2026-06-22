@@ -128,10 +128,20 @@ local function get_mode_short(self)
 end
 
 ---@param attr Attr
+---@param ccol integer|nil
 ---@return string
-function M.get_attr_long(attr)
+function M.get_attr_long(attr, ccol)
     local widths = M.get_width_array(attr.columns)
-    local long   = #widths > 0 and string.format("[%s]", table.concat(widths, ",")) or ""
+    ---@cast widths string[]
+    local long = ""
+    if ccol and M.is_plain(attr) then
+        long = "*"
+    else
+        if ccol then
+            widths[ccol] = widths[ccol] .. "*"
+        end
+        long = #widths > 0 and string.format("[%s]", table.concat(widths, ",")) or ""
+    end
     return M.get_attr_short(attr) .. get_mode_short(attr) .. (attr.fit_width or "") .. long
 end
 

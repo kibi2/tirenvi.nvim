@@ -32,12 +32,32 @@ local function debug_trace(bufnr, title, name)
 end
 
 ---@return string
-local function case_tage()
-    local tag = ""
-    if vim.g.case_no then
-        tag =string.format("CASE%d", vim.g.case_no) 
-    end
-    return tag
+local function case_tag()
+    return vim.g.case_tag or ""
+end
+
+---@param info table
+---@return string
+local function cursor_str(info)
+    return string.format("cur(%d,%d) b%s:r%s:c%s +(%s,%s)<%s>",
+        info.pos.cur_row,
+        info.pos.cur_col,
+        info.pos.iblock,
+        info.pos.irow, info.pos.icol,
+        info.pos.row_offset, info.pos.col_offset,
+        info.char
+    )
+end
+
+---@return table
+local function get_info()
+    local info = {}
+    info.attrs = buffer.get(nil, buffer.IKEY.ATTRS)
+    local cur_row, _, char_col = buffer.get_cursor_char_pos()
+    info.pos = Attrs.to_logical(info.attrs, cur_row, char_col)
+    info.line = buffer.get_line(nil, cur_row)
+    info.char = vim.fn.strcharpart(info.line, char_col - 1, 1)
+    return info
 end
 
 ----------------------------------------------------------------------
@@ -53,27 +73,22 @@ function M.ui_exit(bufnr, name)
 end
 
 ---@param title string|nil
+---@param single boolean|nil
 ---@return string
-function M.cached_attrs(title)
-    title = case_tage() .. (title or "")
-    local attrs = buffer.get(nil, buffer.IKEY.ATTRS)
-    return Attrs.debug_attrs(attrs, title .. DELIMITER)
+function M.layout(title, single)
+    single = single or false
+    title = case_tag() .. (title or "") .. DELIMITER
+    local info = get_info()
+    local attr_str = Attrs.debug_attrs(info.attrs, "", info.pos.iblock, info.pos.icol, single)
+    return string.format("%s %s %s", title, cursor_str(info), attr_str)
 end
 
 ---@param title string|nil
 ---@return string
 function M.cursor_pos(title)
-    title = case_tage() .. (title or "")
-    local attrs = buffer.get(nil, buffer.IKEY.ATTRS)
-    local cur_row, _, char_col = buffer.get_cursor_char_pos()
-    local pos = Attrs.to_logical(attrs, cur_row, char_col)
-    local str = string.format("cur(%d,%d) b%s:r%s:c%s +(%s,%s)",
-        cur_row, char_col,
-        pos.iblock,
-        pos.irow, pos.icol,
-        pos.row_offset, pos.col_offset
-    )
-    return string.format("%s%s %s", title, DELIMITER, str)
+    title = case_tag() .. (title or "")
+    local info = get_info()
+    return string.format("%s%s %s", title, DELIMITER, cursor_str(info))
 end
 
 ---@param iblock integer

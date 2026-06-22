@@ -2,19 +2,19 @@
 === MESSAGE ===
 irow, byte_col, char_col 
  
-=== CASE1: set (1,1) & add ABC, insert XYZ ===
+--- CASE 18: set (1,1) & add ABC, insert XYZ" ---
 1 1 1
 1 1 1
  
-=== CASE2: set (2,5) & add 123, insert 789 ===
+--- CASE 28: set (2,5) & add 123, insert 789" ---
 2 13 5
 2 13 5
  
-=== CASE3: set (3,10) & add 甲乙, insert 丙丁 ===
+--- CASE 38: set (3,10) & add 甲乙, insert 丙丁" ---
 3 20 10
 3 20 10
  
-=== CASE4: kkjj ===
+--- CASE 48: kkjj" ---
 silent ascii =>  <丁> 19969, Hex 4e01, Octal 47001
 3 23 11
 silent ascii =>  <か> 12363, Hex 304b, Oct 30113, Digr ka

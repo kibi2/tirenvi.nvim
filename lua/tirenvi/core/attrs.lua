@@ -144,8 +144,12 @@ local nmax = 4
 
 ---@param self Attr[]
 ---@param title string
+---@param iblock integer|nil
+---@param icol integer|nil
+---@param single boolean|nil
 ---@return string
-function M:debug_attrs(title)
+function M:debug_attrs(title, iblock, icol, single)
+    single = single or false
     if not log.is_debug() and not vim.g.tirenvi_test_mode then
         return ""
     end
@@ -153,8 +157,16 @@ function M:debug_attrs(title)
         return title .. " nil"
     end
     local strings = { title }
-    for iattr = 1, math.min(#self, nmax) do
-        strings[#strings + 1] = Attr.get_attr_long(self[iattr])
+    if single then
+        strings[1] = Attr.get_attr_long(self[iblock], icol)
+    else
+        for iattr = 1, math.min(#self, nmax) do
+            local ccol
+            if iblock and iattr == iblock then
+                ccol = icol
+            end
+            strings[#strings + 1] = Attr.get_attr_long(self[iattr], ccol)
+        end
     end
     return table.concat(strings, " ")
 end
@@ -238,6 +250,8 @@ end
 ---@return Cell_pos
 function M:to_logical(cur_row, cur_col)
     local cell_pos = {}
+    cell_pos.cur_row = cur_row
+    cell_pos.cur_col = cur_col
     cell_pos.iblock = get_index(self, cur_row)
     local attr = self[cell_pos.iblock]
     log.assert(attr, "invalid position %d", cur_row)
