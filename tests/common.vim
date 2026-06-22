@@ -24,6 +24,9 @@ M.setup({
 		probe = true,
 		output = "print",
 	},
+  	table = {
+		width_mode = "nowrap",
+	},
 })
 vim.g.tirenvi_initialized = false
 Debug = require("tirenvi.editor.debug")

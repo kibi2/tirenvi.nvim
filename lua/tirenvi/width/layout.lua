@@ -202,8 +202,19 @@ end
 
 ---@param block Block_grid
 ---@param win_width integer
-local function auto_block(block, win_width)
+local function auto_block2(block, win_width)
     local max_columns = vim.deepcopy(block.attr.columns)
+    fit_auto_block(block, win_width)
+    local is_wrap = false
+    for icol = 1, #max_columns do
+        is_wrap = is_wrap or auto_attr(block.attr.columns[icol], max_columns[icol], win_width)
+    end
+end
+
+---@param block Block_grid
+local function auto_block(block)
+    local max_columns = vim.deepcopy(block.attr.columns)
+    local win_width = block.attr.fit_width or buffer.get_win_width()
     fit_auto_block(block, win_width)
     local is_wrap = false
     for icol = 1, #max_columns do
@@ -215,7 +226,7 @@ end
 local function auto(block)
     Block.grid.set_max_attr(block)
     local win_width = buffer.get_win_width()
-    auto_block(block, win_width)
+    auto_block2(block, win_width)
 end
 
 ---@param current_width integer[]
@@ -267,6 +278,7 @@ end
 
 ---@param block Block_grid
 local function wrap_fit(block)
+    auto_block(block)
 end
 
 ---@param block Block_grid
