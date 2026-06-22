@@ -68,6 +68,8 @@ local M = {}
 ---@alias Ndjson Attr_file|Record
 
 ---@class Cell_pos
+---@field cur_row integer
+---@field cur_col integer
 ---@field iblock integer
 ---@field irow integer
 ---@field icol integer

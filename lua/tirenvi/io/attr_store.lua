@@ -1,6 +1,5 @@
 local config = require("tirenvi.config")
 local Attr = require("tirenvi.core.attr")
-local Attrs = require("tirenvi.core.attrs")
 local namespaces = require("tirenvi.io.namespaces")
 local buffer = require("tirenvi.io.buffer")
 local Range = require("tirenvi.util.range")

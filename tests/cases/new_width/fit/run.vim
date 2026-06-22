@@ -1,0 +1,59 @@
+source $TIRENVI_ROOT/tests/common.vim
+
+" ===== GFM =====
+edit $TIRENVI_ROOT/tests/data/table2.md
+
+call Case("initial cached attrs")
+lua print(Debug.layout())
+
+call Case("fit+2 plain#1")
+lua Debug.goto(1, 1, 1)
+Tir fit+2
+lua print(Debug.layout())
+
+call Case("fit-4 grid#1")
+lua Debug.goto(2, 1, 1)
+Tir fit-4
+lua print(Debug.layout())
+
+call Case("fit+10 grid#1")
+lua Debug.goto(2, 4, 2)
+Tir fit+10
+lua print(Debug.layout())
+
+call Case("fit=80 grid#1")
+lua Debug.goto(4, 2, 3)
+Tir fit=80
+lua print(Debug.layout())
+
+call Case("fit=1 grid#2")
+lua Debug.goto(4, 3, 2)
+Tir fit=1
+lua print(Debug.layout())
+
+call Case("fit-10 plain#2")
+lua Debug.goto(3, 3, 2)
+Tir fit-10
+lua print(Debug.layout())
+
+call Case("fit - 10 gird#2")
+lua Debug.goto(4, 3, 2)
+Tir fit - 10
+lua print(Debug.layout())
+
+call Case("fit =200 grid#2")
+lua Debug.goto(2, 3, 2)
+Tir fit =200
+lua print(Debug.layout())
+
+call Case("fit!3")
+lua Debug.goto(3, 2, 3)
+Tir fit!3
+lua print(Debug.layout())
+
+call Case("fit foo")
+lua Debug.goto(1, 2, 3)
+Tir wrap foo
+lua print(Debug.layout())
+
+call RunTest({ 'desc': 'Tir fit' })

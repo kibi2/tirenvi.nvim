@@ -40,6 +40,14 @@ EOF
 let g:case_no = 0
 let g:case_name = ""
 
+function! CaseImpl(id, desc) abort
+  echomsg " "
+  echomsg printf("--- CASE %d: %s ---", a:id, a:desc)
+  let g:case_tag = printf("CASE %d", a:id)
+endfunction
+
+command! -nargs=1 CASE call CaseImpl(expand('<slnum>'), <q-args>)
+
 function! Case(desc) abort
   let g:case_no += 1
   let g:case_name = a:desc
