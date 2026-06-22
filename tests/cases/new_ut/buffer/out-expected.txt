@@ -1,11 +1,30 @@
+--- test Buffer.set_cursor_char_pos ---
 === MESSAGE ===
 irow, byte_col, char_col 
+ 
+=== CASE1: set (1,1) & add ABC, insert XYZ ===
 1 1 1
 1 1 1
+ 
+=== CASE2: set (2,5) & add 123, insert 789 ===
 2 13 5
 2 13 5
+ 
+=== CASE3: set (3,10) & add 甲乙, insert 丙丁 ===
 3 20 10
 3 20 10
+ 
+=== CASE4: kkjj ===
+silent ascii =>  <丁> 19969, Hex 4e01, Octal 47001
+3 23 11
+silent ascii =>  <か> 12363, Hex 304b, Oct 30113, Digr ka
+2 22 12
+silent ascii =>  <0>  48,  Hex 30,  Octal 060
+1 16 16
+silent ascii =>  <か> 12363, Hex 304b, Oct 30113, Digr ka
+2 22 12
+silent ascii =>  <丁> 19969, Hex 4e01, Octal 47001
+3 23 11
 
 === DISPLAY ===
 XYZ1ABC234567890

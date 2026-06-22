@@ -34,9 +34,27 @@ buffer.set_step(3)
 EOF
 
 " ----------------------------
+let g:case_no = 0
+let g:case_name = ""
+
 function! Case(desc) abort
+  let g:case_no += 1
+  let g:case_name = a:desc
+
   echomsg " "
-  echomsg "----- CASE: " . a:desc
+  echomsg printf("=== CASE%d: %s ===",
+    \ g:case_no,
+    \ a:desc)
+
+endfunction
+
+function! Dump(cmd) abort
+  redir => msg
+  execute a:cmd
+  redir END
+
+  let msg = substitute(msg, '\n', ' ', 'g')
+  echomsg printf('%s => %s', a:cmd, msg)
 endfunction
 
 function! SafeEdit(path)
