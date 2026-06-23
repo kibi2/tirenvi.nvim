@@ -278,6 +278,7 @@ end
 
 ---@param block Block_grid
 local function wrap_fit(block)
+    log.probe("fit")
     auto_block(block)
 end
 

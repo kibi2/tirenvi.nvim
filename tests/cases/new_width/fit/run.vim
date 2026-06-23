@@ -53,7 +53,7 @@ lua print(Debug.layout())
 
 CASE fit foo
 lua Debug.goto(1, 2, 3)
-Tir wrap foo
+Tir fit foo
 lua print(Debug.layout())
 
 call RunTest({ 'desc': 'Tir fit' })
