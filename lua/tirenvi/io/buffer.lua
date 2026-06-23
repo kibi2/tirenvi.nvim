@@ -61,6 +61,7 @@ local initial_value = {
 -----------------------------------------------------------------------
 -- Private helpers
 -----------------------------------------------------------------------
+
 local function fix_cursor_utf8()
 	local winid = api.nvim_get_current_win()
 	local irow, icol = M.get_cursor_byte_pos(winid)
@@ -69,6 +70,15 @@ local function fix_cursor_utf8()
 	local boundary = vim.str_byteindex(line, char_col0) + 1
 	if boundary ~= icol then
 		M.set_cursor_byte_pos(0, irow, boundary)
+	end
+end
+
+---@param cell_pos Cell_pos
+local function reset_cursor_utf8(cell_pos)
+	if cell_pos and cell_pos.cur_row then
+		M.set_cursor_char_pos(0, cell_pos.cur_row, cell_pos.cur_col)
+	else
+		fix_cursor_utf8()
 	end
 end
 
@@ -82,7 +92,8 @@ end
 ---@param range Range
 ---@param lines string[]
 ---@param no_undo boolean
-local function set_lines(bufnr, range, lines, no_undo)
+---@param cell_pos Cell_pos
+local function set_lines(bufnr, range, lines, no_undo, cell_pos)
 	M.clear_cache()
 	local undolevels = bo[bufnr].undolevels
 	if no_undo then
@@ -97,7 +108,7 @@ local function set_lines(bufnr, range, lines, no_undo)
 	start0 = math.max(start0, 0)
 	api.nvim_buf_set_lines(bufnr, start0, end0, false, lines)
 	set_undo_tree_last(bufnr)
-	fix_cursor_utf8()
+	reset_cursor_utf8(cell_pos)
 	bo[bufnr].undolevels = undolevels
 end
 
@@ -194,11 +205,12 @@ end
 ---@param range Range
 ---@param lines string[]
 ---@param no_undo boolean
-function M.set_lines(bufnr, range, lines, no_undo)
+---@param cell_pos Cell_pos
+function M.set_lines(bufnr, range, lines, no_undo, cell_pos)
 	-- log.debug(M.get_state(bufnr))
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
 	local before = fn.undotree(bufnr).seq_last
-	local ok, err = pcall(set_lines, bufnr, range, lines, no_undo)
+	local ok, err = pcall(set_lines, bufnr, range, lines, no_undo, cell_pos)
 	local after = fn.undotree(bufnr).seq_last
 	local first, last = Range.to_lua(range)
 	log.watch("UNDO", "%s[%d->%d]set_lines lines[%d]='%s'...[%d]='%s'", tostring(no_undo),
@@ -310,8 +322,8 @@ end
 ---@return integer
 function M.get_cursor_char_pos(winid)
 	local irow, byte_col1 = M.get_cursor_byte_pos(winid)
-	local byte_col0 = byte_col1 - 1
 	local line = M.get_line(0, irow)
+	local byte_col0 = math.min(byte_col1, #line) - 1
 	local char_col0 = vim.str_utfindex(line, byte_col0)
 	local new_byte_col = vim.str_byteindex(line, char_col0) + 1
 	return irow, new_byte_col, char_col0 + 1
