@@ -228,15 +228,17 @@ end
 ---@param ctx Context
 ---@param width_op WidthOp
 local function change_fit(ctx, width_op)
-    log.debug("row%d, col%d", width_op.irow, width_op.icol)
     local row_range = expand_rect(ctx, width_op.irow)
     local r_result = reader.read(ctx, row_range)
-    if change_attrs_width(r_result.attrs, width_op) then
-        local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
-        log.watch("ATTR", Document.debug_attrs(bufdoc, "[88]MODE"))
-        doc_to_buflines(ctx, r_result, bufdoc)
-        log.watch("ATTR", Document.debug_attrs(bufdoc, "[88]MODE"))
-    end
+    local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
+    log.assert(#bufdoc.blocks == 1, "only one block")
+    local attr = bufdoc.blocks[1].attr
+    if Attr.is_plain(attr) then return end
+    log.probe(attr.fit_width)
+    attr.fit_width = width_op:apply(Attr.get_fit_width(attr))
+    log.probe(attr.fit_width)
+    attr.width_mode = "wrap_fit"
+    doc_to_buflines(ctx, r_result, bufdoc)
 end
 
 ---@param ctx Context
@@ -255,10 +257,10 @@ end
 
 ---@param ctx Context
 ---@param width_op WidthOp
-local function change_mode(ctx, width_op)
+local function toggle_mode(ctx, width_op)
     local attrs = attr_store.read(ctx.bufnr)
     local attr = Attrs.get(attrs, width_op.irow)
-    Attr.change_width_mode(attr or {})
+    Attr.toggle_width_mode(attr or {})
     attr_store.write(ctx.bufnr, attrs)
 end
 
@@ -325,15 +327,15 @@ end
 ---@param ctx Context
 ---@param width_op WidthOp
 function M.cmd_fit(ctx, width_op)
-    --log.probe(width_op)
-    --change_mode(ctx, width_op)
-    --change_fit(ctx, width_op)
+    log.probe(width_op)
+    --set_fit_mode(ctx, width_op)
+    change_fit(ctx, width_op)
 end
 
 ---@param ctx Context
 ---@param width_op WidthOp
 function M.cmd_wrap(ctx, width_op)
-    change_mode(ctx, width_op)
+    toggle_mode(ctx, width_op)
     M.cmd_repair(ctx)
 end
 
