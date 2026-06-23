@@ -12,10 +12,10 @@ CASE 9 // cur(1,1) b1:r1:c0 +(0,0)<->  p(1,1)-* g(2,6)-[5,6] p(7,7)- g(8,12)-[5,
 CASE 14 // cur(2,2) b2:r1:c1 +(0,0)<N>  p(1,1)- g(2,6)w[8*,6] p(7,7)- g(8,12)-[5,3,6]
  
 --- CASE 19: width-2 on second grid block, column 2" ---
-CASE 19 // cur(9,5) b4:r2:c1 +(0,3)<⠀>  p(1,1)- g(2,6)w[8,6] p(7,7)- g(8,14)w[5,2*,6]
+CASE 19 // cur(9,8) b4:r2:c2 +(0,0)<e>  p(1,1)- g(2,6)w[8,6] p(7,7)- g(8,14)w[5,2*,6]
  
 --- CASE 25: width=10 on second grid block, column 2" ---
-CASE 25 // cur(9,13) b4:r2:c2 +(0,5)<⠀>  p(1,1)- g(2,6)w[8,6] p(7,7)- g(8,12)w[5,10*,6]
+CASE 25 // cur(9,8) b4:r2:c2 +(0,0)<->  p(1,1)- g(2,6)w[8,6] p(7,7)- g(8,12)w[5,10*,6]
  
 --- CASE 30: width= on second grid block, column 2" ---
 CASE 30 // cur(9,8) b4:r2:c2 +(0,0)<->  p(1,1)- g(2,6)w[8,6] p(7,7)- g(8,12)w[5,3*,6]

@@ -16,6 +16,7 @@ local M = {}
 ---@field range Range
 ---@field lines string[]
 ---@field no_undo boolean
+---@field cell_pos Cell_pos
 
 -- private helpers
 
@@ -23,15 +24,16 @@ local M = {}
 -- Public API
 -----------------------------------------------------------------------
 
----@param range Range
+---@param r_req ReadResult
 ---@param lines string[]
 ---@param no_undo boolean|nil
 ---@return Request
-function M.new_writer(range, lines, no_undo)
+function M.new_writer(r_req, lines, no_undo)
     return {
-        range = range,
+        range = r_req.range,
         lines = lines,
         no_undo = no_undo or false,
+        cell_pos = r_req.cell_pos
     }
 end
 

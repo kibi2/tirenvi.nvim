@@ -254,6 +254,9 @@ function M:to_logical(cur_row, cur_col)
     cell_pos.cur_col = cur_col
     cell_pos.iblock = get_index(self, cur_row)
     local attr = self[cell_pos.iblock]
+    if not attr then
+        return cell_pos
+    end
     log.assert(attr, "invalid position %d", cur_row)
     cell_pos.irow = cur_row - attr.range.first + 1
     cell_pos.icol, cell_pos.col_offset = Attr.to_cell_col(attr, cur_col)

@@ -94,7 +94,7 @@ local function doc_to_buflines(ctx, r_result, doc, no_undo, no_normalize)
     attr_store.write(ctx.bufnr, attrs)
     local buf_lines = buf_parser.unparse(bufdoc)
     if not util.same_str_array(buf_lines, r_result.lines) then
-        local req_w = Request.new_writer(r_result.range, buf_lines, no_undo)
+        local req_w = Request.new_writer(r_result, buf_lines, no_undo)
         writer.write(ctx, req_w)
     end
 end
@@ -104,7 +104,7 @@ end
 ---@param is_write_pre boolean|nil
 local function tirdoc_to_flat(ctx, r_result, tirdoc, is_write_pre)
     local fltlines = flat_parser.unparse(ctx, tirdoc)
-    local req_w = Request.new_writer(r_result.range, fltlines, is_write_pre)
+    local req_w = Request.new_writer(r_result, fltlines, is_write_pre)
     local attrs = vim.deepcopy(r_result.attrs)
     if not is_write_pre then
         Attrs.remove_range(attrs)
@@ -289,7 +289,8 @@ end
 ---@param ctx Context
 function M.write_post(ctx)
     if backup_buffer then
-        local req = Request.new_writer(Range.WHOLE, backup_buffer, true)
+        local r_result = reader.read(ctx, Range.WHOLE)
+        local req = Request.new_writer(r_result, backup_buffer, true)
         writer.write(ctx, req)
         backup_buffer = nil
     end
@@ -324,7 +325,7 @@ end
 ---@param ctx Context
 ---@param width_op WidthOp
 function M.cmd_fit(ctx, width_op)
-    log.probe(width_op)
+    --log.probe(width_op)
     --change_mode(ctx, width_op)
     --change_fit(ctx, width_op)
 end
