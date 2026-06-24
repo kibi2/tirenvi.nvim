@@ -148,4 +148,15 @@ function M.trim(source, min, max)
 	return result
 end
 
+---@overload fun(values: integer[]): integer
+---@param values number[]
+---@return number
+function M.sum(values)
+	local total = 0
+	for ival = 1, #values do
+		total = total + values[ival]
+	end
+	return total
+end
+
 return M

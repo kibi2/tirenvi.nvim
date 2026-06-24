@@ -88,6 +88,17 @@ function M.grid:set_max_attr(records, force)
     end
 end
 
+---@param records Record_grid[]
+---@return integer[]
+function M.grid.get_max_width(records)
+    local widths = {}
+    local ncol = Record.get_max_ncol(records)
+    for icol = 1, ncol do
+        widths[#widths + 1] = get_max_width(records, icol)
+    end
+    return widths
+end
+
 ---@param self Attr
 ---@return string
 function M.get_attr_short(self)
@@ -99,21 +110,21 @@ end
 ---@param self Attr
 ---@return string
 local function get_mode_short(self)
-    local width_mode = M.get_width_mode(self)
-    if not self.width_mode then
+    local wrap_mode = M.get_wrap_mode(self)
+    if not self.wrap_mode then
         return "-"
-    elseif width_mode == "nowrap" then
+    elseif wrap_mode == "nowrap" then
         return "n"
-    elseif width_mode == "wrap_auto" then
+    elseif wrap_mode == "wrap_auto" then
         return "a"
-    elseif width_mode == "wrap_fit" then
+    elseif wrap_mode == "wrap_fit" then
         return "f"
-    elseif width_mode == "wrap_width" then
+    elseif wrap_mode == "wrap_width" then
         return "w"
-    elseif not width_mode then
+    elseif not wrap_mode then
         return ""
     else
-        log.assert(false, "invalid mode %s", width_mode)
+        log.assert(false, "invalid mode %s", wrap_mode)
         return "X"
     end
 end
@@ -133,7 +144,7 @@ function M.get_attr_long(attr, ccol)
         end
         long = #widths > 0 and string.format("[%s]", table.concat(widths, ",")) or ""
     end
-    return M.get_attr_short(attr) .. get_mode_short(attr) .. (attr.fit_width or "") .. long
+    return M.get_attr_short(attr) .. get_mode_short(attr) .. (attr.fit_span or "") .. long
 end
 
 ---@param columns Attr_column[]
@@ -214,20 +225,20 @@ function M:get_total_width(last_col)
 end
 
 ---@param self Attr
----@return  WidthMode|nil
-function M:get_width_mode()
-    local width_mode = self.width_mode
+---@return  WrapMode|nil
+function M:get_wrap_mode()
+    local wrap_mode = self.wrap_mode
     if M.is_plain(self) then
-        log.assert(self.fit_width == nil, "attr.fit_width of plain is %s.", self.fit_width)
+        log.assert(self.fit_span == nil, "attr.fit_width of plain is %s.", self.fit_span)
         return nil
     end
-    if not width_mode then
-        width_mode = config.table.width_mode == "nowrap" and "nowrap" or "wrap_auto"
+    if not wrap_mode then
+        wrap_mode = config.table.wrap_mode == "nowrap" and "nowrap" or "wrap_auto"
     end
-    if width_mode == "wrap_fit" and self.fit_width == nil then
-        width_mode = "wrap_auto"
+    if wrap_mode == "wrap_fit" and self.fit_span == nil then
+        wrap_mode = "wrap_auto"
     end
-    return width_mode
+    return wrap_mode
 end
 
 ---@param self Attr
@@ -266,21 +277,21 @@ function M:get_start_pos(icol)
 end
 
 ---@param self Attr
-function M:toggle_width_mode()
+function M:toggle_wrap_mode()
     if not self or M.is_plain(self) then
         return
     end
-    if M.get_width_mode(self) == "nowrap" then
-        self.width_mode = "wrap_fit"
+    if M.get_wrap_mode(self) == "nowrap" then
+        self.wrap_mode = "wrap_fit"
     else
-        self.fit_width = M.get_fit_width(self)
-        self.width_mode = "nowrap"
+        self.fit_span = M.get_fit_span(self)
+        self.wrap_mode = "nowrap"
     end
 end
 
 ---@param self Attr
 ---@return integer
-function M.get_fit_width(self)
+function M.get_fit_span(self)
     if M.is_plain(self) then
         return 0
     end
@@ -292,8 +303,8 @@ function M:set_fit_mode()
     if not self or M.is_plain(self) then
         return
     end
-    self.fit_width = M.get_fit_width(self)
-    self.width_mode = "wrap_fit"
+    self.fit_span = M.get_fit_span(self)
+    self.wrap_mode = "wrap_fit"
 end
 
 return M

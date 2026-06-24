@@ -20,7 +20,6 @@ CASE fit - 10 grid#1
 lua Debug.goto(2, 1, 1)
 Tir fit - 10
 lua print(Debug.layout())
-Tir fit=
 
 CASE fit+10 grid#1
 lua Debug.goto(2, 4, 2)

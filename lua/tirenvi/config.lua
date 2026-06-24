@@ -40,7 +40,7 @@ local defaults = {
 	},
 	table = {
 		auto_reconcile = true,
-		width_mode = "wrap",
+		wrap_mode = "wrap",
 	},
 	ui = {
 		conceal = {

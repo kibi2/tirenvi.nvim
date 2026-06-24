@@ -288,6 +288,12 @@ function M.grid:set_max_attr(force)
     Attr.grid.set_max_attr(self.attr, self.records, force)
 end
 
+---@param self Block_grid
+---@return integer[]
+function M.grid:get_max_width()
+    return Attr.grid.get_max_width(self.records)
+end
+
 ---@self Block_grid
 ---@param attrs Attr[]
 function M.grid:apply_attrs_by_range(attrs)

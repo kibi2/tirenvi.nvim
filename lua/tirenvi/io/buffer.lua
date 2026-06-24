@@ -354,7 +354,7 @@ end
 
 ---@param winid integer|nil
 ---@return integer
-function M.get_win_width(winid)
+function M.get_win_span(winid)
 	winid = M.normalize_winid(winid)
 	local info = vim.fn.getwininfo(winid)[1]
 	return info.width - info.textoff
