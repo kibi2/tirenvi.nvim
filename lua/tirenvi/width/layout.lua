@@ -61,6 +61,7 @@ end
 ---@param block Block_grid
 ---@param max_size integer
 local function fit_auto_block(block, max_size)
+    Block.grid.set_max_attr(block, true)
     local total = 0
     local logws = {}
     for _, column in ipairs(block.attr.columns) do
@@ -212,7 +213,7 @@ local function auto_block2(block, win_width)
 end
 
 ---@param block Block_grid
-local function auto_block(block)
+local function fit_block(block)
     local win_width = block.attr.fit_width or buffer.get_win_width()
     fit_auto_block(block, win_width)
 end
@@ -273,8 +274,7 @@ end
 
 ---@param block Block_grid
 local function wrap_fit(block)
-    log.probe("fit")
-    auto_block(block)
+    fit_block(block)
 end
 
 ---@param block Block_grid

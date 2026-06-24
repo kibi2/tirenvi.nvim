@@ -27,7 +27,7 @@ lua Debug.goto(2, 4, 2)
 Tir fit+10
 lua print(Debug.layout())
 
-CASE fit=80 grid#1
+CASE fit=80 grid#2
 lua Debug.goto(4, 2, 3)
 Tir fit=80
 lua print(Debug.layout())
@@ -38,7 +38,7 @@ Tir fit=1
 lua print(Debug.layout())
 
 CASE fit-10 plain#2
-lua Debug.goto(3, 3, 2)
+lua Debug.goto(3, 1, 2)
 Tir fit-10
 lua print(Debug.layout())
 
