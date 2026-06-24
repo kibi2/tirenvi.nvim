@@ -220,7 +220,7 @@ local function change_width(ctx, width_op)
     local attr = bufdoc.blocks[1].attr
     if Attr.is_plain(attr) then return end
     local column = Attr.get(attr, width_op.icol)
-    column.width = width_op:apply(column.width)
+    column.width = width_op:apply(column.width) or 0
     attr.width_mode = "wrap_width"
     doc_to_buflines(ctx, r_result, bufdoc)
 end
@@ -235,7 +235,7 @@ local function change_fit(ctx, width_op)
     local attr = bufdoc.blocks[1].attr
     if Attr.is_plain(attr) then return end
     log.probe(attr.fit_width)
-    attr.fit_width = width_op:apply(Attr.get_fit_width(attr))
+    attr.fit_width = width_op:apply(Attr.get_fit_width(attr)) or 0
     log.probe(attr.fit_width)
     attr.width_mode = "wrap_fit"
     doc_to_buflines(ctx, r_result, bufdoc)

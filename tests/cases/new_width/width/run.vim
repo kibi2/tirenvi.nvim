@@ -40,11 +40,10 @@ lua print(Debug.layout())
 CASE width on second grid block, column 3"
 lua Debug.goto(4, 2, 3)
 Tir width
+Tir width=x
 lua print(Debug.layout())
 
-Tir width=x
-
-" ===== GFM =====
+" ===== CSV =====
 edit $TIRENVI_ROOT/tests/data/simple.csv
 
 CASE initial cached attrs"
