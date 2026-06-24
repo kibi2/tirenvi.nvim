@@ -331,7 +331,7 @@ local function nowrap(block)
 end
 
 ---@param block Block_grid
-local function wrap_auto(block)
+local function wrap_auto2(block)
     Block.grid.set_max_attr(block, true)
     local win_width = buffer.get_win_span()
     local total_width = Attr.get_total_width(block.attr)
@@ -342,6 +342,36 @@ local function wrap_auto(block)
     end
     for icol = 1, #widths do
         block.attr.columns[icol].width = block.attr.columns[icol].width + widths[icol]
+    end
+end
+
+---@param max_widths integer[]
+---@param fit_width integer
+---@return integer[]
+local function shrink(max_widths, fit_width)
+    local fit_widths = get_fit_widths(max_widths, fit_width)
+    for icol = 1, #fit_widths do
+        local plus = fit_widths[icol] - max_widths[icol]
+        plus = math.min(plus, math.ceil(max_widths[icol] / 3), 6)
+        fit_widths[icol] = max_widths[icol] + plus
+    end
+    return fit_widths
+end
+
+---@param block Block_grid
+local function wrap_auto(block)
+    local max_widths = Block.grid.get_max_width(block)
+    local max_width = util.sum(max_widths)
+    local fit_span = buffer.get_win_span()
+    local fit_width = get_fit_width(#max_widths, fit_span)
+    if max_width < fit_width then
+        -- block.attr.columns = block.attr.columns or {}
+        local fit_widths = shrink(max_widths, fit_width)
+        log.probe(block.attr)
+        for icol = 1, #fit_widths do
+            block.attr.columns[icol] = block.attr.columns[icol] or {}
+            block.attr.columns[icol].width = fit_widths[icol]
+        end
     end
 end
 
