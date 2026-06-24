@@ -31,12 +31,12 @@ end
 ---@param icol integer
 ---@return integer
 local function get_max_width(records, icol)
-    local max_width = 0
+    local max_width = Cell.MIN_WIDTH
     for _, record in ipairs(records) do
         local width = Cell.get_max_width(record.row[icol])
         max_width = math.max(max_width, width)
     end
-    return math.max(max_width, Cell.MIN_WIDTH)
+    return max_width
 end
 
 ---@param columns Attr_column[]|nil
