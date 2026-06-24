@@ -24,7 +24,7 @@ local function cmd_width(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
 	local width_op = WidthOp.new(opts)
 	if not width_op then
-		notify.error(errors.err_unknown_command(opts.args))
+		notify.error(errors.err_invalid_command(opts.args))
 		return
 	end
 	log.debug(width_op:to_string())
@@ -38,10 +38,10 @@ local function cmd_fit(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
 	local width_op = WidthOp.new(opts)
 	if not width_op then
-		notify.error(errors.err_unknown_command(opts.args))
+		notify.error(errors.err_invalid_command(opts.args))
 		return
 	end
-	log.debug("row:%d, col:%d %s", width_op:to_string())
+	log.debug(width_op:to_string())
 	init.fit(ctx, width_op)
 end
 
@@ -52,7 +52,7 @@ local function cmd_wrap(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
 	local width_op = WidthOp.new(opts)
 	if not width_op then
-		notify.error(errors.err_unknown_command(opts.args))
+		notify.error(errors.err_invalid_command(opts.args))
 		return
 	end
 	log.debug("row:%d, col:%d %s", width_op:to_string())

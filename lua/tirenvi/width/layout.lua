@@ -213,13 +213,8 @@ end
 
 ---@param block Block_grid
 local function auto_block(block)
-    local max_columns = vim.deepcopy(block.attr.columns)
     local win_width = block.attr.fit_width or buffer.get_win_width()
     fit_auto_block(block, win_width)
-    local is_wrap = false
-    for icol = 1, #max_columns do
-        is_wrap = is_wrap or auto_attr(block.attr.columns[icol], max_columns[icol], win_width)
-    end
 end
 
 ---@param block Block_grid

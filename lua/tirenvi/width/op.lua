@@ -1,8 +1,21 @@
+---@alias WidthCommand
+---| "width"
+---| "fit"
+---| "wrap"
+
+---@alias WidthOperation
+---| "set"
+---| "add"
+---| "sub"
+---| "auto"
+---| "info"
+---| "none"
+
 ---@class WidthOp
 ---@field args string
----@field command string
----@field operation string
----@field number number[]
+---@field command WidthCommand
+---@field operation WidthOperation
+---@field number integer
 ---@field irow integer
 ---@field icol integer
 local WidthOp   = {}
@@ -23,19 +36,6 @@ local map       = {
     ["-"] = "sub",
     ["?"] = "info",
 }
-
----@param str string
----@return integer|nil
-local function get_number(str)
-    if not str or str == "" then
-        return nil
-    end
-    local num = tonumber(str)
-    if not num then
-        error(string.format("%s is not number", str))
-    end
-    return num
-end
 
 ---@param opts {[string]:any}
 ---@return integer
@@ -61,28 +61,56 @@ local function get_selection(opts)
     return math.min(row_start, row_end), math.min(col_start, col_end)
 end
 
+---@param str string
+---@return integer
+local function get_number(str)
+    if not str or str == "" then
+        return 1
+    end
+    local num = tonumber(str)
+    if not num or num <= 0 then
+        error(string.format("%s is not positive number", str))
+    end
+    return num
+end
+
+---@param opts {[string]:any}
+---@return WidthOperation
+---@return integer
+local function get_operation(opts)
+    local sub = table.concat(opts.command.sub, "%")
+    local regex = string.format("^%s%%s*([%s])(.*)", opts.command_name, sub)
+    local op, value = opts.args:match(regex)
+    if not op then
+        error(string.format("%s need operator %s", opts.command_name, sub))
+    end
+    if op == "=" and #value == 0 then
+        return "auto", 0
+    end
+    return map[op], get_number(value)
+end
+
 ---@param opts {[string]:any}
 ---@return WidthOp|nil
 local function try_new(opts)
     local command_name = opts.command_name
-    local op, value
-    if opts.command.has_op then
-        local sub = table.concat(opts.command.sub, "%")
-        local regex = string.format("^%s%%s*([%s])(.*)", command_name, sub)
-        op, value = opts.args:match(regex)
-        if not op then
-            return nil
-        end
-    end
+    ---@cast command_name WidthCommand
     local irow, icol = get_selection(opts)
-    return setmetatable({
+    local self = setmetatable({
         args = opts.args,
         command = command_name,
-        operation = map[op],
-        number = { get_number(value) },
+        operation = "none",
+        number = 0,
         irow = irow,
         icol = icol,
     }, WidthOp)
+    if not opts.command.has_op then
+        return self
+    end
+    local operation, number = get_operation(opts)
+    self.operation = operation
+    self.number = number
+    return self
 end
 
 -----------------------------------------------------------------------
@@ -107,25 +135,23 @@ end
 function WidthOp:to_string()
     return string.format("WidthOp %s %s (%d, %d) [%s] %s",
         self.command, self.operation or "nil",
-        self.irow, self.icol, self.number[1] or "nil", self:to_cmd())
+        self.irow, self.icol, self.number or "nil", self:to_cmd())
 end
 
 ---@param self WidthOp
 ---@param current integer
----@return integer
+---@return integer|nil
 function WidthOp:apply(current)
     local operation = self.operation
-    local count = math.max(self.number[1] or 1, 1)
+    local count = self.number
     if operation == "set" then
-        if not self.number[1] or count <= 1 then
-            return 0
-        else
-            return math.max(count, Cell.MIN_WIDTH)
-        end
+        return math.max(count, Cell.MIN_WIDTH)
     elseif operation == "add" then
         return current + count
     elseif operation == "sub" then
         return math.max(current - count, Cell.MIN_WIDTH)
+    elseif operation == "auto" then
+        return nil
     else
         return current
     end

@@ -59,8 +59,8 @@ end
 --- Unknown Tir command.
 ---@param sub_command string
 ---@return string
-function M.err_unknown_command(sub_command)
-	return PREFIX .. "Unknown Tir command: " .. sub_command
+function M.err_invalid_command(sub_command)
+	return PREFIX .. "Invalid Tir command: " .. sub_command
 end
 
 --- External command execution failed.
