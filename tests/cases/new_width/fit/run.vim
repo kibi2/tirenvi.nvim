@@ -62,4 +62,19 @@ lua Debug.goto(1, 2, 3)
 Tir fit foo
 lua print(Debug.layout())
 
+" ===== CSV =====
+edit $TIRENVI_ROOT/tests/data/simple.csv
+
+CASE CSV fit =100
+Tir fit =100
+lua print(Debug.layout())
+
+CASE CSV fit+50
+Tir fit+50
+lua print(Debug.layout())
+
+CASE CSV fit-100
+Tir fit-100
+lua print(Debug.layout())
+
 call RunTest({ 'desc': 'Tir fit' })
