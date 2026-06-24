@@ -36,6 +36,11 @@ local function show_debug_marks(bufnr, attr, iattr)
     ---- NOTE:
     -- virt_text screen position is not always stable and may differ
     -- from the extmark's actual buffer position.
+    local nlines = buffer.line_count(bufnr)
+    if start0 >= nlines then
+        log.debug("‼️" .. start0)
+        start0 = nlines - 1
+    end
     vim.api.nvim_buf_set_extmark(bufnr, namespaces.ATTR, start0, 0, opts)
 end
 

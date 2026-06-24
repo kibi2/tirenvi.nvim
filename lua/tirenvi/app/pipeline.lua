@@ -234,9 +234,7 @@ local function change_fit(ctx, width_op)
     log.assert(#bufdoc.blocks == 1, "only one block")
     local attr = bufdoc.blocks[1].attr
     if Attr.is_plain(attr) then return end
-    log.probe(attr.fit_width)
     attr.fit_width = width_op:apply(Attr.get_fit_width(attr)) or 0
-    log.probe(attr.fit_width)
     attr.width_mode = "wrap_fit"
     doc_to_buflines(ctx, r_result, bufdoc)
 end
@@ -327,8 +325,6 @@ end
 ---@param ctx Context
 ---@param width_op WidthOp
 function M.cmd_fit(ctx, width_op)
-    log.probe(width_op)
-    --set_fit_mode(ctx, width_op)
     change_fit(ctx, width_op)
 end
 
