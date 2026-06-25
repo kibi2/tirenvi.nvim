@@ -363,24 +363,24 @@ end
 local WIDTH_MIN = 6
 ---@param max_widths integer[]
 ---@param fit_widths integer[]
----@return integer
-local function get_expand_size(max_widths, fit_widths)
-    local size = 0
+---@return number
+local function get_expand_ratio(max_widths, fit_widths)
+    local ratio = 1
     for icol = 1, #fit_widths do
         if fit_widths[icol] < max_widths[icol] then
-            size = size + math.max(0, WIDTH_MIN - fit_widths[icol])
+            ratio = math.max(ratio, WIDTH_MIN / fit_widths[icol])
         end
     end
-    return size
+    return ratio
 end
 
 local function expand(max_widths, fit_width)
     local fit_widths = get_fit_widths(max_widths, fit_width)
-    local size = get_expand_size(max_widths, fit_widths)
-    if size == 0 then
+    local ratio = get_expand_ratio(max_widths, fit_widths)
+    if ratio == 1 then
         return fit_widths
     end
-    return get_fit_widths(max_widths, fit_width + size)
+    return get_fit_widths(max_widths, math.ceil(fit_width * ratio))
 end
 
 ---@param block Block_grid
