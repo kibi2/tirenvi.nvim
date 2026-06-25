@@ -55,7 +55,7 @@ local function cmd_wrap(ctx, opts)
 		notify.error(errors.err_invalid_command(opts.args))
 		return
 	end
-	log.debug("row:%d, col:%d %s", width_op:to_string())
+	log.debug(width_op:to_string())
 	init.wrap(ctx, width_op)
 end
 

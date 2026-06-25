@@ -105,6 +105,9 @@ local function try_new(opts)
         icol = icol,
     }, WidthOp)
     if not opts.command.has_op then
+        if opts.args ~= command_name then
+            return nil
+        end
         return self
     end
     local operation, number = get_operation(opts)
