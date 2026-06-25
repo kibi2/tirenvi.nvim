@@ -16,8 +16,8 @@
 ---@field command WidthCommand
 ---@field operation WidthOperation
 ---@field number integer
----@field irow integer
----@field icol integer
+---@field cur_row integer
+---@field cur_col integer
 local WidthOp   = {}
 WidthOp.__index = WidthOp
 
@@ -95,14 +95,14 @@ end
 local function try_new(opts)
     local command_name = opts.command_name
     ---@cast command_name WidthCommand
-    local irow, icol = get_selection(opts)
+    local cur_row, cur_col = get_selection(opts)
     local self = setmetatable({
         args = opts.args,
         command = command_name,
         operation = "none",
         number = 0,
-        irow = irow,
-        icol = icol,
+        cur_row = cur_row,
+        cur_col = cur_col,
     }, WidthOp)
     if not opts.command.has_op then
         if opts.args ~= command_name then
@@ -138,7 +138,7 @@ end
 function WidthOp:to_string()
     return string.format("WidthOp %s %s (%d, %d) [%s] %s",
         self.command, self.operation or "nil",
-        self.irow, self.icol, self.number or "nil", self:to_cmd())
+        self.cur_row, self.cur_col, self.number or "nil", self:to_cmd())
 end
 
 ---@param self WidthOp
