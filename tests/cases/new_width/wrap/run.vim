@@ -30,24 +30,34 @@ lua Debug.goto(4, 2, 3)
 Tir wrap
 lua print(Debug.layout())
 
-CASE wrap grid#2 again
+CASE wrap grid#2 nowrap
 lua Debug.goto(4, 3, 2)
 Tir wrap
 lua print(Debug.layout())
 
 CASE wrap plain#2
-lua Debug.goto(3, 3, 2)
+lua Debug.goto(3, 1, 2)
 Tir wrap
 lua print(Debug.layout())
 
-" wrap fit60 wrap wrap でfit60が再現されるか？
-CASE wrap grid#1 again
-lua Debug.goto(2, 3, 2)
+" ===== CSV =====
+edit $TIRENVI_ROOT/tests/data/simple.csv
+
+CASE CSV initial cached attrs
+lua print(Debug.layout())
+
+CASE CSV wrap -> fit
+lua Debug.goto(1, 3, 2)
+Tir wrap
+lua print(Debug.layout())
+
+CASE CSV wrap -> nowrap
+lua Debug.goto(1, 6, 1)
 Tir wrap
 lua print(Debug.layout())
 
 CASE wrap=3
-lua Debug.goto(4, 2, 3)
+lua Debug.goto(1, 2, 3)
 Tir wrap=3
 lua print(Debug.layout())
 
