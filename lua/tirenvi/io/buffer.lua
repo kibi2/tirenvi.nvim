@@ -313,6 +313,8 @@ end
 function M.get_cursor_byte_pos(winid)
 	winid = M.normalize_winid(winid)
 	local irow, icol0 = unpack(api.nvim_win_get_cursor(winid))
+	local maxrow = vim.api.nvim_buf_line_count(0)
+	irow = math.max(1, math.min(irow, maxrow))
 	return irow, icol0 + 1
 end
 
@@ -344,6 +346,9 @@ function M.set_cursor_char_pos(winid, char_row, char_col)
 	winid = M.normalize_winid(winid)
 	local bufnr = vim.api.nvim_win_get_buf(winid)
 	local line = M.get_line(bufnr, char_row)
+	if not line then
+		return
+	end
 	local char_col = util.trim(char_col, 1, #line)
 	local byte_col0 = vim.str_byteindex(line, char_col - 1)
 	local view = vim.fn.winsaveview()
