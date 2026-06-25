@@ -300,7 +300,7 @@ end
 
 ---@param current_width integer[]
 ---@param extra_width integer
-local function expand(current_width, extra_width)
+local function expand2(current_width, extra_width)
     local total = 0
     local logws = {}
     for _, width in ipairs(current_width) do
@@ -322,7 +322,7 @@ end
 ---@return integer[]
 local function deliver(block, extra_width)
     local current_width = Attr.get_width_array(block.attr.columns)
-    return expand(current_width, extra_width)
+    return expand2(current_width, extra_width)
 end
 
 ---@param block Block_grid
@@ -345,6 +345,8 @@ local function wrap_auto2(block)
     end
 end
 
+local PADDING_RATE = 1 / 3
+local PADDING_MAX = 6
 ---@param max_widths integer[]
 ---@param fit_width integer
 ---@return integer[]
@@ -352,10 +354,33 @@ local function shrink(max_widths, fit_width)
     local fit_widths = get_fit_widths(max_widths, fit_width)
     for icol = 1, #fit_widths do
         local plus = fit_widths[icol] - max_widths[icol]
-        plus = math.min(plus, math.ceil(max_widths[icol] / 3), 6)
+        plus = math.min(plus, math.ceil(max_widths[icol] * PADDING_RATE), PADDING_MAX)
         fit_widths[icol] = max_widths[icol] + plus
     end
     return fit_widths
+end
+
+local WIDTH_MIN = 6
+---@param max_widths integer[]
+---@param fit_widths integer[]
+---@return integer
+local function get_expand_size(max_widths, fit_widths)
+    local size = 0
+    for icol = 1, #fit_widths do
+        if fit_widths[icol] < max_widths[icol] then
+            size = size + math.max(0, WIDTH_MIN - fit_widths[icol])
+        end
+    end
+    return size
+end
+
+local function expand(max_widths, fit_width)
+    local fit_widths = get_fit_widths(max_widths, fit_width)
+    local size = get_expand_size(max_widths, fit_widths)
+    if size == 0 then
+        return fit_widths
+    end
+    return get_fit_widths(max_widths, fit_width + size)
 end
 
 ---@param block Block_grid
@@ -364,14 +389,15 @@ local function wrap_auto(block)
     local max_width = util.sum(max_widths)
     local fit_span = buffer.get_win_span()
     local fit_width = get_fit_width(#max_widths, fit_span)
+    local fit_widths
     if max_width < fit_width then
-        -- block.attr.columns = block.attr.columns or {}
-        local fit_widths = shrink(max_widths, fit_width)
-        log.probe(block.attr)
-        for icol = 1, #fit_widths do
-            block.attr.columns[icol] = block.attr.columns[icol] or {}
-            block.attr.columns[icol].width = fit_widths[icol]
-        end
+        fit_widths = shrink(max_widths, fit_width)
+    else
+        fit_widths = expand(max_widths, fit_width)
+    end
+    for icol = 1, #fit_widths do
+        block.attr.columns[icol] = block.attr.columns[icol] or {}
+        block.attr.columns[icol].width = fit_widths[icol]
     end
 end
 
