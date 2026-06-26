@@ -1,9 +1,12 @@
 -- dependencies
+local config = require("tirenvi.config")
 local Context = require("tirenvi.app.context")
 local Attrs = require("tirenvi.core.attrs")
 local Attr = require("tirenvi.core.attr")
 local buffer = require("tirenvi.io.buffer")
 local buf_state = require("tirenvi.io.buf_state")
+local namespaces = require("tirenvi.io.namespaces")
+local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
 -- module
@@ -63,6 +66,37 @@ local function get_info()
     return info
 end
 
+---@param ctx Context
+---@param attr Attr
+---@param iattr integer
+---@param icol integer
+local function show_attr_marks(ctx, attr, iattr, icol)
+    local start0
+    if attr.range then
+        start0 = Range.to_vim(attr.range)
+    else
+        start0 = iattr - 1
+    end
+    local highlight = "ErrorMsg"
+    if Attr.is_grid(attr) then
+        highlight = "Todo"
+    end
+    local attr_long = Attr.get_attr_long(attr, icol)
+    local opts = {
+        virt_text = { { tostring(attr_long), highlight } },
+        virt_text_pos = "eol_right_align", -- eol
+    }
+    ---- NOTE:
+    -- virt_text screen position is not always stable and may differ
+    -- from the extmark's actual buffer position.
+    local nlines = buffer.line_count(ctx.bufnr)
+    if start0 >= nlines then
+        log.debug("‼️" .. start0)
+        start0 = nlines - 1
+    end
+    vim.api.nvim_buf_set_extmark(ctx.bufnr, namespaces.ATTR, start0, 0, opts)
+end
+
 ----------------------------------------------------------------------
 -- Public API
 ----------------------------------------------------------------------
@@ -105,6 +139,24 @@ function M.goto(iblock, irow, icol)
     local line = buffer.get_line(ctx.bufnr, char_row)
     local byte_col = vim.str_byteindex(line, char_col - 1)
 	buffer.set_cursor_byte_pos(ctx.winid, char_row, byte_col)
+end
+
+function M.show_attr_marks(ctx)
+    local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+    vim.api.nvim_buf_clear_namespace(ctx.bufnr, namespaces.ATTR, 0, -1)
+    if not attrs then
+        return
+    end
+    local cur_row, _, char_col = buffer.get_cursor_char_pos(ctx)
+    local pos = Attrs.to_logical(attrs, cur_row, char_col)
+    for iattr, attr in ipairs(attrs) do
+        -- カーソル移動で追従？
+        local icol
+        if pos.iblock == iattr then
+            icol = Attr.to_cell_col(attr, char_col)
+        end
+        show_attr_marks(ctx, attr, iattr, icol)
+    end
 end
 
 return M

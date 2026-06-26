@@ -1,4 +1,5 @@
 -- dependencies
+local config = require("tirenvi.config")
 local Context = require("tirenvi.app.context")
 local Bufline = require("tirenvi.core.bufline")
 local reader = require("tirenvi.io.reader")
@@ -9,7 +10,7 @@ local ui = require("tirenvi.ui")
 local guard = require("tirenvi.util.guard")
 local Range3 = require("tirenvi.util.range3")
 local log = require("tirenvi.util.log")
-local debug = require("tirenvi.editor.debug")
+local Debug = require("tirenvi.editor.debug")
 
 -- module
 local M = {}
@@ -47,9 +48,9 @@ local function on_lines(_, bufnr, tick, range3, bytecount)
 	recover_flat(bufnr, range3)
 	if buf_state.should_skip(bufnr) then return end
 	local ctx = get_context(bufnr)
-	debug.ui_entry(bufnr, Range3.short(range3))
+	Debug.ui_entry(bufnr, Range3.short(range3))
 	init.on_lines(ctx, range3)
-	debug.ui_exit(bufnr, Range3.short(range3))
+	Debug.ui_exit(bufnr, Range3.short(range3))
 end
 
 ---@param bufnr number
@@ -140,10 +141,10 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf, { has_grid = true, }) then return end
-			debug.ui_entry(args.buf, args.event)
+			Debug.ui_entry(args.buf, args.event)
 			local ctx = get_context(args.buf)
 			on_buf_write_pre(ctx)
-			debug.ui_exit(args.buf, args.event)
+			Debug.ui_exit(args.buf, args.event)
 		end),
 	})
 
@@ -154,10 +155,10 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 			if buf_state.should_skip(args.buf, { is_tirbuf = false, }) then
 				return
 			end
-			debug.ui_entry(args.buf, args.event)
+			Debug.ui_entry(args.buf, args.event)
 			local ctx = get_context(args.buf)
 			on_buf_write_post(ctx)
-			debug.ui_exit(args.buf, args.event)
+			Debug.ui_exit(args.buf, args.event)
 		end),
 	})
 
@@ -172,16 +173,31 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		end),
 	})
 
+	api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+		group = augroup,
+		buffer = bufnr,
+		callback = guard.guarded(function(args)
+			if vim.log.levels.DEBUG < config.log.level then
+				return
+			end
+			if buf_state.should_skip(args.buf) then
+				return
+			end
+			local ctx = Context.from_buf(bufnr)
+			Debug.show_attr_marks(ctx)
+		end),
+	})
+
 	api.nvim_create_autocmd("InsertEnter", {
 		group = augroup,
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
-			debug.ui_entry(args.buf, args.event)
+			Debug.ui_entry(args.buf, args.event)
 			log.assert(not buffer.get(args.buf, buffer.IKEY.INSERT_MODE),
 				"InsertEnter triggered while already in insert mode")
 			buffer.set(args.buf, buffer.IKEY.INSERT_MODE, true)
-			debug.ui_exit(args.buf, args.event)
+			Debug.ui_exit(args.buf, args.event)
 		end),
 	})
 
@@ -190,14 +206,14 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
-			debug.ui_entry(args.buf, args.event)
+			Debug.ui_entry(args.buf, args.event)
 			local ctx = get_context(args.buf)
 			-- InsertLeave may be triggered without a preceding InsertEnter
 			-- due to the behavior of other plugins (e.g., Telescope).
 			-- Do not assert insert_mode here.
 			buffer.set(args.buf, buffer.IKEY.INSERT_MODE, false)
 			on_insert_leave(ctx)
-			debug.ui_exit(args.buf, args.event)
+			Debug.ui_exit(args.buf, args.event)
 		end),
 	})
 
@@ -206,10 +222,10 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
-			debug.ui_entry(args.buf, args.event)
+			Debug.ui_entry(args.buf, args.event)
 			local ctx = get_context(args.buf)
 			on_insert_char_pre(ctx)
-			debug.ui_exit(args.buf, args.event)
+			Debug.ui_exit(args.buf, args.event)
 		end),
 	})
 
@@ -239,7 +255,7 @@ local function register_autocmds()
 				}) then
 				return
 			end
-			debug.ui_entry(args.buf, args.event)
+			Debug.ui_entry(args.buf, args.event)
 			local ctx = get_context(bufnr)
 			on_filetype(ctx)
 			clear_buffer_local_autocmds(augroup, bufnr)
@@ -247,7 +263,7 @@ local function register_autocmds()
 				return
 			end
 			register_buffer_local_autocmds(augroup, bufnr)
-			debug.ui_exit(args.buf, args.event)
+			Debug.ui_exit(args.buf, args.event)
 		end),
 	})
 
@@ -257,10 +273,10 @@ local function register_autocmds()
 			if buf_state.should_skip(args.buf, { is_tirbuf = false, }) then
 				return
 			end
-			debug.ui_entry(args.buf, args.event)
+			Debug.ui_entry(args.buf, args.event)
 			local ctx = get_context(args.buf)
 			on_buf_read_post(ctx)
-			debug.ui_exit(args.buf, args.event)
+			Debug.ui_exit(args.buf, args.event)
 		end),
 	})
 
@@ -275,9 +291,9 @@ local function register_autocmds()
 	api.nvim_create_autocmd("VimLeave", {
 		group = augroup,
 		callback = guard.guarded(function(args)
-			debug.ui_entry(args.buf, args.event)
+			Debug.ui_entry(args.buf, args.event)
 			on_vim_leave(args)
-			debug.ui_exit(args.buf, args.event)
+			Debug.ui_exit(args.buf, args.event)
 		end),
 	})
 
@@ -286,9 +302,9 @@ local function register_autocmds()
 		if ok then
 			vim.api.nvim_create_autocmd("VimLeavePre", {
 				callback = function(args)
-					debug.ui_entry(args.buf, args.event)
+					Debug.ui_entry(args.buf, args.event)
 					luacov.save_stats()
-					debug.ui_exit(args.buf, args.event)
+					Debug.ui_exit(args.buf, args.event)
 				end,
 			})
 		end

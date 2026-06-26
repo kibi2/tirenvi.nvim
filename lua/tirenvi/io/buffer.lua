@@ -304,12 +304,12 @@ end
 ---@return integer
 ---@return integer
 function M.get_cursor_char_pos(ctx)
-	local irow, byte_col1 = M.get_cursor_byte_pos(ctx)
-	local line = M.get_line(ctx.bufnr, irow)
+	local cur_row, byte_col1 = M.get_cursor_byte_pos(ctx)
+	local line = M.get_line(ctx.bufnr, cur_row)
 	local byte_col0 = byte_col1 - 1
 	local char_col0 = vim.str_utfindex(line, byte_col0)
 	local new_byte_col = vim.str_byteindex(line, char_col0) + 1
-	return irow, new_byte_col, char_col0 + 1
+	return cur_row, new_byte_col, char_col0 + 1
 end
 
 ---@param winid integer
