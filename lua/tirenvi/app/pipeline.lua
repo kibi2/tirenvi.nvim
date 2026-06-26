@@ -4,6 +4,7 @@
 local Document = require("tirenvi.core.document")
 local Attrs = require("tirenvi.core.attrs")
 local Attr = require("tirenvi.core.attr")
+local Cell = require("tirenvi.core.cell")
 local Bufline = require("tirenvi.core.bufline")
 local dirty_range = require("tirenvi.core.dirty_range")
 local Request = require("tirenvi.app.request")
@@ -248,16 +249,54 @@ local function change_wrap_auto(ctx, width_op)
     doc_to_buflines(ctx, r_result, bufdoc)
 end
 
+local MAX_HEAD = 5
+---@param bufnr number
 ---@param attr Attr
----@param width_op WidthOp
+---@param icol integer
+---@return string
+local function get_head(bufnr, attr, icol)
+    local irow = attr.range.first
+    local line = buffer.get_line(bufnr, irow) or ""
+    local cells = Bufline.get_cells(line)
+    local head = Cell.remove_padding(cells[icol] or "")
+    local head_chars = util.utf8_chars(head)
+    if #head_chars > MAX_HEAD then
+        head = table.concat(vim.list_slice(head_chars, 1, MAX_HEAD)) .. ".."
+    end
+    return head
+end
+
+local DELTA = 2
+---@param attr Attr
 ---@param pos Cell_pos
 ---@return string
-local function get_width_info(attr, width_op, pos)
-    -- print("mode=wrap span=612 col=57/100 header=custo.. widths=[..,7,10,5*,12,8,..]")
-    local mode = Attr.get_wrap_mode(attr) == "nowrap" and "nowrap" or "wrap"
+local function get_col_info(attr, pos)
+    local widths = Attr.get_width_array(attr.columns)
+    ---@cast widths string[]
+    widths[pos.icol] = widths[pos.icol] .. "*"
+    local first = math.max(1, pos.icol - DELTA)
+    local last = math.min(#widths, pos.icol + DELTA)
+    local info = table.concat(widths, ",", first, last)
+    if first ~= 1 then
+        info = "..," .. info
+    end
+    if last ~= #widths then
+        info = info .. ",.."
+    end
+    return "[" .. info .. "]"
+end
+
+---@param bufnr number
+---@param attr Attr
+---@param pos Cell_pos
+---@return string
+local function get_width_info(bufnr, attr, pos)
+    local mode = Attr.get_wrap_kind(attr)
     local span = Attr.get_fit_span(attr)
-    return string.format("mode=%s span=%d col=%d/%d header=custo.. widths=[..,7,10,5*,12,8,..]",
-        mode, span, pos.icol, #attr.columns
+    local head = get_head(bufnr, attr, pos.icol)
+    local col_info = get_col_info(attr, pos)
+    return string.format("mode=%s span=%d col=%d/%d header=%q widths=%s",
+        mode, span, pos.icol, #attr.columns, head, col_info
     )
 end
 
@@ -267,11 +306,10 @@ local function width_info(ctx, width_op)
     local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
     local pos = Attrs.to_logical(attrs, width_op.cur_row, width_op.cur_col)
     local attr = attrs[pos.iblock]
-    log.probe(attr)
     if Attr.is_plain(attr) then
         print("kind=plain")
     else
-        print(get_width_info(attr, width_op, pos))
+        print(get_width_info(ctx.bufnr, attr, pos))
     end
 end
 
