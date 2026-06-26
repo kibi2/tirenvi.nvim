@@ -227,11 +227,11 @@ end
 ---@param self Attr
 ---@return  WrapMode|nil
 function M:get_wrap_mode()
-    local wrap_mode = self.wrap_mode
     if M.is_plain(self) then
         log.assert(self.fit_span == nil, "attr.fit_width of plain is %s.", self.fit_span)
         return nil
     end
+    local wrap_mode = self.wrap_mode
     if not wrap_mode then
         wrap_mode = config.table.wrap_mode == "nowrap" and "nowrap" or "wrap_auto"
     end
@@ -239,6 +239,19 @@ function M:get_wrap_mode()
         wrap_mode = "wrap_auto"
     end
     return wrap_mode
+end
+
+---@param self Attr
+---@return "wrap"|"nowrap"|nil
+function M:get_wrap_kind()
+    local mode = M.get_wrap_mode(self)
+    if mode == nil then
+        return nil
+    elseif mode == "nowrap" then
+        return "nowrap"
+    else
+        return "wrap"
+    end
 end
 
 ---@param self Attr

@@ -1,7 +1,7 @@
 --- Tir width nowrap ---
 === MESSAGE ===
  
---- CASE 6: initial cached attrs" ---
+--- CASE 6: initial cached attrs ---
 CASE 6 // cur(1,1) b1:r1:c0 +(0,0)<->  p(1,1)-* g(2,6)-[5,6] p(7,7)- g(8,12)-[5,3,6]
  
 --- CASE 9: width+ on first plain block" ---

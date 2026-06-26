@@ -3,8 +3,8 @@ source $TIRENVI_ROOT/tests/common.vim
 " ===== GFM =====
 edit $TIRENVI_ROOT/tests/data/table2.md
 
-CASE initial cached attrs"
-lua print(Debug.layout(""))
+CASE initial cached attrs
+lua print(Debug.layout())
 
 CASE width+ on first plain block"
 lua Debug.goto(1, 1, 1)

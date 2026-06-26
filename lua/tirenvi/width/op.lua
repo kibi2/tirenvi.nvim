@@ -75,8 +75,8 @@ local function get_number(str)
 end
 
 ---@param opts {[string]:any}
----@return WidthOperation
----@return integer
+---@return WidthOperation|nil
+---@return integer|nil
 local function get_operation(opts)
     local sub = table.concat(opts.command.sub, "%")
     local regex = string.format("^%s%%s*([%s])(.*)", opts.command_name, sub)
@@ -86,6 +86,9 @@ local function get_operation(opts)
     end
     if op == "=" and #value == 0 then
         return "auto", 0
+    end
+    if op == "?" and #value ~= 0 then
+        return nil, nil
     end
     return map[op], get_number(value)
 end
@@ -111,6 +114,9 @@ local function try_new(opts)
         return self
     end
     local operation, number = get_operation(opts)
+    if not operation or not number then
+        return nil
+    end
     self.operation = operation
     self.number = number
     return self
