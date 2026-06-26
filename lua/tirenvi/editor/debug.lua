@@ -9,6 +9,8 @@ local log = require("tirenvi.util.log")
 -- module
 local M = {}
 
+local api         = vim.api
+
 -- constants / defaults
 
 local DELIMITER = " //"
@@ -52,10 +54,11 @@ end
 ---@return table
 local function get_info()
     local info = {}
-    info.attrs = buffer.get(nil, buffer.IKEY.ATTRS)
-    local cur_row, _, char_col = buffer.get_cursor_char_pos()
+	local ctx                  = Context.from_buf()
+    info.attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+    local cur_row, _, char_col = buffer.get_cursor_char_pos(ctx)
     info.pos = Attrs.to_logical(info.attrs, cur_row, char_col)
-    info.line = buffer.get_line(nil, cur_row)
+    info.line = buffer.get_line(ctx.bufnr, cur_row)
     info.char = vim.fn.strcharpart(info.line, char_col - 1, 1)
     return info
 end
@@ -95,12 +98,13 @@ end
 ---@param irow integer
 ---@param icol integer
 function M.goto(iblock, irow, icol)
-    local attrs = buffer.get(nil, buffer.IKEY.ATTRS)
+    local ctx = Context.from_buf()
+    local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
     local cell_pos = {iblock=iblock, irow=irow, icol=icol}
     local char_row, char_col = Attrs.to_cursor(attrs, cell_pos)
-    local line = buffer.get_line(nil, char_row)
+    local line = buffer.get_line(ctx.bufnr, char_row)
     local byte_col = vim.str_byteindex(line, char_col - 1)
-	buffer.set_cursor_byte_pos(nil, char_row, byte_col)
+	buffer.set_cursor_byte_pos(ctx.winid, char_row, byte_col)
 end
 
 return M

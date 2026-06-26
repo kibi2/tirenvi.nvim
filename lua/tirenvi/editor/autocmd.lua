@@ -220,7 +220,8 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 			if buf_state.should_skip(args.buf, { is_tirbuf = false, }) then
 				return
 			end
-			ui.special_apply()
+			local ctx = Context.from_buf(bufnr)
+			ui.special_apply(ctx.winid)
 		end),
 	})
 end

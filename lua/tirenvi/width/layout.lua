@@ -117,11 +117,12 @@ local function expand(max_widths, fit_width)
     return get_fit_widths(max_widths, math.ceil(fit_width * ratio))
 end
 
+---@param winid number
 ---@param block Block_grid
-local function wrap_auto(block)
+local function wrap_auto(winid, block)
     local max_widths = Block.grid.get_max_width(block)
     local max_width = util.sum(max_widths)
-    local fit_span = buffer.get_win_span()
+    local fit_span = buffer.get_win_span(winid)
     local fit_width = get_fit_width(#max_widths, fit_span)
     local fit_widths
     if max_width < fit_width then
@@ -135,9 +136,10 @@ local function wrap_auto(block)
     end
 end
 
+---@param winid number
 ---@param block Block_grid
-local function wrap_fit(block)
-    local fit_span = block.attr.fit_span or buffer.get_win_span()
+local function wrap_fit(winid, block)
+    local fit_span = block.attr.fit_span or buffer.get_win_span(winid)
     local max_widths = Block.grid.get_max_width(block)
     local fit_width = get_fit_width(#max_widths, fit_span)
     local fit_widths = get_fit_widths(max_widths, fit_width)
@@ -151,13 +153,14 @@ local function wrap_width(block)
     Block.grid.set_max_attr(block)
 end
 
+---@param winid number
 ---@param block Block_grid
 ---@param wrap_mode WrapMode
-local function wrap(block, wrap_mode)
+local function wrap(winid, block, wrap_mode)
     if wrap_mode == "wrap_auto" then
-        wrap_auto(block)
+        wrap_auto(winid, block)
     elseif wrap_mode == "wrap_fit" then
-        wrap_fit(block)
+        wrap_fit(winid, block)
     elseif wrap_mode == "wrap_width" then
         wrap_width(block)
     else
@@ -169,15 +172,16 @@ end
 -- Public API
 -----------------------------------------------------------------------
 
+---@param winid number
 ---@param tirdoc Document
-function M.compute(tirdoc)
+function M.compute(winid, tirdoc)
     for _, block in ipairs(tirdoc.blocks) do
         if block.kind == "grid" then
             local wrap_mode = Attr.get_wrap_mode(block.attr)
             if wrap_mode == "nowrap" then
                 nowrap(block)
             elseif wrap_mode then
-                wrap(block, wrap_mode)
+                wrap(winid, block, wrap_mode)
             end
         end
     end

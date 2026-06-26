@@ -206,6 +206,7 @@ function M.debug_state(bufnr)
 	return string.format("%s/%s/%s", allow_plain and "GFM" or "CSV", flat, count)
 end
 
+---@param bufnr number
 ---@return boolean|nil
 function M.is_flat(bufnr)
 	return buffer.get(bufnr, buffer.IKEY.FLAT)

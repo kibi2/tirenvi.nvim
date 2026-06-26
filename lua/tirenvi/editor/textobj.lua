@@ -26,10 +26,10 @@ local function setup_vl(ctx, line_provider, is_around)
         notify.error(errors.ERR.TABLE_IS_NOT_ALIGNED)
         return
     end
-    buffer.set_cursor_byte_pos(0, rect.row.first, rect.col.first)
+    buffer.set_cursor_byte_pos(ctx.winid, rect.row.first, rect.col.first)
     vim.api.nvim_feedkeys(vim.keycode("<C-v>"), "n", false)
     vim.cmd("normal! o")
-    buffer.set_cursor_byte_pos(0, rect.row.last, rect.col.last)
+    buffer.set_cursor_byte_pos(ctx.winid, rect.row.last, rect.col.last)
 end
 
 local function setup_vil()

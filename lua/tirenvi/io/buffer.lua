@@ -62,23 +62,24 @@ local initial_value = {
 -- Private helpers
 -----------------------------------------------------------------------
 
-local function fix_cursor_utf8()
-	local winid = api.nvim_get_current_win()
-	local irow, icol = M.get_cursor_byte_pos(winid)
-	local line = M.get_line(0, irow)
-	local char_col0 = vim.str_utfindex(line, icol - 1)
+---@param ctx Context
+local function fix_cursor_utf8(ctx)
+	local irow, byte_col = M.get_cursor_byte_pos(ctx)
+	local line = M.get_line(ctx.bufnr, irow)
+	local char_col0 = vim.str_utfindex(line, byte_col - 1)
 	local boundary = vim.str_byteindex(line, char_col0) + 1
-	if boundary ~= icol then
-		M.set_cursor_byte_pos(0, irow, boundary)
+	if boundary ~= byte_col then
+		M.set_cursor_byte_pos(ctx.winid, irow, boundary)
 	end
 end
 
+---@param ctx Context
 ---@param cell_pos Cell_pos
-local function reset_cursor_utf8(cell_pos)
+local function reset_cursor_utf8(ctx, cell_pos)
 	if cell_pos and cell_pos.cur_row then
-		M.set_cursor_char_pos(0, cell_pos.cur_row, cell_pos.cur_col)
+		M.set_cursor_char_pos(ctx.bufnr, cell_pos.cur_row, cell_pos.cur_col)
 	else
-		fix_cursor_utf8()
+		fix_cursor_utf8(ctx)
 	end
 end
 
@@ -88,13 +89,14 @@ local function set_undo_tree_last(bufnr)
 	M.set(bufnr, M.IKEY.UNDO_TREE_LAST, next)
 end
 
----@param bufnr number
+---@param ctx Context
 ---@param range Range
 ---@param lines string[]
 ---@param no_undo boolean
 ---@param cell_pos Cell_pos
-local function set_lines(bufnr, range, lines, no_undo, cell_pos)
+local function set_lines(ctx, range, lines, no_undo, cell_pos)
 	M.clear_cache()
+	local bufnr = ctx.bufnr
 	local undolevels = bo[bufnr].undolevels
 	if no_undo then
 		local undotree = fn.undotree(bufnr)
@@ -108,7 +110,7 @@ local function set_lines(bufnr, range, lines, no_undo, cell_pos)
 	start0 = math.max(start0, 0)
 	api.nvim_buf_set_lines(bufnr, start0, end0, false, lines)
 	set_undo_tree_last(bufnr)
-	reset_cursor_utf8(cell_pos)
+	reset_cursor_utf8(ctx, cell_pos)
 	bo[bufnr].undolevels = undolevels
 end
 
@@ -117,8 +119,8 @@ end
 ---@param last integer -- 1-based
 local function get_lines_and_cache(bufnr, first, last)
 	local start  = math.max(first - 1, 0)
-	local end0   = math.min(math.max(last, start + 2 * STEP), M.line_count(bufnr))
-	local start0 = math.max(math.min(start, end0 - 2 * STEP), 0)
+	local end0   = util.trim(last, start + 2 * STEP, M.line_count(bufnr))
+	local start0 = util.trim(start, 0, end0 - 2 * STEP)
 	local lines  = api.nvim_buf_get_lines(bufnr, start0, end0, false)
 	cache        = { bufnr = bufnr, start = start0, lines = lines, }
 	log.debug("=== cache[#%d] lines[%d]='%s'...[%d]='%s'", cache.bufnr,
@@ -156,35 +158,16 @@ end
 -- Public API
 -----------------------------------------------------------------------
 
----@param bufnr number|nil
----@return number
-function M.normalize_bufnr(bufnr)
-	if not bufnr or bufnr == 0 then
-		return api.nvim_get_current_buf()
-	end
-	return bufnr
-end
-
----@param winid number|nil
----@return number
-function M.normalize_winid(winid)
-	if not winid or winid == 0 then
-		return api.nvim_get_current_win()
-	end
-	return winid
-end
-
----@param bufnr number|nil
+---@param bufnr number
 ---@return {[string]: boolean|integer|string|integer[][]|nil}
 function M.get_state(bufnr)
-	bufnr = M.normalize_bufnr(bufnr)
 	if not b[bufnr].tirenvi then
 		b[bufnr].tirenvi = initial_value
 	end
 	return b[bufnr].tirenvi
 end
 
----@param bufnr number|nil
+---@param bufnr number
 ---@param key string
 ---@return any
 function M.get(bufnr, key)
@@ -195,22 +178,22 @@ end
 ---@param key string
 ---@param val boolean|integer|string|integer[][]|nil
 function M.set(bufnr, key, val)
-	bufnr = M.normalize_bufnr(bufnr)
 	local state = M.get_state(bufnr)
 	state[key] = val
 	b[bufnr].tirenvi = state
 end
 
----@param bufnr number
+---@param ctx Context
 ---@param range Range
 ---@param lines string[]
 ---@param no_undo boolean
 ---@param cell_pos Cell_pos
-function M.set_lines(bufnr, range, lines, no_undo, cell_pos)
+function M.set_lines(ctx, range, lines, no_undo, cell_pos)
 	-- log.debug(M.get_state(bufnr))
+	local bufnr = ctx.bufnr
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
 	local before = fn.undotree(bufnr).seq_last
-	local ok, err = pcall(set_lines, bufnr, range, lines, no_undo, cell_pos)
+	local ok, err = pcall(set_lines, ctx, range, lines, no_undo, cell_pos)
 	local after = fn.undotree(bufnr).seq_last
 	local first, last = Range.to_lua(range)
 	log.watch("UNDO", "%s[%d->%d]set_lines lines[%d]='%s'...[%d]='%s'", tostring(no_undo),
@@ -231,7 +214,6 @@ end
 ---@param last integer -- 1-based
 ---@return string[]
 function M.get_lines(bufnr, first, last)
-	bufnr = M.normalize_bufnr(bufnr)
 	first = math.max(1, first)
 	local nline = M.line_count(bufnr)
 	if last == -1 then
@@ -246,11 +228,10 @@ function M.get_lines(bufnr, first, last)
 	return get_lines_from_cache(bufnr, first, last)
 end
 
----@param bufnr number|nil
+---@param bufnr number
 ---@param iline integer -- 1-based
 ---@return string|nil
 function M.get_line(bufnr, iline)
-	bufnr = M.normalize_bufnr(bufnr)
 	local line = get_line_from_cache(bufnr, iline)
 	if line then
 		return line
@@ -269,10 +250,9 @@ function M.get_line(bufnr, iline)
 	return get_line_from_cache(bufnr, iline)
 end
 
----@param bufnr number|nil
+---@param bufnr number
 ---@return integer
 function M.line_count(bufnr)
-	bufnr = M.normalize_bufnr(bufnr)
 	return api.nvim_buf_line_count(bufnr)
 end
 
@@ -307,44 +287,42 @@ function M.set_step(step)
 	STEP = step
 end
 
----@param winid integer|nil
+---@param ctx Context
 ---@return integer
 ---@return integer
-function M.get_cursor_byte_pos(winid)
-	winid = M.normalize_winid(winid)
-	local irow, icol0 = unpack(api.nvim_win_get_cursor(winid))
-	local maxrow = vim.api.nvim_buf_line_count(0)
-	irow = math.max(1, math.min(irow, maxrow))
-	return irow, icol0 + 1
+function M.get_cursor_byte_pos(ctx)
+	local irow, byte_col0 = unpack(api.nvim_win_get_cursor(ctx.winid))
+	local maxrow = vim.api.nvim_buf_line_count(ctx.bufnr)
+	irow = util.trim(irow, 1, maxrow)
+	local line = M.get_line(ctx.bufnr, irow)
+	byte_col0 = util.trim(byte_col0, 0, #line - 1)
+	return irow, byte_col0 + 1
 end
 
----@param winid integer|nil
+---@param ctx Context
 ---@return integer
 ---@return integer
 ---@return integer
-function M.get_cursor_char_pos(winid)
-	local irow, byte_col1 = M.get_cursor_byte_pos(winid)
-	local line = M.get_line(0, irow)
-	local byte_col0 = math.min(byte_col1, #line) - 1
+function M.get_cursor_char_pos(ctx)
+	local irow, byte_col1 = M.get_cursor_byte_pos(ctx)
+	local line = M.get_line(ctx.bufnr, irow)
+	local byte_col0 = byte_col1 - 1
 	local char_col0 = vim.str_utfindex(line, byte_col0)
 	local new_byte_col = vim.str_byteindex(line, char_col0) + 1
 	return irow, new_byte_col, char_col0 + 1
 end
 
----@param winid integer|nil
+---@param winid integer
 ---@param irow integer
 ---@param icol integer
 function M.set_cursor_byte_pos(winid, irow, icol)
-	winid = M.normalize_winid(winid)
 	vim.api.nvim_win_set_cursor(winid, { irow, icol - 1 })
 end
 
----@param winid integer|nil
+---@param bufnr number
 ---@param char_row integer
 ---@param char_col integer
-function M.set_cursor_char_pos(winid, char_row, char_col)
-	winid = M.normalize_winid(winid)
-	local bufnr = vim.api.nvim_win_get_buf(winid)
+function M.set_cursor_char_pos(bufnr, char_row, char_col)
 	local line = M.get_line(bufnr, char_row)
 	if not line then
 		return
@@ -357,10 +335,9 @@ function M.set_cursor_char_pos(winid, char_row, char_col)
 	vim.fn.winrestview(view)
 end
 
----@param winid integer|nil
+---@param winid integer
 ---@return integer
 function M.get_win_span(winid)
-	winid = M.normalize_winid(winid)
 	local info = vim.fn.getwininfo(winid)[1]
 	return info.width - info.textoff
 end

@@ -114,8 +114,7 @@ end
 
 ---@param ctx Context
 function M.insert_char_in_newline(ctx)
-	local winid = api.nvim_get_current_win()
-	local irow = buffer.get_cursor_byte_pos(winid)
+	local irow = buffer.get_cursor_byte_pos(ctx)
 	local line_new = buffer.get_line(ctx.bufnr, irow)
 	if line_new ~= "" then
 		return
