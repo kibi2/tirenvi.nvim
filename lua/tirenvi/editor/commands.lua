@@ -10,7 +10,7 @@ local notify = require("tirenvi.util.notify")
 local errors = require("tirenvi.util.errors")
 local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
-local debug = require("tirenvi.editor.debug")
+local Debug = require("tirenvi.editor.debug")
 
 -- module
 local M = {}
@@ -147,7 +147,7 @@ local function on_tir(opts)
 	end
 	local ctx = Context.from_buf()
 	local debug_name = string.format("%s %s", opts.name, table.concat(opts.fargs, " "))
-	debug.ui_entry(ctx.bufnr, debug_name)
+	Debug.ui_entry(ctx.bufnr, debug_name)
 	local command_name = sub:match("^[A-Za-z_]+") or ""
 	local command = commands[command_name]
 	if not command then
@@ -157,7 +157,7 @@ local function on_tir(opts)
 	opts.command_name = command_name
 	opts.command = command
 	command.func(ctx, opts)
-	debug.ui_exit(ctx.bufnr, debug_name)
+	Debug.ui_exit(ctx.bufnr, debug_name)
 end
 
 local function complete_tir(arglead, cmdline)

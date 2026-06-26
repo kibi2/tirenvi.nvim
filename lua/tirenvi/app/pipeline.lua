@@ -92,7 +92,7 @@ local function doc_to_buflines(ctx, r_result, doc, no_undo, no_normalize)
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
     buf_state.set_buffer_flat(ctx.bufnr, false)
-    attr_store.write(ctx.bufnr, attrs)
+    attr_store.write(ctx, attrs)
     local buf_lines = buf_parser.unparse(bufdoc)
     if not util.same_str_array(buf_lines, r_result.lines) then
         local req_w = Request.new_writer(r_result, buf_lines, no_undo)
@@ -111,7 +111,7 @@ local function tirdoc_to_flat(ctx, r_result, tirdoc, is_write_pre)
         Attrs.remove_range(attrs)
         log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
         buf_state.set_buffer_flat(ctx.bufnr, true)
-        attr_store.write(ctx.bufnr, attrs)
+        attr_store.write(ctx, attrs)
     end
     writer.write(ctx, req_w)
 end
@@ -203,7 +203,7 @@ local function update_attrs(ctx, range3, r_result)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
     local attrs = reconcile_attrs(r_result, bufdoc, range3)
     reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
-    attr_store.write(ctx.bufnr, attrs)
+    attr_store.write(ctx, attrs)
 end
 
 ---@param ctx Context
@@ -319,7 +319,7 @@ local function toggle_wrap_mode(ctx, width_op)
     local attrs = attr_store.read(ctx.bufnr)
     local attr = Attrs.get(attrs, width_op.cur_row)
     Attr.toggle_wrap_mode(attr or {})
-    attr_store.write(ctx.bufnr, attrs)
+    attr_store.write(ctx, attrs)
 end
 
 -----------------------------------------------------------------------

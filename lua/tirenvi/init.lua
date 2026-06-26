@@ -182,7 +182,7 @@ function M.on_filetype(ctx)
 	end
 	buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, new_filetype)
 	buf_state.set_buffer_flat(ctx.bufnr, true)
-	attr_store.write(ctx.bufnr, nil)
+	attr_store.write(ctx, nil)
 	ctx = Context.from_buf(ctx.bufnr)
 	if not ctx.parser then
 		buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, nil)
