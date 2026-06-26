@@ -66,7 +66,7 @@ local function cmd_toggle(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr, { is_tirbuf = false, has_grid = true, }) then
 		return
 	end
-	ui.special_apply()
+	ui.special_apply(ctx.winid)
 	init.toggle(ctx)
 end
 
@@ -207,10 +207,10 @@ end
 
 ---@return string
 function M.keymap_lf()
-	local bufnr = Context.from_buf().bufnr
+	local ctx = Context.from_buf()
 	buffer.clear_cache()
-	log.debug("===+===+===+===+=== keymap_lf %s ===+===+===+===+===", bufnr)
-	if buf_state.should_skip(bufnr) then
+	log.debug("===+===+===+===+=== keymap_lf %s ===+===+===+===+===", ctx.bufnr)
+	if buf_state.should_skip(ctx.bufnr) then
 		return util.get_termcodes("<CR>")
 	end
 	return init.keymap_lf()
@@ -218,10 +218,10 @@ end
 
 ---@return string
 function M.keymap_tab()
-	local bufnr = Context.from_buf().bufnr
+	local ctx = Context.from_buf()
 	buffer.clear_cache()
-	log.debug("===+===+===+===+=== keymap_tab %s ===+===+===+===+===", bufnr)
-	if buf_state.should_skip(bufnr) then
+	log.debug("===+===+===+===+=== keymap_tab %s ===+===+===+===+===", ctx.bufnr)
+	if buf_state.should_skip(ctx.bufnr) then
 		return util.get_termcodes("<Tab>")
 	end
 	return init.keymap_tab()

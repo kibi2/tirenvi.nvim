@@ -28,34 +28,37 @@ end
 ---@param name string
 ---@param targets string[]
 local function safe_link_multi(name, targets)
+    local ns_id = 0
     local target = get_safe_link_name(targets)
-    api.nvim_set_hl(0, name, { link = target })
+    api.nvim_set_hl(ns_id, name, { link = target })
 end
 
 local function diagnostic_setup()
+    local ns_id = 0
     fn.sign_define("TirenviSign", { text = "◆", texthl = "ErrorMsg" })
-    api.nvim_set_hl(0, "TirenviDebugLine", { bg = "#404000" })
-    api.nvim_set_hl(0, "TirenviDirty", { bg = "#2a2a1a", italic = true, })
-    api.nvim_set_hl(0, "TirenviDirtySign", { link = "DiagnosticWarn" })
+    api.nvim_set_hl(ns_id, "TirenviDebugLine", { bg = "#404000" })
+    api.nvim_set_hl(ns_id, "TirenviDirty", { bg = "#2a2a1a", italic = true, })
+    api.nvim_set_hl(ns_id, "TirenviDirtySign", { link = "DiagnosticWarn" })
 end
 
 local function special_setup()
-    api.nvim_set_hl(0, "TirenviPadding", {})
+    local ns_id = 0
+    api.nvim_set_hl(ns_id, "TirenviPadding", {})
     local target = get_safe_link_name({ "@punctuation.special.markdown", "Delimiter", "Special", })
-    local special = api.nvim_get_hl(0, { name = target })
-    api.nvim_set_hl(0, "TirenviPipeNoHbar", { link = target })
-    api.nvim_set_hl(0, "TirenviPipeHbar", {
+    local special = api.nvim_get_hl(ns_id, { name = target })
+    api.nvim_set_hl(ns_id, "TirenviPipeNoHbar", { link = target })
+    api.nvim_set_hl(ns_id, "TirenviPipeHbar", {
         fg = special.fg,
         bg = special.bg,
         underline = true,
         nocombine = true,
     })
-    api.nvim_set_hl(0, "TirenviHbar", {
+    api.nvim_set_hl(ns_id, "TirenviHbar", {
         underline = true,
         sp = special.fg,
         nocombine = true,
     })
-    api.nvim_set_hl(0, "Conceal", { link = "TirenviPipeNoHbar" })
+    api.nvim_set_hl(ns_id, "Conceal", { link = "TirenviPipeNoHbar" })
     safe_link_multi("TirenviSpecialChar", { "NonText", })
 end
 
@@ -94,9 +97,8 @@ function M.setup()
     diagnostic_setup()
 end
 
----@param winid integer|nil
+---@param winid integer
 function M.special_clear(winid)
-    winid = buffer.normalize_winid(winid)
     local ids = matches[winid]
     if not ids then return end
     for _, id in ipairs(ids) do
@@ -105,11 +107,10 @@ function M.special_clear(winid)
     matches[winid] = nil
 end
 
----@param winid integer|nil
+---@param winid integer
 function M.special_apply(winid)
     local pipen = config.marks.pipe
     local pipec = config.marks.pipec
-    winid = buffer.normalize_winid(winid)
     M.special_clear(winid)
     add_match(winid, "TirenviPadding", pat_v(config.marks.padding), 10)
     add_match(winid, "TirenviSpecialChar", pat_v(config.marks.lf), 20)

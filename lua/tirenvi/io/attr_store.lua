@@ -60,7 +60,7 @@ end
 -- Public API
 -----------------------------------------------------------------------
 
----@param bufnr number|nil
+---@param bufnr number
 ---@return Attr[]
 function M.read(bufnr)
     return buffer.get(bufnr, buffer.IKEY.ATTRS) or {}

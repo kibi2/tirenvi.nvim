@@ -1,16 +1,18 @@
-local Context = require("tirenvi.app.context")
-local buffer = require("tirenvi.io.buffer")
+local Context     = require("tirenvi.app.context")
+local buffer      = require("tirenvi.io.buffer")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
-local Attrs = require("tirenvi.core.attrs")
-local Bufline = require("tirenvi.core.bufline")
-local log = require("tirenvi.util.log")
+local Attrs       = require("tirenvi.core.attrs")
+local Bufline     = require("tirenvi.core.bufline")
+local log         = require("tirenvi.util.log")
 
-local M = {}
+local M           = {}
+
+local api         = vim.api
 
 ---@return string
 local function get_pipe()
 	local ctx = Context.from_buf()
-	local irow = buffer.get_cursor_byte_pos()
+	local irow = buffer.get_cursor_byte_pos(ctx)
 	local line = buffer.get_line(ctx.bufnr, irow)
 	return Bufline.get_pipe_char(line) or ""
 end
@@ -33,19 +35,21 @@ M.t = build_motion("t")
 M.T = build_motion("T")
 
 function M.block_top()
-	local attrs                = buffer.get(nil, buffer.IKEY.ATTRS)
-	local cur_row, _, char_col = buffer.get_cursor_char_pos()
+	local ctx                  = Context.from_buf()
+	local attrs                = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+	local cur_row, _, char_col = buffer.get_cursor_char_pos(ctx)
 	local pos                  = Attrs.to_logical(attrs, cur_row, char_col)
 	local top_row              = attrs[pos.iblock].range.first
-	buffer.set_cursor_char_pos(0, top_row, char_col)
+	buffer.set_cursor_char_pos(ctx.bufnr, top_row, char_col)
 end
 
 function M.block_bottom()
-	local attrs                = buffer.get(nil, buffer.IKEY.ATTRS)
-	local cur_row, _, char_col = buffer.get_cursor_char_pos()
+	local ctx                  = Context.from_buf()
+	local attrs                = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+	local cur_row, _, char_col = buffer.get_cursor_char_pos(ctx)
 	local pos                  = Attrs.to_logical(attrs, cur_row, char_col)
 	local bottom_row           = attrs[pos.iblock].range.last
-	buffer.set_cursor_char_pos(0, bottom_row, char_col)
+	buffer.set_cursor_char_pos(ctx.bufnr, bottom_row, char_col)
 end
 
 return M

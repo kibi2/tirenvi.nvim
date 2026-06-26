@@ -219,15 +219,13 @@ end
 ---@return Rect|nil
 ---@return string[]
 function M.get_block_rect(ctx, line_provider, count, is_around)
-    local pipen = config.marks.pipe
-    local pipec = config.marks.pipec
-    local irow, icol = buffer.get_cursor_byte_pos()
+    local irow, byte_col = buffer.get_cursor_byte_pos(ctx)
     local cline = line_provider.get_line(irow) or ""
     local cbyte_pos = M.get_pipe_byte_position(cline)
     if #cbyte_pos == 0 then
         return nil, {}
     end
-    local colIndex = M.get_current_col_index(cbyte_pos, icol)
+    local colIndex = M.get_current_col_index(cbyte_pos, byte_col)
     if not colIndex then
         return nil, {}
     end
@@ -240,9 +238,10 @@ function M.get_block_rect(ctx, line_provider, count, is_around)
     local bbyte_pos = M.get_pipe_byte_position(bline)
     local end_index = colIndex + count
     end_index = math.min(end_index, #bbyte_pos)
+    local pipe = M.get_pipe_char(tline)
     local rect = {
         row = Range.from_lua(trow, brow),
-        col = Range.from_lua(tbyte_pos[colIndex] + (is_around and 0 or #pipen),
+        col = Range.from_lua(tbyte_pos[colIndex] + (is_around and 0 or #pipe),
             bbyte_pos[end_index] - 1),
     }
     return rect, lines

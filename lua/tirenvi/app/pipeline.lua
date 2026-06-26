@@ -69,9 +69,10 @@ local function buflines_to_bufdoc_attrs_driven(ctx, r_result)
     return bufdoc
 end
 
+---@param ctx Context
 ---@param tirdoc Document
-local function apply_wrap_mode(tirdoc)
-    width_layout.compute(tirdoc)
+local function apply_wrap_mode(ctx, tirdoc)
+    width_layout.compute(ctx.winid, tirdoc)
 end
 
 ---@param ctx Context
@@ -84,7 +85,7 @@ local function doc_to_buflines(ctx, r_result, doc, no_undo, no_normalize)
     if not doc._tir then
         tirdoc = Document.from_bufdoc(doc, no_normalize)
     end
-    apply_wrap_mode(tirdoc)
+    apply_wrap_mode(ctx, tirdoc)
     local bufdoc = Document.to_bufdoc(tirdoc)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[9]DOC ATTR:"))
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
