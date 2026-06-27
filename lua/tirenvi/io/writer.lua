@@ -18,7 +18,7 @@ local M           = {}
 local function reset_cursor_pos(bufnr, cell_pos)
     local attrs = buffer.get(bufnr, buffer.IKEY.ATTRS)
     local attr = attrs[cell_pos.iblock]
-    if not Attr.is_grid(attr) then
+    if not Attr.is_grid(attr) or not attr.range then
         cell_pos.cur_row = nil
         cell_pos.cur_col = nil
     else

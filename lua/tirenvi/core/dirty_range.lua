@@ -128,15 +128,15 @@ end
 ---@return Range[]
 local function check_dirty_1range(line_provider, range, attrs)
     local inv_ranges = {}
-    for irow = range.first, range.last do
-        local attr = Attrs.get(attrs, irow)
-        local line = line_provider.get_line(irow)
+    for cur_row = range.first, range.last do
+        local attr = Attrs.get(attrs, cur_row)
+        local line = line_provider.get_line(cur_row)
         if not is_valid(attr, line) then
-            Range.push(inv_ranges, irow)
+            Range.push(inv_ranges, cur_row)
         elseif Attr.is_grid(attr) then
-            attr = Attrs.get(attrs, irow + 1)
+            attr = Attrs.get(attrs, cur_row + 1)
             if not is_valid_bound(attr, line) then
-                Range.push(inv_ranges, irow)
+                Range.push(inv_ranges, cur_row)
             end
         end
     end

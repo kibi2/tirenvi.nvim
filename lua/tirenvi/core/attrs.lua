@@ -54,17 +54,17 @@ end
 
 local current_index = 1
 ---@param self Attr[]
----@param irow integer
+---@param cur_row integer
 ---@return integer|nil
-local function get_index(self, irow)
-    if not self or #self == 0 then
+local function get_index(self, cur_row)
+    if not self or #self == 0 or not self[1].range then
         return nil
     end
     if current_index > #self then
         current_index = 1
     end
     for _ = 1, #self do
-        if Range.contains(self[current_index].range, irow) then
+        if Range.contains(self[current_index].range, cur_row) then
             return current_index
         end
         current_index = current_index % #self + 1
@@ -223,10 +223,12 @@ function M.get_attr(attrs, range)
 end
 
 ---@param self Attr[]
----@param irow integer
+---@param cur_row integer
 ---@return Attr|nil
-function M:get(irow)
-    return self[get_index(self, irow)]
+---@return integer|nil
+function M:get(cur_row)
+    local iblock = get_index(self, cur_row)
+    return self[iblock], iblock
 end
 
 ---@param self Attr[]
@@ -249,11 +251,9 @@ end
 ---@param cur_col integer
 ---@return Cell_pos
 function M:to_logical(cur_row, cur_col)
-    local cell_pos = {}
-    cell_pos.cur_row = cur_row
-    cell_pos.cur_col = cur_col
-    cell_pos.iblock = get_index(self, cur_row)
-    local attr = self[cell_pos.iblock]
+    local cell_pos = { cur_row = cur_row, cur_col = cur_col }
+    local attr, iblock = M.get(self, cur_row)
+    cell_pos.iblock = iblock
     if not attr then
         return cell_pos
     end
