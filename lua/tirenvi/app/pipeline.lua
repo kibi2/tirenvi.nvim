@@ -76,12 +76,17 @@ local function apply_wrap_mode(ctx, tirdoc)
     width_layout.compute(ctx.winid, tirdoc)
 end
 
+---@class DocToBufLinesOpts
+---@field no_undo? boolean
+---@field no_normalize? boolean
+
 ---@param ctx Context
 ---@param r_result ReadResult
 ---@param doc Document
----@param no_undo boolean|nil
----@param no_normalize boolean|nil
-local function doc_to_buflines(ctx, r_result, doc, no_undo, no_normalize)
+---@param opts DocToBufLinesOpts|nil
+local function doc_to_buflines(ctx, r_result, doc, opts)
+    local no_undo = opts and opts.no_undo or false
+    local no_normalize = opts and opts.no_normalize or false
     local tirdoc = doc
     if not doc._tir then
         tirdoc = Document.from_bufdoc(doc, no_normalize)
@@ -161,7 +166,7 @@ local function schedule_repair(ctx, range3)
         vim.schedule(function()
             schedule_repair_flag = false
             local no_normalize = range3 and Range3.get_delta(range3) == 0 or false
-            M.cmd_repair(ctx, true, no_normalize)
+            M.cmd_repair(ctx, { no_undo = true, no_normalize = no_normalize })
         end)
         schedule_repair_flag = true
     else
@@ -333,10 +338,10 @@ function M.read_post(ctx)
     if not Bufline.has_pipe(r_result.lines) then
         util.ensure_no_reserved_marks(r_result.lines)
         local tirdoc = fltlines_to_tirdoc(ctx, r_result)
-        doc_to_buflines(ctx, r_result, tirdoc, true)
+        doc_to_buflines(ctx, r_result, tirdoc, { no_undo = true })
     else
         local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
-        doc_to_buflines(ctx, r_result, bufdoc, true)
+        doc_to_buflines(ctx, r_result, bufdoc, { no_undo = true })
     end
 end
 
@@ -404,9 +409,8 @@ function M.cmd_wrap(ctx, width_op)
 end
 
 ---@param ctx Context
----@param no_undo boolean|nil
----@param no_normalize boolean|nil
-function M.cmd_repair(ctx, no_undo, no_normalize)
+---@param opts DocToBufLinesOpts|nil
+function M.cmd_repair(ctx, opts)
     if not need_repair(ctx) then
         return
     end
@@ -414,7 +418,7 @@ function M.cmd_repair(ctx, no_undo, no_normalize)
     local r_result = reader.read(ctx, Range.WHOLE)
     log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[88]MODE:"))
     local bufdoc = buflines_to_bufdoc_attrs_driven(ctx, r_result)
-    doc_to_buflines(ctx, r_result, bufdoc, no_undo, no_normalize)
+    doc_to_buflines(ctx, r_result, bufdoc, opts)
 end
 
 ---@param ctx Context
