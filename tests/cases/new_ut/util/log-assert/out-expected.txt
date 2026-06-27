@@ -1,10 +1,9 @@
 
 --- ERROR ---
 === MESSAGE ===
+ 
+--- CASE 15: log ERROR ---
 [TIR][ERROR][log.lua 414] test case for log.assert ERROR
-
-=== DISPLAY ===
-
 
 === DISPLAY ===
 

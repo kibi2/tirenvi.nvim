@@ -12,8 +12,6 @@ local log = require("tirenvi.util.log")
 -- module
 local M = {}
 
-local api         = vim.api
-
 -- constants / defaults
 
 local DELIMITER = " //"
@@ -90,10 +88,7 @@ local function show_attr_marks(ctx, attr, iattr, icol)
     -- virt_text screen position is not always stable and may differ
     -- from the extmark's actual buffer position.
     local nlines = buffer.line_count(ctx.bufnr)
-    if start0 >= nlines then
-        log.debug("‼️" .. start0)
-        start0 = nlines - 1
-    end
+    start0 = math.min(start0, nlines - 1)
     vim.api.nvim_buf_set_extmark(ctx.bufnr, namespaces.ATTR, start0, 0, opts)
 end
 
@@ -150,7 +145,6 @@ function M.show_attr_marks(ctx)
     local cur_row, _, char_col = buffer.get_cursor_char_pos(ctx)
     local pos = Attrs.to_logical(attrs, cur_row, char_col)
     for iattr, attr in ipairs(attrs) do
-        -- カーソル移動で追従？
         local icol
         if pos.iblock == iattr then
             icol = Attr.to_cell_col(attr, char_col)
