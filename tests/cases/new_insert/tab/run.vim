@@ -1,5 +1,20 @@
 source $TIRENVI_ROOT/tests/common.vim
 
+lua << EOF
+function print_key(key)
+  local line = {"[CI] key = "}
+  for i = 1, #key do
+    table.insert(line, string.format("%02X", string.byte(key, i)))
+  end
+  print(table.concat(line))
+end
+function insert_tab()
+  local key = require("tirenvi.editor.commands").keymap_tab(0)
+  vim.api.nvim_put({key}, "c", true, true)
+  print_key(key)
+end
+EOF
+
 " ===== GFM =====
 edit $TIRENVI_ROOT/tests/data/simple.md
 
@@ -23,11 +38,7 @@ lua print(Debug.layout())
 CASE <noexpand tab> plain
 set noexpandtab
 execute "normal! 02G10l"
-" execute "normal! a\<Tab>\<Esc>"
-lua << EOF
-local key = require("tirenvi.editor.commands").keymap_tab(0)
-vim.api.nvim_put({key}, "c", true, true)
-EOF
+lua insert_tab()
 sleep 1m
 lua print(Debug.layout())
 
@@ -35,11 +46,7 @@ CASE <noexpand tab> Bob Age
 set noexpandtab
 lua Debug.goto(2, 4, 2)
 execute "normal! l"
-" execute "normal! a\<Tab>\<Esc>"
-lua << EOF
-local key = require("tirenvi.editor.commands").keymap_tab(0)
-vim.api.nvim_put({key}, "c", true, true)
-EOF
+lua insert_tab()
 sleep 1m
 lua print(Debug.layout())
 
@@ -54,16 +61,7 @@ lua print(Debug.layout())
 CASE <expand tab>Alice
 set noexpandtab
 lua Debug.goto(1, 2, 1)
-" execute "normal! a\<Tab>\<Esc>"
-
-lua << EOF
-local log = require("tirenvi.util.log")
-local key = require("tirenvi.editor.commands").keymap_tab(0)
-for i = 1, #key do
-  log.error(string.format("[CI] key = %02X", string.byte(key, i)))
-end
-vim.api.nvim_put({key}, "c", true, true)
-EOF
+lua insert_tab()
 sleep 1m
 lua print(Debug.layout())
 
@@ -76,6 +74,6 @@ e!
 set noexpandtab
 Tir toggle
 call cursor(1, 1)
-execute "normal! a\<Tab>\<Esc>"
+lua insert_tab()
 
 call RunTest({ 'desc': 'FLAT' })

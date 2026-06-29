@@ -132,8 +132,10 @@ function M.goto(iblock, irow, icol)
     local cell_pos = {iblock=iblock, irow=irow, icol=icol}
     local char_row, char_col = Attrs.to_cursor(attrs, cell_pos)
     local line = buffer.get_line(ctx.bufnr, char_row)
-    --local byte_col = vim.str_byteindex(line, "utf-32", char_col - 1, false)
-    local byte_col = vim.str_byteindex(line, char_col - 1)
+    if not line then
+        return
+    end
+    local byte_col = buffer.str_byteindex(line, "utf-32", char_col - 1, false)
 	buffer.set_cursor_byte_pos(ctx.winid, char_row, byte_col)
 end
 

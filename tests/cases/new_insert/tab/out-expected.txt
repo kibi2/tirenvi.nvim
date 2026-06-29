@@ -2,20 +2,22 @@
 --- GFM ---
 === MESSAGE ===
  
---- CASE 6: initial cached attrs ---
-CASE 6 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)-* g(3,8)-[5,3,11] p(9,11)-
+--- CASE 21: initial cached attrs ---
+CASE 21 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)-* g(3,8)-[5,3,11] p(9,11)-
  
---- CASE 9: <expand tab>Alice ---
-CASE 9 // cur(5,2) b2:r3:c1 +(0,0)< >  p(1,2)- g(3,8)-[8*,3,11] p(9,11)-
+--- CASE 24: <expand tab>Alice ---
+CASE 24 // cur(5,2) b2:r3:c1 +(0,0)< >  p(1,2)- g(3,8)-[8*,3,11] p(9,11)-
  
---- CASE 16: <expand tab> plain ---
-CASE 16 // cur(2,4) b1:r2:c0 +(0,0)< >  p(1,2)-* g(3,8)-[8,3,11] p(9,11)-
+--- CASE 31: <expand tab> plain ---
+CASE 31 // cur(2,4) b1:r2:c0 +(0,0)< >  p(1,2)-* g(3,8)-[8,3,11] p(9,11)-
  
---- CASE 23: <noexpand tab> plain ---
-CASE 23 // cur(2,13) b1:r2:c0 +(0,0)<->  p(1,2)-* g(3,8)-[8,3,11] p(9,11)-
+--- CASE 38: <noexpand tab> plain ---
+[CI] key = 09
+CASE 38 // cur(2,13) b1:r2:c0 +(0,0)<->  p(1,2)-* g(3,8)-[8,3,11] p(9,11)-
  
---- CASE 34: <noexpand tab> Bob Age ---
-CASE 34 // cur(6,11) b2:r4:c2 +(0,0)<3>  p(1,2)- g(3,8)-[8,3*,11] p(9,11)-
+--- CASE 45: <noexpand tab> Bob Age ---
+[CI] key = E287A5
+CASE 45 // cur(6,11) b2:r4:c2 +(0,0)<3>  p(1,2)- g(3,8)-[8,3*,11] p(9,11)-
 
 === DISPLAY ===
 gfm
@@ -33,14 +35,12 @@ markdown
 --- CSV ---
 === MESSAGE ===
  
---- CASE 51: initial cached attrs ---
-CASE 51 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,7)-[2*,3,3]
+--- CASE 58: initial cached attrs ---
+CASE 58 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,7)-[2*,3,3]
  
---- CASE 54: <expand tab>Alice ---
-[TIR][ERROR][[string ":lua"] 4] [CI] key = E2
-[TIR][ERROR][[string ":lua"] 4] [CI] key = 87
-[TIR][ERROR][[string ":lua"] 4] [CI] key = A5
-CASE 54 // cur(2,2) b1:r2:c1 +(0,0)<⇥>  g(1,7)-[3*,3,3]
+--- CASE 61: <expand tab>Alice ---
+[CI] key = E287A5
+CASE 61 // cur(2,2) b1:r2:c1 +(0,0)<⇥>  g(1,7)-[3*,3,3]
 
 === DISPLAY ===
 │1a⠀│2 a│ 3a│
@@ -53,7 +53,8 @@ CASE 54 // cur(2,2) b1:r2:c1 +(0,0)<⇥>  g(1,7)-[3*,3,3]
 --- FLAT ---
 === MESSAGE ===
  
---- CASE 74: <noexpand tab>FLAT ---
+--- CASE 72: <noexpand tab>FLAT ---
+[CI] key = 09
 
 === DISPLAY ===
 1	a,2 a, 3a
