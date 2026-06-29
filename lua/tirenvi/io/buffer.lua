@@ -66,8 +66,11 @@ local initial_value = {
 local function fix_cursor_utf8(ctx)
 	local irow, byte_col = M.get_cursor_byte_pos(ctx)
 	local line = M.get_line(ctx.bufnr, irow)
+	if not line then
+		return
+	end
 	local char_col0 = vim.str_utfindex(line, byte_col - 1)
-	local boundary = vim.str_byteindex(line, char_col0) + 1
+	local boundary = M.str_byteindex(line, "utf-32", char_col0, false) + 1
 	if boundary ~= byte_col then
 		M.set_cursor_byte_pos(ctx.winid, irow, boundary)
 	end
@@ -306,9 +309,12 @@ end
 function M.get_cursor_char_pos(ctx)
 	local cur_row, byte_col1 = M.get_cursor_byte_pos(ctx)
 	local line = M.get_line(ctx.bufnr, cur_row)
+	if not line then
+		return 0, 0, 0
+	end
 	local byte_col0 = byte_col1 - 1
 	local char_col0 = vim.str_utfindex(line, byte_col0)
-	local new_byte_col = vim.str_byteindex(line, char_col0) + 1
+	local new_byte_col = M.str_byteindex(line, "utf-32", char_col0, false) + 1
 	return cur_row, new_byte_col, char_col0 + 1
 end
 
@@ -316,7 +322,7 @@ end
 ---@param irow integer
 ---@param icol integer
 function M.set_cursor_byte_pos(winid, irow, icol)
-	vim.api.nvim_win_set_cursor(winid, { irow, icol - 1 })
+	vim.api.nvim_win_set_cursor(winid, { irow, math.max(0, icol - 1) })
 end
 
 ---@param bufnr number
@@ -328,7 +334,7 @@ function M.set_cursor_char_pos(bufnr, char_row, char_col)
 		return
 	end
 	local char_col = util.trim(char_col, 1, #line)
-	local byte_col0 = vim.str_byteindex(line, char_col - 1)
+	local byte_col0 = M.str_byteindex(line, "utf-32", char_col - 1, false)
 	local view = vim.fn.winsaveview()
 	view.lnum = char_row
 	view.col = byte_col0
@@ -340,6 +346,16 @@ end
 function M.get_win_span(winid)
 	local info = vim.fn.getwininfo(winid)[1]
 	return info.width - info.textoff
+end
+
+---@param chars string
+---@param encoding string
+---@param ichar integer
+---@param strict_indexing boolean
+function M.str_byteindex(chars, encoding, ichar, strict_indexing)
+	local nchar = vim.str_utfindex(chars)
+	ichar = math.min(ichar, nchar)
+	return vim.str_byteindex(chars, ichar)
 end
 
 return M
