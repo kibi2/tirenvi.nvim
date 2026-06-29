@@ -16,6 +16,11 @@
 
 set -euo pipefail
 
+NVIM_BIN="${NVIM_BIN:-nvim}"
+
+echo "Running with: $NVIM_BIN"
+$NVIM_BIN --version | head -n 1
+
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 ROOT_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
 CASES_DIR="$SCRIPT_DIR/cases"
@@ -116,7 +121,7 @@ while IFS= read -r -d '' d; do
     if [ -f run.sh ]; then
       sh run.sh > stdout.txt 2> stderr.txt
     else
-      NVIM_TIRENVI_DEV=1 ~/opt/nvim-macos-arm64/bin/nvim --headless -u NONE -n -S run.vim  +qa \
+      NVIM_TIRENVI_DEV=1 $NVIM_BIN --headless -u NONE -n -S run.vim  +qa \
         > stdout.txt 2> stderr.txt
       # NVIM_TIRENVI_DEV=1 nvim --headless -u NONE -n -S run.vim  +qa \
       #   > stdout.txt 2> stderr.txt
