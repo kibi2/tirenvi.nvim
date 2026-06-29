@@ -10,26 +10,11 @@
 #   NO_COLOR=1               # disable colored output
 #
 # Notes:
-# - Tests are located under tests/cases/
+# - Tests are located under cases/
 # - Each test must have run.sh or run.vim
 # - --update does NOT overwrite existing out-expected.txt
 
 set -euo pipefail
-
-NVIM_BIN="${NVIM_BIN:-nvim}"
-
-echo "Running with: $NVIM_BIN"
-$NVIM_BIN --version | head -n 1
-
-SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
-ROOT_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
-CASES_DIR="$SCRIPT_DIR/cases"
-STATS="luacov.stats.out"
-
-export TIRENVI_ROOT="$ROOT_DIR"
-
-eval "$(luarocks path)"
-: >  "$ROOT_DIR/$STATS"
 
 GREEN='\033[32m'
 RED='\033[31m'
@@ -47,6 +32,20 @@ if [ -n "${NO_COLOR:-}" ] || [ -n "${GITHUB_ACTIONS:-}" ]; then
   RED_BG=""
   WHITE=""
 fi
+
+NVIM_BIN="${NVIM_BIN:-nvim}"
+echo "Running with: $NVIM_BIN"
+printf "${BOLD}${GREEN}%s${RESET}\n" "$($NVIM_BIN --version | head -n 1)"
+
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+ROOT_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
+CASES_DIR="$SCRIPT_DIR/cases"
+STATS="luacov.stats.out"
+
+export TIRENVI_ROOT="$ROOT_DIR"
+
+eval "$(luarocks path)"
+: >  "$ROOT_DIR/$STATS"
 
 UPDATE=0
 FAIL_FAST=${FAIL_FAST:-0}
@@ -77,21 +76,21 @@ while IFS= read -r -d '' d; do
     continue
   fi
 
-    if [ -f "$d/skip-ci" ]; then
+  if [ -f "$d/skip-ci" ]; then
     if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
       echo "skip (ci): $d"
       continue
     fi
   fi
 
-  name=${d#"$CASES_DIR"/}
+  name=${d#"$SCRIPT_DIR"/}
 
   # --- filter ---
   if [ -n "$PATTERNS" ]; then
     matched=0
     for p in $PATTERNS; do
       case "$name" in
-        $p) matched=1 ;;
+        *"$p"*) matched=1 ;;
       esac
     done
     [ "$matched" -eq 1 ] || continue
