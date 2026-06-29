@@ -36,7 +36,49 @@ execute "normal! oiroha\<Esc>"
 sleep 1m
 lua print(Debug.layout())
 
-call Snapshot({})
+call Snapshot({ 'desc': 'GFM' })
+
+" ===== GFM 3o =====
+
+CASE 3O at top
+e!
+lua Debug.goto(2, 1, 1)
+execute "normal! 3O\<Esc>"
+sleep 1m
+lua print(Debug.layout())
+
+CASE 3OQWE at top
+lua Debug.goto(2, 1, 1)
+execute "normal! 3OQWE\<Esc>"
+sleep 1m
+lua print(Debug.layout())
+
+CASE 3o at top
+e!
+lua Debug.goto(2, 1, 1)
+execute "normal! 3o\<Esc>"
+sleep 1m
+lua print(Debug.layout())
+
+CASE 3oRTY at top
+lua Debug.goto(2, 1, 1)
+execute "normal! 3oRTY\<Esc>"
+sleep 1m
+lua print(Debug.layout())
+
+CASE 3o at bottom
+lua Debug.goto(3, 1, 1)
+execute "normal! k3o\<Esc>"
+sleep 1m
+lua print(Debug.layout())
+
+CASE 3oIOP at bottom
+lua Debug.goto(3, 1, 1)
+execute "normal! k3oIOP\<Esc>"
+sleep 1m
+lua print(Debug.layout())
+
+call Snapshot({ 'desc': 'GFM 3o' })
 
 " ===== CSV =====
 edit $TIRENVI_ROOT/tests/data/simple.csv
@@ -55,4 +97,4 @@ execute "normal! Go\<Esc>"
 sleep 1m
 lua print(Debug.layout())
 
-call RunTest({})
+call RunTest({ 'desc': 'CSV' })
