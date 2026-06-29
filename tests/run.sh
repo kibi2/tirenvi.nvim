@@ -83,13 +83,15 @@ while IFS= read -r -d '' d; do
     fi
   fi
 
-  name=${d#"$SCRIPT_DIR"/}
+  #name=${d#"$SCRIPT_DIR"/}
+  name_match=${d#"$ROOT_DIR"/}
+  name=${d#"$CASES_DIR"/}
 
   # --- filter ---
   if [ -n "$PATTERNS" ]; then
     matched=0
     for p in $PATTERNS; do
-      case "$name" in
+      case "$name_match" in
         *"$p"*) matched=1 ;;
       esac
     done
