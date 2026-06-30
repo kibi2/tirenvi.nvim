@@ -11,7 +11,7 @@ lua << EOF
     "あいうえおかきくけこ",
     "子1丑2寅3卯4辰5巳6午7未8申9酉10戌11亥12"
   }
-	ctx = Context.from_buf()
+  ctx = Context.from_buf()
   Buffer.set_lines(ctx, Range.WHOLE, lines)
 EOF
 
@@ -20,47 +20,47 @@ EOF
 CASE set (1,1) & add ABC, insert XYZ"
 	lua Buffer.set_cursor_char_pos(ctx.bufnr, 1, 1)
 			lua print(Buffer.get_cursor_char_pos(ctx))
-		execute "normal! aABC\<Esc>"
+		normal! aABC
 		lua Buffer.clear_cache()
 	lua Buffer.set_cursor_char_pos(ctx.bufnr, 1, 1)
 			lua print(Buffer.get_cursor_char_pos(ctx))
-		execute "normal! iXYZ\<Esc>"
+		normal! iXYZ
 		lua Buffer.clear_cache()
 
 CASE set (2,5) & add 123, insert 789"
 	lua Buffer.set_cursor_char_pos(ctx.bufnr, 2, 5)
 			lua print(Buffer.get_cursor_char_pos(ctx))
-		execute "normal! a123\<Esc>"
+		normal! a123
 		lua Buffer.clear_cache()
 	lua Buffer.set_cursor_char_pos(ctx.bufnr, 2, 5)
 			lua print(Buffer.get_cursor_char_pos(ctx))
-		execute "normal! i789\<Esc>"
+		normal! i789
 		lua Buffer.clear_cache()
 
 CASE set (3,10) & add 甲乙, insert 丙丁"
 	lua Buffer.set_cursor_char_pos(ctx.bufnr, 3, 10)
 			lua print(Buffer.get_cursor_char_pos(ctx))
-		execute "normal! a甲乙\<Esc>"
+		normal! a甲乙
 		lua Buffer.clear_cache()
 	lua Buffer.set_cursor_char_pos(ctx.bufnr, 3, 10)
 			lua print(Buffer.get_cursor_char_pos(ctx))
-		execute "normal! i丙丁\<Esc>"
+		normal! i丙丁
 		lua Buffer.clear_cache()
 
 CASE kkjj"
-      call Dump('silent ascii')
+      		call Dump('silent ascii')
 			lua print(Buffer.get_cursor_char_pos(ctx))
-		execute "normal! k"
-      call Dump('silent ascii')
+		normal! k
+      		call Dump('silent ascii')
 			lua print(Buffer.get_cursor_char_pos(ctx))
-		execute "normal! k"
-      call Dump('silent ascii')
+		normal! k
+      		call Dump('silent ascii')
 			lua print(Buffer.get_cursor_char_pos(ctx))
-		execute "normal! j"
-      call Dump('silent ascii')
+		normal! j
+      		call Dump('silent ascii')
 			lua print(Buffer.get_cursor_char_pos(ctx))
-		execute "normal! j"
-      call Dump('silent ascii')
+		normal! j
+      		call Dump('silent ascii')
 			lua print(Buffer.get_cursor_char_pos(ctx))
 
 call RunTest({ 'desc': 'test Buffer.set_cursor_char_pos' })

@@ -18,24 +18,24 @@ CASE initial cached attrs
 
 CASE yank column and put
     call feedkeys("vih", "x")
-		execute "normal! x"
-		execute "normal! $"
-		execute "normal! p"
+		normal! x
+		normal! $
+		normal! p
       sleep 1m | lua print(Debug.layout())
 
 CASE yank 2column and put
 	call At(1, 7, 1)
-		execute "normal! l"
+		normal! l
 			lua print(Debug.layout())
     call feedkeys("v2ih", "x")
-		execute "normal! d"
-		execute "normal! hP"
+		normal! d
+		normal! hP
       sleep 1m | lua print(Debug.layout())
 
 CASE repair disable
 Tir repair disable
 	call At(1, 5, 1)
-		execute "normal! ainsert\<Esc>"
+		normal! ainsert
     call feedkeys("vih", "x")
 
 call Snapshot({ 'desc': 'CSV' })
@@ -49,16 +49,16 @@ CASE initial cached attrs
 
 CASE yank plain
     call feedkeys("vih", "x")
-		execute "normal! d"
-		execute "normal! $h"
-		execute "normal! p"
+		normal! d
+		normal! $h
+		normal! p
       sleep 1m | lua print(Debug.layout())
 
 CASE yank 2column and put
 	call At(2, 4, 2)
     call feedkeys("v2ih", "x")
-		execute "normal! lx"
-		execute "normal! 0p"
+		normal! lx
+		normal! 0p
       sleep 1m | lua print(Debug.layout())
 
 call RunTest({ 'desc': 'GFM' })

@@ -19,7 +19,7 @@ EOF
 edit $TIRENVI_ROOT/tests/data/simple.md
 
 CASE initial cached attrs
-lua print(Debug.layout())
+      lua print(Debug.layout())
 
 CASE <expand tab>Alice
 set expandtab
@@ -35,13 +35,13 @@ CASE <expand tab> plain
 
 CASE <noexpand tab> plain
     set noexpandtab
-  execute "normal! 02G10l"
+  normal! 02G10l
     lua insert_tab()
     sleep 1m | lua print(Debug.layout())
 
 CASE <noexpand tab> Bob Age
 set noexpandtab
-	call At(2, 4, 2) | execute "normal! l"
+	call At(2, 4, 2) | normal! l
     lua insert_tab()
       sleep 1m | lua print(Debug.layout())
 
