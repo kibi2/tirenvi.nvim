@@ -79,13 +79,6 @@ function! Dump(cmd) abort
   echomsg printf('%s => %s', a:cmd, msg)
 endfunction
 
-function! SafeEdit(path)
-  try
-    execute 'edit ' . a:path
-  catch
-  endtry
-endfunction
-
 let s:last_msg_count = 0
 
 function! s:CollectMessages() abort

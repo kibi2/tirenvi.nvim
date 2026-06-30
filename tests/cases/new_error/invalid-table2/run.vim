@@ -12,9 +12,10 @@ M.setup({
 })
 EOF
 
+" ===== CSV =====
 edit $TIRENVI_ROOT/tests/data/simple.csv
-Tir toggle
-call cursor(2, 1)
-execute "normal! i│\<Esc>"
+      Tir toggle
+  call cursor(2, 1)
+      execute "normal! i│\<Esc>"
 
 call RunTest({})

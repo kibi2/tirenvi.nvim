@@ -6,14 +6,14 @@ CASE 6 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
 --- CASE 9: yyp : grid last row ---
 CASE 9 // cur(9,1) b2:r7:c1 +(0,-1)<│>  p(1,2) g(3,9)n[5*,3,11] p(10,12)
  
---- CASE 15: yyp : grid row "nipponbashi" ---
-CASE 15 // cur(8,1) b2:r6:c1 +(0,-1)<│>  p(1,2) g(3,10)n[5*,3,11] p(11,13)
+--- CASE 14: yyp : grid row "nipponbashi" ---
+CASE 14 // cur(8,1) b2:r6:c1 +(0,-1)<│>  p(1,2) g(3,10)n[5*,3,11] p(11,13)
  
---- CASE 21: yyp : grid continue row ---
-CASE 21 // cur(7,2) b2:r5:c1 +(0,0)<⠀>  p(1,2) g(3,11)n[6*,4,11] p(12,14)
+--- CASE 19: yyp : grid continue row ---
+CASE 19 // cur(7,2) b2:r5:c1 +(0,0)<⠀>  p(1,2) g(3,11)n[6*,4,11] p(12,14)
  
---- CASE 27: yyp : plain ---
-CASE 27 // cur(3,1) b1:r3:c0 +(0,0)<->  p(1,3)* g(4,12)n[6,4,11] p(13,15)
+--- CASE 24: yyp : plain ---
+CASE 24 // cur(3,1) b1:r3:c0 +(0,0)<->  p(1,3)* g(4,12)n[6,4,11] p(13,15)
 
 === DISPLAY ===
 gfm

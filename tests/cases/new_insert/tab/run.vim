@@ -23,32 +23,27 @@ lua print(Debug.layout())
 
 CASE <expand tab>Alice
 set expandtab
-lua Debug.goto(2, 3, 1)
-execute "normal! a\<Tab>\<Esc>"
-sleep 1m
-lua print(Debug.layout())
+	call At(2, 3, 1)
+    execute "normal! a\<Tab>\<Esc>"
+      sleep 1m | lua print(Debug.layout())
 
 CASE <expand tab> plain
-set expandtab
-lua Debug.goto(1, 2, 1)
-execute "normal! a\<Tab>\<Esc>"
-sleep 1m
-lua print(Debug.layout())
+    set expandtab
+  call At(1, 2, 1)
+    execute "normal! a\<Tab>\<Esc>"
+    sleep 1m | lua print(Debug.layout())
 
 CASE <noexpand tab> plain
-set noexpandtab
-execute "normal! 02G10l"
-lua insert_tab()
-sleep 1m
-lua print(Debug.layout())
+    set noexpandtab
+  execute "normal! 02G10l"
+    lua insert_tab()
+    sleep 1m | lua print(Debug.layout())
 
 CASE <noexpand tab> Bob Age
 set noexpandtab
-lua Debug.goto(2, 4, 2)
-execute "normal! l"
-lua insert_tab()
-sleep 1m
-lua print(Debug.layout())
+	call At(2, 4, 2) | execute "normal! l"
+    lua insert_tab()
+      sleep 1m | lua print(Debug.layout())
 
 call Snapshot({ 'desc': 'GFM' })
 
@@ -56,24 +51,23 @@ call Snapshot({ 'desc': 'GFM' })
 edit $TIRENVI_ROOT/tests/data/simple.csv
 
 CASE initial cached attrs
-lua print(Debug.layout())
+      lua print(Debug.layout())
 
 CASE <expand tab>Alice
 set noexpandtab
-lua Debug.goto(1, 2, 1)
-lua insert_tab()
-sleep 1m
-lua print(Debug.layout())
+	call At(1, 2, 1)
+    lua insert_tab()
+      sleep 1m | lua print(Debug.layout())
 
 call Snapshot({ 'desc': 'CSV' })
 
 " ===== FLAT =====
 
 CASE <noexpand tab>FLAT
-e!
-set noexpandtab
-Tir toggle
-call cursor(1, 1)
-lua insert_tab()
+    e!
+    set noexpandtab
+    Tir toggle
+  call cursor(1, 1)
+      lua insert_tab()
 
 call RunTest({ 'desc': 'FLAT' })
