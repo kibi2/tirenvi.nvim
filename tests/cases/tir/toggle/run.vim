@@ -1,5 +1,4 @@
 source $TIRENVI_ROOT/tests/common.vim
-let outfile = 'gen.csv'
 
 " ===== GFM =====
 edit $TIRENVI_ROOT/tests/data/table2.md
@@ -25,18 +24,14 @@ lua Debug.goto(1, 1, 1)
 sleep 1m
 lua print(Debug.layout())
 
-lua Debug.goto(1, 1, 1)
-execute "normal! 0gg2j0"
+edit $TIRENVI_ROOT/tests/data/simple.md
+lua Debug.goto(2, 2, 1)
 Tir width-1
-sleep 1m
-execute "normal! 0gg4j6l"
+lua Debug.goto(2, 3, 2)
 Tir width=5
-sleep 1m
-execute "normal! 0gg7j22l"
+lua Debug.goto(2, 4, 3)
 Tir width+2
-sleep 1m
 Tir toggle
-sleep 1m
 Tir toggle
 sleep 1m
 call Snapshot({'desc': 'simple.md' })

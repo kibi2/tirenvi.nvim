@@ -1,7 +1,15 @@
 
 --- simple.md ---
 === MESSAGE ===
+ 
+--- CASE 6: nowrap mode : toggle -> toggle ---
+CASE 6 // cur(1,1) b1:r1:c0 +(0,0)<->  p(1,1)* g(2,6)n[5,6] p(7,7) g(8,12)n[5,3,6]
+CASE 6 // cur(1,1) b1:r1:c0 +(0,0)<->  p(1,1)* g(2,6)n[5,6] p(7,7) g(8,12)n[5,3,6]
+ 
+--- CASE 13: wrap mode : toggle -> toggle ---
 tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
+CASE 13 // cur(1,1) b1:r1:c0 +(0,0)<->  p(1,1)* g(2,11)w[5,3] p(12,12) g(13,22)f13[3,3,3]
+CASE 13 // cur(1,1) b1:r1:c0 +(0,0)<->  p(1,1)* g(2,11)w[5,3] p(12,12) g(13,22)f13[3,3,3]
 
 === DISPLAY ===
 gfm
@@ -17,7 +25,18 @@ gfm
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
 markdown
 
---- table0.md ---
+--- toggle ---
+=== MESSAGE ===
+ 
+--- CASE 40: table 0 ---
+CASE 40 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)*
+ 
+--- CASE 47: NG case ---
+Usage: :Tir <fit|redraw|repair|toggle|width|wrap>
+Usage: :Tir <fit|redraw|repair|toggle|width|wrap>
+Tir repair is deprecated and will be removed in v0.5. Use :Tir redraw
+Usage: :Tir <fit|redraw|repair|toggle|width|wrap>
+CASE 47 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)*
 
 === DISPLAY ===
 gfm
