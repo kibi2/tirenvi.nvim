@@ -68,10 +68,10 @@ local function get_number(str)
         return 1
     end
     local num = tonumber(str)
-    if not num or num <= 0 then
+    if not num or num < 0 then
         error(string.format("%s is not positive number", str))
     end
-    return num
+    return math.max(1, num)
 end
 
 ---@param opts {[string]:any}
@@ -84,13 +84,14 @@ local function get_operation(opts)
     if not op then
         error(string.format("%s need operator %s", opts.command_name, sub))
     end
-    if op == "=" and #value == 0 then
-        return "auto", 0
-    end
     if op == "?" and #value ~= 0 then
         return nil, nil
     end
-    return map[op], get_number(value)
+    local num = get_number(value)
+    if op == "=" and num <= 1 then
+        return "auto", 0
+    end
+    return map[op], num
 end
 
 ---@param opts {[string]:any}

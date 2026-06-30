@@ -2,7 +2,7 @@
 === MESSAGE ===
  
 --- CASE 6: initial cached attrs ---
-CASE 6 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,18)-[17*,9,10,7,17,9,10,7,8,7,17,9,10,7,8,7]
+CASE 6 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,18)n[17*,9,10,7,17,9,10,7,8,7,17,9,10,7,8,7]
  
 --- CASE 9: width? CSV col#1 ---
 mode=nowrap span=176 col=1/16 header="A1" widths=[17*,9,10,..]
@@ -24,7 +24,7 @@ mode=wrap span=143 col=10/16 header="F6666.." widths=[..,7,8,7*,9,8,..]
 mode=wrap span=143 col=16/16 header="F6666.." widths=[..,7,8,7*]
  
 --- CASE 37: initial cached attrs ---
-CASE 37 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)-* g(3,8)-[5,3,11] p(9,11)-
+CASE 37 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
  
 --- CASE 40: width? plain ---
 kind=plain

@@ -125,7 +125,7 @@ local function apply_attrs_by_id(tirdoc, c_attrs)
         if block.kind == CONST.KIND.GRID then
             iblock = iblock + 1
             if attrs_grid[iblock] then
-                block.attr.columns = attrs_grid[iblock].columns
+                block.attr = attrs_grid[iblock]
             end
         end
     end

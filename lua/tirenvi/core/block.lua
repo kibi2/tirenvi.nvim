@@ -301,6 +301,8 @@ function M.grid:apply_attrs_by_range(attrs)
     if not attr or not Attr.is_grid(attr) then
         return
     end
+    self.attr.wrap_mode = attr.wrap_mode
+    self.attr.fit_span = attr.fit_span
     if #self.attr.columns == 0 then
         self.attr.columns = vim.deepcopy(attr.columns)
     else

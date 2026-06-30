@@ -3,14 +3,14 @@
 === MESSAGE ===
  
 --- CASE 15: initial cached attrs ---
-CASE 15 // cur(1,5) b1:r1:c2 +(0,0)<2>  g(1,7)-[2,3*,3]
+CASE 15 // cur(1,5) b1:r1:c2 +(0,0)<2>  g(1,7)n[2,3*,3]
  
 --- CASE 19: yank column and put ---
-CASE 19 // cur(1,10) b1:r1:c3 +(0,2)<2>  g(1,7)-[2,2,3*,3]
+CASE 19 // cur(1,10) b1:r1:c3 +(0,2)<2>  g(1,7)n[2,2,3*,3]
  
 --- CASE 27: yank 2column and put ---
-CASE 27 // cur(7,2) b1:r7:c1 +(0,0)<⠀>  g(1,7)-[2*,2,3,3]
-CASE 27 // cur(1,1) b1:r1:c1 +(0,-1)<1>  g(1,7)-[2*,2,2,3,3]
+CASE 27 // cur(7,2) b1:r7:c1 +(0,0)<⠀>  g(1,7)n[2*,2,3,3]
+CASE 27 // cur(1,1) b1:r1:c1 +(0,-1)<1>  g(1,7)n[2*,2,2,3,3]
  
 --- CASE 37: repair disable ---
 [Tirenvi] repair:disable 
@@ -28,13 +28,13 @@ tirenvi: Cannot select column: table is not aligned.
 === MESSAGE ===
  
 --- CASE 48: initial cached attrs ---
-CASE 48 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)-* g(3,8)-[5,3,11] p(9,11)-
+CASE 48 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
  
 --- CASE 52: yank plain ---
-CASE 52 // cur(1,2) b1:r1:c0 +(0,0)<g>  p(1,2)-* g(3,8)-[5,3,11] p(9,11)-
+CASE 52 // cur(1,2) b1:r1:c0 +(0,0)<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
  
 --- CASE 59: yank 2column and put ---
-CASE 59 // cur(3,2) b2:r1:c1 +(0,0)<A>  p(1,2)- g(3,8)-[3*,11,5] p(9,11)-
+CASE 59 // cur(3,2) b2:r1:c1 +(0,0)<A>  p(1,2) g(3,8)n[3*,11,5] p(9,11)
 
 === DISPLAY ===
 fgm
