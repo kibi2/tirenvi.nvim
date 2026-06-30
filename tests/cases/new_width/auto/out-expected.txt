@@ -2,32 +2,32 @@
 === MESSAGE ===
  
 --- CASE 6: initial cached attrs ---
-CASE 6 // cur(1,1) b1:r1:c0 +(0,0)<->  p(1,1)-* g(2,6)-[5,6] p(7,7)- g(8,12)-[5,3,6]
+CASE 6 // cur(1,1) b1:r1:c0 +(0,0)<->  p(1,1)* g(2,6)n[5,6] p(7,7) g(8,12)n[5,3,6]
  
 --- CASE 9: fit= plain#1 ---
 tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
-CASE 9 // cur(1,1) b1:r1:c0 +(0,0)<->  p(1,1)-* g(2,6)-[5,6] p(7,7)- g(8,12)-[5,3,6]
+CASE 9 // cur(1,1) b1:r1:c0 +(0,0)<->  p(1,1)* g(2,6)n[5,6] p(7,7) g(8,12)n[5,3,6]
  
 --- CASE 14: fit= grid#1 ---
-CASE 14 // cur(2,2) b2:r1:c1 +(0,0)<N>  p(1,1)- g(2,6)a0[7*,8] p(7,7)- g(8,12)-[5,3,6]
+CASE 14 // cur(2,2) b2:r1:c1 +(0,0)<N>  p(1,1) g(2,6)a0[7*,8] p(7,7) g(8,12)n[5,3,6]
  
 --- CASE 19: fit= grid#1 logic A // within screen width: recommended width for an empty column is 3 ---
-CASE 19 // cur(2,2) b2:r1:c1 +(0,0)<⠀>  p(1,1)- g(2,6)a0[3*,8] p(7,7)- g(8,12)-[5,3,6]
+CASE 19 // cur(2,2) b2:r1:c1 +(0,0)<⠀>  p(1,1) g(2,6)a0[3*,8] p(7,7) g(8,12)n[5,3,6]
  
 --- CASE 25: fit= grid#1 logic A // within screen width: recommended width for a 3-character column is 4 ---
-CASE 25 // cur(2,7) b2:r1:c2 +(0,0)<C>  p(1,1)- g(2,6)a0[4,8*] p(7,7)- g(8,12)-[5,3,6]
+CASE 25 // cur(2,7) b2:r1:c2 +(0,0)<C>  p(1,1) g(2,6)a0[4,8*] p(7,7) g(8,12)n[5,3,6]
  
 --- CASE 30: fit= grid#1 logic A // within screen width: recommended width for a 4-character column is 6 ---
-CASE 30 // cur(2,2) b2:r1:c1 +(0,0)<P>  p(1,1)- g(2,6)a0[6*,8] p(7,7)- g(8,12)-[5,3,6]
+CASE 30 // cur(2,2) b2:r1:c1 +(0,0)<P>  p(1,1) g(2,6)a0[6*,8] p(7,7) g(8,12)n[5,3,6]
  
 --- CASE 35: fit= grid#1 logic A // within screen width: recommended width for an 18-character column is 24 ---
-CASE 35 // cur(3,27) b2:r2:c2 +(0,0)<->  p(1,1)- g(2,6)a0[24,8*] p(7,7)- g(8,12)-[5,3,6]
+CASE 35 // cur(3,27) b2:r2:c2 +(0,0)<->  p(1,1) g(2,6)a0[24,8*] p(7,7) g(8,12)n[5,3,6]
  
 --- CASE 40: fit= grid#1 logic A // within screen width: recommended width for a 19-character column is 25 ---
-CASE 40 // cur(3,2) b2:r2:c1 +(0,0)<R>  p(1,1)- g(2,6)a0[25*,8] p(7,7)- g(8,12)-[5,3,6]
+CASE 40 // cur(3,2) b2:r2:c1 +(0,0)<R>  p(1,1) g(2,6)a0[25*,8] p(7,7) g(8,12)n[5,3,6]
  
 --- CASE 48: wide CSV initial ---
-CASE 48 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,18)-[17*,9,10,7,17,9,10,7,8,7,17,9,10,7,8,7]
+CASE 48 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,18)n[17*,9,10,7,17,9,10,7,8,7,17,9,10,7,8,7]
  
 --- CASE 51: fit= logic C // exceeds screen width ---
 CASE 51 // cur(1,2) b1:r1:c1 +(0,0)<A>  g(1,21)a0[9*,8,8,7,9,8,8,7,8,7,9,8,8,7,8,7]

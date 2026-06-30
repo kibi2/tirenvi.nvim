@@ -33,7 +33,7 @@ lua print(Debug.layout())
 
 CASE fit=1 grid#2
 lua Debug.goto(4, 3, 2)
-Tir fit=1
+Tir fit=2
 lua print(Debug.layout())
 
 CASE fit-10 plain#2

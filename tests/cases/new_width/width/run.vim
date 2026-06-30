@@ -59,19 +59,19 @@ lua Debug.goto(1, 3, 3)
 Tir width=20
 lua print(Debug.layout())
 
-CASE undo"
+CASE undo
 u
 lua print(Debug.layout())
 
-CASE undo #2"
+CASE undo #2
 undo
 lua print(Debug.layout())
 
-CASE undo #3"
+CASE undo #3
 undo
 lua print(Debug.layout())
 
-CASE redo"
+CASE redo
 redo
 lua print(Debug.layout())
 
