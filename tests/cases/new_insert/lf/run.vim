@@ -20,7 +20,7 @@ edit $TIRENVI_ROOT/tests/data/simple.csv
 
 CASE lf-at-start <lf>|2-1|2-2|2-3|
   call At(1, 2, 1)
-    execute "normal! 0"
+    normal! 0
       lua print_lf()
 
 CASE lf-in-cell |<lf char>2-1|2-2|2-3|

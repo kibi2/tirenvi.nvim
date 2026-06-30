@@ -33,7 +33,7 @@ CASE next cell
             lua print(Debug.cursor_pos())
 
 CASE repeat 3cell
-        execute "normal! 3;"
+        normal! 3;
             lua print(Debug.cursor_pos())
 
 CASE prev cell
@@ -46,7 +46,7 @@ edit $TIRENVI_ROOT/tests/data/simple.csv
 CASE CSV bottom
 lua require('tirenvi').motion.block_bottom()
         execute "normal! " . luaeval("require('tirenvi.editor.motion').t()")
-        execute "normal! 2;"
+        normal! 2;
             lua print(Debug.cursor_pos())
 
 CASE CSV top

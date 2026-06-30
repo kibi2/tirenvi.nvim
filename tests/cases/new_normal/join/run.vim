@@ -8,17 +8,17 @@ lua print(Debug.layout())
 
 CASE 3J
 	call At(2, 1, 3)
-        execute "normal! 3J"
+        normal! 3J
             sleep 1m | lua print(Debug.layout())
 
 CASE 2gJ
 	call At(2, 3, 2)
-        execute "normal! 2gJ"
+        normal! 2gJ
             sleep 1m | lua print(Debug.layout())
 
 CASE J
 	call At(3, 1, 1)
-        execute "normal! kJ"
+        normal! kJ
             sleep 1m | lua print(Debug.layout())
 
 call Snapshot({})
@@ -26,7 +26,7 @@ call Snapshot({})
 CASE Alice + Bob
 e!
 	call At(2, 3, 1)
-        execute "normal! J"
+        normal! J
             sleep 1m | lua print(Debug.layout())
 
 call RunTest({})

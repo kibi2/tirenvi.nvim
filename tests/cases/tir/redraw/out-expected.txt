@@ -1,4 +1,40 @@
 
+=== MESSAGE ===
+ 
+--- CASE 6: delete(val) -> put ---
+CASE 6 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,7)n[2*,3,3]
+CASE 6 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,7)n[3*,3]
+CASE 6 // cur(1,9) b1:r1:c3 +(0,-1)<│>  g(1,7)n[3,3,2*]
+
+=== DISPLAY ===
+│2 a│ 3a│1a│
+┊2b⠀┊3↲⠀┊1↲┊
+│⠀⠀⠀│b⇥⠀│⠀⠀│
+┊⠀⠀⠀┊⇥c⠀┊↲⠀┊
+┊⠀⠀⠀┊⠀⠀⠀┊↲⠀┊
+┊⠀⠀⠀┊⠀⠀⠀┊↲⠀┊
+│⠀⠀⠀│⠀⠀⠀│⠀⠀│
+
+=== MESSAGE ===
+ 
+--- CASE 17: delete(val) -> redraw -> put ---
+CASE 17 // cur(1,2) b1:r1:c1 +(0,0)<1>  g(1,7)n[2*,3,3]
+CASE 17 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,7)n[3*,3]
+CASE 17 // cur(1,2) b1:r1:c1 +(0,0)<2>  g(1,4)n[3*,3]
+3 more lines
+CASE 17 // cur(1,27) b1:r1:c2 +(0,0)< >  g(1,9)n[24,6*]
+
+=== DISPLAY ===
+│2 a⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│ 3a 1a│
+┊2b⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀┊3↲⠀⠀⠀⠀┊
+┊⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀┊ 1↲⠀⠀⠀┊
+│⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│b⇥ ⠀⠀⠀│
+┊⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀┊⇥c ↲⠀⠀┊
+│⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│⠀⠀⠀⠀⠀⠀│
+┊                        ┊↲⠀⠀⠀⠀⠀┊
+┊⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀┊↲⠀⠀⠀⠀⠀┊
+│⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│⠀⠀⠀⠀⠀⠀│
+
 --- before format ---
 === MESSAGE ===
 [Tirenvi] repair:disable 
@@ -6,7 +42,7 @@
 5 substitutions on 4 lines
 3 lines yanked
 3 more lines
-[{'range': {'first': 1, 'last': 2}}, {'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 11, 'width': 11}], 'width_mode': 'fit', 'range': {'first': 3, 'last': 5}, 'prev_width_mode': 'fit'}, {'range': {'first': 6, 'last': 6}}, {'columns': [{'fix_width': 6, 'width': 6}, {'fix_width': 3, 'width': 3}, {'fix_width': 12, 'width': 12}], 'width_mode': 'fit', 'range': {'first': 7, 'last': 9}, 'prev_width_mode': 'fit'}, {'range': {'first': 10, 'last': 11}}]
+CASE 17 // cur(7,1) b4:r1:c1 +(0,-1)<┊>  p(1,2) g(3,5)n[5,3,11] p(6,6) g(7,9)n[6*,3,12]
 
 === DISPLAY ===
 gfm
@@ -23,20 +59,19 @@ markdQWwn
 
 --- after format ---
 === MESSAGE ===
-[{'range': {'first': 1, 'last': 2}}, {'columns': [{'fix_width': 5, 'width': 5}, {'fix_width': 3, 'width': 3}, {'fix_width': 11, 'width': 11}], 'width_mode': 'fit', 'range': {'first': 3, 'last': 7}, 'prev_width_mode': 'fit'}, {'range': {'first': 8, 'last': 8}}, {'columns': [{'fix_width': 6, 'width': 6}, {'fix_width': 3, 'width': 3}, {'fix_width': 12, 'width': 12}], 'width_mode': 'fit', 'range': {'first': 9, 'last': 11}, 'prev_width_mode': 'fit'}, {'range': {'first': 12, 'last': 13}}]
+Tir repair is deprecated and will be removed in v0.5. Use :Tir redraw
+CASE 17 // cur(7,2) b4:r1:c1 +(0,0)<B>  p(1,2) g(3,5)n[6,2,12] p(6,6) g(7,9)n[6*,2,12]
 
 === DISPLAY ===
 gfm
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
-┊BQWb⠀┊31⠀┊Osaka↲⠀⠀⠀⠀⠀┊
-┊⠀⠀⠀⠀⠀┊⠀⠀⠀┊nippQWnbash┊
-│⠀⠀⠀⠀⠀│⠀⠀⠀│i⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│
-┊CarQW┊27⠀┊NagQWya⠀⠀⠀⠀┊
-│l⠀⠀⠀⠀│⠀⠀⠀│⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀│
+┊BQWb⠀⠀┊31┊Osaka↲⠀⠀⠀⠀⠀⠀┊
+│⠀⠀⠀⠀⠀⠀│⠀⠀│nippQWnbashi│
+│CarQWl│27│NagQWya⠀⠀⠀⠀⠀│
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
-┊BQWb⠀⠀┊31⠀┊Osaka↲⠀⠀⠀⠀⠀⠀┊
-│⠀⠀⠀⠀⠀⠀│⠀⠀⠀│nippQWnbashi│
-│CarQWl│27⠀│NagQWya⠀⠀⠀⠀⠀│
+┊BQWb⠀⠀┊31┊Osaka↲⠀⠀⠀⠀⠀⠀┊
+│⠀⠀⠀⠀⠀⠀│⠀⠀│nippQWnbashi│
+│CarQWl│27│NagQWya⠀⠀⠀⠀⠀│
 markdQWwn
 
 
@@ -49,22 +84,19 @@ markdQWwn
 [Tirenvi] invalid argument: of (expected: [enable|disable|toggle])
 [Tirenvi] repair:disable 
 [Tirenvi] repair:enable 
+CASE 17 // cur(2,7) b1:r2:c2 +(0,0)<d>  g(1,2)n[4,2*]
 
 === DISPLAY ===
-│a⠀│b⠀│
-┊AD┊d⠀┊
-│Dc│⠀⠀│
+│a⠀⠀⠀│b⠀│
+│ADDc│d⠀│
 === MESSAGE ===
 [Tirenvi] repair:disable 
-7 substitutions on 3 lines
+7 substitutions on 2 lines
 [Tirenvi] repair:enable 
+CASE 17 // cur(2,2) b1:r2:c1 +(0,0)<x>  g(1,2)n[2*,2]
+CASE 17 // cur(2,11) b1:r2:c2 +(0,0)<⠀>  g(1,3)n[8,2*]
 
 === DISPLAY ===
-│xx│xx│
-┊ne┊⠀⠀┊
-┊w ┊⠀⠀┊
-┊li┊⠀⠀┊
-│ne│⠀⠀│
-┊xx┊xx┊
-┊xx┊⠀⠀┊
-│x⠀│⠀⠀│
+│xx⠀⠀⠀⠀⠀⠀│xx│
+│new line│⠀⠀│
+│x⠀⠀⠀⠀⠀⠀⠀│⠀⠀│

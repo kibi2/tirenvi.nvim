@@ -8,27 +8,27 @@ CASE initial cached attrs
 
 CASE o at Alice
 	call At(2, 3, 1)
-        execute "normal! o\<Esc>"
+        normal! o
             sleep 1m | lua print(Debug.layout())
 
 CASE Oabs at Top (header line)
 	call At(2, 1, 3)
-        execute "normal! Oabc\<Esc>"
+        normal! Oabc
             sleep 1m | lua print(Debug.layout())
 
 CASE insert pipe at Bottom
 	call At(2, 7, 2)
-        execute "normal! o 1 | 2\<Esc>"
+        normal! o 1 | 2
             sleep 1m | lua print(Debug.layout())
 
 CASE insert ABC
 	call At(2, 6, 1)
-        execute "normal! oABC\<Esc>"
+        normal! oABC
             sleep 1m | lua print(Debug.layout())
 
 CASE insert iroha TOP
 	call At(1, 1, 1)
-        execute "normal! oiroha\<Esc>"
+        normal! oiroha
             sleep 1m | lua print(Debug.layout())
 
 call Snapshot({ 'desc': 'GFM' })
@@ -38,33 +38,33 @@ call Snapshot({ 'desc': 'GFM' })
 CASE 3O at top
 e!
 	call At(2, 1, 1)
-        execute "normal! 3O\<Esc>"
+        normal! 3O
             sleep 1m | lua print(Debug.layout())
 
 CASE 3OQWE at top
 	call At(2, 1, 1)
-        execute "normal! 3OQWE\<Esc>"
+        normal! 3OQWE
             sleep 1m | lua print(Debug.layout())
 
 CASE 3o at top
 e!
 	call At(2, 1, 1)
-        execute "normal! 3o\<Esc>"
+        normal! 3o
             sleep 1m | lua print(Debug.layout())
 
 CASE 3oRTY at top
 	call At(2, 1, 1)
-        execute "normal! 3oRTY\<Esc>"
+        normal! 3oRTY
             sleep 1m | lua print(Debug.layout())
 
 CASE 3o at bottom
 	call At(3, 1, 1)
-        execute "normal! k3o\<Esc>"
+        normal! k3o
             sleep 1m | lua print(Debug.layout())
 
 CASE 3oIOP at bottom
 	call At(3, 1, 1)
-        execute "normal! k3oIOP\<Esc>"
+        normal! k3oIOP
             sleep 1m | lua print(Debug.layout())
 
 call Snapshot({ 'desc': 'GFM 3o' })
@@ -77,11 +77,11 @@ lua print(Debug.layout())
 
 CASE TOP O
 	call At(1, 1, 1)
-        execute "normal! Onew line\<Esc>"
+        normal! Onew line
             sleep 1m | lua print(Debug.layout())
 
 CASE BOTTOM o
-        execute "normal! Go\<Esc>"
+        normal! Go
             sleep 1m | lua print(Debug.layout())
 
 call RunTest({ 'desc': 'CSV' })

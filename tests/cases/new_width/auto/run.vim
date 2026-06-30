@@ -4,58 +4,49 @@ source $TIRENVI_ROOT/tests/common.vim
 edit $TIRENVI_ROOT/tests/data/table2.md
 
 CASE initial cached attrs
-lua print(Debug.layout())
+			lua print(Debug.layout())
 
 CASE fit= plain#1
-lua Debug.goto(1, 1, 1)
-Tir fit=
-lua print(Debug.layout())
+	call At(1, 1, 1)
+		call Tir("fit=")
 
 CASE fit= grid#1
-lua Debug.goto(1, 2, 1)
-Tir fit=
-lua print(Debug.layout())
+	call At(1, 2, 1)
+		call Tir("fit=")
 
 CASE fit= grid#1 logic A // within screen width: recommended width for an empty column is 3
-call feedkeys("vil", "x")
-execute "normal! d"
-Tir fit=
-lua print(Debug.layout())
+	call feedkeys("vil", "x")
+	normal! d
+		call Tir("fit=")
 
 CASE fit= grid#1 logic A // within screen width: recommended width for a 3-character column is 4
-execute "normal! 3aO\<Esc>"
-Tir fit=
-lua print(Debug.layout())
+	normal! 3aO
+		call Tir("fit=")
 
 CASE fit= grid#1 logic A // within screen width: recommended width for a 4-character column is 6
-execute "normal! 0aP\<Esc>"
-Tir fit=
-lua print(Debug.layout())
+	normal! 0aP
+		call Tir("fit=")
 
 CASE fit= grid#1 logic A // within screen width: recommended width for an 18-character column is 24
-execute "normal! j018aQ\<Esc>"
-Tir fit=
-lua print(Debug.layout())
+	normal! j018aQ
+		call Tir("fit=")
 
 CASE fit= grid#1 logic A // within screen width: recommended width for a 19-character column is 25
-execute "normal! 0aR\<Esc>"
-Tir fit=
-lua print(Debug.layout())
+	normal! 0aR
+		call Tir("fit=")
 
 " ===== CSV =====
 edit $TIRENVI_ROOT/tests/data/wide.csv
 
 CASE wide CSV initial
-lua print(Debug.layout())
+			lua print(Debug.layout())
 
 CASE fit= logic C // exceeds screen width
-Tir fit=
-lua print(Debug.layout())
+		call Tir("fit=")
 
 CASE fit= logic B // fits within screen width
-call feedkeys("val", "x")
-execute "normal! d"
-Tir fit=
-lua print(Debug.layout())
+	call feedkeys("val", "x")
+	normal! d
+		call Tir("fit=")
 
 call RunTest({ 'desc': 'Tir wrap' })
