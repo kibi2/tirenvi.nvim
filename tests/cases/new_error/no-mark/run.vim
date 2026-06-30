@@ -15,6 +15,7 @@ M.setup({
 })
 EOF
 
+" ===== CSV =====
 try
   edit $TIRENVI_ROOT/tests/data/simple.csv
 catch

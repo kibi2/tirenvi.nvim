@@ -38,9 +38,4 @@ execute "normal! 2j"
 lua log.watch("ATTR", Debug.layout("1DOC ATTR:"))
 lua log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "UPDATE CHACHED ATTRS:")) 
 
-
-lua << EOF
-EOF
-
-
 call RunTest({})

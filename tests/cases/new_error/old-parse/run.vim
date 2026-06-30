@@ -12,10 +12,10 @@ M.setup({
 })
 EOF
 
+" ===== GFM =====
 try
   edit $TIRENVI_ROOT/tests/data/simple.md
 catch
 endtry
 
-" call SafeEdit($TIRENVI_ROOT . '/tests/data/complex.csv')
 call RunTest({})

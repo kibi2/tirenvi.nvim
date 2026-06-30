@@ -12,10 +12,10 @@ M.setup({
 })
 EOF
 
+" ===== CSV =====
 try
   edit $TIRENVI_ROOT/tests/data/simple.csv
 catch
 endtry
 
-" call SafeEdit($TIRENVI_ROOT . '/tests/data/complex.csv')
 call RunTest({})

@@ -8,16 +8,16 @@ CASE 21 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
 --- CASE 24: <expand tab>Alice ---
 CASE 24 // cur(5,2) b2:r3:c1 +(0,0)< >  p(1,2) g(3,8)n[8*,3,11] p(9,11)
  
---- CASE 31: <expand tab> plain ---
-CASE 31 // cur(2,4) b1:r2:c0 +(0,0)< >  p(1,2)* g(3,8)n[8,3,11] p(9,11)
+--- CASE 30: <expand tab> plain ---
+CASE 30 // cur(2,4) b1:r2:c0 +(0,0)< >  p(1,2)* g(3,8)n[8,3,11] p(9,11)
  
---- CASE 38: <noexpand tab> plain ---
+--- CASE 36: <noexpand tab> plain ---
 [CI] key = 09
-CASE 38 // cur(2,13) b1:r2:c0 +(0,0)<->  p(1,2)* g(3,8)n[8,3,11] p(9,11)
+CASE 36 // cur(2,13) b1:r2:c0 +(0,0)<->  p(1,2)* g(3,8)n[8,3,11] p(9,11)
  
---- CASE 45: <noexpand tab> Bob Age ---
+--- CASE 42: <noexpand tab> Bob Age ---
 [CI] key = E287A5
-CASE 45 // cur(6,11) b2:r4:c2 +(0,0)<3>  p(1,2) g(3,8)n[8,3*,11] p(9,11)
+CASE 42 // cur(6,11) b2:r4:c2 +(0,0)<3>  p(1,2) g(3,8)n[8,3*,11] p(9,11)
 
 === DISPLAY ===
 gfm
@@ -35,12 +35,12 @@ markdown
 --- CSV ---
 === MESSAGE ===
  
---- CASE 58: initial cached attrs ---
-CASE 58 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,7)n[2*,3,3]
+--- CASE 53: initial cached attrs ---
+CASE 53 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,7)n[2*,3,3]
  
---- CASE 61: <expand tab>Alice ---
+--- CASE 56: <expand tab>Alice ---
 [CI] key = E287A5
-CASE 61 // cur(2,2) b1:r2:c1 +(0,0)<⇥>  g(1,7)n[3*,3,3]
+CASE 56 // cur(2,2) b1:r2:c1 +(0,0)<⇥>  g(1,7)n[3*,3,3]
 
 === DISPLAY ===
 │1a⠀│2 a│ 3a│
@@ -53,7 +53,7 @@ CASE 61 // cur(2,2) b1:r2:c1 +(0,0)<⇥>  g(1,7)n[3*,3,3]
 --- FLAT ---
 === MESSAGE ===
  
---- CASE 72: <noexpand tab>FLAT ---
+--- CASE 66: <noexpand tab>FLAT ---
 [CI] key = 09
 
 === DISPLAY ===
