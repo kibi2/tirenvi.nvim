@@ -12,7 +12,8 @@ parser_map = {
 })
 EOF
 
+" ===== CSV =====
 edit $TIRENVI_ROOT/tests/data/simple.csv
-checkhealth tirenvi
+		checkhealth tirenvi
 
 call RunTest({ "nomessage": 'true' })

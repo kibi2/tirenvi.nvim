@@ -14,7 +14,8 @@ parser_map = {
 })
 EOF
 
+" ===== TXT =====
 edit $TIRENVI_ROOT/tests/data/empty.txt
-checkhealth tirenvi
+        checkhealth tirenvi
 
 call RunTest({ "nomessage": 'true' })

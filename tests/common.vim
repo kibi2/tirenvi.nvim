@@ -40,6 +40,17 @@ EOF
 let g:case_no = 0
 let g:case_name = ""
 
+function! At(block, row, col) abort
+  execute printf(
+        \ 'lua Debug.goto(%d,%d,%d)',
+        \ a:block, a:row, a:col)
+endfunction
+
+function! Tir(cmd) abort
+  execute "Tir " . a:cmd
+  lua print(Debug.layout())
+endfunction
+
 function! CaseImpl(id, desc) abort
   echomsg " "
   echomsg printf("--- CASE %d: %s ---", a:id, a:desc)
