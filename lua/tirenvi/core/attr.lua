@@ -111,7 +111,9 @@ end
 ---@return string
 local function get_mode_short(self)
     local wrap_mode = M.get_wrap_mode(self)
-    if not self.wrap_mode then
+    if not wrap_mode then
+        return ""
+    elseif not self.wrap_mode then
         return "-"
     elseif wrap_mode == "nowrap" then
         return "n"
@@ -121,8 +123,6 @@ local function get_mode_short(self)
         return "f"
     elseif wrap_mode == "wrap_width" then
         return "w"
-    elseif not wrap_mode then
-        return ""
     else
         log.assert(false, "invalid mode %s", wrap_mode)
         return "X"
@@ -231,14 +231,16 @@ function M:get_wrap_mode()
         log.assert(self.fit_span == nil, "attr.fit_width of plain is %s.", self.fit_span)
         return nil
     end
-    local wrap_mode = self.wrap_mode
-    if not wrap_mode then
-        wrap_mode = config.table.wrap_mode == "nowrap" and "nowrap" or "wrap_auto"
+    if not self.wrap_mode then
+        if config.table.wrap_mode == "nowrap" then
+            self.wrap_mode = "nowrap"
+        else
+            self.wrap_mode = "wrap_auto"
+        end
+    elseif self.wrap_mode == "wrap_fit" and self.fit_span == nil then
+        self.wrap_mode = "wrap_auto"
     end
-    if wrap_mode == "wrap_fit" and self.fit_span == nil then
-        wrap_mode = "wrap_auto"
-    end
-    return wrap_mode
+    return self.wrap_mode
 end
 
 ---@param self Attr
