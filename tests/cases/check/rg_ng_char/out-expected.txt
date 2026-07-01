@@ -5,6 +5,12 @@
 /Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/config.lua:		tab = "⇥", -- »⇥→⇨▹▸▻►⇤␉》
 /Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/ui.lua:    fn.sign_define("TirenviSign", { text = "◆", texthl = "ErrorMsg" })
 /Users/ogawa/oss/tirenvi.nvim/lua/tirenvi/util/log.lua:		name = "🟧PRB"
+/Users/ogawa/oss/tirenvi.nvim/tests/cases/check/health/run.sh:  -e 's/❌ //g' \
+/Users/ogawa/oss/tirenvi.nvim/tests/cases/check/health/run.sh:  -e 's/✅ //g' \
+/Users/ogawa/oss/tirenvi.nvim/tests/cases/check/health/run.sh:  -e 's/⚠️ //g' out-actual.txt | \
+/Users/ogawa/oss/tirenvi.nvim/tests/cases/check/health-ng/run.sh:  -e 's/❌ //g' \
+/Users/ogawa/oss/tirenvi.nvim/tests/cases/check/health-ng/run.sh:  -e 's/✅ //g' \
+/Users/ogawa/oss/tirenvi.nvim/tests/cases/check/health-ng/run.sh:  -e 's/⚠️ //g' out-actual.txt | \
 /Users/ogawa/oss/tirenvi.nvim/tests/cases/error/invalid-table2/run.vim:      normal! i│
 /Users/ogawa/oss/tirenvi.nvim/tests/cases/ut/state/cursor/run.vim:    "あいうえおかきくけこ",
 /Users/ogawa/oss/tirenvi.nvim/tests/cases/ut/state/cursor/run.vim:    "子1丑2寅3卯4辰5巳6午7未8申9酉10戌11亥12"
