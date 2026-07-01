@@ -182,10 +182,7 @@ end
 ---@self Attr|nil
 ---@return boolean
 function M:is_plain()
-    if not self then
-        return false
-    end
-    return self.columns == nil
+    return self and self.columns == nil
 end
 
 ---@param self Attr|nil
@@ -200,10 +197,7 @@ end
 ---@param self Attr
 ---@param ncol integer|nil
 function M:set_ncol(ncol)
-    if not ncol then
-        return
-    end
-    for icol = 1, ncol do
+    for icol = 1, ncol or 0 do
         self.columns[icol] = { width = 0 }
     end
 end
@@ -307,19 +301,7 @@ end
 ---@param self Attr
 ---@return integer
 function M.get_fit_span(self)
-    if M.is_plain(self) then
-        return 0
-    end
     return M.get_total_width(self) + #self.columns + 1
-end
-
----@param self Attr
-function M:set_fit_mode()
-    if not self or M.is_plain(self) then
-        return
-    end
-    self.fit_span = M.get_fit_span(self)
-    self.wrap_mode = "wrap_fit"
 end
 
 return M

@@ -51,12 +51,12 @@ function M:get_range()
     return self.range or self
 end
 
----@param first0 integer
----@param last0 integer
----@return Range
-function M.from_vim(first0, last0)
-    return new(first0 + 1, last0)
-end
+--@param first0 integer
+--@param last0 integer
+--@return Range
+-- function M.from_vim(first0, last0)
+-- return new(first0 + 1, last0)
+-- end
 
 ---@param first integer
 ---@param last integer
@@ -115,18 +115,6 @@ function M.merge(ranges)
         end
     end
     return unions
-end
-
----@param ranges Range[]
----@return Range
-function M.bounding(ranges)
-    local min = ranges[1].first
-    local max = ranges[1].last
-    for _, ranges in ipairs(ranges) do
-        min = math.min(min, ranges.first)
-        max = math.max(max, ranges.last)
-    end
-    return new(min, max)
 end
 
 ---@param self Range

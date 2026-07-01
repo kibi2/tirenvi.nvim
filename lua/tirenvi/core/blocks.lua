@@ -209,7 +209,7 @@ end
 function M.serialize(self)
 	local ndjsons = {}
 	for _, block in ipairs(self) do
-		util.extend(ndjsons, Block[block.kind].serialize(block))
+		util.extend(ndjsons, Block.serialize(block))
 	end
 	return ndjsons
 end

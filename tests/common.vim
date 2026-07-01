@@ -24,7 +24,7 @@ M.setup({
 		probe = true,
 		output = "print",
 	},
-  	table = {
+  table = {
 		wrap_mode = "nowrap",
 	},
 })
