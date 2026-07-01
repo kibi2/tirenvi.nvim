@@ -31,4 +31,4 @@ CASE filetype markdown -> bar
         normal! jdd
             lua print(vim.b.tirenvi.attached)
 
-call RunTest({})
+call Snapshot({})

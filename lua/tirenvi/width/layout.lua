@@ -82,16 +82,18 @@ end
 local PADDING_RATE = 1 / 3
 local PADDING_MAX = 6
 ---@param max_widths integer[]
+---@param max_width integer
 ---@param fit_width integer
 ---@return integer[]
-local function shrink(max_widths, fit_width)
-    local fit_widths = get_fit_widths(max_widths, fit_width)
-    for icol = 1, #fit_widths do
-        local plus = fit_widths[icol] - max_widths[icol]
-        plus = math.min(plus, math.ceil(max_widths[icol] * PADDING_RATE), PADDING_MAX)
-        fit_widths[icol] = max_widths[icol] + plus
+local function shrink(max_widths, max_width, fit_width)
+    local plus_widths = get_fit_widths(max_widths, fit_width - max_width)
+    for icol = 1, #plus_widths do
+        local plus = math.min(plus_widths[icol],
+            math.ceil(max_widths[icol] * PADDING_RATE),
+            PADDING_MAX)
+        plus_widths[icol] = max_widths[icol] + plus
     end
-    return fit_widths
+    return plus_widths
 end
 
 local WIDTH_MIN = 6
@@ -126,7 +128,7 @@ local function wrap_auto(winid, block)
     local fit_width = get_fit_width(#max_widths, fit_span)
     local fit_widths
     if max_width < fit_width then
-        fit_widths = shrink(max_widths, fit_width)
+        fit_widths = shrink(max_widths, max_width, fit_width)
     else
         fit_widths = expand(max_widths, fit_width)
     end

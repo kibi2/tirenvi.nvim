@@ -18,4 +18,4 @@ edit $TIRENVI_ROOT/tests/data/simple.csv
   call cursor(2, 1)
       normal! i│
 
-call RunTest({})
+call Snapshot({})

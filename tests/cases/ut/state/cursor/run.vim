@@ -63,4 +63,4 @@ CASE kkjj"
       		call Dump('silent ascii')
 			lua print(Buffer.get_cursor_char_pos(ctx))
 
-call RunTest({ 'desc': 'test Buffer.set_cursor_char_pos' })
+call Snapshot({ 'desc': 'test Buffer.set_cursor_char_pos' })

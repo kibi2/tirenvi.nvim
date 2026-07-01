@@ -1,4 +1,3 @@
-
 --- file gen.foo ---
 
 === DISPLAY ===
@@ -19,7 +18,6 @@ b	"
 
 
 ",,	c
-
 --- file gen.csv ---
 
 === DISPLAY ===

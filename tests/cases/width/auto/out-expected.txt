@@ -26,14 +26,17 @@ CASE 30 // cur(3,27) b2:r2:c2 +(0,0)<->  p(1,1) g(2,6)a0[24,8*] p(7,7) g(8,12)n[
 --- CASE 34: fit= grid#1 logic A // within screen width: recommended width for a 19-character column is 25 ---
 CASE 34 // cur(3,2) b2:r2:c1 +(0,0)<R>  p(1,1) g(2,6)a0[25*,8] p(7,7) g(8,12)n[5,3,6]
  
---- CASE 41: wide CSV initial ---
-CASE 41 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,18)n[17*,9,10,7,17,9,10,7,8,7,17,9,10,7,8,7]
+--- CASE 38: fit= grid#1 // max or fit ---
+CASE 38 // cur(3,58) b2:r2:c2 +(0,0)<->  p(1,1) g(2,7)a0[55,22*] p(8,8) g(9,13)n[5,3,6]
  
---- CASE 44: fit= logic C // exceeds screen width ---
-CASE 44 // cur(1,2) b1:r1:c1 +(0,0)<A>  g(1,21)a0[9*,8,8,7,9,8,8,7,8,7,9,8,8,7,8,7]
+--- CASE 45: wide CSV initial ---
+CASE 45 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,18)n[17*,9,10,7,17,9,10,7,8,7,17,9,10,7,8,7]
  
---- CASE 47: fit= logic B // fits within screen width ---
-CASE 47 // cur(1,2) b1:r1:c1 +(0,0)<B>  g(1,24)a0[7*,7,6,8,6,6,6,6,6,8,6,6,6,6,6]
+--- CASE 48: fit= logic C // exceeds screen width ---
+CASE 48 // cur(1,2) b1:r1:c1 +(0,0)<A>  g(1,21)a0[9*,8,8,7,9,8,8,7,8,7,9,8,8,7,8,7]
+ 
+--- CASE 51: fit= logic B // fits within screen width ---
+CASE 51 // cur(1,2) b1:r1:c1 +(0,0)<B>  g(1,24)a0[7*,7,6,8,6,6,6,6,6,8,6,6,6,6,6]
 
 === DISPLAY ===
 ┊B22⠀⠀⠀⠀┊C333⠀⠀⠀┊D4444⠀┊A1⠀⠀⠀⠀⠀⠀┊B22⠀⠀⠀┊C333⠀⠀┊D4444⠀┊E55555┊F66666┊A1⠀⠀⠀⠀⠀⠀┊B22⠀⠀⠀┊C333⠀⠀┊D4444⠀┊E55555┊F66666┊

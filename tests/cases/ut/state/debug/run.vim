@@ -39,4 +39,4 @@ CASE test debugger, logger
     lua log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "UPDATE CHACHED ATTRS:")) 
     lua print(Debug.layout("", true))
 
-call RunTest({})
+call Snapshot({})

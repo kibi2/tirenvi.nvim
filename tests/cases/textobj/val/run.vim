@@ -61,4 +61,4 @@ CASE yank 2column and put
 		normal! p
 			lua print(Debug.layout())
 
-call RunTest({ 'desc': 'GFM' })
+call Snapshot({ 'desc': 'GFM' })

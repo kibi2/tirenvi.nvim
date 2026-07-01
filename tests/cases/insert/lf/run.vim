@@ -34,4 +34,4 @@ CASE lf-in-flat
   lua vim.api.nvim_win_set_cursor(0, {2, 1})
       lua print_lf()
 
-call RunTest({})
+call Snapshot({})

@@ -18,4 +18,4 @@ EOF
 edit $TIRENVI_ROOT/tests/data/empty.txt
         checkhealth tirenvi
 
-call RunTest({ "nomessage": 'true' })
+call Snapshot({ "nomessage": 'true' })

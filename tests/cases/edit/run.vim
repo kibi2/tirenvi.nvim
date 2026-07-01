@@ -61,4 +61,4 @@ edit $TIRENVI_ROOT/tests/data/tir-buf.md
         Tir toggle
             lua print(Debug.layout())
 
-call RunTest({ 'desc': 'edit save' })
+call Snapshot({ 'desc': 'edit save' })

@@ -53,4 +53,4 @@ CASE CSV top
         lua require('tirenvi').motion.block_top()
             lua print(Debug.cursor_pos())
 
-call RunTest({ 'desc': 'motion f F t T g G' })
+call Snapshot({ 'desc': 'motion f F t T g G' })

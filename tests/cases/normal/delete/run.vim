@@ -51,4 +51,4 @@ CASE Delete All
         normal! 2lD
             sleep 1m | lua print(Debug.layout())
 
-call RunTest({'desc': 'CSV'})
+call Snapshot({'desc': 'CSV'})

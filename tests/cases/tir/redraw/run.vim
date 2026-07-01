@@ -78,4 +78,4 @@ CASE repair off -> on
 		normal! Onew line
 			sleep 1m | lua print(Debug.layout())
 
-call RunTest({})
+call Snapshot({})

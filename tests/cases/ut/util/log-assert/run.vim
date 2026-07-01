@@ -32,4 +32,4 @@ CASE log trace
 
 lua log.assert(false, "test case for log.assert trace back", "bar")
 
-call RunTest({ 'nomessage' })
+call Snapshot({ 'nomessage' })

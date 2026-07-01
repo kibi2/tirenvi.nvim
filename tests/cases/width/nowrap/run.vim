@@ -55,6 +55,6 @@ CASE wrap foo
 	call At(1, 2, 3)
         call Tir("wrap foo")
 
-call RunTest({ 'desc': 'Tir wrap' })
+call Snapshot({ 'desc': 'Tir wrap' })
 
 " ===== CSV =====

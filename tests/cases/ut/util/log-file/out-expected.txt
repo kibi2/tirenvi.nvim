@@ -1,14 +1,14 @@
-[TIR][DEBUG][debug.lua 34] ===+=== ENTRY ===+=== FileType[#1] text : CSV/NIL/P0G1 ===
-[TIR][DEBUG][buf_state.lua 141] ===+=== skip:(1) has_parser
-[TIR][DEBUG][buf_state.lua 141] ===+=== skip:(1) has_parser
-[TIR][ERROR][[string ":lua"] 1] error
-[TIR][WARN][[string ":lua"] 1] 3.14
-[TIR][DEBUG][[string ":lua"] 1] <boolean> false
-[TIR][🟧PRB][[string ":lua"] 1] -0.003
-[TIR][CATEGORY][[string ":lua"] 1] format 38 foo (12,34)
-[TIR][DEBUG][debug.lua 34] ===+=== ENTRY ===+=== VimLeavePre[#1] text : CSV/,A,/P0G1 ===
-[TIR][DEBUG][debug.lua 34] ===+=== EXIT! ===+=== VimLeavePre[#1] text : CSV/,A,/P0G1 ===
-[TIR][DEBUG][debug.lua 34] ===+=== ENTRY ===+=== VimLeavePre[#1] text : CSV/,A,/P0G1 ===
-[TIR][DEBUG][debug.lua 34] ===+=== EXIT! ===+=== VimLeavePre[#1] text : CSV/,A,/P0G1 ===
-[TIR][DEBUG][debug.lua 34] ===+=== ENTRY ===+=== VimLeave[#1] text : CSV/,A,/P0G1 ===
-[TIR][DEBUG][debug.lua 34] ===+=== EXIT! ===+=== VimLeave[#1] text : CSV/,A,/P0G1 ===
+[TIR][DEBUG][debug.lua] ===+=== ENTRY ===+=== FileType[#1] text : CSV/NIL/P0G1 ===
+[TIR][DEBUG][buf_state.lua] ===+=== skip:(1) has_parser
+[TIR][DEBUG][buf_state.lua] ===+=== skip:(1) has_parser
+[TIR][ERROR][[string ":lua"]] error
+[TIR][WARN][[string ":lua"]] 3.14
+[TIR][DEBUG][[string ":lua"]] <boolean> false
+[TIR][🟧PRB][[string ":lua"]] -0.003
+[TIR][CATEGORY][[string ":lua"]] format 38 foo (12,34)
+[TIR][DEBUG][debug.lua] ===+=== ENTRY ===+=== VimLeavePre[#1] text : CSV/,A,/P0G1 ===
+[TIR][DEBUG][debug.lua] ===+=== EXIT! ===+=== VimLeavePre[#1] text : CSV/,A,/P0G1 ===
+[TIR][DEBUG][debug.lua] ===+=== ENTRY ===+=== VimLeavePre[#1] text : CSV/,A,/P0G1 ===
+[TIR][DEBUG][debug.lua] ===+=== EXIT! ===+=== VimLeavePre[#1] text : CSV/,A,/P0G1 ===
+[TIR][DEBUG][debug.lua] ===+=== ENTRY ===+=== VimLeave[#1] text : CSV/,A,/P0G1 ===
+[TIR][DEBUG][debug.lua] ===+=== EXIT! ===+=== VimLeave[#1] text : CSV/,A,/P0G1 ===
