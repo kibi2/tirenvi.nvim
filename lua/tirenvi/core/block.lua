@@ -192,34 +192,26 @@ function M:add(record)
     self.records[#self.records + 1] = record
 end
 
+---@self Block
+---@return Ndjson[]
+function M:serialize()
+    return serialize_records(self)
+end
+
+---@self Block
+---@param no_normalize boolean
+function M:from_buf(no_normalize)
+    remove_padding(self)
+    if self.kind == CONST.KIND.GRID and not no_normalize then
+        unwrap(self)
+    end
+end
+
 function M.plain.new()
     local self = M.new()
     M.set_kind(self, CONST.KIND.PLAIN)
     M.add(self, Record.plain.new_from_bufline(""))
     return self
-end
-
----@self Block_plain
----@return Ndjson[]
-function M.plain:serialize()
-    return serialize_records(self)
-end
-
----@self Block_plain
----@return Block_grid
-function M.plain:to_grid()
-    local block = M.new()
-    M.set_kind(block, CONST.KIND.GRID)
-    for index, record in ipairs(self.records) do
-        block.records[index] = Record.plain.to_grid(record)
-    end
-    ---@cast block Block_grid
-    return block
-end
-
----@self Block_plain
-function M.plain:from_buf()
-    remove_padding(self)
 end
 
 ---@self Block
@@ -233,18 +225,6 @@ end
 
 M.plain.inherit_neighbor_attr = nop
 
----@self Block_grid
----@return Ndjson[]
-function M.grid:serialize()
-    return serialize_records(self)
-end
-
----@self Block_grid
----@return Block_grid
-function M.grid:to_grid()
-    return self
-end
-
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 function M.grid:from_flat()
@@ -254,15 +234,6 @@ end
 ---@self Block_grid
 function M.grid:to_flat()
     apply_replacements(self, get_un_escape_map())
-end
-
----@param no_normalize boolean
----@self Block_grid
-function M.grid:from_buf(no_normalize)
-    remove_padding(self)
-    if not no_normalize then
-        unwrap(self)
-    end
 end
 
 --- Normalize all rows in a grid block to have the same number of columns.

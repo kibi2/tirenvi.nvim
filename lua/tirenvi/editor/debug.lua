@@ -111,7 +111,6 @@ end
 ---@param single boolean|nil
 ---@return string
 function M.layout(title, single)
-    single = single or false
     title = case_tag() .. (title or "") .. DELIMITER
     local info = get_info()
     local attr_str = Attrs.debug_attrs(info.attrs, "", info.pos.iblock, info.pos.icol, single)

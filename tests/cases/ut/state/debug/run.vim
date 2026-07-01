@@ -29,13 +29,14 @@ lua << EOF
 EOF
 
 CASE test debugger, logger
-
     lua log.watch("ATTR", Debug.layout("UPDATE CHACHED ATTRS:")) 
     lua Document.replace_attrs(bufdoc, r_result.range)
     lua log.watch("ATTR", Debug.layout("1DOC ATTR:"))
+    lua log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
   call At(2, 1, 3)
   normal! 2j
     lua log.watch("ATTR", Debug.layout("1DOC ATTR:"))
     lua log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "UPDATE CHACHED ATTRS:")) 
+    lua print(Debug.layout("", true))
 
 call RunTest({})

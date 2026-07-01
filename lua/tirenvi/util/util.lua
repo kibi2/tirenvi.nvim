@@ -70,13 +70,6 @@ function M.utf8_chars(str)
 	return chars
 end
 
---- Get file extension.
----@param filename string
----@return string|nil
-function M.get_ext(filename)
-	return filename:match("^.+%.([^.]+)$")
-end
-
 --- Convert string to hex representation (for debugging).
 ---@param str string
 ---@return string
