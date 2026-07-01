@@ -65,4 +65,4 @@ lua << EOF
 EOF
 
 
-call RunTest({})
+call Snapshot({})

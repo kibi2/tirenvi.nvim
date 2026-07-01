@@ -12,4 +12,4 @@ CASE Tir toggle + undo
     normal! 1G2l
         normal! D
 
-call RunTest({})
+call Snapshot({})

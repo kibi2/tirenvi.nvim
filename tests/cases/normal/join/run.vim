@@ -29,4 +29,4 @@ e!
         normal! J
             sleep 1m | lua print(Debug.layout())
 
-call RunTest({})
+call Snapshot({})

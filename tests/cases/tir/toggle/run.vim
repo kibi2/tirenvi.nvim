@@ -48,4 +48,4 @@ CASE NG case
         Tir reconcile
             lua print(Debug.layout())
 
-call RunTest({'desc': 'toggle' })
+call Snapshot({'desc': 'toggle' })

@@ -145,17 +145,6 @@ endfunction
 function! Snapshot(opts) abort
   lua vim.wait(50)
   let l:out = s:CollectAll(a:opts)
-  call writefile([''], 'out-actual.txt', 'a')
+  " call writefile([''], 'out-actual.txt', 'a')
   call writefile(l:out, 'out-actual.txt', 'a')
-endfunction
-
-" ----------------------------
-" opts:
-"   file: 'output.csv'
-"   desc: 'description'
-function! RunTest(opts) abort
-  lua vim.wait(50)
-  let l:out = s:CollectAll(a:opts)
-  call writefile(l:out, 'out-actual.txt', 'a')
-  qa!
 endfunction

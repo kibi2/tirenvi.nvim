@@ -1,4 +1,3 @@
-
 === MESSAGE ===
  
 --- CASE 6: initial cached attrs ---

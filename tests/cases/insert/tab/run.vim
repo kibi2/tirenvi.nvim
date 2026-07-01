@@ -70,4 +70,4 @@ CASE <noexpand tab>FLAT
   call cursor(1, 1)
       lua insert_tab()
 
-call RunTest({ 'desc': 'FLAT' })
+call Snapshot({ 'desc': 'FLAT' })

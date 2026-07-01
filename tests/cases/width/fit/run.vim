@@ -62,4 +62,4 @@ CASE CSV fit+50
 CASE CSV fit-100
 	    call Tir("fit-100")
 
-call RunTest({ 'desc': 'Tir fit' })
+call Snapshot({ 'desc': 'Tir fit' })

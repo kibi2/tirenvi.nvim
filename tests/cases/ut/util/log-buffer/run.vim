@@ -23,4 +23,4 @@ lua log.debug(4e8)
 lua log.probe(4e8)
 lua log.watch("CATEGORY", "format %d %s %s", 38, "foo", Range.from_lua(12,34))
 
-call RunTest({})
+call Snapshot({})

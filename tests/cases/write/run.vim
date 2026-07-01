@@ -25,4 +25,4 @@ call Snapshot({ 'desc': 'file ' . outcsv, 'file': outcsv })
 
         execute 'write ' . outtsv
 
-call RunTest ({ 'desc': 'file ' . outtsv, 'file': outtsv })
+call Snapshot({ 'desc': 'file ' . outtsv, 'file': outtsv })

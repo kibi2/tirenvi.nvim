@@ -8,7 +8,8 @@ lua << EOF
 		level = levels.DEBUG,
 		single_line = false,
 		output = "file",
-		file_name = "./gen.tirenvi",
+		-- file_name = "./gen.tirenvi",
+		file_name = "./out-actual.txt",
 		use_timestamp = false,
 		probe = true,
   	},
@@ -25,5 +26,3 @@ lua log.info(nil)
 lua log.debug(false)
 lua log.probe(-3e-3)
 lua log.watch("CATEGORY", "format %d %s %s", 38, "foo", Range.short(Range.from_lua(12,34)))
-
-call RunTest({})

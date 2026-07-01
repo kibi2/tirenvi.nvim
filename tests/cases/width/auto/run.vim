@@ -16,24 +16,32 @@ CASE fit= grid#1
 
 CASE fit= grid#1 logic A // within screen width: recommended width for an empty column is 3
 	call feedkeys("vil", "x")
-	normal! d
-		call Tir("fit=")
+		normal! d
+			sleep 1m | lua print(Debug.layout())
 
 CASE fit= grid#1 logic A // within screen width: recommended width for a 3-character column is 4
-	normal! 3aO
-		call Tir("fit=")
+		normal! 3aO
+			sleep 1m | lua print(Debug.layout())
 
 CASE fit= grid#1 logic A // within screen width: recommended width for a 4-character column is 6
-	normal! 0aP
-		call Tir("fit=")
+		normal! 0aP
+			sleep 1m | lua print(Debug.layout())
 
 CASE fit= grid#1 logic A // within screen width: recommended width for an 18-character column is 24
-	normal! j018aQ
-		call Tir("fit=")
+		normal! j018aQ
+			sleep 1m | lua print(Debug.layout())
 
 CASE fit= grid#1 logic A // within screen width: recommended width for a 19-character column is 25
-	normal! 0aR
-		call Tir("fit=")
+		normal! 0aR
+			sleep 1m | lua print(Debug.layout())
+
+CASE fit= grid#1 // max or fit
+		e!
+	call At(2, 4, 1)
+		normal! 060aG
+			sleep 1m | lua print(Debug.layout())
+			
+call Snapshot({ 'desc': 'GFM' })
 
 " ===== CSV =====
 edit $TIRENVI_ROOT/tests/data/wide.csv
@@ -49,4 +57,4 @@ CASE fit= logic B // fits within screen width
 	normal! d
 		call Tir("fit=")
 
-call RunTest({ 'desc': 'Tir wrap' })
+call Snapshot({ 'desc': 'Tir wrap' })

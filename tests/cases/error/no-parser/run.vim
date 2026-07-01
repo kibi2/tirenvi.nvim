@@ -18,4 +18,4 @@ try
 catch
 endtry
 
-call RunTest({})
+call Snapshot({})

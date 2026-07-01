@@ -84,4 +84,4 @@ CASE BOTTOM o
         normal! Go
             sleep 1m | lua print(Debug.layout())
 
-call RunTest({ 'desc': 'CSV' })
+call Snapshot({ 'desc': 'CSV' })

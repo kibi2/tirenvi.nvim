@@ -119,16 +119,19 @@ while IFS= read -r -d '' d; do
     if [ ! -e "./$STATS" ]; then
       ln -s "$ROOT_DIR/$STATS" "./$STATS"
     fi
+      NVIM_TIRENVI_DEV=1 $NVIM_BIN --headless -u NONE -n \
+        -c "source run.vim" \
+        -c "qa!" \
+        > stdout.txt 2> stderr.txt
+      # NVIM_TIRENVI_DEV=1 $NVIM_BIN --headless -u NONE -n -S run.vim  +qa \
+#         > stdout.txt 2> stderr.txt
     if [ -f run.sh ]; then
       sh run.sh > stdout.txt 2> stderr.txt
-    else
-      NVIM_TIRENVI_DEV=1 $NVIM_BIN --headless -u NONE -n -S run.vim  +qa \
-        > stdout.txt 2> stderr.txt
-      # NVIM_TIRENVI_DEV=1 nvim --headless -u NONE -n -S run.vim  +qa \
-      #   > stdout.txt 2> stderr.txt
     fi
 
-    sed -E 's/[0-9]+ seconds? ago/<time>/g' out-actual.txt > out-actual.tmp 
+    LC_ALL=C sed -E 's/ [0-9]+]/]/g' out-actual.txt > gen.txt
+    mv gen.txt out-actual.txt
+    LC_ALL=C sed -E 's/[0-9]+ seconds? ago/<time>/g' out-actual.txt > out-actual.tmp 
     mv out-actual.tmp out-actual.txt
 
     if [ "$UPDATE" -eq 1 ]; then

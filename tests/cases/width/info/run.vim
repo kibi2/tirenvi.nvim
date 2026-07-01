@@ -49,4 +49,4 @@ CASE width?9 invalid
 	call At(1, 3, 1)
 		Tir width?9
 
-call RunTest({ 'desc': 'Tir wrap' })
+call Snapshot({ 'desc': 'Tir wrap' })

@@ -65,4 +65,4 @@ CASE redo
         redo
             lua print(Debug.layout())
 
-call RunTest({ 'desc': 'Tir width nowrap' })
+call Snapshot({ 'desc': 'Tir width nowrap' })

@@ -26,4 +26,4 @@ CASE yyp : plain
         normal! yyp
             sleep 1m | lua print(Debug.layout())
 
-call RunTest({})
+call Snapshot({})
