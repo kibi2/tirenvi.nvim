@@ -57,6 +57,9 @@ local function get_info()
     local info = {}
 	local ctx                  = Context.from_buf()
     info.attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+    if not info.attrs then
+        info.attrs = {}
+    end
     local cur_row, _, char_col = buffer.get_cursor_char_pos(ctx)
     info.pos = Attrs.to_logical(info.attrs, cur_row, char_col)
     info.line = buffer.get_line(ctx.bufnr, cur_row)

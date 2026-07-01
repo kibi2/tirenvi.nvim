@@ -1,0 +1,28 @@
+=== MESSAGE ===
+ 
+--- CASE 6: filetype csv -> csv ---
+CASE 6 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,7)n[2*,3,3]
+ 
+--- CASE 10: filetype csv -> markdown ->csv ---
+CASE 10 // cur(1,1) bnil:rnil:cnil +(nil,nil)<1> 
+CASE 10 // cur(1,1) bnil:rnil:cnil +(nil,nil)<1> 
+CASE 10 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,8)n[2*,3,3]
+ 
+--- CASE 18: filetype csv -> tsv ---
+CASE 18 // cur(1,4) bnil:rnil:cnil +(nil,nil)<2> 
+CASE 18 // cur(1,2) b1:r1:c1 +(0,0)<1>  g(1,9)n[10*,2]
+ 
+--- CASE 25: filetype markdown -> bar ---
+v:true
+false
+
+=== DISPLAY ===
+gfm
+----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
+| Name | Age | City |
+| ---- | --- | ---- |
+| ADD Alice | 23 | Tokyo |
+| Carol | 27 | Nagoya |
+----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
+markdown
+

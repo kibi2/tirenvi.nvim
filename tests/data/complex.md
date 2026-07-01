@@ -110,7 +110,7 @@ Text immediately after table.
 
 | Col1 | Col2 |
 | ---- | ---- |
-| trailing space | value   |
+| trailing space | value |
 | empty |  |
 
 ---
