@@ -128,6 +128,9 @@ while IFS= read -r -d '' d; do
       #   > stdout.txt 2> stderr.txt
     fi
 
+    sed -E 's/[0-9]+ seconds? ago/<time>/g' out-actual.txt > out-actual.tmp 
+    mv out-actual.tmp out-actual.txt
+
     if [ "$UPDATE" -eq 1 ]; then
       if [ -f out-expected.txt ]; then
         echo "Refusing update: out-expected.txt already exists"
