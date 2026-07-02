@@ -90,6 +90,7 @@ end
 
 ---@param ctx Context
 local function on_buf_read_post(ctx)
+	buffer.clear_buf_local(ctx.bufnr)
 	init.read_post(ctx)
 end
 

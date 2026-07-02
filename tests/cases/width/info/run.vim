@@ -31,6 +31,21 @@ CASE width? CSV col#$
     normal! $
 		Tir width?
 
+CASE width? CSV col#$
+    normal! $
+		Tir width+
+		Tir width?
+
+CASE width? CSV col#$
+    normal! $
+		Tir fit=40
+		Tir width?
+
+CASE width? CSV col#$
+    normal! $
+		Tir fit=
+		Tir width?
+
 " ===== GFM =====
 edit $TIRENVI_ROOT/tests/data/simple.md
 
