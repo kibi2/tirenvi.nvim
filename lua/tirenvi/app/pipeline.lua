@@ -221,7 +221,7 @@ local function change_wrap_width(ctx, width_op)
     local attr = bufdoc.blocks[1].attr
     if Attr.is_plain(attr) then return end
     local column = Attr.get(attr, width_op.cur_col)
-    column.width = width_op:apply(column.width) or 0
+    column.width = width_op:apply(column.width)
     attr.wrap_mode = "wrap_width"
     doc_to_buflines(ctx, r_result, bufdoc)
 end
@@ -235,7 +235,7 @@ local function change_wrap_fit(ctx, width_op)
     log.assert(#bufdoc.blocks == 1, "only one block")
     local attr = bufdoc.blocks[1].attr
     if Attr.is_plain(attr) then return end
-    attr.fit_span = width_op:apply(Attr.get_fit_span(attr)) or 0
+    attr.fit_span = width_op:apply(Attr.get_fit_span(attr))
     attr.wrap_mode = "wrap_fit"
     doc_to_buflines(ctx, r_result, bufdoc)
 end
