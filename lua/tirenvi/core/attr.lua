@@ -42,7 +42,10 @@ end
 ---@param columns Attr_column[]|nil
 ---@return Attr
 local function new_from_columns(columns)
-    return { columns = columns }
+    local self = {}
+    self.columns = columns
+    self.fit_span = 0
+    return self
 end
 
 -----------------------------------------------------------------------
@@ -107,26 +110,12 @@ function M.get_attr_short(self)
     return kind .. range_str
 end
 
+local short_map = { plain = "", nowrap = "n", wrap_auto = "a", wrap_fit = "f", wrap_width = "w" }
 ---@param self Attr
 ---@return string
 local function get_mode_short(self)
     local wrap_mode = M.get_wrap_mode(self)
-    if not wrap_mode then
-        return ""
-    elseif not self.wrap_mode then
-        return "-"
-    elseif wrap_mode == "nowrap" then
-        return "n"
-    elseif wrap_mode == "wrap_auto" then
-        return "a"
-    elseif wrap_mode == "wrap_fit" then
-        return "f"
-    elseif wrap_mode == "wrap_width" then
-        return "w"
-    else
-        log.assert(false, "invalid mode %s", wrap_mode)
-        return "X"
-    end
+    return short_map[wrap_mode]
 end
 
 ---@param attr Attr
@@ -144,7 +133,8 @@ function M.get_attr_long(attr, ccol)
         end
         long = #widths > 0 and string.format("[%s]", table.concat(widths, ",")) or ""
     end
-    return M.get_attr_short(attr) .. get_mode_short(attr) .. (attr.fit_span or "") .. long
+    local fit_span = attr.fit_span == 0 and "" or tostring(attr.fit_span)
+    return M.get_attr_short(attr) .. get_mode_short(attr) .. fit_span .. long
 end
 
 ---@param columns Attr_column[]
@@ -219,11 +209,10 @@ function M:get_total_width(last_col)
 end
 
 ---@param self Attr
----@return  WrapMode|nil
+---@return  WrapMode
 function M:get_wrap_mode()
     if M.is_plain(self) then
-        log.assert(self.fit_span == nil, "attr.fit_width of plain is %s.", self.fit_span)
-        return nil
+        return "plain"
     end
     if not self.wrap_mode then
         if config.table.wrap_mode == "nowrap" then
@@ -231,19 +220,21 @@ function M:get_wrap_mode()
         else
             self.wrap_mode = "wrap_auto"
         end
-    elseif self.wrap_mode == "wrap_fit" and self.fit_span == nil then
-        self.wrap_mode = "wrap_auto"
+    end
+    if self.wrap_mode == "wrap_fit" then
+        if self.fit_span == 0 then
+            self.wrap_mode = "wrap_auto"
+        end
     end
     return self.wrap_mode
 end
 
 ---@param self Attr
----@return "wrap"|"nowrap"|nil
+---@return "wrap"|"nowrap"
 function M:get_wrap_kind()
+    log.assert(not M.is_plain(self), "is not plain attr: %s", vim.inspect(self))
     local mode = M.get_wrap_mode(self)
-    if mode == nil then
-        return nil
-    elseif mode == "nowrap" then
+    if mode == "nowrap" then
         return "nowrap"
     else
         return "wrap"
@@ -291,7 +282,11 @@ function M:toggle_wrap_mode()
         return
     end
     if M.get_wrap_mode(self) == "nowrap" then
-        self.wrap_mode = "wrap_fit"
+        if self.fit_span == 0 then
+            self.wrap_mode = "wrap_auto"
+        else
+            self.wrap_mode = "wrap_fit"
+        end
     else
         self.fit_span = M.get_fit_span(self)
         self.wrap_mode = "nowrap"

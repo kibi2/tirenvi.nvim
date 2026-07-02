@@ -12,3 +12,4 @@
 ---| "wrap_auto"
 ---| "wrap_fit"
 ---| "wrap_width"
+---| "plain"

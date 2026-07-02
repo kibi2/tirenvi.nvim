@@ -150,7 +150,7 @@ end
 
 ---@param self WidthOp
 ---@param current integer
----@return integer|nil
+---@return integer
 function WidthOp:apply(current)
     local operation = self.operation
     local count = self.number
@@ -161,7 +161,7 @@ function WidthOp:apply(current)
     elseif operation == "sub" then
         return math.max(current - count, Cell.MIN_WIDTH)
     elseif operation == "auto" then
-        return nil
+        return 0
     else
         return current
     end
