@@ -222,6 +222,7 @@ local function change_wrap_width(ctx, width_op)
     if Attr.is_plain(attr) then return end
     local column = Attr.get(attr, width_op.cur_col)
     column.width = width_op:apply(column.width)
+    attr.fit_span = Attr.get_fit_span(attr)
     attr.wrap_mode = "wrap_width"
     doc_to_buflines(ctx, r_result, bufdoc)
 end

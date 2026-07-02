@@ -192,7 +192,6 @@ end
 ---@param no_undo boolean
 ---@param cell_pos Cell_pos
 function M.set_lines(ctx, range, lines, no_undo, cell_pos)
-	-- log.debug(M.get_state(bufnr))
 	local bufnr = ctx.bufnr
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
 	local before = fn.undotree(bufnr).seq_last
@@ -206,6 +205,11 @@ function M.set_lines(ctx, range, lines, no_undo, cell_pos)
 	if not ok then
 		error(err)
 	end
+end
+
+function M.clear_buf_local(bufnr)
+	M.set(bufnr, M.IKEY.ATTRS, nil)
+	M.set(bufnr, M.IKEY.DIRTY, nil)
 end
 
 function M.clear_cache()

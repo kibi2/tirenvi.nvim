@@ -38,6 +38,7 @@ CASE fit= grid#1 logic A // within screen width: recommended width for a 19-char
 CASE fit= grid#1 // max or fit
 		e!
 	call At(2, 4, 1)
+		Tir wrap
 		normal! 060aG
 			sleep 1m | lua print(Debug.layout())
 			

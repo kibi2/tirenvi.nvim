@@ -230,12 +230,14 @@ function M:get_wrap_mode()
 end
 
 ---@param self Attr
----@return "wrap"|"nowrap"
+---@return "wrap"|"nowrap"|"auto"
 function M:get_wrap_kind()
     log.assert(not M.is_plain(self), "is not plain attr: %s", vim.inspect(self))
     local mode = M.get_wrap_mode(self)
     if mode == "nowrap" then
         return "nowrap"
+    elseif mode == "wrap_auto" then
+        return "auto"
     else
         return "wrap"
     end
@@ -288,7 +290,7 @@ function M:toggle_wrap_mode()
             self.wrap_mode = "wrap_fit"
         end
     else
-        self.fit_span = M.get_fit_span(self)
+        -- self.fit_span = M.get_fit_span(self)
         self.wrap_mode = "nowrap"
     end
 end
