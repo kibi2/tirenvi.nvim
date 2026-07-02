@@ -3,9 +3,8 @@ local config = require("tirenvi.config")
 local version = require("tirenvi.version")
 local log = require("tirenvi.util.log")
 
-local health = vim.health or require("health")
-
 local M = {}
+local health = vim.health or require("health")
 
 local function report(item)
 	if item.status == "ok" then
@@ -90,6 +89,7 @@ function M.check()
 	local command_requirements = {}
 	---@type Parser
 	for _, parser in pairs(config.parser_map) do
+		parser._checked = false
 		local exe = parser.executable
 		if parser.required_version and not parser._required_version_int then
 			report({
@@ -104,11 +104,13 @@ function M.check()
 			end
 		end
 	end
-	table.sort(command_requirements, function(prev, next)
-		return prev.executable < next.executable
-	end)
-	for _, parser in pairs(command_requirements) do
-		check_command(parser)
+	local keys = {}
+	for exe in pairs(command_requirements) do
+		keys[#keys + 1] = exe
+	end
+	table.sort(keys)
+	for _, exe in ipairs(keys) do
+		check_command(command_requirements[exe])
 	end
 end
 

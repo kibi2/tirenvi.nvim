@@ -1,15 +1,32 @@
+--- checkhealth ok case ---
 
+=== DISPLAY ===
 
+==============================================================================
 
-
+tirenvi ~
+- version: 0.4.0
+- WARNING vim-repeat not found ('.' repeat disabled)
 - OK tir-csv found
 - OK tir-csv version 0.1.4 OK
 - OK tir-gfm-lite found
 - OK tir-gfm-lite version 0.1.6 OK
 - OK tir-pukiwiki found
 - OK tir-pukiwiki version 0.1.1 OK
-- WARNING vim-repeat not found ('.' repeat disabled)
-- version: 0.4.0
+
+--- checkhealth ok case ---
+
 === DISPLAY ===
+
 ==============================================================================
+
 tirenvi ~
+- version: 0.4.0
+- WARNING vim-repeat not found ('.' repeat disabled)
+- ERROR Could not parse tir-pukiwiki version string: 0.
+- ERROR foo not found in PATH
+- OK tir-csv found
+- ERROR tir-csv >= 1.1.4 required, but 0.1.4 found
+- OK tir-gfm-lite found
+- ERROR tir-gfm-lite >= 0.2 required, but 0.1.6 found
+
