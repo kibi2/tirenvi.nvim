@@ -43,6 +43,7 @@ local defaults = {
 		wrap_mode = "wrap",
 	},
 	ui = {
+		manage_wrap = true,
 		conceal = {
 			level = 1,
 			cursor = "nvic",

@@ -169,6 +169,32 @@ function M.on_insert_leave(ctx, range3)
 	pipeline.check_and_repair(ctx, range3)
 end
 
+local function apply_wrap(winid, should_wrap)
+	if vim.wo[winid].wrap ~= should_wrap then
+		vim.wo[winid].wrap = should_wrap
+	end
+end
+
+---@param ctx Context
+function M.on_cursor_moved(ctx)
+	if not config.ui.manage_wrap then
+		return
+	end
+	if not ctx.parser.allow_plain then
+		apply_wrap(ctx.winid, false)
+		return
+	end
+	local cur_row, _, _ = buffer.get_cursor_char_pos(ctx)
+	local line = buffer.get_line(ctx.bufnr, cur_row) or ""
+	local line_width = fn.strdisplaywidth(line)
+	local win_span = buffer.get_win_span(ctx.winid)
+	local is_over = win_span < line_width
+	local is_plain = not Bufline.has_pipe({ line })
+	if is_over then
+		apply_wrap(ctx.winid, is_plain)
+	end
+end
+
 ---@param ctx Context
 function M.on_filetype(ctx)
 	local old_filetype = buffer.get(ctx.bufnr, buffer.IKEY.FILETYPE)

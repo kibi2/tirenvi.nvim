@@ -1,5 +1,4 @@
 -- dependencies
-local config = require("tirenvi.config")
 local Context = require("tirenvi.app.context")
 local Attrs = require("tirenvi.core.attrs")
 local Attr = require("tirenvi.core.attr")
@@ -92,7 +91,14 @@ local function show_attr_marks(ctx, attr, iattr, icol)
     -- from the extmark's actual buffer position.
     local nlines = buffer.line_count(ctx.bufnr)
     start0 = math.min(start0, nlines - 1)
+    local ok = pcall(vim.api.nvim_buf_set_extmark, ctx.bufnr, namespaces.ATTR, start0, 0, opts)
+  if not ok then
+    opts = vim.deepcopy(opts)
+    opts.virt_text = nil
+    opts.virt_text_pos = nil
     vim.api.nvim_buf_set_extmark(ctx.bufnr, namespaces.ATTR, start0, 0, opts)
+  end
+
 end
 
 ----------------------------------------------------------------------
