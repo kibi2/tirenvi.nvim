@@ -114,6 +114,13 @@ local function on_cursor_hold(args)
 	attach_on_lines(args.buf)
 end
 
+---@param args table
+local function on_cursor_moved(args)
+	local ctx = Context.from_buf(args.buf)
+	Debug.show_attr_marks(ctx)
+	init.on_cursor_moved(ctx)
+end
+
 ---@param ctx Context
 local function on_filetype(ctx)
 	init.on_filetype(ctx)
@@ -184,8 +191,7 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 			if buf_state.should_skip(args.buf) then
 				return
 			end
-			local ctx = Context.from_buf(bufnr)
-			Debug.show_attr_marks(ctx)
+			on_cursor_moved(args)
 		end),
 	})
 

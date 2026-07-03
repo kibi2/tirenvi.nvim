@@ -1,0 +1,31 @@
+[TIR][ERROR][[string ":lua"]] error
+[TIR][WARN][[string ":lua"]] 3.14
+[TIR][DEBUG][[string ":lua"]] <boolean> false
+[TIR][🟧PRB][[string ":lua"]] -0.003
+[TIR][CATEGORY][[string ":lua"]] format 38 foo (12,34)
+[TIR][DEBUG][buffer.lua] === cache[#1] lines[1]='gfm'...[6]='┊Bob⠀⠀┊31⠀┊Osaka↲⠀⠀⠀⠀⠀┊'
+--- log file ---
+=== MESSAGE ===
+ 
+--- CASE 24: log.xxx(...) ---
+ 
+--- CASE 32: move cursor ---
+
+=== DISPLAY ===
+gfm
+----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
+│Name⠀│Age│City⠀⠀⠀⠀⠀⠀⠀│
+│----⠀│---│----⠀⠀⠀⠀⠀⠀⠀│
+│Alice│23⠀│Tokyo⠀⠀⠀⠀⠀⠀│
+┊Bob⠀⠀┊31⠀┊Osaka↲⠀⠀⠀⠀⠀┊
+│⠀⠀⠀⠀⠀│⠀⠀⠀│nipponbashi│
+│Carol│27⠀│Nagoya⠀⠀⠀⠀⠀│
+----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
+markdown
+
+[TIR][DEBUG][debug.lua] ===+=== ENTRY ===+=== VimLeavePre[#1] markdown : GFM/|A|/P2G1 ===
+[TIR][DEBUG][debug.lua] ===+=== EXIT! ===+=== VimLeavePre[#1] markdown : GFM/|A|/P2G1 ===
+[TIR][DEBUG][debug.lua] ===+=== ENTRY ===+=== VimLeavePre[#1] markdown : GFM/|A|/P2G1 ===
+[TIR][DEBUG][debug.lua] ===+=== EXIT! ===+=== VimLeavePre[#1] markdown : GFM/|A|/P2G1 ===
+[TIR][DEBUG][debug.lua] ===+=== ENTRY ===+=== VimLeave[#1] markdown : GFM/|A|/P2G1 ===
+[TIR][DEBUG][debug.lua] ===+=== EXIT! ===+=== VimLeave[#1] markdown : GFM/|A|/P2G1 ===
