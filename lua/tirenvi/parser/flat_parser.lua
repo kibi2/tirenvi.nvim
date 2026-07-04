@@ -88,12 +88,27 @@ end
 -- public API
 
 ---@param ctx Context
+---@param jslines string[]
+---@return Document
+function M.from_jslines(ctx, jslines)
+	local ndjsons = jslines_to_ndjsons(jslines)
+	return Document.new_tirdoc(ndjsons, Context.is_allow_plain(ctx))
+end
+
+---@param ctx Context
 ---@param r_result ReadResult
 ---@return Document
 function M.parse(ctx, r_result)
 	local jslines = flat_to_jslines(r_result.lines, ctx.parser)
 	local ndjsons = jslines_to_ndjsons(jslines)
 	return Document.new_tirdoc(ndjsons, Context.is_allow_plain(ctx))
+end
+
+---@param tirdoc Document	
+---@return string[]
+function M.to_jslines(tirdoc)
+	local ndjsons = Document.serialize_to_flat(tirdoc)
+	return ndjsons_to_lines(ndjsons)
 end
 
 --- Convert display lines back to TSV format

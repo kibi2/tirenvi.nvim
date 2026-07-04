@@ -106,6 +106,36 @@ local function cmd_repair(ctx, opts)
 		buffer.get_repair(ctx.bufnr) and "enable" or "disable"))
 end
 
+---@param ctx Context
+---@param opts {[string]:any}
+---@return nil
+local function cmd_debug_read_tir(ctx, opts)
+	if buf_state.should_skip(ctx.bufnr, {
+			is_tirbuf = false,
+		}) then
+		return
+	end
+	local filename = opts.fargs[2]
+	if filename == nil then
+		notify.error("Tir _read_tir need filename")
+		return
+	end
+	init.debug_read_tir(ctx, filename)
+end
+
+---@param ctx Context
+---@param opts {[string]:any}
+---@return nil
+local function cmd_debug_write_tir(ctx, opts)
+	if buf_state.should_skip(ctx.bufnr) then return end
+	local filename = opts.fargs[2]
+	if filename == nil then
+		notify.error("Tir _write_tir need filename")
+		return
+	end
+	init.debug_write_tir(ctx, filename)
+end
+
 ----------------------------------------------------------------------
 -- Registration (private)
 ----------------------------------------------------------------------
@@ -117,6 +147,8 @@ local commands = {
 	fit = { func = cmd_fit, sub = { "=", "+", "-" }, has_op = true },
 	wrap = { func = cmd_wrap, sub = {} },
 	repair = { func = cmd_repair, sub = { "toggle", "enable", "diable" } },
+	_read_tir = { func = cmd_debug_read_tir, sub = {} },
+	_write_tir = { func = cmd_debug_write_tir, sub = {} },
 }
 
 local function get_command_keys()
