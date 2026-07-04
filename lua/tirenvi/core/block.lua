@@ -75,6 +75,8 @@ local function serialize_records(self)
     ---@type Ndjson[]
     local ndjsons = {}
     for _, record in ipairs(self.records) do
+        -- TODO
+        record.prefix = self.attr.prefix
         ndjsons[#ndjsons + 1] = record
     end
     return ndjsons
@@ -228,6 +230,8 @@ M.plain.inherit_neighbor_attr = nop
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 function M.grid:from_flat()
+    -- TODO
+    self.attr.prefix = self.records[1].prefix
     apply_replacements(self, get_escape_map())
 end
 

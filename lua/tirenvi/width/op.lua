@@ -58,6 +58,7 @@ local function get_selection(opts)
         col_disp_end   = col
     end
     local col_range = Range.from_lua_normal(col_disp_start, col_disp_end)
+    ---@type Rect
     return {
         row = row_range,
         col = col_range
@@ -147,6 +148,7 @@ function WidthOp:to_cmd()
 end
 
 ---@param self WidthOp
+---@return string
 function WidthOp:to_string()
     return string.format("WidthOp %s %s (%d, %d) [%s] %s",
         self.command, self.operation or "nil",

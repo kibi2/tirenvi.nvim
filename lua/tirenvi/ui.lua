@@ -46,19 +46,20 @@ local function special_setup()
     api.nvim_set_hl(ns_id, "TirenviPadding", {})
     local target = get_safe_link_name({ "@punctuation.special.markdown", "Delimiter", "Special", })
     local special = api.nvim_get_hl(ns_id, { name = target })
-    api.nvim_set_hl(ns_id, "TirenviPipeNoHbar", { link = target })
-    api.nvim_set_hl(ns_id, "TirenviPipeHbar", {
+    api.nvim_set_hl(ns_id, "TirenviPipe", {
+        fg = special.fg,
+        bg = special.bg,
+    })
+    api.nvim_set_hl(ns_id, "TirenviInnerText", {
+        underline = true,
+        sp = special.fg,
+    })
+    api.nvim_set_hl(ns_id, "TirenviInnerPipe", {
         fg = special.fg,
         bg = special.bg,
         underline = true,
-        nocombine = true,
     })
-    api.nvim_set_hl(ns_id, "TirenviHbar", {
-        underline = true,
-        sp = special.fg,
-        nocombine = true,
-    })
-    api.nvim_set_hl(ns_id, "Conceal", { link = "TirenviPipeNoHbar" })
+    api.nvim_set_hl(ns_id, "Conceal", { link = "TirenviPipe" })
     safe_link_multi("TirenviSpecialChar", { "NonText", })
 end
 
@@ -80,17 +81,17 @@ local function pat_v(s)
     return "\\V" .. s
 end
 
-local function pat_line_inner(pipe)
-    return "^" .. pipe .. "\\zs.*\\ze" .. pipe .. "$"
+local function pat_inner_pipe(pipe)
+    return pipe .. "\\zs.*\\ze" .. pipe
 end
 
-local function pat_line_start(pipe)
-    return "^" .. pipe
+local function pat_inner_text(pipe)
+    return pipe .. "\\zs.\\{-}\\ze" .. pipe
 end
 
-local function pat_line_end(pipe)
-    return pipe .. "$"
-end
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
 
 function M.setup()
     special_setup()
@@ -115,11 +116,10 @@ function M.special_apply(winid)
     add_match(winid, "TirenviPadding", pat_v(config.marks.padding), 10)
     add_match(winid, "TirenviSpecialChar", pat_v(config.marks.lf), 20)
     add_match(winid, "TirenviSpecialChar", pat_v(config.marks.tab), 20)
-    add_match(winid, "TirenviPipeHbar", pat_v(pipen), 30)
-    add_match(winid, "TirenviHbar", pat_line_inner(pipen), 20)
-    add_match(winid, "TirenviPipeNoHbar", pat_line_start(pipen), 40)
-    add_match(winid, "TirenviPipeNoHbar", pat_line_end(pipen), 40)
-    add_match(winid, "TirenviPipeNoHbar", pat_v(pipec), 30)
+    add_match(winid, "TirenviPipe", pat_v(pipec), 30)
+    add_match(winid, "TirenviPipe", pat_v(pipen), 30)
+    add_match(winid, "TirenviInnerPipe", pat_inner_pipe(pipen), 40)
+    add_match(winid, "TirenviInnerText", pat_inner_text(pipen), 50)
     vim.opt_local.conceallevel = config.ui.conceal.level
     vim.opt_local.concealcursor = config.ui.conceal.cursor
     local pattern = fn.escape(pipec, [[/\]])

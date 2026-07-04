@@ -48,6 +48,7 @@ local M = {}
 ---@field wrap_mode WrapMode|nil
 ---@field fit_span integer
 ---@field columns Attr_column[]
+---@field prefix string|nil
 
 ---@class Attr_column
 ---@field width integer                 display width (logical column width)
@@ -60,6 +61,7 @@ local M = {}
 
 ---@class Record_grid
 ---@field kind "grid"
+---@field prefix string|nil
 ---@field row Cell[]
 ---@field _has_continuation? boolean    true if this record continues to the next row
 

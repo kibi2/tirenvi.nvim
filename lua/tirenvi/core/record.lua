@@ -177,7 +177,8 @@ function M.to_buflines(records)
             local row_items = record.row
             local row = table.concat(row_items, pipe)
             row = pipe .. row .. pipe
-            buflines[#buflines + 1] = row
+            local line = (record.prefix or "") .. row
+            buflines[#buflines + 1] = line
         end
     end
     return buflines
