@@ -102,6 +102,13 @@ function! s:CollectFile(path)
   return []
 endfunction
 
+function! s:LoadFileForCI(file) abort
+  if fnamemodify(a:file, ':e') ==# 'tir'
+    return systemlist('jq -cS . ' . shellescape(a:file))
+  endif
+  return s:CollectFile(a:file)
+endfunction
+
 function! s:CollectAll(opts) abort
   let l:out = []
 
@@ -127,7 +134,7 @@ function! s:CollectAll(opts) abort
 
   " FILE
   if has_key(a:opts, 'file')
-    let l:file = s:CollectFile(a:opts.file)
+    let l:file = s:LoadFileForCI(a:opts.file)
     if !empty(l:file)
       call add(l:out, '')
       call add(l:out, '=== FILE ===')

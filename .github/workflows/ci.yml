@@ -36,6 +36,11 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: Install system packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq luarocks
+
       - name: Install tir-csv
         run: |
           pip install tir-csv
@@ -50,8 +55,6 @@ jobs:
 
       - name: Install LuaRocks & LuaCov
         run: |
-          sudo apt-get update
-          sudo apt-get install -y luarocks
           luarocks install --local luacov
           luarocks install --local luacov-html
           eval "$(luarocks path --bin)"

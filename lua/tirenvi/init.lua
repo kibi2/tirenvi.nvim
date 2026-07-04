@@ -215,4 +215,16 @@ function M.on_filetype(ctx)
 	end
 end
 
+---@param ctx Context
+---@param filename string
+function M.debug_read_tir(ctx, filename)
+	pipeline.debug_read_tir(ctx, filename)
+end
+
+---@param ctx Context
+---@param filename string
+function M.debug_write_tir(ctx, filename)
+	pipeline.debug_write_tir(ctx, filename)
+end
+
 return M

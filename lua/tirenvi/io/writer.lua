@@ -14,8 +14,9 @@ local M           = {}
 -----------------------------------------------------------------------
 
 ---@param bufnr number
----@param cell_pos Cell_pos
+---@param cell_pos Cell_pos|nil
 local function reset_cursor_pos(bufnr, cell_pos)
+    if not cell_pos then return end
     local attrs = buffer.get(bufnr, buffer.IKEY.ATTRS)
     local attr = attrs[cell_pos.iblock]
     if not Attr.is_grid(attr) or not attr.range then

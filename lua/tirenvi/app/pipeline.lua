@@ -1,6 +1,7 @@
 -----------------------------------------------------------------------
 -- Dependencies
 -----------------------------------------------------------------------
+local ReadResult = require("tirenvi.app.read_result")
 local Document = require("tirenvi.core.document")
 local Attrs = require("tirenvi.core.attrs")
 local Attr = require("tirenvi.core.attr")
@@ -99,7 +100,7 @@ local function doc_to_buflines(ctx, r_result, doc, opts)
     buf_state.set_buffer_flat(ctx.bufnr, false)
     attr_store.write(ctx, attrs)
     local buf_lines = buf_parser.unparse(bufdoc)
-    if not util.same_str_array(buf_lines, r_result.lines) then
+    if not util.same_str_array(buf_lines, r_result.lines or "") then
         local req_w = Request.new_writer(r_result, buf_lines, no_undo)
         writer.write(ctx, req_w)
     end
@@ -360,6 +361,25 @@ function M.write_post(ctx)
         writer.write(ctx, req)
         backup_buffer = nil
     end
+end
+
+---@param ctx Context
+---@param filename string
+function M.debug_read_tir(ctx, filename)
+    local r_result = ReadResult.new_reader(Range.WHOLE)
+    local jslines = vim.fn.readfile(filename)
+    local tirdoc = flat_parser.from_jslines(ctx, jslines)
+    doc_to_buflines(ctx, r_result, tirdoc)
+end
+
+---@param ctx Context
+---@param filename string
+function M.debug_write_tir(ctx, filename)
+    local r_result = reader.read(ctx, Range.WHOLE)
+    local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
+    local tirdoc = Document.from_bufdoc(bufdoc)
+    local jslines = flat_parser.to_jslines(tirdoc)
+    vim.fn.writefile(jslines, filename)
 end
 
 ---@param ctx Context
