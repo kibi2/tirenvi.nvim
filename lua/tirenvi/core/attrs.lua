@@ -249,7 +249,7 @@ end
 ---@param self Attr[]
 ---@param cur_row integer
 ---@param cur_col integer
----@return Cell_pos
+---@return Cursor_info
 function M:to_logical(cur_row, cur_col)
     local cell_pos = { cur_row = cur_row, cur_col = cur_col }
     local attr, iblock = M.get(self, cur_row)
@@ -265,7 +265,7 @@ function M:to_logical(cur_row, cur_col)
 end
 
 ---@param self Attr[]
----@param cell_pos Cell_pos
+---@param cell_pos Cursor_info
 ---@return integer
 ---@return integer
 function M:to_cursor(cell_pos)

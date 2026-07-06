@@ -16,7 +16,7 @@ local M = {}
 ---@field range Range
 ---@field lines string[]
 ---@field no_undo boolean
----@field cell_pos Cell_pos
+---@field cursor_info Cursor_info
 
 -- private helpers
 
@@ -33,7 +33,7 @@ function M.new_writer(r_req, lines, no_undo)
         range = r_req.range,
         lines = lines,
         no_undo = no_undo or false,
-        cell_pos = r_req.cell_pos
+        cursor_info = r_req.cursor_info
     }
 end
 

@@ -76,11 +76,25 @@ local function fix_cursor_utf8(ctx)
 	end
 end
 
+---@param bufnr number
+---@param cell_pos Cursor_info
+local function reset_cursor_buffer(bufnr, cell_pos)
+	M.set_cursor_char_pos(bufnr, cell_pos.cur_row, cell_pos.cur_col)
+end
+
+---@param bufnr number
+---@param cell_pos Cursor_info
+local function reset_cursor_logical(bufnr, cell_pos)
+	-- M.set_cursor_char_pos(ctx.bufnr, cell_pos.cur_row, cell_pos.cur_col)
+end
+
 ---@param ctx Context
----@param cell_pos Cell_pos
+---@param cell_pos Cursor_info
 local function reset_cursor_utf8(ctx, cell_pos)
-	if cell_pos and cell_pos.cur_row then
-		-- M.set_cursor_char_pos(ctx.bufnr, cell_pos.cur_row, cell_pos.cur_col)
+	if cell_pos and cell_pos.restore_mode == "buffer" then
+		reset_cursor_buffer(ctx.bufnr, cell_pos)
+	elseif cell_pos and cell_pos.restore_mode == "logical" then
+		reset_cursor_logical(ctx.bufnr, cell_pos)
 	else
 		fix_cursor_utf8(ctx)
 	end
@@ -96,8 +110,8 @@ end
 ---@param range Range
 ---@param lines string[]
 ---@param no_undo boolean
----@param cell_pos Cell_pos
-local function set_lines(ctx, range, lines, no_undo, cell_pos)
+---@param cursor_info Cursor_info
+local function set_lines(ctx, range, lines, no_undo, cursor_info)
 	M.clear_cache()
 	local bufnr = ctx.bufnr
 	local undolevels = bo[bufnr].undolevels
@@ -113,7 +127,7 @@ local function set_lines(ctx, range, lines, no_undo, cell_pos)
 	start0 = math.max(start0, 0)
 	api.nvim_buf_set_lines(bufnr, start0, end0, false, lines)
 	set_undo_tree_last(bufnr)
-	reset_cursor_utf8(ctx, cell_pos)
+	reset_cursor_utf8(ctx, cursor_info)
 	bo[bufnr].undolevels = undolevels
 end
 
@@ -190,12 +204,12 @@ end
 ---@param range Range
 ---@param lines string[]
 ---@param no_undo boolean
----@param cell_pos Cell_pos
-function M.set_lines(ctx, range, lines, no_undo, cell_pos)
+---@param cursor_info Cursor_info
+function M.set_lines(ctx, range, lines, no_undo, cursor_info)
 	local bufnr = ctx.bufnr
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
 	local before = fn.undotree(bufnr).seq_last
-	local ok, err = pcall(set_lines, ctx, range, lines, no_undo, cell_pos)
+	local ok, err = pcall(set_lines, ctx, range, lines, no_undo, cursor_info)
 	local after = fn.undotree(bufnr).seq_last
 	local first, last = Range.to_lua(range)
 	log.watch("UNDO", "%s[%d->%d]set_lines lines[%d]='%s'...[%d]='%s'", tostring(no_undo),

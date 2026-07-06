@@ -275,7 +275,7 @@ end
 
 local DELTA = 2
 ---@param attr Attr
----@param pos Cell_pos
+---@param pos Cursor_info
 ---@return string
 local function get_col_info(attr, pos)
     local widths = Attr.get_width_array(attr.columns)
@@ -295,7 +295,7 @@ end
 
 ---@param bufnr number
 ---@param attr Attr
----@param pos Cell_pos
+---@param pos Cursor_info
 ---@return string
 local function get_width_info(bufnr, attr, pos)
     local mode = Attr.get_wrap_kind(attr)
@@ -348,18 +348,24 @@ function M.read_post(ctx)
 end
 
 local backup_buffer
+local backup_cursor_info
 ---@param ctx Context
 function M.write_pre(ctx)
-    backup_buffer = M.to_flat(ctx, true)
+    local r_result = M.to_flat(ctx, true)
+    backup_buffer = r_result.lines
+    backup_cursor_info = r_result.cursor_info
+    backup_cursor_info.restore_mode = "buffer"
 end
 
 ---@param ctx Context
 function M.write_post(ctx)
     if backup_buffer then
         local r_result = reader.read(ctx, Range.WHOLE)
+        r_result.cursor_info = backup_cursor_info
         local req = Request.new_writer(r_result, backup_buffer, true)
         writer.write(ctx, req)
         backup_buffer = nil
+        backup_cursor_info = nil
     end
 end
 
@@ -393,13 +399,13 @@ end
 
 ---@param ctx Context
 ---@param is_write_pre boolean|nil
----@return string[]
+---@return ReadResult
 function M.to_flat(ctx, is_write_pre)
     local r_result = reader.read(ctx, Range.WHOLE)
     local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
     local tirdoc = Document.from_bufdoc(bufdoc)
     tirdoc_to_flat(ctx, r_result, tirdoc, is_write_pre)
-    return r_result.lines
+    return r_result
 end
 
 ---@param ctx Context
