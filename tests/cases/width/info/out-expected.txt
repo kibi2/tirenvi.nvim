@@ -15,7 +15,7 @@ mode=nowrap span=176 col=3/16 header="C333" widths=[17,9,10*,7,17,..]
 mode=nowrap span=176 col=4/16 header="D4444" widths=[..,9,10,7*,17,9,..]
  
 --- CASE 21: width? CSV col#4 wrap ---
-mode=auto span=143 col=4/16 header="D4444" widths=[..,8,8,7*,9,8,..]
+mode=auto span=143 col=5/16 header="A1" widths=[..,8,7,9*,8,8,..]
  
 --- CASE 25: width? CSV col#10 ---
 mode=auto span=143 col=10/16 header="F6666.." widths=[..,7,8,7*,9,8,..]
@@ -30,7 +30,7 @@ mode=wrap span=144 col=16/16 header="F6666.." widths=[..,7,8,8*]
 mode=wrap span=49 col=16/16 header="F6" widths=[..,2,2,2*]
  
 --- CASE 44: width? CSV col#$ ---
-mode=auto span=143 col=16/16 header="F6666.." widths=[..,7,8,7*]
+mode=auto span=143 col=6/16 header="B22" widths=[..,7,9,8*,8,7,..]
  
 --- CASE 52: initial cached attrs ---
 CASE 52 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
