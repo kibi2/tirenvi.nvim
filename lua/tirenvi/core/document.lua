@@ -67,7 +67,8 @@ local M = {}
 
 ---@alias Ndjson Attr_file|Record
 
----@class Cell_pos
+---@class Cursor_info
+---@field restore_mode "none"|"buffer"|"logical"
 ---@field cur_row integer
 ---@field cur_col integer
 ---@field iblock integer

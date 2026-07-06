@@ -16,7 +16,7 @@ local M = {}
 ---@field range Range
 ---@field lines string[]
 ---@field attrs Attr[]
----@field cell_pos Cell_pos
+---@field cursor_info Cursor_info
 
 -- private helpers
 

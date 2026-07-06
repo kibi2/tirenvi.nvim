@@ -14,7 +14,7 @@ local M           = {}
 -----------------------------------------------------------------------
 
 ---@param bufnr number
----@param cell_pos Cell_pos|nil
+---@param cell_pos Cursor_info|nil
 local function reset_cursor_pos(bufnr, cell_pos)
     if not cell_pos then return end
     local attrs = buffer.get(bufnr, buffer.IKEY.ATTRS)
@@ -35,8 +35,8 @@ end
 ---@param ctx Context
 ---@param req Request
 function M.write(ctx, req)
-    reset_cursor_pos(ctx.bufnr, req.cell_pos)
-    buffer.set_lines(ctx, req.range, req.lines, Request.is_no_undo(req), req.cell_pos)
+    -- reset_cursor_pos(ctx.bufnr, req.cursor_info)
+    buffer.set_lines(ctx, req.range, req.lines, Request.is_no_undo(req), req.cursor_info)
     local range3 = Request.get_range3(req)
     local prev_ranges = dirty.get_ranges(ctx.bufnr)
     local new_ranges = dirty_range.remove(prev_ranges, range3)

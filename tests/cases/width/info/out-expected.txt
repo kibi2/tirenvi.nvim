@@ -32,16 +32,18 @@ mode=wrap span=49 col=16/16 header="F6" widths=[..,2,2,2*]
 --- CASE 44: width? CSV col#$ ---
 mode=auto span=143 col=6/16 header="B22" widths=[..,7,9,8*,8,7,..]
  
---- CASE 52: initial cached attrs ---
-CASE 52 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
+--- CASE 49: width? CSV toggle ---
  
---- CASE 55: width? plain ---
+--- CASE 56: initial GFM cached attrs ---
+CASE 56 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
+ 
+--- CASE 59: width? GFM plain ---
 kind=plain
  
---- CASE 59: width? grid ---
+--- CASE 63: width? GFM grid ---
 mode=nowrap span=23 col=1/3 header="Name" widths=[5*,3,11]
  
---- CASE 63: width?9 invalid ---
+--- CASE 67: width?9 invalid ---
 tirenvi: Invalid Tir command: width?9
 
 === DISPLAY ===

@@ -46,17 +46,21 @@ CASE width? CSV col#$
 		Tir fit=
 		Tir width?
 
+CASE width? CSV toggle
+		Tir toggle
+		Tir width?
+
 " ===== GFM =====
 edit $TIRENVI_ROOT/tests/data/simple.md
 
-CASE initial cached attrs
+CASE initial GFM cached attrs
             lua print(Debug.layout())
 
-CASE width? plain
+CASE width? GFM plain
 	call At(1, 2, 1)
 		Tir width?
 
-CASE width? grid
+CASE width? GFM grid
 	call At(1, 3, 1)
 		Tir width?
 
