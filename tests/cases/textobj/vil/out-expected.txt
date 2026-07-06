@@ -9,7 +9,7 @@ CASE 19 // cur(1,8) b1:r1:c3 +(0,0)< >  g(1,7)n[2,2,3*,3]
  
 --- CASE 26: yank 2column and put ---
 CASE 26 // cur(7,2) b1:r7:c1 +(0,0)<⠀>  g(1,7)n[2*,2,3,3]
-CASE 26 // cur(1,2) b1:r1:c1 +(0,0)<1>  g(1,7)n[2*,2,2,3,3]
+CASE 26 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,7)n[2*,2,2,3,3]
  
 --- CASE 35: repair disable ---
 [Tirenvi] repair:disable 

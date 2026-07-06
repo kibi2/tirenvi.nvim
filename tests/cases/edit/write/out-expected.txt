@@ -2,7 +2,7 @@
 === MESSAGE ===
  
 --- CASE 16: simple csv ---
-CASE 16 // cur(1,2) b1:r1:c1 +(0,0)<1>  g(1,7)a[3*,4,4]
+CASE 16 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,7)a[3*,4,4]
 tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
 
 === DISPLAY ===
@@ -67,7 +67,7 @@ b	"
 === MESSAGE ===
  
 --- CASE 30: complex csv ---
-CASE 30 // cur(1,2) b1:r1:c1 +(0,0)<A>  g(1,114)a[20*,11,12,10,11,9]
+CASE 30 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,114)a[20*,11,12,10,11,9]
  
 --- CASE 39: simple md ---
 CASE 39 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)* g(3,8)a[7,4,15] p(9,11)

@@ -80,7 +80,7 @@ end
 ---@param cell_pos Cell_pos
 local function reset_cursor_utf8(ctx, cell_pos)
 	if cell_pos and cell_pos.cur_row then
-		M.set_cursor_char_pos(ctx.bufnr, cell_pos.cur_row, cell_pos.cur_col)
+		-- M.set_cursor_char_pos(ctx.bufnr, cell_pos.cur_row, cell_pos.cur_col)
 	else
 		fix_cursor_utf8(ctx)
 	end
