@@ -17,11 +17,12 @@
 ---@field operation WidthOperation
 ---@field number integer
 ---@field cur_row integer
----@field cur_col integer
+---@field disp_col integer
 local WidthOp   = {}
 WidthOp.__index = WidthOp
 
 local Cell      = require("tirenvi.core.cell")
+local Range     = require("tirenvi.util.range")
 local log       = require("tirenvi.util.log")
 
 -- constants / defaults
@@ -38,27 +39,29 @@ local map       = {
 }
 
 ---@param opts {[string]:any}
----@return integer
----@return integer
+---@return Rect
 local function get_selection(opts)
-    local row_start = opts.line1
-    local row_end   = opts.line2
+    local row_range = Range.from_lua_normal(opts.line1, opts.line2)
     local is_block  = (vim.fn.visualmode() == "\22")
-    local col_start, col_end
+    local disp_col_start, disp_col_end
     if opts.range > 0 then
         if is_block then
-            col_start = vim.fn.virtcol("'<")
-            col_end   = vim.fn.virtcol("'>")
+            disp_col_start = vim.fn.virtcol("'<")
+            disp_col_end   = vim.fn.virtcol("'>")
         else
-            col_start = 1
-            col_end   = math.huge
+            disp_col_start = 1
+            disp_col_end   = math.huge
         end
     else
-        local col = vim.fn.virtcol(".")
-        col_start = col
-        col_end   = col
+        local col      = vim.fn.virtcol(".")
+        disp_col_start = col
+        disp_col_end   = col
     end
-    return math.min(row_start, row_end), math.min(col_start, col_end)
+    local col_range = Range.from_lua_normal(disp_col_start, disp_col_end)
+    return {
+        row = row_range,
+        col = col_range
+    }
 end
 
 ---@param str string
@@ -99,14 +102,16 @@ end
 local function try_new(opts)
     local command_name = opts.command_name
     ---@cast command_name WidthCommand
-    local cur_row, cur_col = get_selection(opts)
+    local rect = get_selection(opts)
+    local cur_row = rect.row.first
+    local disp_col = rect.col.first
     local self = setmetatable({
         args = opts.args,
         command = command_name,
         operation = "none",
         number = 0,
         cur_row = cur_row,
-        cur_col = cur_col,
+        disp_col = disp_col,
     }, WidthOp)
     if not opts.command.has_op then
         if opts.args ~= command_name then
@@ -145,7 +150,7 @@ end
 function WidthOp:to_string()
     return string.format("WidthOp %s %s (%d, %d) [%s] %s",
         self.command, self.operation or "nil",
-        self.cur_row, self.cur_col, self.number or "nil", self:to_cmd())
+        self.cur_row, self.disp_col, self.number or "nil", self:to_cmd())
 end
 
 ---@param self WidthOp

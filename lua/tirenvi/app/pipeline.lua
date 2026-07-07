@@ -221,7 +221,7 @@ local function change_wrap_width(ctx, width_op)
     log.assert(#bufdoc.blocks == 1, "only one block")
     local attr = bufdoc.blocks[1].attr
     if Attr.is_plain(attr) then return end
-    local column = Attr.get(attr, width_op.cur_col)
+    local column = Attr.get(attr, width_op.disp_col)
     column.width = width_op:apply(column.width)
     attr.fit_span = Attr.get_fit_span(attr)
     attr.wrap_mode = "wrap_width"
@@ -311,7 +311,7 @@ end
 ---@param width_op WidthOp
 local function width_info(ctx, width_op)
     local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
-    local pos = Attrs.to_logical(attrs, width_op.cur_row, width_op.cur_col)
+    local pos = Attrs.to_logical(attrs, width_op.cur_row, width_op.disp_col)
     local attr = attrs[pos.iblock]
     if Attr.is_plain(attr) then
         print("kind=plain")

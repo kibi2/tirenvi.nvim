@@ -59,10 +59,11 @@ local function get_info()
     if not info.attrs then
         info.attrs = {}
     end
-    local cur_row, _, char_col = buffer.get_cursor_char_pos(ctx)
+    local cur_row, _, char_col, disp_col = buffer.get_cursor_char_pos(ctx)
     info.pos = Attrs.to_logical(info.attrs, cur_row, char_col)
     info.line = buffer.get_line(ctx.bufnr, cur_row)
     info.char = vim.fn.strcharpart(info.line, char_col - 1, 1)
+    info.disp = disp_col
     return info
 end
 
