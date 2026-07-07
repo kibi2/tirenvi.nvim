@@ -11,7 +11,8 @@ CASE width+ on first plain block"
         call Tir("width+")
 
 CASE width+3 on first grid block"
-	call At(2, 1, 1)
+	call At(4, 3, 3)
+	call feedkeys("\<C-V>8k9h", 'x')
 		call Tir("width+3")
 
 CASE width-2 on second grid block, column 2"

@@ -313,7 +313,7 @@ end
 ---@return integer
 function M.get_cursor_byte_pos(ctx)
 	local irow, byte_col0 = unpack(api.nvim_win_get_cursor(ctx.winid))
-	local maxrow = vim.api.nvim_buf_line_count(ctx.bufnr)
+	local maxrow = api.nvim_buf_line_count(ctx.bufnr)
 	irow = util.trim(irow, 1, maxrow)
 	local line = M.get_line(ctx.bufnr, irow)
 	byte_col0 = util.trim(byte_col0, 0, #line - 1)
@@ -333,6 +333,7 @@ function M.get_cursor_char_pos(ctx)
 	local byte_col0 = byte_col1 - 1
 	local char_col0 = vim.str_utfindex(line, byte_col0)
 	local new_byte_col = M.str_byteindex(line, "utf-32", char_col0, false) + 1
+	local disp_col = fn.strdisplaywidth(line:sub(1, char_col0 + 1))
 	return cur_row, new_byte_col, char_col0 + 1
 end
 
@@ -340,7 +341,7 @@ end
 ---@param irow integer
 ---@param icol integer
 function M.set_cursor_byte_pos(winid, irow, icol)
-	vim.api.nvim_win_set_cursor(winid, { irow, math.max(0, icol - 1) })
+	api.nvim_win_set_cursor(winid, { irow, math.max(0, icol - 1) })
 end
 
 ---@param bufnr number
@@ -353,16 +354,16 @@ function M.set_cursor_char_pos(bufnr, char_row, char_col)
 	end
 	local char_col = util.trim(char_col, 1, #line)
 	local byte_col0 = M.str_byteindex(line, "utf-32", char_col - 1, false)
-	local view = vim.fn.winsaveview()
+	local view = fn.winsaveview()
 	view.lnum = char_row
 	view.col = byte_col0
-	vim.fn.winrestview(view)
+	fn.winrestview(view)
 end
 
 ---@param winid integer
 ---@return integer
 function M.get_win_span(winid)
-	local info = vim.fn.getwininfo(winid)[1]
+	local info = fn.getwininfo(winid)[1]
 	return info.width - info.textoff
 end
 

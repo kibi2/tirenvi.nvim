@@ -12,10 +12,6 @@ local api = vim.api
 ---@param last integer
 ---@return Range
 local function new(first, last)
-    if first > last then
-        -- TODO
-        -- log.error("invalid range: first(%d) > last(%d)", first, last)
-    end
     return {
         first = first,
         last = last,
@@ -63,6 +59,16 @@ end
 ---@return Range
 function M.from_lua(first, last)
     return new(first, last)
+end
+
+---@param first integer
+---@param last integer
+---@return Range
+function M.from_lua_normal(first, last)
+    return {
+        first = math.min(first, last),
+        last = math.max(first, last),
+    }
 end
 
 ---@return boolean
