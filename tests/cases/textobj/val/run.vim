@@ -35,7 +35,7 @@ CASE yank 2column and put
 CASE repair disable
 Tir repair disable
 	call At(1, 5, 1)
-		normal! ainsert
+		normal! hainsert
     	call feedkeys("vah", "x")
 
 call Snapshot({ 'desc': 'CSV' })

@@ -215,13 +215,13 @@ end
 ---@param ctx Context
 ---@param width_op WidthOp
 local function change_wrap_width(ctx, width_op)
-    local row_range = expand_rect(ctx, width_op.cur_row)
+    local row_range = expand_rect(ctx, width_op.row_cur)
     local r_result = reader.read(ctx, row_range)
     local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
     log.assert(#bufdoc.blocks == 1, "only one block")
     local attr = bufdoc.blocks[1].attr
     if Attr.is_plain(attr) then return end
-    local column = Attr.get(attr, width_op.disp_col)
+    local column = Attr.get(attr, width_op.col_disp)
     column.width = width_op:apply(column.width)
     attr.fit_span = Attr.get_fit_span(attr)
     attr.wrap_mode = "wrap_width"
@@ -231,7 +231,7 @@ end
 ---@param ctx Context
 ---@param width_op WidthOp
 local function change_wrap_fit(ctx, width_op)
-    local row_range = expand_rect(ctx, width_op.cur_row)
+    local row_range = expand_rect(ctx, width_op.row_cur)
     local r_result = reader.read(ctx, row_range)
     local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
     log.assert(#bufdoc.blocks == 1, "only one block")
@@ -245,7 +245,7 @@ end
 ---@param ctx Context
 ---@param width_op WidthOp
 local function change_wrap_auto(ctx, width_op)
-    local row_range = expand_rect(ctx, width_op.cur_row)
+    local row_range = expand_rect(ctx, width_op.row_cur)
     local r_result = reader.read(ctx, row_range)
     local bufdoc = buflines_to_bufdoc_text_driven(ctx, r_result)
     log.assert(#bufdoc.blocks == 1, "only one block")
@@ -275,14 +275,14 @@ end
 
 local DELTA = 2
 ---@param attr Attr
----@param pos Cursor_info
+---@param logical CursorLogical
 ---@return string
-local function get_col_info(attr, pos)
+local function get_col_info(attr, logical)
     local widths = Attr.get_width_array(attr.columns)
     ---@cast widths string[]
-    widths[pos.icol] = widths[pos.icol] .. "*"
-    local first = math.max(1, pos.icol - DELTA)
-    local last = math.min(#widths, pos.icol + DELTA)
+    widths[logical.icol] = widths[logical.icol] .. "*"
+    local first = math.max(1, logical.icol - DELTA)
+    local last = math.min(#widths, logical.icol + DELTA)
     local info = table.concat(widths, ",", first, last)
     if first ~= 1 then
         info = "..," .. info
@@ -295,15 +295,15 @@ end
 
 ---@param bufnr number
 ---@param attr Attr
----@param pos Cursor_info
+---@param logical CursorLogical
 ---@return string
-local function get_width_info(bufnr, attr, pos)
+local function get_width_info(bufnr, attr, logical)
     local mode = Attr.get_wrap_kind(attr)
     local span = Attr.get_fit_span(attr)
-    local head = get_head(bufnr, attr, pos.icol)
-    local col_info = get_col_info(attr, pos)
+    local head = get_head(bufnr, attr, logical.icol)
+    local col_info = get_col_info(attr, logical)
     return string.format("mode=%s span=%d col=%d/%d header=%q widths=%s",
-        mode, span, pos.icol, #attr.columns, head, col_info
+        mode, span, logical.icol, #attr.columns, head, col_info
     )
 end
 
@@ -311,12 +311,12 @@ end
 ---@param width_op WidthOp
 local function width_info(ctx, width_op)
     local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
-    local pos = Attrs.to_logical(attrs, width_op.cur_row, width_op.disp_col)
-    local attr = attrs[pos.iblock]
+    local logical = Attrs.to_logical(attrs, width_op.row_cur, width_op.col_disp)
+    local attr = attrs[logical.iblock]
     if Attr.is_plain(attr) then
         print("kind=plain")
     else
-        print(get_width_info(ctx.bufnr, attr, pos))
+        print(get_width_info(ctx.bufnr, attr, logical))
     end
 end
 
@@ -324,7 +324,7 @@ end
 ---@param width_op WidthOp
 local function toggle_wrap_mode(ctx, width_op)
     local attrs = attr_store.read(ctx.bufnr)
-    local attr = Attrs.get(attrs, width_op.cur_row)
+    local attr = Attrs.get(attrs, width_op.row_cur)
     Attr.toggle_wrap_mode(attr or {})
     attr_store.write(ctx, attrs)
 end
@@ -348,24 +348,24 @@ function M.read_post(ctx)
 end
 
 local backup_buffer
-local backup_cursor_info
+local backup_cursor
 ---@param ctx Context
 function M.write_pre(ctx)
     local r_result = M.to_flat(ctx, true)
     backup_buffer = r_result.lines
-    backup_cursor_info = r_result.cursor_info
-    backup_cursor_info.restore_mode = "buffer"
+    backup_cursor = r_result.cursor
+    backup_cursor.restore_mode = "buffer"
 end
 
 ---@param ctx Context
 function M.write_post(ctx)
     if backup_buffer then
         local r_result = reader.read(ctx, Range.WHOLE)
-        r_result.cursor_info = backup_cursor_info
+        r_result.cursor = backup_cursor
         local req = Request.new_writer(r_result, backup_buffer, true)
         writer.write(ctx, req)
         backup_buffer = nil
-        backup_cursor_info = nil
+        backup_cursor = nil
     end
 end
 
@@ -451,7 +451,7 @@ end
 ---@param ctx Context
 ---@param range3 Range3
 function M.on_lines(ctx, range3)
-    local r_result = reader.read(ctx, Range3.get_new_range(range3))
+    local r_result = reader.read(ctx, Range3.get_new_range(range3), { cursor = false })
     update_attrs(ctx, range3, r_result)
 end
 

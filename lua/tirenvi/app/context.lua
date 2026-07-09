@@ -2,23 +2,25 @@
 -- Dependencies
 -----------------------------------------------------------------------
 
-local Parser = require("tirenvi.parser.parser")
-local buffer = require("tirenvi.io.buffer")
-local log    = require("tirenvi.util.log")
+local Parser               = require("tirenvi.parser.parser")
+local buffer               = require("tirenvi.io.buffer")
+local buffer_line_provider = require("tirenvi.io.buffer_line_provider")
+local log                  = require("tirenvi.util.log")
 
 -----------------------------------------------------------------------
 -- Module
 -----------------------------------------------------------------------
 
-local M      = {}
+local M                    = {}
 
-local api    = vim.api
+local api                  = vim.api
 
 ---@class Context
 ---@field bufnr number
 ---@field winid number
 ---@field filetype string
----@field parser Parser
+---@field parser Parser|nil
+---@field line_provider LineProvider
 
 -- private helpers
 
@@ -27,17 +29,20 @@ local api    = vim.api
 -----------------------------------------------------------------------
 
 ---@param bufnr number|nil
----@return table
+---@return Context
 function M.from_buf(bufnr)
     bufnr = bufnr or api.nvim_get_current_buf()
     local winid = api.nvim_get_current_win()
     local filetype = buffer.get(bufnr, buffer.IKEY.FILETYPE)
     local parser = Parser.resolve_parser(filetype)
-    return {
+    ---@type Context
+    return
+    {
         bufnr = bufnr,
         winid = winid,
         filetype = filetype,
         parser = parser,
+        line_provider = buffer_line_provider.new(bufnr)
     }
 end
 

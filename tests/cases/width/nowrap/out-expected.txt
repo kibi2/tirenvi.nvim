@@ -2,50 +2,50 @@
 === MESSAGE ===
  
 --- CASE 6: initial cached attrs ---
-CASE 6 // cur(1,1) b1:r1:c0 +(0,0)<->  p(1,1)* g(2,6)n[5,6] p(7,7) g(8,12)n[5,3,6]
+CASE 6 // cur(1,1) b1:r1:c0+0<->  p(1,1)* g(2,6)n[5,6] p(7,7) g(8,12)n[5,3,6]
  
 --- CASE 9: wrap plain#1 ---
-CASE 9 // cur(1,1) b1:r1:c0 +(0,0)<->  p(1,1)* g(2,6)n[5,6] p(7,7) g(8,12)n[5,3,6]
+CASE 9 // cur(1,1) b1:r1:c0+0<->  p(1,1)* g(2,6)n[5,6] p(7,7) g(8,12)n[5,3,6]
  
 --- CASE 13: wrap grid#1 nowrap -> +10 ---
 tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
-CASE 13 // cur(3,2) b2:r2:c1 +(0,0)<->  p(1,1) g(2,6)w24[15*,6] p(7,7) g(8,12)n[5,3,6]
+CASE 13 // cur(3,2) b2:r2:c1+1<->  p(1,1) g(2,6)w24[15*,6] p(7,7) g(8,12)n[5,3,6]
  
 --- CASE 17: wrap grid#1 +10 -> nowrap ---
-CASE 17 // cur(2,2) b2:r1:c1 +(0,0)<N>  p(1,1) g(2,6)n24[5*,6] p(7,7) g(8,12)n[5,3,6]
+CASE 17 // cur(2,2) b2:r1:c1+1<N>  p(1,1) g(2,6)n24[5*,6] p(7,7) g(8,12)n[5,3,6]
  
 --- CASE 21: wrap grid#1 nowrap -> fit ---
-CASE 21 // cur(2,2) b2:r1:c1 +(0,0)<N>  p(1,1) g(2,6)f24[10*,11] p(7,7) g(8,12)n[5,3,6]
+CASE 21 // cur(2,2) b2:r1:c1+1<N>  p(1,1) g(2,6)f24[10*,11] p(7,7) g(8,12)n[5,3,6]
  
 --- CASE 24: wrap grid#2 -> auto ---
-CASE 24 // cur(9,10) b4:r2:c2 +(0,0)<->  p(1,1) g(2,6)f24[10,11] p(7,7) g(8,12)a[7,4*,8]
+CASE 24 // cur(9,10) b4:r2:c2+1<->  p(1,1) g(2,6)f24[10,11] p(7,7) g(8,12)a[7,4*,8]
  
 --- CASE 28: wrap grid#2 nowrap ---
-CASE 28 // cur(10,11) b4:r3:c3 +(0,-1)<│>  p(1,1) g(2,6)f24[10,11] p(7,7) g(8,12)n[5,3,6*]
+CASE 28 // cur(10,12) b4:r3:c3+1<T>  p(1,1) g(2,6)f24[10,11] p(7,7) g(8,12)n[5,3,6*]
  
 --- CASE 32: wrap plain#2 ---
-CASE 32 // cur(7,2) b3:r1:c0 +(0,0)<->  p(1,1) g(2,6)f24[10,11] p(7,7)* g(8,12)n[5,3,6]
+CASE 32 // cur(7,1) b3:r1:c0+0<->  p(1,1) g(2,6)f24[10,11] p(7,7)* g(8,12)n[5,3,6]
  
 --- CASE 39: CSV initial cached attrs ---
-CASE 39 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,7)n[2*,3,3]
+CASE 39 // cur(1,1) b1:r1:c1+0<│>  g(1,7)n[2*,3,3]
  
 --- CASE 42: CSV wrap -> fit ---
-CASE 42 // cur(3,5) b1:r3:c2 +(0,-1)<│>  g(1,7)a[3,4*,4]
+CASE 42 // cur(3,5) b1:r3:c2+0<│>  g(1,7)a[3,4*,4]
  
 --- CASE 46: CSV wrap -> nowrap ---
-CASE 46 // cur(6,2) b1:r6:c1 +(0,0)<↲>  g(1,7)n[2*,3,3]
+CASE 46 // cur(6,2) b1:r6:c1+1<↲>  g(1,7)n[2*,3,3]
  
 --- CASE 50: wrap=3 ---
 tirenvi: Invalid Tir command: wrap=3
-CASE 50 // cur(2,9) b1:r2:c3 +(0,0)<3>  g(1,7)n[2,3,3*]
+CASE 50 // cur(2,9) b1:r2:c3+1<3>  g(1,7)n[2,3,3*]
  
 --- CASE 54: wrap foo ---
 tirenvi: Invalid Tir command: wrap foo
-CASE 54 // cur(2,9) b1:r2:c3 +(0,0)<3>  g(1,7)n[2,3,3*]
+CASE 54 // cur(2,9) b1:r2:c3+1<3>  g(1,7)n[2,3,3*]
 
 === DISPLAY ===
-│1a│2 a│ 3a│
-┊1↲┊2b⠀┊3↲⠀┊
+│1a│2 a│３a│
+┊1↲┊２⠀┊3↲⠀┊
 │⠀⠀│⠀⠀⠀│b⇥⠀│
 ┊↲⠀┊⠀⠀⠀┊⇥c⠀┊
 ┊↲⠀┊⠀⠀⠀┊⠀⠀⠀┊

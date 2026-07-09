@@ -3,6 +3,7 @@ source $TIRENVI_ROOT/tests/common.vim
 " ===== CSV file command =====
 let outfoo = 'gen.foo'
 
+CASE CSV file command
 edit $TIRENVI_ROOT/tests/data/simple.csv
 	call At(1, 1, 1)
         normal! x
@@ -15,6 +16,7 @@ call Snapshot({ 'desc': 'file ' . outfoo, 'file': outfoo })
 let outcsv = 'gen.csv'
 let outtsv = 'gen.tsv'
 
+CASE CSV Delete
 edit $TIRENVI_ROOT/tests/data/simple.csv
 	call At(1, 2, 1)
         normal! D
@@ -23,6 +25,7 @@ edit $TIRENVI_ROOT/tests/data/simple.csv
 
 call Snapshot({ 'desc': 'file ' . outcsv, 'file': outcsv })
 
+CASE CSV write command
         execute 'write ' . outtsv
 
 call Snapshot({ 'desc': 'file ' . outtsv, 'file': outtsv })

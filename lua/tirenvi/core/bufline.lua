@@ -1,14 +1,15 @@
-local Context = require("tirenvi.app.context")
-local Cell = require("tirenvi.core.cell")
-local config = require("tirenvi.config")
-local buffer = require("tirenvi.io.buffer")
-local util = require("tirenvi.util.util")
-local Range = require("tirenvi.util.range")
-local log = require("tirenvi.util.log")
+local Context    = require("tirenvi.app.context")
+local Cell       = require("tirenvi.core.cell")
+local config     = require("tirenvi.config")
+local buffer     = require("tirenvi.io.buffer")
+local CursorNvim = require("tirenvi.cursor.nvim")
+local util       = require("tirenvi.util.util")
+local Range      = require("tirenvi.util.range")
+local log        = require("tirenvi.util.log")
 
-local M = {}
+local M          = {}
 
-local api = vim.api
+local api        = vim.api
 -- private helpers
 
 ---@param line string
@@ -213,25 +214,26 @@ function M.is_continue_line(line)
 end
 
 ---@param ctx Context
----@param line_provider LineProvider
 ---@param count integer
 ---@param is_around boolean
 ---@return Rect|nil
 ---@return string[]
-function M.get_block_rect(ctx, line_provider, count, is_around)
-    local irow, byte_col = buffer.get_cursor_byte_pos(ctx)
-    local cline = line_provider.get_line(irow) or ""
+function M.get_block_rect(ctx, count, is_around)
+    local cursor = CursorNvim.capture(ctx)
+    local row_cur = cursor.row_cur
+    local col_byte = cursor.col_byte
+    local cline = ctx.line_provider.get_line(row_cur) or ""
     local cbyte_pos = M.get_pipe_byte_position(cline)
     if #cbyte_pos == 0 then
         return nil, {}
     end
-    local colIndex = M.get_current_col_index(cbyte_pos, byte_col)
+    local colIndex = M.get_current_col_index(cbyte_pos, col_byte)
     if not colIndex then
         return nil, {}
     end
-    local trow = M.get_block_top_nrow(ctx, line_provider, irow)
-    local brow = M.get_block_bottom_nrow(ctx, line_provider, irow)
-    local lines = line_provider.get_lines(trow, brow)
+    local trow = M.get_block_top_nrow(ctx, ctx.line_provider, row_cur)
+    local brow = M.get_block_bottom_nrow(ctx, ctx.line_provider, row_cur)
+    local lines = ctx.line_provider.get_lines(trow, brow)
     local tline = lines[1]
     local bline = lines[#lines]
     local tbyte_pos = M.get_pipe_byte_position(tline)

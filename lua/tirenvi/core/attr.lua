@@ -244,10 +244,10 @@ function M:get_wrap_kind()
 end
 
 ---@param self Attr
----@param cur_col integer
+---@param col_disp integer
 ---@return integer
 ---@return integer
-function M:to_cell_col(cur_col)
+function M:to_cell_col(col_disp)
     if M.is_plain(self) then
         return 0, 0
     end
@@ -255,8 +255,8 @@ function M:to_cell_col(cur_col)
     local last
     for icol, column in ipairs(self.columns) do
         last = start + column.width
-        if cur_col <= last then
-            return icol, cur_col - start - 1
+        if col_disp <= last then
+            return icol, col_disp - start
         end
         start = last + 1
     end
@@ -264,9 +264,9 @@ function M:to_cell_col(cur_col)
 end
 
 ---@param self Attr
----@param cur_col integer
-function M:get(cur_col)
-    local icol = M.to_cell_col(self, cur_col)
+---@param col_byte integer
+function M:get(col_byte)
+    local icol = M.to_cell_col(self, col_byte)
     return self.columns[icol]
 end
 
@@ -274,6 +274,9 @@ end
 ---@param icol integer
 ---@return integer
 function M:get_start_pos(icol)
+    if M.is_plain(self) then
+        return 1
+    end
     local width = M.get_total_width(self, icol - 1)
     return width + icol + 1
 end

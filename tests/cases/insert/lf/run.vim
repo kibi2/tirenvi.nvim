@@ -19,19 +19,19 @@ EOF
 edit $TIRENVI_ROOT/tests/data/simple.csv
 
 CASE lf-at-start <lf>|2-1|2-2|2-3|
-  call At(1, 2, 1)
-    normal! 0
+    normal! 2G0
       lua print_lf()
 
 CASE lf-in-cell |<lf char>2-1|2-2|2-3|
-    e!
-  call At(1, 2, 1)
+    normal! 3G0l
       lua print_lf()
 
 CASE lf-in-flat
     e!
     Tir toggle
-  lua vim.api.nvim_win_set_cursor(0, {2, 1})
+  normal! 2G0
+      lua print_lf()
+  normal! 3G0l
       lua print_lf()
 
-call Snapshot({})
+call Snapshot({'desc': 'The LF encoding changes depending on the location'})

@@ -67,16 +67,6 @@ local M = {}
 
 ---@alias Ndjson Attr_file|Record
 
----@class Cursor_info
----@field restore_mode "none"|"buffer"|"logical"
----@field cur_row integer
----@field cur_col integer
----@field iblock integer
----@field irow integer
----@field icol integer
----@field row_offset integer|nil
----@field col_offset integer|nil
-
 local VERSION = "tir/0.1"
 
 -- private helpers

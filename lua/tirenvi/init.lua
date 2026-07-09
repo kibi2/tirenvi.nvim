@@ -3,9 +3,11 @@ local Context = require("tirenvi.app.context")
 local pipeline = require("tirenvi.app.pipeline")
 local config = require("tirenvi.config")
 local buffer = require("tirenvi.io.buffer")
+local reader = require("tirenvi.io.reader")
 local buf_state = require("tirenvi.io.buf_state")
 local attr_store = require("tirenvi.io.attr_store")
 local Bufline = require("tirenvi.core.bufline")
+local CursorNvim = require("tirenvi.cursor.nvim")
 local Range = require("tirenvi.util.range")
 local util = require("tirenvi.util.util")
 local notify = require("tirenvi.util.notify")
@@ -114,12 +116,13 @@ end
 
 ---@param ctx Context
 function M.insert_char_in_newline(ctx)
-	local irow = buffer.get_cursor_byte_pos(ctx)
-	local line_new = buffer.get_line(ctx.bufnr, irow)
+	local cursor = reader.cursor(ctx)
+	local row_cur = cursor.row_cur
+	local line_new = buffer.get_line(ctx.bufnr, row_cur)
 	if line_new ~= "" then
 		return
 	end
-	local line_prev, line_next = buffer.get_lines_around(ctx.bufnr, Range.from_lua(irow, irow))
+	local line_prev, line_next = buffer.get_lines_around(ctx.bufnr, Range.from_lua(row_cur, row_cur))
 	local line_ref = line_prev
 	if not Context.is_allow_plain(ctx) then
 		line_ref = line_ref or line_next
@@ -176,7 +179,7 @@ local function apply_wrap(winid, should_wrap)
 end
 
 ---@param ctx Context
-function M.on_cursor_moved(ctx)
+function M.auto_wrap(ctx)
 	if not config.ui.manage_wrap then
 		return
 	end
@@ -184,8 +187,9 @@ function M.on_cursor_moved(ctx)
 		apply_wrap(ctx.winid, false)
 		return
 	end
-	local cur_row, _, _ = buffer.get_cursor_char_pos(ctx)
-	local line = buffer.get_line(ctx.bufnr, cur_row) or ""
+	-- Fast path for CursorMoved.
+	-- We only need the current line of the current window.
+	local line = vim.api.nvim_get_current_line()
 	local line_width = fn.strdisplaywidth(line)
 	local win_span = buffer.get_win_span(ctx.winid)
 	local is_over = win_span < line_width

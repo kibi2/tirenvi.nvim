@@ -3,17 +3,17 @@
  
 --- CASE 5: simple md -> tir ---
 Tir _write_tir need filename
-CASE 5 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
+CASE 5 // cur(1,1) b1:r1:c0+0<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
 
 === DISPLAY ===
 gfm
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
-│Name⠀│Age│City⠀⠀⠀⠀⠀⠀⠀│
+│名前⠀│Age│City⠀⠀⠀⠀⠀⠀⠀│
 │----⠀│---│----⠀⠀⠀⠀⠀⠀⠀│
 │Alice│23⠀│Tokyo⠀⠀⠀⠀⠀⠀│
-┊Bob⠀⠀┊31⠀┊Osaka↲⠀⠀⠀⠀⠀┊
+┊Bob⠀⠀┊31⠀┊大阪↲⠀⠀⠀⠀⠀⠀┊
 │⠀⠀⠀⠀⠀│⠀⠀⠀│nipponbashi│
-│Carol│27⠀│Nagoya⠀⠀⠀⠀⠀│
+│Carol│27⠀│名古屋⠀⠀⠀⠀⠀│
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
 markdown
 
@@ -22,11 +22,11 @@ markdown
 {"kind":"attr_file","version":"tir/0.1"}
 {"kind":"plain","line":"gfm"}
 {"kind":"plain","line":"----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0"}
-{"_has_continuation":false,"kind":"grid","row":["Name","Age","City"]}
+{"_has_continuation":false,"kind":"grid","row":["名前","Age","City"]}
 {"_has_continuation":false,"kind":"grid","row":["----","---","----"]}
 {"_has_continuation":false,"kind":"grid","row":["Alice","23","Tokyo"]}
-{"_has_continuation":false,"kind":"grid","row":["Bob","31","Osaka\nnipponbashi"]}
-{"_has_continuation":false,"kind":"grid","row":["Carol","27","Nagoya"]}
+{"_has_continuation":false,"kind":"grid","row":["Bob","31","大阪\nnipponbashi"]}
+{"_has_continuation":false,"kind":"grid","row":["Carol","27","名古屋"]}
 {"kind":"plain","line":"----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0"}
 {"kind":"plain","line":"markdown"}
 {"kind":"plain","line":""}
@@ -35,17 +35,17 @@ markdown
  
 --- CASE 13: new md ---
 Tir _read_tir need filename
-CASE 13 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
+CASE 13 // cur(1,1) b1:r1:c0+0<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
 
 === DISPLAY ===
 gfm
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
-│Name⠀│Age│City⠀⠀⠀⠀⠀⠀⠀│
+│名前⠀│Age│City⠀⠀⠀⠀⠀⠀⠀│
 │----⠀│---│----⠀⠀⠀⠀⠀⠀⠀│
 │Alice│23⠀│Tokyo⠀⠀⠀⠀⠀⠀│
-┊Bob⠀⠀┊31⠀┊Osaka↲⠀⠀⠀⠀⠀┊
+┊Bob⠀⠀┊31⠀┊大阪↲⠀⠀⠀⠀⠀⠀┊
 │⠀⠀⠀⠀⠀│⠀⠀⠀│nipponbashi│
-│Carol│27⠀│Nagoya⠀⠀⠀⠀⠀│
+│Carol│27⠀│名古屋⠀⠀⠀⠀⠀│
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
 markdown
 
@@ -53,17 +53,17 @@ markdown
 === MESSAGE ===
  
 --- CASE 21: new csv ---
-CASE 21 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
+CASE 21 // cur(1,1) b1:r1:c0+0<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
 
 === DISPLAY ===
 gfm
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
-│Name⠀│Age│City⠀⠀⠀⠀⠀⠀⠀│
+│名前⠀│Age│City⠀⠀⠀⠀⠀⠀⠀│
 │----⠀│---│----⠀⠀⠀⠀⠀⠀⠀│
 │Alice│23⠀│Tokyo⠀⠀⠀⠀⠀⠀│
-┊Bob⠀⠀┊31⠀┊Osaka↲⠀⠀⠀⠀⠀┊
+┊Bob⠀⠀┊31⠀┊大阪↲⠀⠀⠀⠀⠀⠀┊
 │⠀⠀⠀⠀⠀│⠀⠀⠀│nipponbashi│
-│Carol│27⠀│Nagoya⠀⠀⠀⠀⠀│
+│Carol│27⠀│名古屋⠀⠀⠀⠀⠀│
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
 markdown
 
@@ -71,7 +71,7 @@ markdown
 === MESSAGE ===
  
 --- CASE 29: new txt ---
-CASE 29 // cur(1,1) bnil:rnil:cnil +(nil,nil)<> 
+CASE 29 // cur(1,1) bnil:rnil:cnil+0<> 
 
 === DISPLAY ===
 

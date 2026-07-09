@@ -3,7 +3,7 @@
  
 --- CASE 6: restore curser : write case : restore_mode = buffer ---
 tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
-CASE 6 // cur(43,14) b1:r43:c5 +(0,0)<ん>  g(1,56)f2[2,2,2,2,2*,2,2,2,2,2,2,2,2,2,2,2]
+CASE 6 // cur(43,20) b1:r43:c7+1<ん>  g(1,56)f2[2,2,2,2,2,2,2*,2,2,2,2,2,2,2,2,2]
 
 === DISPLAY ===
 ┊A1┊B2┊C3┊D4┊A1┊B2┊C3┊D4┊E5┊F6┊A1┊B2┊C3┊D4┊E5┊F6┊

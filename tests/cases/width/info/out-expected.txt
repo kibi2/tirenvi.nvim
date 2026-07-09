@@ -2,7 +2,7 @@
 === MESSAGE ===
  
 --- CASE 6: initial cached attrs ---
-CASE 6 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,18)n[17*,9,10,7,17,9,10,7,8,7,17,9,10,7,8,7]
+CASE 6 // cur(1,1) b1:r1:c1+0<│>  g(1,18)n[17*,9,10,7,17,9,10,7,8,7,17,9,10,7,8,7]
  
 --- CASE 9: width? CSV col#1 ---
 mode=nowrap span=176 col=1/16 header="A1" widths=[17*,9,10,..]
@@ -35,13 +35,13 @@ mode=auto span=143 col=6/16 header="B22" widths=[..,7,9,8*,8,7,..]
 --- CASE 49: width? CSV toggle ---
  
 --- CASE 56: initial GFM cached attrs ---
-CASE 56 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
+CASE 56 // cur(1,1) b1:r1:c0+0<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
  
 --- CASE 59: width? GFM plain ---
 kind=plain
  
 --- CASE 63: width? GFM grid ---
-mode=nowrap span=23 col=1/3 header="Name" widths=[5*,3,11]
+mode=nowrap span=23 col=1/3 header="名前" widths=[5*,3,11]
  
 --- CASE 67: width?9 invalid ---
 tirenvi: Invalid Tir command: width?9
@@ -49,12 +49,12 @@ tirenvi: Invalid Tir command: width?9
 === DISPLAY ===
 gfm
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
-│Name⠀│Age│City⠀⠀⠀⠀⠀⠀⠀│
+│名前⠀│Age│City⠀⠀⠀⠀⠀⠀⠀│
 │----⠀│---│----⠀⠀⠀⠀⠀⠀⠀│
 │Alice│23⠀│Tokyo⠀⠀⠀⠀⠀⠀│
-┊Bob⠀⠀┊31⠀┊Osaka↲⠀⠀⠀⠀⠀┊
+┊Bob⠀⠀┊31⠀┊大阪↲⠀⠀⠀⠀⠀⠀┊
 │⠀⠀⠀⠀⠀│⠀⠀⠀│nipponbashi│
-│Carol│27⠀│Nagoya⠀⠀⠀⠀⠀│
+│Carol│27⠀│名古屋⠀⠀⠀⠀⠀│
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
 markdown
 

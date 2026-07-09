@@ -16,7 +16,7 @@ local M = {}
 ---@field range Range
 ---@field lines string[]
 ---@field attrs Attr[]
----@field cursor_info Cursor_info
+---@field cursor CursorBuf
 
 -- private helpers
 

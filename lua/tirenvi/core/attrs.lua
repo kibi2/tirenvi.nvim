@@ -1,10 +1,11 @@
-local Attr  = require("tirenvi.core.attr")
-local Range = require("tirenvi.util.range")
-local util  = require("tirenvi.util.util")
-local log   = require("tirenvi.util.log")
+local Attr          = require("tirenvi.core.attr")
+local CursorLogical = require("tirenvi.cursor.cursor_logical")
+local Range         = require("tirenvi.util.range")
+local util          = require("tirenvi.util.util")
+local log           = require("tirenvi.util.log")
 
-local M     = {}
-local api   = vim.api
+local M             = {}
+local api           = vim.api
 
 -- constants / defaults
 
@@ -54,9 +55,9 @@ end
 
 local current_index = 1
 ---@param self Attr[]
----@param cur_row integer
+---@param row_cur integer
 ---@return integer|nil
-local function get_index(self, cur_row)
+local function get_index(self, row_cur)
     if not self or #self == 0 or not self[1].range then
         return nil
     end
@@ -64,7 +65,7 @@ local function get_index(self, cur_row)
         current_index = 1
     end
     for _ = 1, #self do
-        if Range.contains(self[current_index].range, cur_row) then
+        if Range.contains(self[current_index].range, row_cur) then
             return current_index
         end
         current_index = current_index % #self + 1
@@ -223,11 +224,11 @@ function M.get_attr(attrs, range)
 end
 
 ---@param self Attr[]
----@param cur_row integer
+---@param row_cur integer
 ---@return Attr|nil
 ---@return integer|nil
-function M:get(cur_row)
-    local iblock = get_index(self, cur_row)
+function M:get(row_cur)
+    local iblock = get_index(self, row_cur)
     return self[iblock], iblock
 end
 
@@ -247,32 +248,30 @@ function M:get_invalid_attrs()
 end
 
 ---@param self Attr[]
----@param cur_row integer
----@param cur_col integer
----@return Cursor_info
-function M:to_logical(cur_row, cur_col)
-    local cell_pos = { cur_row = cur_row, cur_col = cur_col }
-    local attr, iblock = M.get(self, cur_row)
-    cell_pos.iblock = iblock
-    if not attr then
-        return cell_pos
+---@param row_cur integer
+---@param col_disp integer
+---@return CursorLogical
+function M:to_logical(row_cur, col_disp)
+    local _, iblock = M.get(self, row_cur)
+    if not iblock then
+        return {}
     end
-    log.assert(attr, "invalid position %d", cur_row)
-    cell_pos.irow = cur_row - attr.range.first + 1
-    cell_pos.icol, cell_pos.col_offset = Attr.to_cell_col(attr, cur_col)
-    cell_pos.row_offset = 0
-    return cell_pos
+    local attr = self[iblock]
+    log.assert(attr, "invalid position %d", row_cur)
+    local irow = row_cur - attr.range.first + 1
+    local icol, offset = Attr.to_cell_col(attr, col_disp)
+    return CursorLogical.new(iblock, irow, icol, offset)
 end
 
 ---@param self Attr[]
----@param cell_pos Cursor_info
+---@param logical CursorLogical
 ---@return integer
 ---@return integer
-function M:to_cursor(cell_pos)
-    local attr = self[cell_pos.iblock]
-    local char_row = attr.range.first + cell_pos.irow - 1
-    local char_col = Attr.get_start_pos(attr, cell_pos.icol)
-    return char_row, char_col
+function M:to_cursor(logical)
+    local attr = self[logical.iblock]
+    local row_cur = attr.range.first + logical.irow - 1
+    local col_disp = Attr.get_start_pos(attr, logical.icol)
+    return row_cur, col_disp
 end
 
 return M

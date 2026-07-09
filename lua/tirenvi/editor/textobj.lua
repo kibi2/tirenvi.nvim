@@ -12,13 +12,12 @@ local M = {}
 
 -- private helpers
 
----@param ctx Context
----@param line_provider LineProvider
 ---@param is_around boolean|nil
-local function setup_vl(ctx, line_provider, is_around)
+local function setup_vl(is_around)
+    local ctx = Context.from_buf()
     is_around = is_around or false
     local count = vim.v.count1
-    local rect, lines = Bufline.get_block_rect(ctx, line_provider, count, is_around)
+    local rect, lines = Bufline.get_block_rect(ctx, count, is_around)
     if not rect then
         return
     end
@@ -33,15 +32,11 @@ local function setup_vl(ctx, line_provider, is_around)
 end
 
 local function setup_vil()
-    local ctx = Context.from_buf()
-    local line_provider = LinProvider.new(ctx.bufnr)
-    setup_vl(ctx, line_provider)
+    setup_vl()
 end
 
 local function setup_val()
-    local ctx = Context.from_buf()
-    local line_provider = LinProvider.new(ctx.bufnr)
-    setup_vl(ctx, line_provider, true)
+    setup_vl(true)
 end
 
 -----------------------------------------------------------------------

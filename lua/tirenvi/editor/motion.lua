@@ -1,20 +1,18 @@
-local Context     = require("tirenvi.app.context")
-local buffer      = require("tirenvi.io.buffer")
-local LinProvider = require("tirenvi.io.buffer_line_provider")
-local Attrs       = require("tirenvi.core.attrs")
-local Bufline     = require("tirenvi.core.bufline")
-local log         = require("tirenvi.util.log")
+local Context    = require("tirenvi.app.context")
+local buffer     = require("tirenvi.io.buffer")
+local reader     = require("tirenvi.io.reader")
+local Attrs      = require("tirenvi.core.attrs")
+local Bufline    = require("tirenvi.core.bufline")
+local CursorNvim = require("tirenvi.cursor.nvim")
+local log        = require("tirenvi.util.log")
 
-local M           = {}
-
-local api         = vim.api
+local M          = {}
 
 ---@return string
 local function get_pipe()
 	local ctx = Context.from_buf()
-	local irow = buffer.get_cursor_byte_pos(ctx)
-	local line = buffer.get_line(ctx.bufnr, irow)
-	return Bufline.get_pipe_char(line) or ""
+	local cursor = reader.cursor(ctx)
+	return Bufline.get_pipe_char(cursor.line) or ""
 end
 
 ---@param op string
@@ -35,21 +33,21 @@ M.t = build_motion("t")
 M.T = build_motion("T")
 
 function M.block_top()
-	local ctx                  = Context.from_buf()
-	local attrs                = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
-	local cur_row, _, char_col = buffer.get_cursor_char_pos(ctx)
-	local pos                  = Attrs.to_logical(attrs, cur_row, char_col)
-	local top_row              = attrs[pos.iblock].range.first
-	buffer.set_cursor_char_pos(ctx.bufnr, top_row, char_col)
+	local ctx     = Context.from_buf()
+	local attrs   = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+	local cursor  = reader.cursor(ctx)
+	local pos     = Attrs.to_logical(attrs, cursor.row_cur, cursor.col_disp)
+	local top_row = attrs[pos.iblock].range.first
+	buffer.set_cursor_char_pos(ctx.bufnr, top_row, cursor.col_char)
 end
 
 function M.block_bottom()
-	local ctx                  = Context.from_buf()
-	local attrs                = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
-	local cur_row, _, char_col = buffer.get_cursor_char_pos(ctx)
-	local pos                  = Attrs.to_logical(attrs, cur_row, char_col)
-	local bottom_row           = attrs[pos.iblock].range.last
-	buffer.set_cursor_char_pos(ctx.bufnr, bottom_row, char_col)
+	local ctx        = Context.from_buf()
+	local attrs      = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+	local cursor     = reader.cursor(ctx)
+	local pos        = Attrs.to_logical(attrs, cursor.row_cur, cursor.col_disp)
+	local bottom_row = attrs[pos.iblock].range.last
+	buffer.set_cursor_char_pos(ctx.bufnr, bottom_row, cursor.col_char)
 end
 
 return M

@@ -287,9 +287,9 @@ end
 
 ---@param self Block_grid
 ---@param attrs Attr[]
----@param cur_row integer
-function M.grid:inherit_neighbor_attr(attrs, cur_row)
-    local attr = Attrs.get(attrs, cur_row)
+---@param row_cur integer
+function M.grid:inherit_neighbor_attr(attrs, row_cur)
+    local attr = Attrs.get(attrs, row_cur)
     if not attr or not Attr.is_grid(attr) then
         return
     end

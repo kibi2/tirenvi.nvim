@@ -2,24 +2,24 @@
 === MESSAGE ===
  
 --- CASE 15: initial cached attrs ---
-CASE 15 // cur(1,5) b1:r1:c2 +(0,0)<2>  g(1,7)n[2,3*,3]
+CASE 15 // cur(1,5) b1:r1:c2+1<2>  g(1,7)n[2,3*,3]
  
 --- CASE 19: yank column and put ---
 block of 7 lines yanked
-CASE 19 // cur(1,12) b1:r1:c4 +(0,-1)<│>  g(1,7)n[2,3,3,3*]
+CASE 19 // cur(1,12) b1:r1:c4+0<│>  g(1,7)n[2,3,3,3*]
  
 --- CASE 26: yank 2column and put ---
-CASE 26 // cur(7,2) b1:r7:c1 +(0,0)<⠀>  g(1,7)n[2*,3,3,3]
+CASE 26 // cur(7,3) b1:r7:c1+2<⠀>  g(1,7)n[2*,3,3,3]
 block of 7 lines yanked
-CASE 26 // cur(1,1) b1:r1:c1 +(0,-1)<│>  g(1,7)n[2*,3,2,3,3,3]
+CASE 26 // cur(1,1) b1:r1:c1+0<│>  g(1,7)n[2*,3,2,3,3,3]
  
 --- CASE 35: repair disable ---
 [Tirenvi] repair:disable 
 tirenvi: Cannot select column: table is not aligned.
 
 === DISPLAY ===
-│1a│2 a│1a│2 a│ 3a│2 a│
-┊1↲┊2b⠀┊1↲┊2b⠀┊3↲⠀┊2b⠀┊
+│1a│2 a│1a│2 a│３a│2 a│
+┊1↲┊２⠀┊1↲┊２⠀┊3↲⠀┊２⠀┊
 │⠀⠀│⠀⠀⠀│⠀⠀│⠀⠀⠀│b⇥⠀│⠀⠀⠀│
 ┊↲⠀┊⠀⠀⠀┊↲⠀┊⠀⠀⠀┊⇥c⠀┊⠀⠀⠀┊
 ┊insert↲⠀┊⠀⠀⠀┊↲⠀┊⠀⠀⠀┊⠀⠀⠀┊⠀⠀⠀┊
@@ -29,24 +29,24 @@ tirenvi: Cannot select column: table is not aligned.
 === MESSAGE ===
  
 --- CASE 46: initial cached attrs ---
-CASE 46 // cur(1,1) b1:r1:c0 +(0,0)<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
+CASE 46 // cur(1,1) b1:r1:c0+0<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
  
 --- CASE 50: yank plain ---
-CASE 50 // cur(1,3) b1:r1:c0 +(0,0)<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
+CASE 50 // cur(1,3) b1:r1:c0+0<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
  
 --- CASE 57: yank 2column and put ---
 block of 6 lines yanked
-CASE 57 // cur(3,8) b2:r1:c2 +(0,0)<│>  p(1,2) g(3,8)n[5,2*,3,11,3,11] p(9,11)
+CASE 57 // cur(3,8) b2:r1:c2+1<│>  p(1,2) g(3,8)n[5,2*,3,11,3,11] p(9,11)
 
 === DISPLAY ===
 gfgm
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
-│Name⠀│⠀⠀│Age│City⠀⠀⠀⠀⠀⠀⠀│Age│City⠀⠀⠀⠀⠀⠀⠀│
+│名前⠀│⠀⠀│Age│City⠀⠀⠀⠀⠀⠀⠀│Age│City⠀⠀⠀⠀⠀⠀⠀│
 │----⠀│⠀⠀│---│----⠀⠀⠀⠀⠀⠀⠀│---│----⠀⠀⠀⠀⠀⠀⠀│
 │Alice│⠀⠀│23⠀│Tokyo⠀⠀⠀⠀⠀⠀│23⠀│Tokyo⠀⠀⠀⠀⠀⠀│
-┊Bob⠀⠀┊⠀⠀┊31⠀┊Osaka↲⠀⠀⠀⠀⠀┊31⠀┊Osaka↲⠀⠀⠀⠀⠀┊
+┊Bob⠀⠀┊⠀⠀┊31⠀┊大阪↲⠀⠀⠀⠀⠀⠀┊31⠀┊大阪↲⠀⠀⠀⠀⠀⠀┊
 │⠀⠀⠀⠀⠀│⠀⠀│⠀⠀⠀│nipponbashi│⠀⠀⠀│nipponbashi│
-│Carol│⠀⠀│27⠀│Nagoya⠀⠀⠀⠀⠀│27⠀│Nagoya⠀⠀⠀⠀⠀│
+│Carol│⠀⠀│27⠀│名古屋⠀⠀⠀⠀⠀│27⠀│名古屋⠀⠀⠀⠀⠀│
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
 markdown
 

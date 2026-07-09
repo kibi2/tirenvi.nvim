@@ -3,6 +3,7 @@
 -----------------------------------------------------------------------
 ----- dependencies
 local config        = require("tirenvi.config")
+local CursorNvim    = require("tirenvi.cursor.nvim")
 local Range         = require("tirenvi.util.range")
 local util          = require("tirenvi.util.util")
 local log           = require("tirenvi.util.log")
@@ -63,40 +64,22 @@ local initial_value = {
 -----------------------------------------------------------------------
 
 ---@param ctx Context
-local function fix_cursor_utf8(ctx)
-	local irow, byte_col = M.get_cursor_byte_pos(ctx)
-	local line = M.get_line(ctx.bufnr, irow)
-	if not line then
-		return
-	end
-	local char_col0 = vim.str_utfindex(line, byte_col - 1)
-	local boundary = M.str_byteindex(line, "utf-32", char_col0, false) + 1
-	if boundary ~= byte_col then
-		M.set_cursor_byte_pos(ctx.winid, irow, boundary)
-	end
-end
-
----@param bufnr number
----@param cell_pos Cursor_info
-local function reset_cursor_buffer(bufnr, cell_pos)
-	M.set_cursor_char_pos(bufnr, cell_pos.cur_row, cell_pos.cur_col)
-end
-
----@param bufnr number
----@param cell_pos Cursor_info
-local function reset_cursor_logical(bufnr, cell_pos)
-	-- M.set_cursor_char_pos(ctx.bufnr, cell_pos.cur_row, cell_pos.cur_col)
+---@param cursor CursorBuf
+local function reset_cursor_logical(ctx, cursor)
+	-- CursorNvim.move(ctx, cursor.row_cur, cursor.col_byte)
 end
 
 ---@param ctx Context
----@param cell_pos Cursor_info
-local function reset_cursor_utf8(ctx, cell_pos)
-	if cell_pos and cell_pos.restore_mode == "buffer" then
-		reset_cursor_buffer(ctx.bufnr, cell_pos)
-	elseif cell_pos and cell_pos.restore_mode == "logical" then
-		reset_cursor_logical(ctx.bufnr, cell_pos)
+---@param cursor CursorBuf|nil
+local function set_cursor_pos(ctx, cursor)
+	if not cursor then
+		CursorNvim.reset(ctx)
+	elseif cursor.restore_mode == "buffer" then
+		CursorNvim.move(ctx, cursor.row_cur, cursor.col_byte)
+	elseif cursor.restore_mode == "logical" then
+		reset_cursor_logical(ctx, cursor)
 	else
-		fix_cursor_utf8(ctx)
+		CursorNvim.reset(ctx)
 	end
 end
 
@@ -110,8 +93,8 @@ end
 ---@param range Range
 ---@param lines string[]
 ---@param no_undo boolean
----@param cursor_info Cursor_info
-local function set_lines(ctx, range, lines, no_undo, cursor_info)
+---@param cursor CursorBuf|nil
+local function set_lines(ctx, range, lines, no_undo, cursor)
 	M.clear_cache()
 	local bufnr = ctx.bufnr
 	local undolevels = bo[bufnr].undolevels
@@ -127,7 +110,7 @@ local function set_lines(ctx, range, lines, no_undo, cursor_info)
 	start0 = math.max(start0, 0)
 	api.nvim_buf_set_lines(bufnr, start0, end0, false, lines)
 	set_undo_tree_last(bufnr)
-	reset_cursor_utf8(ctx, cursor_info)
+	set_cursor_pos(ctx, cursor)
 	bo[bufnr].undolevels = undolevels
 end
 
@@ -203,13 +186,13 @@ end
 ---@param ctx Context
 ---@param range Range
 ---@param lines string[]
----@param no_undo boolean
----@param cursor_info Cursor_info
-function M.set_lines(ctx, range, lines, no_undo, cursor_info)
+---@param no_undo boolean|nil
+---@param cursor CursorBuf|nil
+function M.set_lines(ctx, range, lines, no_undo, cursor)
 	local bufnr = ctx.bufnr
 	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
 	local before = fn.undotree(bufnr).seq_last
-	local ok, err = pcall(set_lines, ctx, range, lines, no_undo, cursor_info)
+	local ok, err = pcall(set_lines, ctx, range, lines, no_undo, cursor)
 	local after = fn.undotree(bufnr).seq_last
 	local first, last = Range.to_lua(range)
 	log.watch("UNDO", "%s[%d->%d]set_lines lines[%d]='%s'...[%d]='%s'", tostring(no_undo),
@@ -308,35 +291,6 @@ function M.set_step(step)
 	STEP = step
 end
 
----@param ctx Context
----@return integer
----@return integer
-function M.get_cursor_byte_pos(ctx)
-	local irow, byte_col0 = unpack(api.nvim_win_get_cursor(ctx.winid))
-	local maxrow = api.nvim_buf_line_count(ctx.bufnr)
-	irow = util.trim(irow, 1, maxrow)
-	local line = M.get_line(ctx.bufnr, irow)
-	byte_col0 = util.trim(byte_col0, 0, #line - 1)
-	return irow, byte_col0 + 1
-end
-
----@param ctx Context
----@return integer
----@return integer
----@return integer
-function M.get_cursor_char_pos(ctx)
-	local cur_row, byte_col1 = M.get_cursor_byte_pos(ctx)
-	local line = M.get_line(ctx.bufnr, cur_row)
-	if not line then
-		return 0, 0, 0
-	end
-	local byte_col0 = byte_col1 - 1
-	local char_col0 = vim.str_utfindex(line, byte_col0)
-	local new_byte_col = M.str_byteindex(line, "utf-32", char_col0, false) + 1
-	local disp_col = fn.strdisplaywidth(line:sub(1, char_col0 + 1))
-	return cur_row, new_byte_col, char_col0 + 1
-end
-
 ---@param winid integer
 ---@param irow integer
 ---@param icol integer
@@ -345,18 +299,18 @@ function M.set_cursor_byte_pos(winid, irow, icol)
 end
 
 ---@param bufnr number
----@param char_row integer
----@param char_col integer
-function M.set_cursor_char_pos(bufnr, char_row, char_col)
-	local line = M.get_line(bufnr, char_row)
+---@param row_cur integer
+---@param col_char integer
+function M.set_cursor_char_pos(bufnr, row_cur, col_char)
+	local line = M.get_line(bufnr, row_cur)
 	if not line then
 		return
 	end
-	local char_col = util.trim(char_col, 1, #line)
-	local byte_col0 = M.str_byteindex(line, "utf-32", char_col - 1, false)
+	local col_char = util.trim(col_char, 1, #line)
+	local col_byte0 = M.str_byteindex(line, col_char - 1)
 	local view = fn.winsaveview()
-	view.lnum = char_row
-	view.col = byte_col0
+	view.lnum = row_cur
+	view.col = col_byte0
 	fn.winrestview(view)
 end
 
@@ -368,13 +322,13 @@ function M.get_win_span(winid)
 end
 
 ---@param chars string
----@param encoding string
----@param ichar integer
----@param strict_indexing boolean
-function M.str_byteindex(chars, encoding, ichar, strict_indexing)
+---@param ichar0 integer
+---@return integer -- byte index (0-based)
+function M.str_byteindex(chars, ichar0)
 	local nchar = vim.str_utfindex(chars)
-	ichar = math.min(ichar, nchar)
-	return vim.str_byteindex(chars, ichar)
+	ichar0 = math.min(ichar0, nchar)
+	return vim.str_byteindex(chars, ichar0)
+	-- str_byteindex(line, "utf-32", col_char - 1, false)
 end
 
 return M
