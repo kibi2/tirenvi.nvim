@@ -16,8 +16,8 @@
 ---@field command WidthCommand
 ---@field operation WidthOperation
 ---@field number integer
----@field cur_row integer
----@field disp_col integer
+---@field row_cur integer
+---@field col_disp integer
 local WidthOp   = {}
 WidthOp.__index = WidthOp
 
@@ -43,21 +43,21 @@ local map       = {
 local function get_selection(opts)
     local row_range = Range.from_lua_normal(opts.line1, opts.line2)
     local is_block  = (vim.fn.visualmode() == "\22")
-    local disp_col_start, disp_col_end
+    local col_disp_start, col_disp_end
     if opts.range > 0 then
         if is_block then
-            disp_col_start = vim.fn.virtcol("'<")
-            disp_col_end   = vim.fn.virtcol("'>")
+            col_disp_start = vim.fn.virtcol("'<")
+            col_disp_end   = vim.fn.virtcol("'>")
         else
-            disp_col_start = 1
-            disp_col_end   = math.huge
+            col_disp_start = 1
+            col_disp_end   = math.huge
         end
     else
         local col      = vim.fn.virtcol(".")
-        disp_col_start = col
-        disp_col_end   = col
+        col_disp_start = col
+        col_disp_end   = col
     end
-    local col_range = Range.from_lua_normal(disp_col_start, disp_col_end)
+    local col_range = Range.from_lua_normal(col_disp_start, col_disp_end)
     return {
         row = row_range,
         col = col_range
@@ -103,15 +103,15 @@ local function try_new(opts)
     local command_name = opts.command_name
     ---@cast command_name WidthCommand
     local rect = get_selection(opts)
-    local cur_row = rect.row.first
-    local disp_col = rect.col.first
+    local row_cur = rect.row.first
+    local col_disp = rect.col.first
     local self = setmetatable({
         args = opts.args,
         command = command_name,
         operation = "none",
         number = 0,
-        cur_row = cur_row,
-        disp_col = disp_col,
+        row_cur = row_cur,
+        col_disp = col_disp,
     }, WidthOp)
     if not opts.command.has_op then
         if opts.args ~= command_name then
@@ -150,7 +150,7 @@ end
 function WidthOp:to_string()
     return string.format("WidthOp %s %s (%d, %d) [%s] %s",
         self.command, self.operation or "nil",
-        self.cur_row, self.disp_col, self.number or "nil", self:to_cmd())
+        self.row_cur, self.col_disp, self.number or "nil", self:to_cmd())
 end
 
 ---@param self WidthOp

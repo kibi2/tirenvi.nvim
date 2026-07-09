@@ -9,6 +9,7 @@ local buf_state = require("tirenvi.io.buf_state")
 local ui = require("tirenvi.ui")
 local guard = require("tirenvi.util.guard")
 local Range3 = require("tirenvi.util.range3")
+local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 local Debug = require("tirenvi.editor.debug")
 
@@ -31,11 +32,13 @@ end
 
 ---@param bufnr number
 local function recover_flat(bufnr, range3)
-	local r_result = reader.read(get_context(bufnr), Range3.get_new_range(range3))
-	if #r_result.lines ~= buffer.line_count(bufnr) then
+	-- local r_result = reader.read(get_context(bufnr), Range3.get_new_range(range3))
+	local first, last = Range.to_lua(Range3.get_new_range(range3))
+	local lines = buffer.get_lines(bufnr, first, last)
+	if #lines ~= buffer.line_count(bufnr) then
 		return
 	end
-	buf_state.set_buffer_flat(bufnr, not Bufline.has_pipe(r_result.lines))
+	buf_state.set_buffer_flat(bufnr, not Bufline.has_pipe(lines))
 end
 
 ---@param _ string
@@ -118,7 +121,7 @@ end
 local function on_cursor_moved(args)
 	local ctx = Context.from_buf(args.buf)
 	Debug.show_attr_marks(ctx)
-	init.on_cursor_moved(ctx)
+	init.auto_wrap(ctx)
 end
 
 ---@param ctx Context

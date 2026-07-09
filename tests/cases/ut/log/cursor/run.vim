@@ -13,54 +13,58 @@ lua << EOF
   }
   ctx = Context.from_buf()
   Buffer.set_lines(ctx, Range.WHOLE, lines)
+	function print_cursor()
+		local cursor = require("tirenvi.io.reader").cursor(ctx)
+		print(cursor.row_cur, cursor.col_byte, cursor.col_char)
+	end
 EOF
 
-			lua print("irow, byte_col, char_col ")
+			lua print("irow, col_byte, col_char ")
 
 CASE set (1,1) & add ABC, insert XYZ"
 	lua Buffer.set_cursor_char_pos(ctx.bufnr, 1, 1)
-			lua print(Buffer.get_cursor_char_pos(ctx))
+			lua print_cursor(ctx)
 		normal! aABC
 		lua Buffer.clear_cache()
 	lua Buffer.set_cursor_char_pos(ctx.bufnr, 1, 1)
-			lua print(Buffer.get_cursor_char_pos(ctx))
+			lua print_cursor(ctx)
 		normal! iXYZ
 		lua Buffer.clear_cache()
 
 CASE set (2,5) & add 123, insert 789"
 	lua Buffer.set_cursor_char_pos(ctx.bufnr, 2, 5)
-			lua print(Buffer.get_cursor_char_pos(ctx))
+			lua print_cursor(ctx)
 		normal! a123
 		lua Buffer.clear_cache()
 	lua Buffer.set_cursor_char_pos(ctx.bufnr, 2, 5)
-			lua print(Buffer.get_cursor_char_pos(ctx))
+			lua print_cursor(ctx)
 		normal! i789
 		lua Buffer.clear_cache()
 
 CASE set (3,10) & add 甲乙, insert 丙丁"
 	lua Buffer.set_cursor_char_pos(ctx.bufnr, 3, 10)
-			lua print(Buffer.get_cursor_char_pos(ctx))
+			lua print_cursor(ctx)
 		normal! a甲乙
 		lua Buffer.clear_cache()
 	lua Buffer.set_cursor_char_pos(ctx.bufnr, 3, 10)
-			lua print(Buffer.get_cursor_char_pos(ctx))
+			lua print_cursor(ctx)
 		normal! i丙丁
 		lua Buffer.clear_cache()
 
 CASE kkjj"
       		call Dump('silent ascii')
-			lua print(Buffer.get_cursor_char_pos(ctx))
+			lua print_cursor(ctx)
 		normal! k
       		call Dump('silent ascii')
-			lua print(Buffer.get_cursor_char_pos(ctx))
+			lua print_cursor(ctx)
 		normal! k
       		call Dump('silent ascii')
-			lua print(Buffer.get_cursor_char_pos(ctx))
+			lua print_cursor(ctx)
 		normal! j
       		call Dump('silent ascii')
-			lua print(Buffer.get_cursor_char_pos(ctx))
+			lua print_cursor(ctx)
 		normal! j
       		call Dump('silent ascii')
-			lua print(Buffer.get_cursor_char_pos(ctx))
+			lua print_cursor(ctx)
 
 call Snapshot({ 'desc': 'test Buffer.set_cursor_char_pos' })

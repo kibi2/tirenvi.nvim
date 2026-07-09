@@ -24,7 +24,7 @@ CASE initial cached attrs
 CASE <expand tab>Alice
 set expandtab
 	call At(2, 3, 1)
-    execute "normal! a\<Tab>\<Esc>"
+    execute "normal! ha\<Tab>\<Esc>"
       sleep 1m | lua print(Debug.layout())
 
 CASE <expand tab> plain
@@ -41,7 +41,7 @@ CASE <noexpand tab> plain
 
 CASE <noexpand tab> Bob Age
 set noexpandtab
-	call At(2, 4, 2) | normal! l
+	call At(2, 4, 2)
     lua insert_tab()
       sleep 1m | lua print(Debug.layout())
 
@@ -55,7 +55,7 @@ CASE initial cached attrs
 
 CASE <expand tab>Alice
 set noexpandtab
-	call At(1, 2, 1)
+	call At(1, 2, 1) | normal! h
     lua insert_tab()
       sleep 1m | lua print(Debug.layout())
 

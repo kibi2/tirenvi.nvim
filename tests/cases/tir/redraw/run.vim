@@ -14,7 +14,7 @@ CASE delete(val) -> put
 
 CASE delete(val) -> redraw -> put
         e!
-	call At(1, 7, 1) | normal! 2l
+	call At(1, 7, 1) | normal! l
             lua print(Debug.layout())
         call feedkeys("val", "x")
 		normal! x
@@ -31,7 +31,7 @@ edit $TIRENVI_ROOT/tests/data/simple.md
 
 CASE repair off
         Tir repair toggle
-	call At(2, 1, 1)
+	call At(2, 1, 1) | normal! h
 		normal! 3D
         %s /o/QW/g
 	call At(2, 1, 1)
@@ -60,7 +60,7 @@ CASE repair on/off
 		Tir repair toggle
 
 CASE repair off -> redraw
-	call At(1, 2, 1)
+	call At(1, 2, 1) | normal! h
 		Tir repair disable
 		normal! aADD
 		Tir redraw
@@ -71,7 +71,7 @@ call Snapshot({'desc': 'final' })
 CASE repair off -> on
 		Tir repair disable
         %s /[A-z]/xx/g
-	call At(1, 2, 2)
+	call At(1, 2, 2) | normal! h
 		normal! D
 		call Tir("repair enable")
 	call At(1, 2, 2)

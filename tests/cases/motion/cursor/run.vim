@@ -4,7 +4,7 @@ lua << EOF
 function print_wrap(title)
     local Context = require("tirenvi.app.context")
 	ctx =  Context.from_buf()
-    require("tirenvi.init").on_cursor_moved(ctx)
+    require("tirenvi.init").auto_wrap(ctx)
     print(tostring(vim.wo[0].wrap) .. " : " .. (title or ""))
 end
 EOF
@@ -35,7 +35,7 @@ edit! $TIRENVI_ROOT/tests/data/simple.csv
 
 CASE CSV grid
 	call At(1, 2, 1)
-    normal! 100aC
+    normal! h100aC
             lua vim.wo[0].wrap = true
             lua print(vim.wo[0].wrap)
 

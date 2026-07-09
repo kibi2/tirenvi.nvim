@@ -15,7 +15,7 @@ call Snapshot({'desc': 'fail table join' })
 
 CASE Delete Alice -> Ali
 	call At(2, 3, 1)
-        normal! 4lD
+        normal! 3lD
             sleep 1m | lua print(Debug.layout())
 
 CASE Delete All (separate table)
@@ -48,7 +48,7 @@ CASE Delete columns
 
 CASE Delete All
 	call At(1, 2, 2)
-        normal! 2lD
+        normal! lD
             sleep 1m | lua print(Debug.layout())
 
 call Snapshot({'desc': 'CSV'})

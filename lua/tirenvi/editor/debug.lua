@@ -2,8 +2,11 @@
 local Context = require("tirenvi.app.context")
 local Attrs = require("tirenvi.core.attrs")
 local Attr = require("tirenvi.core.attr")
+local CursorNvim = require("tirenvi.cursor.nvim")
+local CursorLogical = require("tirenvi.cursor.cursor_logical")
 local buffer = require("tirenvi.io.buffer")
 local buf_state = require("tirenvi.io.buf_state")
+local reader = require("tirenvi.io.reader")
 local namespaces = require("tirenvi.io.namespaces")
 local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
@@ -38,33 +41,19 @@ local function case_tag()
     return vim.g.case_tag or ""
 end
 
----@param info table
+---@param cursor CursorBuf
+---@param logical CursorLogical
 ---@return string
-local function cursor_str(info)
-    return string.format("cur(%d,%d) b%s:r%s:c%s +(%s,%s)<%s>",
-        info.pos.cur_row,
-        info.pos.cur_col,
-        info.pos.iblock,
-        info.pos.irow, info.pos.icol,
-        info.pos.row_offset, info.pos.col_offset,
-        info.char
+local function cursor_str(cursor, logical)
+    return string.format("cur(%d,%d) b%s:r%s:c%s%+d<%s>",
+        cursor.row_cur,
+        cursor.col_disp,
+        logical.iblock,
+        logical.irow,
+        logical.icol,
+        logical.col_offset or 0,
+        cursor.char
     )
-end
-
----@return table
-local function get_info()
-    local info = {}
-	local ctx                  = Context.from_buf()
-    info.attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
-    if not info.attrs then
-        info.attrs = {}
-    end
-    local cur_row, _, char_col, disp_col = buffer.get_cursor_char_pos(ctx)
-    info.pos = Attrs.to_logical(info.attrs, cur_row, char_col)
-    info.line = buffer.get_line(ctx.bufnr, cur_row)
-    info.char = vim.fn.strcharpart(info.line, char_col - 1, 1)
-    info.disp = disp_col
-    return info
 end
 
 ---@param ctx Context
@@ -119,17 +108,12 @@ end
 ---@return string
 function M.layout(title, single)
     title = case_tag() .. (title or "") .. DELIMITER
-    local info = get_info()
-    local attr_str = Attrs.debug_attrs(info.attrs, "", info.pos.iblock, info.pos.icol, single)
-    return string.format("%s %s %s", title, cursor_str(info), attr_str)
-end
-
----@param title string|nil
----@return string
-function M.cursor_pos(title)
-    title = case_tag() .. (title or "")
-    local info = get_info()
-    return string.format("%s%s %s", title, DELIMITER, cursor_str(info))
+	local ctx                  = Context.from_buf()
+    local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)  or {}
+    local cursor = reader.cursor(ctx)
+    local logical = Attrs.to_logical(attrs, cursor.row_cur, cursor.col_disp)
+    local attr_str = Attrs.debug_attrs(attrs, "", logical.iblock, logical.icol, single)
+    return string.format("%s %s %s", title, cursor_str(cursor, logical), attr_str)
 end
 
 ---@param iblock integer
@@ -138,14 +122,11 @@ end
 function M.goto(iblock, irow, icol)
     local ctx = Context.from_buf()
     local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
-    local cell_pos = {iblock=iblock, irow=irow, icol=icol}
-    local char_row, char_col = Attrs.to_cursor(attrs, cell_pos)
-    local line = buffer.get_line(ctx.bufnr, char_row)
-    if not line then
-        return
-    end
-    local byte_col = buffer.str_byteindex(line, "utf-32", char_col - 1, false)
-	buffer.set_cursor_byte_pos(ctx.winid, char_row, byte_col)
+    local logical = CursorLogical.new(iblock, irow, icol, 0)
+    local row_cur, col_disp = Attrs.to_cursor(attrs, logical)
+    local line = buffer.get_line(ctx.bufnr, row_cur) or ""
+    local cursor = CursorNvim.from_col_disp(line, row_cur, col_disp)
+	buffer.set_cursor_byte_pos(ctx.winid, row_cur, cursor.col_byte)
 end
 
 function M.show_attr_marks(ctx)
@@ -154,12 +135,12 @@ function M.show_attr_marks(ctx)
     if not attrs then
         return
     end
-    local cur_row, _, char_col = buffer.get_cursor_char_pos(ctx)
-    local pos = Attrs.to_logical(attrs, cur_row, char_col)
+    local cursor = reader.cursor(ctx)
+    local pos = Attrs.to_logical(attrs, cursor.row_cur, cursor.col_disp)
     for iattr, attr in ipairs(attrs) do
         local icol
         if pos.iblock == iattr then
-            icol = Attr.to_cell_col(attr, char_col)
+            icol = Attr.to_cell_col(attr, cursor.col_char)
         end
         show_attr_marks(ctx, attr, iattr, icol)
     end

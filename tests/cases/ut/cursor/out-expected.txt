@@ -1,0 +1,10 @@
+--- test io.cursor ---
+=== MESSAGE ===
+irow, col_byte, col_char 
+ 
+--- CASE 19: cursor pos ---
+CASE 19 // cur(1,1) bnil:rnil:cnil+0<1> 
+
+=== DISPLAY ===
+1あA
+123A

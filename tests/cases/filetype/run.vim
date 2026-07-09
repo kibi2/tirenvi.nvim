@@ -25,7 +25,7 @@ CASE filetype csv -> tsv
 CASE filetype markdown -> bar
     e! $TIRENVI_ROOT/tests/data/simple.md
     call At(2, 3, 1)
-        normal! aADD 
+        normal! haADD 
         set filetype=bar
             echomsg b:tirenvi.attached
         normal! jdd
