@@ -4,10 +4,10 @@ source $TIRENVI_ROOT/tests/common.vim
 edit $TIRENVI_ROOT/tests/data/simple.md
 
 CASE initial
+	call At(2, 1, 3)
             lua print(Debug.layout())
 
 CASE block#2 bottom
-	call At(2, 1, 1)
         lua require('tirenvi').motion.block_bottom()
             lua print(Debug.layout())
 
@@ -16,6 +16,7 @@ CASE block#2 top
             lua print(Debug.layout())
 
 CASE next cell
+	call At(2, 1, 1)
         execute "normal! " . luaeval("require('tirenvi.editor.motion').f()")
             lua print(Debug.layout())
 

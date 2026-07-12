@@ -2,37 +2,37 @@
 === MESSAGE ===
  
 --- CASE 6: initial ---
-CASE 6 // cur(1,1) b1:r1:c0+0<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
+CASE 6 // cur(3,12) b2:r1:c3+1<C>  p(1,2) g(3,8)n[5,3,11*] p(9,11)
  
---- CASE 9: block#2 bottom ---
-CASE 9 // cur(8,2) b2:r6:c1+1<C>  p(1,2) g(3,8)n[5*,3,11] p(9,11)
+--- CASE 10: block#2 bottom ---
+CASE 10 // cur(8,12) b2:r6:c3+1<名>  p(1,2) g(3,8)n[5,3,11*] p(9,11)
  
 --- CASE 14: block#2 top ---
-CASE 14 // cur(3,2) b2:r1:c1+1<名>  p(1,2) g(3,8)n[5*,3,11] p(9,11)
+CASE 14 // cur(3,12) b2:r1:c3+1<C>  p(1,2) g(3,8)n[5,3,11*] p(9,11)
  
 --- CASE 18: next cell ---
 CASE 18 // cur(3,7) b2:r1:c2+0<│>  p(1,2) g(3,8)n[5,3*,11] p(9,11)
  
---- CASE 22: next 2cell ---
-CASE 22 // cur(3,23) b2:r1:c3+11<│>  p(1,2) g(3,8)n[5,3,11*] p(9,11)
+--- CASE 23: next 2cell ---
+CASE 23 // cur(3,23) b2:r1:c3+11<│>  p(1,2) g(3,8)n[5,3,11*] p(9,11)
  
---- CASE 26: prev 2cell ---
-CASE 26 // cur(3,7) b2:r1:c2+0<│>  p(1,2) g(3,8)n[5,3*,11] p(9,11)
+--- CASE 27: prev 2cell ---
+CASE 27 // cur(3,7) b2:r1:c2+0<│>  p(1,2) g(3,8)n[5,3*,11] p(9,11)
  
---- CASE 30: next cell ---
-CASE 30 // cur(6,6) b2:r4:c1+5<⠀>  p(1,2) g(3,8)n[5*,3,11] p(9,11)
+--- CASE 31: next cell ---
+CASE 31 // cur(6,6) b2:r4:c1+5<⠀>  p(1,2) g(3,8)n[5*,3,11] p(9,11)
  
---- CASE 35: repeat 3cell ---
-CASE 35 // cur(6,22) b2:r4:c3+11<⠀>  p(1,2) g(3,8)n[5,3,11*] p(9,11)
+--- CASE 36: repeat 3cell ---
+CASE 36 // cur(6,22) b2:r4:c3+11<⠀>  p(1,2) g(3,8)n[5,3,11*] p(9,11)
  
---- CASE 39: prev cell ---
-CASE 39 // cur(6,12) b2:r4:c3+1<大>  p(1,2) g(3,8)n[5,3,11*] p(9,11)
+--- CASE 40: prev cell ---
+CASE 40 // cur(6,12) b2:r4:c3+1<大>  p(1,2) g(3,8)n[5,3,11*] p(9,11)
  
---- CASE 46: CSV bottom ---
-CASE 46 // cur(7,7) b1:r7:c2+3<⠀>  g(1,7)n[2,3*,3]
+--- CASE 47: CSV bottom ---
+CASE 47 // cur(7,7) b1:r7:c2+3<⠀>  g(1,7)n[2,3*,3]
  
---- CASE 52: CSV top ---
-CASE 52 // cur(1,7) b1:r1:c2+3<a>  g(1,7)n[2,3*,3]
+--- CASE 53: CSV top ---
+CASE 53 // cur(1,7) b1:r1:c2+3<a>  g(1,7)n[2,3*,3]
 
 === DISPLAY ===
 │1a│2 a│３a│

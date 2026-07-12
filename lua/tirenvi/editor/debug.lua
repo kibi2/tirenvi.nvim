@@ -126,7 +126,7 @@ function M.goto(iblock, irow, icol)
     local row_cur, col_disp = Attrs.to_cursor(attrs, logical)
     local line = buffer.get_line(ctx.bufnr, row_cur) or ""
     local cursor = CursorNvim.from_col_disp(line, row_cur, col_disp)
-	buffer.set_cursor_byte_pos(ctx.winid, row_cur, cursor.col_byte)
+	CursorNvim.move_byte(ctx, row_cur, cursor.col_byte)
 end
 
 function M.show_attr_marks(ctx)

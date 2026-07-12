@@ -38,7 +38,7 @@ function M.block_top()
 	local cursor  = reader.cursor(ctx)
 	local pos     = Attrs.to_logical(attrs, cursor.row_cur, cursor.col_disp)
 	local top_row = attrs[pos.iblock].range.first
-	buffer.set_cursor_char_pos(ctx.bufnr, top_row, cursor.col_char)
+	CursorNvim.restore_disp(ctx, top_row, cursor.col_disp)
 end
 
 function M.block_bottom()
@@ -47,7 +47,7 @@ function M.block_bottom()
 	local cursor     = reader.cursor(ctx)
 	local pos        = Attrs.to_logical(attrs, cursor.row_cur, cursor.col_disp)
 	local bottom_row = attrs[pos.iblock].range.last
-	buffer.set_cursor_char_pos(ctx.bufnr, bottom_row, cursor.col_char)
+	CursorNvim.restore_disp(ctx, bottom_row, cursor.col_disp)
 end
 
 return M

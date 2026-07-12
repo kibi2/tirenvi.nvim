@@ -2,6 +2,7 @@ local Context = require("tirenvi.app.context")
 local Bufline = require("tirenvi.core.bufline")
 local buf_parser = require("tirenvi.parser.buf_parser")
 local config = require("tirenvi.config")
+local CursorNvim = require("tirenvi.cursor.nvim")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
 local buffer = require("tirenvi.io.buffer")
 local errors = require("tirenvi.util.errors")
@@ -25,10 +26,10 @@ local function setup_vl(is_around)
         notify.error(errors.ERR.TABLE_IS_NOT_ALIGNED)
         return
     end
-    buffer.set_cursor_byte_pos(ctx.winid, rect.row.first, rect.col.first)
+    CursorNvim.move_byte(ctx, rect.row.first, rect.col.first)
     vim.api.nvim_feedkeys(vim.keycode("<C-v>"), "n", false)
     vim.cmd("normal! o")
-    buffer.set_cursor_byte_pos(ctx.winid, rect.row.last, rect.col.last)
+    CursorNvim.move_byte(ctx, rect.row.last, rect.col.last)
 end
 
 local function setup_vil()

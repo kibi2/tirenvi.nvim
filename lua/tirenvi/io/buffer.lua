@@ -75,7 +75,7 @@ local function set_cursor_pos(ctx, cursor)
 	if not cursor then
 		CursorNvim.reset(ctx)
 	elseif cursor.restore_mode == "buffer" then
-		CursorNvim.move(ctx, cursor.row_cur, cursor.col_byte)
+		CursorNvim.restore_byte(ctx, cursor.row_cur, cursor.col_byte)
 	elseif cursor.restore_mode == "logical" then
 		reset_cursor_logical(ctx, cursor)
 	else
@@ -292,43 +292,10 @@ function M.set_step(step)
 end
 
 ---@param winid integer
----@param irow integer
----@param icol integer
-function M.set_cursor_byte_pos(winid, irow, icol)
-	api.nvim_win_set_cursor(winid, { irow, math.max(0, icol - 1) })
-end
-
----@param bufnr number
----@param row_cur integer
----@param col_char integer
-function M.set_cursor_char_pos(bufnr, row_cur, col_char)
-	local line = M.get_line(bufnr, row_cur)
-	if not line then
-		return
-	end
-	local col_char = util.trim(col_char, 1, #line)
-	local col_byte0 = M.str_byteindex(line, col_char - 1)
-	local view = fn.winsaveview()
-	view.lnum = row_cur
-	view.col = col_byte0
-	fn.winrestview(view)
-end
-
----@param winid integer
 ---@return integer
 function M.get_win_span(winid)
 	local info = fn.getwininfo(winid)[1]
 	return info.width - info.textoff
-end
-
----@param chars string
----@param ichar0 integer
----@return integer -- byte index (0-based)
-function M.str_byteindex(chars, ichar0)
-	local nchar = vim.str_utfindex(chars)
-	ichar0 = math.min(ichar0, nchar)
-	return vim.str_byteindex(chars, ichar0)
-	-- str_byteindex(line, "utf-32", col_char - 1, false)
 end
 
 return M

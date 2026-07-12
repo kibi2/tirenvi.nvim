@@ -29,6 +29,7 @@ local M = {}
 ---@param no_undo boolean|nil
 ---@return Request
 function M.new_writer(r_req, lines, no_undo)
+    ---@type Request
     return {
         range = r_req.range,
         lines = lines,
