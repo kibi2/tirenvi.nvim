@@ -27,7 +27,8 @@ local function check_command(parser)
 	if err == Parser.ERR.EXECUTABLE_NOT_FOUND then
 		report({
 			status = "error",
-			message = parser.executable .. " not found in PATH",
+			message = parser.executable .. " not found.\nInstall it with:\n    pip install " .. parser
+				.executable,
 		})
 		return
 	end
@@ -99,7 +100,8 @@ function M.check()
 		elseif exe then
 			if not command_requirements[exe] then
 				command_requirements[exe] = parser
-			elseif parser._required_version_int > command_requirements[exe]._required_version_int then
+			elseif Parser.is_old(parser._required_version_int,
+					command_requirements[exe]._required_version_int) then
 				command_requirements[exe] = parser
 			end
 		end

@@ -37,3 +37,4 @@ edit $TIRENVI_ROOT/tests/data/empty.txt
         checkhealth tirenvi
 
 call Snapshot({ 'nomessage': 'true', 'desc': 'checkhealth ok case' })
+" call Snapshot({ 'desc': 'checkhealth ok case' })

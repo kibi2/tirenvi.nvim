@@ -119,12 +119,13 @@ while IFS= read -r -d '' d; do
     if [ ! -e "./$STATS" ]; then
       ln -s "$ROOT_DIR/$STATS" "./$STATS"
     fi
+    if [ -f run.sh ]; then
+      NVIM_BIN=$NVIM_BIN sh run.sh > stdout.txt 2> stderr.txt
+    else
       NVIM_TIRENVI_DEV=1 $NVIM_BIN --headless -u NONE -n \
         -c "source run.vim" \
         -c "qa!" \
         > stdout.txt 2> stderr.txt
-    if [ -f run.sh ]; then
-      sh run.sh > stdout.txt 2> stderr.txt
     fi
 
     LC_ALL=C sed -E '/PRB/! s/ [0-9]+]/]/g' out-actual.txt > gen.txt
