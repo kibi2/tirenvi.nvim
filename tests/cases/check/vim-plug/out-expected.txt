@@ -1,0 +1,9 @@
+--- vim plug ---
+
+=== DISPLAY ===
+[=]
+
+- Finishing ... Done!
+- Post-update hook for tir-csv ... OK
+- tir-csv: Already up to date.
+0.0.post1.dev1

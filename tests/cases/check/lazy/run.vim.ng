@@ -1,0 +1,22 @@
+source $TIRENVI_ROOT/tests/common.vim
+
+set rtp+=~/.local/share/lazy-test/site/pack/lazy/start/lazy.nvim
+
+lua << EOF
+require("lazy").setup({
+  {
+    "kibi2/tirenvi.nvim",
+    dependencies = {
+      {
+        "kibi2/tir-csv", build = "pip install .",
+      },
+    },
+  },
+})
+require("lazy").sync()
+require("tirenvi").setup {}
+EOF
+
+checkhealth tirenvi
+
+call Snapshot({ 'desc': 'lazy' })

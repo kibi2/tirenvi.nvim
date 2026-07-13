@@ -1,7 +1,9 @@
 === MESSAGE ===
-tirenvi: Required command 'tir-my-csv' not found in PATH.
+tirenvi: Required command 'tir-my-csv' not found.
 
-Use :checkhealth tirenvi for details.
+Install it with:
+
+    pip install tir-my-csv
 
 === DISPLAY ===
 1a,2 a,３a

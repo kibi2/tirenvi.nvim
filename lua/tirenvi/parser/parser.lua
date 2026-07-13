@@ -110,17 +110,13 @@ end
 ---@return integer|nil
 local function get_int_version(self)
     local str_ver = get_string_version(self)
-    local int_ver = config.version_to_integer(str_ver)
-    if not int_ver then
-        error({ code = ERR.VERSION_PARSE_FAILED })
-    end
-    return int_ver
+    return config.version_to_integer(str_ver)
 end
 
 ---@return boolean
 local function is_available_version(self)
     local iver = get_int_version(self)
-    if iver < self._required_version_int then
+    if M.is_old(self._required_version_int, iver) then
         error({ code = ERR.VERSION_TOO_OLD })
     end
     return true
@@ -168,6 +164,16 @@ function M.resolve_parser(filetype)
     end
     _, parser._err_code = M.check(parser)
     return parser
+end
+
+---@param require integer|nil
+---@param target integer|nil
+---@return boolean
+function M.is_old(require, target)
+    if require == nil or target == nil then
+        return false
+    end
+    return require > target
 end
 
 return M

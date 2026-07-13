@@ -86,7 +86,8 @@ end
 ---@return string
 function M.not_found_parser_error(parser)
 	return string.format(
-		PREFIX .. "Required command '%s' not found in PATH.\n\n" .. "Use :checkhealth tirenvi for details.",
+		PREFIX .. "Required command '%s' not found.\n\n" .. "Install it with:\n\n" .. "    pip install %s",
+		parser.executable,
 		parser.executable
 	)
 end

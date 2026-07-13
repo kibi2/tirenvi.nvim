@@ -122,7 +122,9 @@ even if they contain temporary structural inconsistencies.
 {
   "kibi2/tirenvi.nvim",
   dependencies = {
-    "tpope/vim-repeat", -- optional: enables '.' repeat for column width operations
+    { "kibi2/tir-csv", build = "pip install ." },
+    { "kibi2/tir-gfm-lite", build = "pip install ." },
+    { "tpope/vim-repeat" }, -- Optional: enables '.' repeat for column width operations
   },
   config = function()
     require("tirenvi").setup {}
@@ -130,10 +132,16 @@ even if they contain temporary structural inconsistencies.
 }
 ```
 
+The required CSV and GFM parsers are installed automatically when using lazy.nvim.
+
 ### vim-plug
 
 ```vim
 Plug 'kibi2/tirenvi.nvim'
+
+" Required parsers
+Plug 'kibi2/tir-csv' { 'do': 'pip install .' }
+Plug 'kibi2/tir-gfm-lite' { 'do': 'pip install .' }
 
 " Optional: enables '.' repeat for column width operations
 Plug 'tpope/vim-repeat'
@@ -144,11 +152,11 @@ Plug 'tpope/vim-repeat'
 * Neovim >= 0.10
 * UTF-8 environment
 
-Install parsers:
+### Optional parsers
+
+PukiWiki support is optional.
 
 ```bash
-pip install tir-gfm-lite
-pip install tir-csv
 pip install tir-pukiwiki
 ```
 

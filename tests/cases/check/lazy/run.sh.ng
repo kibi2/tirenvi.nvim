@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+
+LAZY_DIR="$HOME/.local/share/lazy-test/site/pack/lazy/start/lazy.nvim"
+rm -rf "$LAZY_DIR"
+
+if [ ! -d "$LAZY_DIR" ]; then
+    git clone --filter=blob:none \
+        --branch=stable \
+        https://github.com/folke/lazy.nvim.git \
+        "$LAZY_DIR"
+fi
+pip uninstall -y tir-csv
+
+NVIM_APPNAME=lazy-test NVIM_TIRENVI_DEV=1 $NVIM_BIN --headless -u NONE -n \
+    -c "source run.vim" \
+    -c "qa!" \
+    > stdout.txt 2> stderr.txt
+
+pip uninstall -y tir-csv
+pip install tir-csv
