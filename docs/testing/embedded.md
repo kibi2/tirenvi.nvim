@@ -81,8 +81,10 @@ import traceback
 
 | No | Preconditions | Action | Expected | Date | Notes | Commit Message |
 | --- | --- | --- | --- | --- | --- | --- |
+|  |  | health | OK | 26/07/16 |  | feat: support both legacy and new parser version interfaces |
+|  |  | edit table.txt | OK |  |  |  |
 |  | record.prefix=" #hoge# " | Tir _read_tir ./tests/data/simple.tir | #hoge# |  |  |  |
 |  |  | Tir _write_tir /tmp/hoge.tir | record.prefix=" #hoge# " |  |  |  |
-|  | record.prefix=" // " | " // " -> "  // "  | 戻る |  |  |  |
-|  | record.prefix=" // " | " // " -> "   "  | 戻る |  |  |  |
+|  | record.prefix=" // " | " // " -> "  // " | 戻る |  |  |  |
+|  | record.prefix=" // " | " // " -> "   " | 戻る |  |  |  |
 

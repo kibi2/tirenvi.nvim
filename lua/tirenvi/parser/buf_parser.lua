@@ -92,6 +92,7 @@ end
 ---@param bufdoc Document
 ---@return string[]
 function M.unparse(bufdoc)
+	Document.prefix_to_records(bufdoc)
 	local records = Document.serialize_to_buf(bufdoc)
 	return Record.to_buflines(records)
 end

@@ -101,7 +101,9 @@ end
 function M.parse(ctx, r_result)
 	local jslines = flat_to_jslines(r_result.lines, ctx.parser)
 	local ndjsons = jslines_to_ndjsons(jslines)
-	return Document.new_tirdoc(ndjsons, Context.is_allow_plain(ctx))
+	local tirdoc = Document.new_tirdoc(ndjsons, Context.is_allow_plain(ctx))
+	Document.prefix_to_attrs(tirdoc)
+	return tirdoc
 end
 
 ---@param tirdoc Document	

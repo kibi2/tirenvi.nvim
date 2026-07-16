@@ -181,6 +181,17 @@ function M.to_bufdoc(tirdoc)
 end
 
 ---@param bufdoc Document
+function M.prefix_to_records(bufdoc)
+    log.assert(not bufdoc._tir, "serialize_to_buf should be called only for bufdoc")
+    Blocks.prefix_to_records(bufdoc.blocks)
+end
+
+---@param tirfdoc Document
+function M.prefix_to_attrs(tirfdoc)
+    Blocks.prefix_to_attrs(tirfdoc.blocks)
+end
+
+---@param bufdoc Document
 ---@return Record[]
 function M.serialize_to_buf(bufdoc)
     log.assert(not bufdoc._tir, "serialize_to_buf should be called only for bufdoc")

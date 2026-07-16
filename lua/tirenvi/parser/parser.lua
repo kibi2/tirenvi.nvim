@@ -101,7 +101,11 @@ local function get_string_version(self)
     end
     self._installed_version = vim.trim(fn.system({ self.executable, "--version" }))
     if vim.v.shell_error ~= 0 then
-        error({ code = ERR.VERSION_COMMAND_FAILED })
+        -- TODO
+        self._installed_version = vim.trim(fn.system({ self.executable, "version" }))
+        if vim.v.shell_error ~= 0 then
+            error({ code = ERR.VERSION_COMMAND_FAILED })
+        end
     end
     return self._installed_version
 end

@@ -59,17 +59,6 @@ endfunction
 
 command! -nargs=1 CASE call CaseImpl(expand('<slnum>'), <q-args>)
 
-function! Case(desc) abort
-  let g:case_no += 1
-  let g:case_name = a:desc
-
-  echomsg " "
-  echomsg printf("=== CASE%d: %s ===",
-    \ g:case_no,
-    \ a:desc)
-
-endfunction
-
 function! Dump(cmd) abort
   redir => msg
   execute a:cmd

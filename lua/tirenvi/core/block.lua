@@ -75,8 +75,6 @@ local function serialize_records(self)
     ---@type Ndjson[]
     local ndjsons = {}
     for _, record in ipairs(self.records) do
-        -- TODO
-        record.prefix = self.attr.prefix
         ndjsons[#ndjsons + 1] = record
     end
     return ndjsons
@@ -194,10 +192,30 @@ function M:add(record)
     self.records[#self.records + 1] = record
 end
 
----@self Block
+---@self Block_plain
 ---@return Ndjson[]
-function M:serialize()
+function M.plain:serialize()
     return serialize_records(self)
+end
+
+---@self Block_grid
+---@return Ndjson[]
+function M.grid:serialize()
+    return serialize_records(self)
+end
+
+---@self Block_grid
+function M.grid:prefix_to_records()
+    local prefix = self.attr.prefix
+    for _, record in ipairs(self.records) do
+        record.prefix = prefix
+    end
+end
+
+---@self Block_grid
+function M.grid:prefix_to_attrs()
+    self.attr.prefix = self.records[1].prefix
+    self.records[1].prefix = nil
 end
 
 ---@self Block
@@ -230,8 +248,6 @@ M.plain.inherit_neighbor_attr = nop
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 function M.grid:from_flat()
-    -- TODO
-    self.attr.prefix = self.records[1].prefix
     apply_replacements(self, get_escape_map())
 end
 

@@ -205,11 +205,21 @@ function M.set_attr_range(bufblocks, first)
 end
 
 ---@param self Blocks
+function M.prefix_to_records(self)
+	apply(self, "prefix_to_records")
+end
+
+---@param self Blocks
+function M.prefix_to_attrs(self)
+	apply(self, "prefix_to_attrs")
+end
+
+---@param self Blocks
 ---@return Ndjson[]
 function M.serialize(self)
 	local ndjsons = {}
 	for _, block in ipairs(self) do
-		util.extend(ndjsons, Block.serialize(block))
+		util.extend(ndjsons, Block[block.kind].serialize(block))
 	end
 	return ndjsons
 end
