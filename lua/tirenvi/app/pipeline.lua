@@ -97,7 +97,7 @@ local function doc_to_buflines(ctx, r_result, doc, opts)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[9]DOC ATTR:"))
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
-    buf_state.set_buffer_flat(ctx.bufnr, false)
+    buf_state.set_buffer_flat(ctx.bufnr, not Attrs.has_grid(attrs))
     attr_store.write(ctx, attrs)
     local buf_lines = buf_parser.unparse(bufdoc)
     if not util.same_str_array(buf_lines, r_result.lines or "") then
@@ -190,7 +190,7 @@ local function need_repair(ctx)
     if buf_state.is_flat(ctx.bufnr) then
         return false
     end
-    if buf_state.has_grid(ctx) == false then
+    if not buf_state.has_grid(ctx) then
         return false
     end
     -- repair must remove redundant padding,
@@ -389,7 +389,6 @@ function M.debug_write_tir(ctx, filename)
 end
 
 ---@param ctx Context
----@return nil
 function M.from_flat(ctx)
     local r_result = reader.read(ctx, Range.WHOLE)
     util.ensure_no_reserved_marks(r_result.lines)

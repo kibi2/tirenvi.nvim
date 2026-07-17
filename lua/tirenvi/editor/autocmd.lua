@@ -68,7 +68,7 @@ local function attach_on_lines(bufnr)
 		-- this handler. In this case, `on_detach` is NOT called automatically, so any
 		-- state (e.g. ATTACHED flag) must be updated manually here.
 		on_lines = function(_, bufnr, tick, first, last, new_last, bytecount)
-			if buffer.get(bufnr, buffer.IKEY.FILETYPE) == nil then
+			if buffer.get(bufnr, buffer.IKEY.PARSER) == nil then
 				log.debug("===+=== auto detach (no filetype)")
 				buffer.set(bufnr, buffer.IKEY.ATTACHED, false)
 				return true -- detach
@@ -120,7 +120,9 @@ end
 ---@param args table
 local function on_cursor_moved(args)
 	local ctx = Context.from_buf(args.buf)
-	Debug.show_attr_marks(ctx)
+	if vim.log.levels.DEBUG >= config.log.level then
+		Debug.show_attr_marks(ctx)
+	end
 	init.auto_wrap(ctx)
 end
 
@@ -136,15 +138,20 @@ local function on_vim_leave(args) end
 -- Autocmd registration (private)
 ----------------------------------------------------------------------
 
----@param augroup integer
 ---@param bufnr number
-local function clear_buffer_local_autocmds(augroup, bufnr)
+local function clear_buffer_local_autocmds(bufnr)
+	buffer.set(bufnr, buffer.IKEY.AUTOCMD, false)
+	local augroup = api.nvim_create_augroup(GROUP_NAME, { clear = false })
 	api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
 end
 
----@param augroup integer
 ---@param bufnr number
-local function register_buffer_local_autocmds(augroup, bufnr)
+local function register_buffer_local_autocmds(bufnr)
+	if buffer.get(bufnr, buffer.IKEY.AUTOCMD) then
+		return
+	end
+	buffer.set(bufnr, buffer.IKEY.AUTOCMD, true)
+	local augroup = api.nvim_create_augroup(GROUP_NAME, { clear = false })
 	attach_on_lines(bufnr)
 
 	api.nvim_create_autocmd("BufWritePre", {
@@ -188,9 +195,6 @@ local function register_buffer_local_autocmds(augroup, bufnr)
 		group = augroup,
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
-			if vim.log.levels.DEBUG < config.log.level then
-				return
-			end
 			if buf_state.should_skip(args.buf) then
 				return
 			end
@@ -254,7 +258,6 @@ end
 
 local function register_autocmds()
 	local augroup = api.nvim_create_augroup(GROUP_NAME, { clear = true })
-
 	vim.api.nvim_create_autocmd("FileType", {
 		group = augroup,
 		callback = guard.guarded(function(args)
@@ -268,11 +271,11 @@ local function register_autocmds()
 			Debug.ui_entry(args.buf, args.event)
 			local ctx = get_context(bufnr)
 			on_filetype(ctx)
-			clear_buffer_local_autocmds(augroup, bufnr)
+			clear_buffer_local_autocmds(bufnr)
 			if buf_state.should_skip(args.buf, { is_tirbuf = false, }) then
 				return
 			end
-			register_buffer_local_autocmds(augroup, bufnr)
+			register_buffer_local_autocmds(bufnr)
 			Debug.ui_exit(args.buf, args.event)
 		end),
 	})
@@ -311,6 +314,7 @@ local function register_autocmds()
 		local ok, luacov = pcall(require, "luacov")
 		if ok then
 			vim.api.nvim_create_autocmd("VimLeavePre", {
+				group = augroup,
 				callback = function(args)
 					Debug.ui_entry(args.buf, args.event)
 					luacov.save_stats()
@@ -327,6 +331,14 @@ end
 
 function M.setup()
 	register_autocmds()
+end
+
+function M.clear_buf_autocmds(bufnr)
+	clear_buffer_local_autocmds(bufnr)
+end
+
+function M.register_buf_autocmd(bufnr)
+	register_buffer_local_autocmds(bufnr)
 end
 
 return M

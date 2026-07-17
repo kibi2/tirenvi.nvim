@@ -18,7 +18,6 @@ local api                  = vim.api
 ---@class Context
 ---@field bufnr number
 ---@field winid number
----@field filetype string
 ---@field parser Parser|nil
 ---@field line_provider LineProvider
 
@@ -33,14 +32,12 @@ local api                  = vim.api
 function M.from_buf(bufnr)
     bufnr = bufnr or api.nvim_get_current_buf()
     local winid = api.nvim_get_current_win()
-    local filetype = buffer.get(bufnr, buffer.IKEY.FILETYPE)
-    local parser = Parser.resolve_parser(filetype)
+    local parser = buffer.get(bufnr, buffer.IKEY.PARSER)
     ---@type Context
     return
     {
         bufnr = bufnr,
         winid = winid,
-        filetype = filetype,
         parser = parser,
         line_provider = buffer_line_provider.new(bufnr)
     }

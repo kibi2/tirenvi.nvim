@@ -7,7 +7,7 @@ local reader = require("tirenvi.io.reader")
 local buf_state = require("tirenvi.io.buf_state")
 local attr_store = require("tirenvi.io.attr_store")
 local Bufline = require("tirenvi.core.bufline")
-local CursorNvim = require("tirenvi.cursor.nvim")
+local Parser = require("tirenvi.parser.parser")
 local Range = require("tirenvi.util.range")
 local util = require("tirenvi.util.util")
 local notify = require("tirenvi.util.notify")
@@ -36,6 +36,15 @@ local function set_repeat(command)
 			"tirenvi: install 'tpope/vim-repeat' to enable '.' repeat"
 		)
 	end
+end
+
+---@param ctx Context
+local function embedded(ctx)
+	if ctx.parser then
+		return
+	end
+	ctx.parser = Parser.resolve_parser("*")
+	buffer.set(ctx.bufnr, buffer.IKEY.PARSER, ctx.parser)
 end
 
 -----------------------------------------------------------------------
@@ -79,9 +88,9 @@ function M.write_post(ctx)
 end
 
 ---@param ctx Context
----@return nil
 function M.toggle(ctx)
 	local is_flat = buf_state.is_flat(ctx.bufnr)
+	embedded(ctx)
 	if is_flat == nil or is_flat then
 		pipeline.from_flat(ctx)
 	elseif buf_state.has_grid(ctx) then
@@ -213,10 +222,8 @@ function M.on_filetype(ctx)
 	buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, new_filetype)
 	buf_state.set_buffer_flat(ctx.bufnr, true)
 	attr_store.write(ctx, nil)
-	ctx = Context.from_buf(ctx.bufnr)
-	if not ctx.parser then
-		buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, nil)
-	end
+	local parser = Parser.resolve_parser(new_filetype)
+	buffer.set(ctx.bufnr, buffer.IKEY.PARSER, parser)
 end
 
 ---@param ctx Context

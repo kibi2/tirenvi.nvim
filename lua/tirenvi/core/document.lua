@@ -180,15 +180,9 @@ function M.to_bufdoc(tirdoc)
     return bufdoc
 end
 
----@param bufdoc Document
-function M.prefix_to_records(bufdoc)
-    log.assert(not bufdoc._tir, "serialize_to_buf should be called only for bufdoc")
-    Blocks.prefix_to_records(bufdoc.blocks)
-end
-
 ---@param tirfdoc Document
 function M.prefix_to_attrs(tirfdoc)
-    Blocks.prefix_to_attrs(tirfdoc.blocks)
+    --Blocks.prefix_to_attrs(tirfdoc.blocks)
 end
 
 ---@param bufdoc Document
@@ -239,6 +233,9 @@ end
 ---@param doc Document
 ---@param attrs Attr[]
 function M.apply_attrs(doc, attrs)
+    if not attrs or #attrs == 0 then
+        return
+    end
     if doc._tir then
         apply_attrs_by_id(doc, attrs)
     else
@@ -280,6 +277,17 @@ end
 function M.has_width(bufdoc)
     log.assert(not bufdoc._tir, "has_width should be called only for bufdoc")
     return Blocks.has_width(bufdoc.blocks)
+end
+
+---@param self Document
+---@return boolean
+function M.has_grid(self)
+    for _, block in ipairs(self.blocks) do
+        if block.kind == CONST.KIND.GRID then
+            return true
+        end
+    end
+    return false
 end
 
 return M

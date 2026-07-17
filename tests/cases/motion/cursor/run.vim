@@ -46,14 +46,7 @@ CASE CSV grid
 	call At(1, 2, 1) | lua print_wrap("grid")
             
 " ===== CONFIG =====
-lua << EOF
-    local M = require("tirenvi")
-    M.setup({
-      ui = {
-        manage_wrap = false
-      },
-    })
-EOF
+lua require("tirenvi.config").ui.manage_wrap = false
 
 CASE CSV confg
     lua vim.wo[0].wrap = true

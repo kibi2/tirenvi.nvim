@@ -1,5 +1,6 @@
 -- dependencies
 local Context = require("tirenvi.app.context")
+local autocmd = require("tirenvi.editor.autocmd")
 local WidthOp = require("tirenvi.width.op")
 local buf_state = require("tirenvi.io.buf_state")
 local buffer = require("tirenvi.io.buffer")
@@ -63,11 +64,24 @@ end
 ---@param opts {[string]:any}
 ---@return nil
 local function cmd_toggle(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr, { is_tirbuf = false, has_grid = true, }) then
+	if buf_state.should_skip(ctx.bufnr, {
+			is_tirbuf = false,
+			has_grid = false,
+			has_parser = false,
+		}) then
 		return
 	end
 	ui.special_apply(ctx.winid)
 	init.toggle(ctx)
+	--TODO
+	local is_flat = buf_state.is_flat(ctx.bufnr)
+	local has_grid = buf_state.has_grid(ctx) or false
+	-- log.probe({ not is_flat, has_grid })
+	if has_grid then
+		autocmd.register_buf_autocmd(ctx.bufnr)
+	else
+		autocmd.clear_buf_autocmds(ctx.bufnr)
+	end
 end
 
 ---@param ctx Context

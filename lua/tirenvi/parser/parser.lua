@@ -132,11 +132,12 @@ end
 
 ---@param self Parser
 ---@param subcmd string Subcommand ("parse" or "unparse")
+---@param options string[]
 ---@param lines string[] Input lines
 ---@return string stdout
-function M.run(self, subcmd, lines)
+function M.run(self, subcmd, options, lines)
     ensure_parser(self)
-    return run_parser(self.executable, subcmd, self.options, lines)
+    return run_parser(self.executable, subcmd, options, lines)
 end
 
 ---@param self Parser

@@ -3,19 +3,17 @@ source $TIRENVI_ROOT/tests/common.vim
 edit $TIRENVI_ROOT/tests/data/simple.md
 
 lua << EOF
-  local M = require("tirenvi")
-  local levels = vim.log.levels
-  M.setup({
+  local opts = {
   	log = {
-		level = levels.DEBUG,
+		level = vim.log.levels.DEBUG,
 		single_line = false,
 		output = "file",
-		-- file_name = "./gen.tirenvi",
 		file_name = "./out-actual.txt",
 		use_timestamp = false,
 		probe = true,
   	},
-  })
+  }
+  require("tirenvi").setup(opts)
   Range = require("tirenvi.util.range")
   log = require("tirenvi.util.log")
   Context = require("tirenvi.app.context")

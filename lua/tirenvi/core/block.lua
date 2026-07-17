@@ -208,14 +208,8 @@ end
 function M.grid:prefix_to_records()
     local prefix = self.attr.prefix
     for _, record in ipairs(self.records) do
-        record.prefix = prefix
+        --record.prefix = prefix
     end
-end
-
----@self Block_grid
-function M.grid:prefix_to_attrs()
-    self.attr.prefix = self.records[1].prefix
-    self.records[1].prefix = nil
 end
 
 ---@self Block
@@ -248,11 +242,14 @@ M.plain.inherit_neighbor_attr = nop
 --- Normalize all rows in a grid block to have the same number of columns.
 ---@self Block_grid
 function M.grid:from_flat()
+    --self.attr.prefix = self.records[1].prefix
+    --self.records[1].prefix = nil
     apply_replacements(self, get_escape_map())
 end
 
 ---@self Block_grid
 function M.grid:to_flat()
+    --self.records[1].prefix = self.attr.prefix
     apply_replacements(self, get_un_escape_map())
 end
 
@@ -333,6 +330,19 @@ function M.grid:has_width()
         end
     end
     return true
+end
+
+---@self Block_plain
+---@return Attr
+function M.plain:get_attr()
+    return self.attr
+end
+
+---@self Block_grid
+---@return Attr
+function M.grid:get_attr()
+    self.attr.prefix = self.records[1].prefix
+    return self.attr
 end
 
 return M

@@ -13,8 +13,7 @@ filetype plugin indent on
 
 lua << EOF
 require("luacov")
-local M = require("tirenvi")
-M.setup({
+local opts = {
   log = {
 		level = vim.log.levels.WARN,
 		-- level = vim.log.levels.DEBUG,
@@ -27,7 +26,8 @@ M.setup({
   table = {
 		wrap_mode = "nowrap",
 	},
-})
+}
+require("tirenvi").setup(opts)
 vim.g.tirenvi_initialized = false
 Debug = require("tirenvi.editor.debug")
 Motion = require("tirenvi.editor.motion")

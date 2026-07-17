@@ -144,7 +144,7 @@ function M:collect_attrs()
 	local attrs = {}
 	for _, block in ipairs(self) do
 		log.assert(block.attr, "block.attr is nil")
-		attrs[#attrs + 1] = block.attr
+		attrs[#attrs + 1] = Block[block.kind].get_attr(block)
 	end
 	return attrs
 end
@@ -202,16 +202,6 @@ function M.set_attr_range(bufblocks, first)
 		return
 	end
 	rebuild_attr_range(bufblocks, first)
-end
-
----@param self Blocks
-function M.prefix_to_records(self)
-	apply(self, "prefix_to_records")
-end
-
----@param self Blocks
-function M.prefix_to_attrs(self)
-	apply(self, "prefix_to_attrs")
 end
 
 ---@param self Blocks

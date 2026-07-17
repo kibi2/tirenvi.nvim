@@ -33,7 +33,6 @@ CASE 37 // cur(1,1) b1:r1:c0+0<g>  p(1,2)*
 --- CASE 43: NG case ---
 Usage: :Tir <fit|redraw|repair|toggle|width|wrap>
 Usage: :Tir <fit|redraw|repair|toggle|width|wrap>
-Tir repair is deprecated and will be removed in v0.5. Use :Tir redraw
 Usage: :Tir <fit|redraw|repair|toggle|width|wrap>
 CASE 43 // cur(1,1) b1:r1:c0+0<g>  p(1,2)*
 

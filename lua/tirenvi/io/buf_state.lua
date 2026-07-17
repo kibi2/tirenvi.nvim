@@ -98,11 +98,11 @@ local checks = {
 	end,
 
 	has_parser = function(bufnr)
-		return buffer.get(bufnr, buffer.IKEY.FILETYPE) ~= nil
+		return buffer.get(bufnr, buffer.IKEY.PARSER) ~= nil
 	end,
 
 	is_tirbuf = function(bufnr)
-		return M.is_flat(bufnr) ~= true
+		return not M.is_flat(bufnr)
 	end,
 
 	has_grid = function(bufnr)
@@ -207,13 +207,13 @@ function M.debug_state(bufnr)
 end
 
 ---@param bufnr number
----@return boolean|nil
+---@return boolean
 function M.is_flat(bufnr)
 	return buffer.get(bufnr, buffer.IKEY.FLAT)
 end
 
 ---@param ctx Context
----@return boolean|nil
+---@return boolean
 function M.has_grid(ctx)
 	if not Context.is_allow_plain(ctx) then
 		return true

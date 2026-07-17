@@ -95,10 +95,10 @@ function M.get_count(self)
 end
 
 ---@param self Attr[]|nil
----@return boolean|nil
+---@return boolean
 function M.has_grid(self)
     if not self then
-        return nil
+        return false
     end
     local count = M.get_count(self)
     for _, attr in ipairs(self) do

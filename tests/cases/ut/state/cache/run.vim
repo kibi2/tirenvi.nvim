@@ -1,11 +1,10 @@
 source $TIRENVI_ROOT/tests/common.vim
 
 lua << EOF
-  local M = require("tirenvi")
   local log = require("tirenvi.util.log")
   local buffer = require("tirenvi.io.buffer")
   local levels = vim.log.levels
-  M.setup({
+  require("tirenvi.config").setup({
   	log = {
 		level = levels.DEBUG,
 		probe = true, output = "print",

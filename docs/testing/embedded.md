@@ -29,7 +29,6 @@ import traceback
 
 * 詳細は tir-embedded を参照のこと
 * まずカレント行から key を決定することを試みる。
-* 失敗した場合はファイル先頭から検索する。
   * "|"を二つ以上含むこと
   * 行末が"|"であること
 * カレント行が条件を満たさない場合は先頭行から検索する
@@ -82,7 +81,7 @@ import traceback
 | No | Preconditions | Action | Expected | Date | Notes | Commit Message |
 | --- | --- | --- | --- | --- | --- | --- |
 |  |  | health | OK | 26/07/16 |  | feat: support both legacy and new parser version interfaces |
-|  |  | edit table.txt | OK |  |  |  |
+|  | edit table.txt | Tir toggle (row # 1) | show grid block | 26/07/18 |  | Add grid display support for text files in :Tir toggle |
 |  | record.prefix=" #hoge# " | Tir _read_tir ./tests/data/simple.tir | #hoge# |  |  |  |
 |  |  | Tir _write_tir /tmp/hoge.tir | record.prefix=" #hoge# " |  |  |  |
 |  | record.prefix=" // " | " // " -> "  // " | 戻る |  |  |  |

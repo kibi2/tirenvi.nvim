@@ -29,11 +29,16 @@ local M = {}
 -- private helpers
 
 --- Convert flat lines to NDJSON lines
----@param fllines string[]
 ---@param parser Parser
+---@param fllines string[]
+---@param cursor CursorBuf
 ---@return string[] NDJSON lines
-local function flat_to_jslines(fllines, parser)
-	local js_string = Parser.run(parser, "parse", fllines)
+local function flat_to_jslines(parser, fllines, cursor)
+	local options = vim.deepcopy(parser.options) or {}
+	if parser.executable == "tir-embedded" then
+		options[#options + 1] = "--cursor-line=" .. cursor.row_cur
+	end
+	local js_string = Parser.run(parser, "parse", options, fllines)
 	return vim.split(js_string, "\n", { plain = true })
 end
 
@@ -79,13 +84,33 @@ end
 ---@param parser Parser
 ---@return string[] flat lines
 local function jslines_to_flat(jslines, parser)
-	local fl_string = Parser.run(parser, "unparse", jslines)
+	local fl_string = Parser.run(parser, "unparse", parser.options, jslines)
 	local fllines = vim.split(fl_string, "\n")
 	--log.debug(util.to_hex(table.concat(fllines, "\n")):sub(1, 80) .. " ")
 	return fllines
 end
 
--- public API
+---@param ndjsons Ndjson[]
+local function expand_grid_prefix(ndjsons)
+	local prefix
+	local is_first = true
+	for _, ndjson in ipairs(ndjsons) do
+		if ndjson.kind == "grid" then
+			if is_first then
+				prefix = ndjson.prefix
+				is_first = false
+			end
+			ndjson.prefix = prefix
+		else
+			prefix = nil
+			is_first = true
+		end
+	end
+end
+
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
 
 ---@param ctx Context
 ---@param jslines string[]
@@ -99,10 +124,10 @@ end
 ---@param r_result ReadResult
 ---@return Document
 function M.parse(ctx, r_result)
-	local jslines = flat_to_jslines(r_result.lines, ctx.parser)
+	local jslines = flat_to_jslines(ctx.parser, r_result.lines, r_result.cursor)
 	local ndjsons = jslines_to_ndjsons(jslines)
+	expand_grid_prefix(ndjsons)
 	local tirdoc = Document.new_tirdoc(ndjsons, Context.is_allow_plain(ctx))
-	Document.prefix_to_attrs(tirdoc)
 	return tirdoc
 end
 

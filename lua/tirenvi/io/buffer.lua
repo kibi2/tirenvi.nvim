@@ -28,11 +28,17 @@ M.IKEY              = {
 	-- Depth of patch recursion
 	PATCH_DEPTH = "patch_depth",
 
+	-- create autocmd
+	AUTOCMD = "autocmd",
+
 	-- fn.undotree().seq_last
 	UNDO_TREE_LAST = "undo_tree_last",
 
 	-- bo[bufnr].filetype
 	FILETYPE = "filetype",
+
+	-- parser
+	PARSER = "parser",
 
 	-- repair flag
 	REPAIR = "repair",
@@ -45,18 +51,24 @@ M.IKEY              = {
 
 	-- buffer is flat or tir-buffer
 	FLAT = "flat",
+
+	-- embedded key
+	EMBEDDED_KEY = "embedded_key",
 }
 
 local initial_value = {
 	[M.IKEY.INSERT_MODE] = false,
 	[M.IKEY.ATTACHED] = false,
 	[M.IKEY.PATCH_DEPTH] = 0,
+	[M.IKEY.AUTOCMD] = false,
 	[M.IKEY.UNDO_TREE_LAST] = -1,
 	[M.IKEY.FILETYPE] = nil,
+	[M.IKEY.PARSER] = nil,
 	[M.IKEY.REPAIR] = nil,
 	[M.IKEY.ATTRS] = nil,
 	[M.IKEY.DIRTY] = nil,
-	[M.IKEY.FLAT] = nil,
+	[M.IKEY.FLAT] = true,
+	[M.IKEY.EMBEDDED_KEY] = nil,
 }
 
 -----------------------------------------------------------------------

@@ -17,10 +17,9 @@ M.grid = {}
 ---@param bufline string
 ---@return Record
 local function from_bufline(bufline)
-    local pipec = config.marks.pipec
     local pipe = Bufline.get_pipe_char(bufline)
     if pipe then
-        return M.grid.new_from_bufline(bufline, pipe == pipec)
+        return M.grid.new_from_bufline(bufline, pipe)
     else
         return M.plain.new_from_bufline(bufline)
     end
@@ -72,13 +71,16 @@ function M.grid.new(cells)
 end
 
 ---@param bufline string
----@param has_continuation boolean
+---@param pipe string
 ---@return Record_grid
-function M.grid.new_from_bufline(bufline, has_continuation)
-    bufline = bufline or ""
+function M.grid.new_from_bufline(bufline, pipe)
+    local pos = string.find(bufline, pipe, 1, true) or 1
+    local prefix = string.sub(bufline, 1, pos - 1)
+    --bufline = string.sub(bufline, pos)
     local cells = Bufline.get_cells(bufline)
     local record = M.grid.new(cells)
-    record._has_continuation = has_continuation
+    --record.prefix = prefix
+    record._has_continuation = pipe == config.marks.pipec
     return record
 end
 
@@ -123,6 +125,7 @@ function M.grid:wrap(columns)
         for irow, cell in ipairs(cells) do
             records[irow] = records[irow] or M.grid.new()
             records[irow].row[icol] = cell
+            records[irow].prefix = self.prefix
         end
     end
     local ncol = #self.row
