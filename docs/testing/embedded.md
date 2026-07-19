@@ -82,6 +82,7 @@ import traceback
 | --- | --- | --- | --- | --- | --- | --- |
 |  |  | health | OK | 26/07/16 |  | feat: support both legacy and new parser version interfaces |
 |  | edit table.txt | Tir toggle (row # 1) | show grid block | 26/07/18 |  | Add grid display support for text files in :Tir toggle |
+|  | edit table.txt | Tir toggle (row # 1) 2 time | show flat  | 26/07/19 |  |  |
 |  | record.prefix=" #hoge# " | Tir _read_tir ./tests/data/simple.tir | #hoge# |  |  |  |
 |  |  | Tir _write_tir /tmp/hoge.tir | record.prefix=" #hoge# " |  |  |  |
 |  | record.prefix=" // " | " // " -> "  // " | 戻る |  |  |  |

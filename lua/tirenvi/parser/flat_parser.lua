@@ -108,6 +108,22 @@ local function expand_grid_prefix(ndjsons)
 	end
 end
 
+---@param ndjsons Ndjson[]
+local function collapse_grid_prefix(ndjsons)
+	local is_first = true
+	for _, ndjson in ipairs(ndjsons) do
+		if ndjson.kind == "grid" then
+			if is_first then
+				is_first = false
+			else
+				ndjson.prefix = nil
+			end
+		else
+			is_first = true
+		end
+	end
+end
+
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
@@ -144,6 +160,7 @@ end
 ---@return string[]
 function M.unparse(ctx, tirdoc)
 	local ndjsons = Document.serialize_to_flat(tirdoc)
+	collapse_grid_prefix(ndjsons)
 	local jslines = ndjsons_to_lines(ndjsons)
 	log.debug("[%d]='%s'...[%d]='%s'", 1, tostring(jslines[1]), #jslines, tostring(jslines[#jslines]))
 	return jslines_to_flat(jslines, ctx.parser)

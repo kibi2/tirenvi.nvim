@@ -15,11 +15,12 @@ M.grid = {}
 -----------------------------------------------------------------------
 
 ---@param bufline string
+---@param embedded_key string|nil
 ---@return Record
-local function from_bufline(bufline)
+local function from_bufline(bufline, embedded_key)
     local pipe = Bufline.get_pipe_char(bufline)
     if pipe then
-        return M.grid.new_from_bufline(bufline, pipe)
+        return M.grid.new_from_bufline(bufline, pipe, embedded_key)
     else
         return M.plain.new_from_bufline(bufline)
     end
@@ -72,14 +73,19 @@ end
 
 ---@param bufline string
 ---@param pipe string
+---@param embedded_key string|nil
 ---@return Record_grid
-function M.grid.new_from_bufline(bufline, pipe)
+function M.grid.new_from_bufline(bufline, pipe, embedded_key)
     local pos = string.find(bufline, pipe, 1, true) or 1
     local prefix = string.sub(bufline, 1, pos - 1)
-    --bufline = string.sub(bufline, pos)
+    if vim.trim(prefix) == embedded_key then
+        bufline = string.sub(bufline, pos)
+    end
     local cells = Bufline.get_cells(bufline)
     local record = M.grid.new(cells)
-    --record.prefix = prefix
+    if vim.trim(prefix) == embedded_key then
+        record.prefix = prefix
+    end
     record._has_continuation = pipe == config.marks.pipec
     return record
 end
@@ -156,11 +162,12 @@ function M.get_max_ncol(records)
 end
 
 ---@param buflines string[]
+---@param embedded_key string|nil
 ---@return Record[]
-function M.from_buflines(buflines)
+function M.from_buflines(buflines, embedded_key)
     local records = {}
     for index = 1, #buflines do
-        records[index] = from_bufline(buflines[index])
+        records[index] = from_bufline(buflines[index], embedded_key)
     end
     return records
 end

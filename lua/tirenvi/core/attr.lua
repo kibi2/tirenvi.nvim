@@ -107,8 +107,13 @@ end
 function M.get_attr_short(self)
     local kind = M.is_plain(self) and "p" or "g"
     local range_str = self.range and string.format("(%d,%d)", self.range.first, self.range.last) or "()"
-    local prefix = vim.trim(self.prefix or "")
-    return kind .. prefix .. range_str
+    local key
+    if self.prefix then
+        key = "'" .. vim.trim(self.prefix) .. "'"
+    else
+        key = ""
+    end
+    return kind .. key .. range_str
 end
 
 local short_map = { plain = "", nowrap = "n", wrap_auto = "a", wrap_fit = "f", wrap_width = "w" }

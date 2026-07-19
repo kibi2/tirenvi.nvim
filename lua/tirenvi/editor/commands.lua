@@ -73,11 +73,7 @@ local function cmd_toggle(ctx, opts)
 	end
 	ui.special_apply(ctx.winid)
 	init.toggle(ctx)
-	--TODO
-	local is_flat = buf_state.is_flat(ctx.bufnr)
-	local has_grid = buf_state.has_grid(ctx) or false
-	-- log.probe({ not is_flat, has_grid })
-	if has_grid then
+	if buf_state.is_tirbuf(ctx.bufnr) then
 		autocmd.register_buf_autocmd(ctx.bufnr)
 	else
 		autocmd.clear_buf_autocmds(ctx.bufnr)

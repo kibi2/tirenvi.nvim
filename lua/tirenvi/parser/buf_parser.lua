@@ -82,7 +82,8 @@ end
 ---@param opts any
 ---@return Document
 function M.parse(ctx, r_result, opts)
-	local records = Record.from_buflines(r_result.lines)
+	local embedded_key = Attrs.get_embedded_key(r_result.attrs)
+	local records = Record.from_buflines(r_result.lines, embedded_key)
 	local allow_plain = Context.is_allow_plain(ctx)
 	promote_empty_lines(records, r_result, allow_plain, opts.range3)
 	local bufdoc = Document.new_bufdoc(records, allow_plain, opts.attrs, opts.first)

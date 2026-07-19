@@ -38,7 +38,7 @@ local function recover_flat(bufnr, range3)
 	if #lines ~= buffer.line_count(bufnr) then
 		return
 	end
-	buf_state.set_buffer_flat(bufnr, not Bufline.has_pipe(lines))
+	buf_state.set_buffer_tirbuf(bufnr, Bufline.has_pipe(lines))
 end
 
 ---@param _ string

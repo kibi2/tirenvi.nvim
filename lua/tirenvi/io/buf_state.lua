@@ -102,7 +102,7 @@ local checks = {
 	end,
 
 	is_tirbuf = function(bufnr)
-		return not M.is_flat(bufnr)
+		return M.is_tirbuf(bufnr)
 	end,
 
 	has_grid = function(bufnr)
@@ -166,8 +166,8 @@ end
 
 ---@param bufnr number
 ---@param value boolean
-function M.set_buffer_flat(bufnr, value)
-	buffer.set(bufnr, buffer.IKEY.FLAT, value)
+function M.set_buffer_tirbuf(bufnr, value)
+	buffer.set(bufnr, buffer.IKEY.TIRBUF, value)
 end
 
 ---@param ctx Context
@@ -192,24 +192,18 @@ function M.debug_state(bufnr)
 	end
 	local ctx = Context.from_buf(bufnr)
 	local allow_plain = Context.is_allow_plain(ctx)
-	local flat
-	local is_flat = M.is_flat(bufnr)
-	if is_flat == nil then
-		flat = "NIL"
-	else
-		flat = is_flat and ",A," or "|A|"
-	end
+	local form = M.is_tirbuf(bufnr) and "|A|" or ",A,"
 	local count = get_count(ctx)
 	if not allow_plain then
 		log.assert(count == "P0G1", "grid must be enabled when plain is not allowed")
 	end
-	return string.format("%s/%s/%s", allow_plain and "GFM" or "CSV", flat, count)
+	return string.format("%s/%s/%s", allow_plain and "GFM" or "CSV", form, count)
 end
 
 ---@param bufnr number
 ---@return boolean
-function M.is_flat(bufnr)
-	return buffer.get(bufnr, buffer.IKEY.FLAT)
+function M.is_tirbuf(bufnr)
+	return buffer.get(bufnr, buffer.IKEY.TIRBUF)
 end
 
 ---@param ctx Context

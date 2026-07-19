@@ -39,12 +39,17 @@ local function set_repeat(command)
 end
 
 ---@param ctx Context
-local function embedded(ctx)
+local function embedded_on(ctx)
 	if ctx.parser then
 		return
 	end
 	ctx.parser = Parser.resolve_parser("*")
 	buffer.set(ctx.bufnr, buffer.IKEY.PARSER, ctx.parser)
+end
+
+---@param ctx Context
+local function embedded_off(ctx)
+	buffer.set(ctx.bufnr, buffer.IKEY.PARSER, nil)
 end
 
 -----------------------------------------------------------------------
@@ -89,10 +94,13 @@ end
 
 ---@param ctx Context
 function M.toggle(ctx)
-	local is_flat = buf_state.is_flat(ctx.bufnr)
-	embedded(ctx)
-	if is_flat == nil or is_flat then
+	embedded_on(ctx)
+	local is_flat = not buf_state.is_tirbuf(ctx.bufnr)
+	if is_flat then
 		pipeline.from_flat(ctx)
+		if not buf_state.has_grid(ctx) then
+			embedded_off(ctx)
+		end
 	elseif buf_state.has_grid(ctx) then
 		pipeline.to_flat(ctx)
 	end
@@ -220,7 +228,7 @@ function M.on_filetype(ctx)
 		pipeline.to_flat(ctx)
 	end
 	buffer.set(ctx.bufnr, buffer.IKEY.FILETYPE, new_filetype)
-	buf_state.set_buffer_flat(ctx.bufnr, true)
+	buf_state.set_buffer_tirbuf(ctx.bufnr, false)
 	attr_store.write(ctx, nil)
 	local parser = Parser.resolve_parser(new_filetype)
 	buffer.set(ctx.bufnr, buffer.IKEY.PARSER, parser)

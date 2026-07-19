@@ -274,4 +274,15 @@ function M:to_cursor(logical)
     return row_cur, col_disp
 end
 
+---@param self Attr[]
+---@return string|nil
+function M:get_embedded_key()
+    for _, attr in ipairs(self) do
+        if Attr.is_grid(attr) then
+            return attr.prefix and vim.trim(attr.prefix) or nil
+        end
+    end
+    return nil
+end
+
 return M

@@ -108,7 +108,7 @@ local function unwrap(self)
     local cont_prev = false
     for _, record in ipairs(self.records) do
         if not cont_prev then
-            new_record = Record.grid.new(record.row)
+            new_record = vim.deepcopy(record)
             records[#records + 1] = new_record
         else
             Record.grid.concat(new_record, record)

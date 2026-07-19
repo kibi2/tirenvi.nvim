@@ -50,10 +50,7 @@ M.IKEY              = {
 	DIRTY = "dirty",
 
 	-- buffer is flat or tir-buffer
-	FLAT = "flat",
-
-	-- embedded key
-	EMBEDDED_KEY = "embedded_key",
+	TIRBUF = "tirbuf",
 }
 
 local initial_value = {
@@ -67,8 +64,7 @@ local initial_value = {
 	[M.IKEY.REPAIR] = nil,
 	[M.IKEY.ATTRS] = nil,
 	[M.IKEY.DIRTY] = nil,
-	[M.IKEY.FLAT] = true,
-	[M.IKEY.EMBEDDED_KEY] = nil,
+	[M.IKEY.TIRBUF] = false,
 }
 
 -----------------------------------------------------------------------
@@ -166,31 +162,31 @@ local function get_lines_from_cache(bufnr, first, last)
 	return vim.list_slice(cache.lines, istart, ilast)
 end
 
------------------------------------------------------------------------
--- Public API
------------------------------------------------------------------------
-
 ---@param bufnr number
 ---@return {[string]: boolean|integer|string|integer[][]|nil}
-function M.get_state(bufnr)
+local function get_state(bufnr)
 	if not b[bufnr].tirenvi then
 		b[bufnr].tirenvi = initial_value
 	end
 	return b[bufnr].tirenvi
 end
 
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
+
 ---@param bufnr number
 ---@param key string
 ---@return any
 function M.get(bufnr, key)
-	return M.get_state(bufnr)[key]
+	return get_state(bufnr)[key]
 end
 
 ---@param bufnr number
 ---@param key string
 ---@param val boolean|integer|string|integer[][]|nil
 function M.set(bufnr, key, val)
-	local state = M.get_state(bufnr)
+	local state = get_state(bufnr)
 	state[key] = val
 	b[bufnr].tirenvi = state
 end

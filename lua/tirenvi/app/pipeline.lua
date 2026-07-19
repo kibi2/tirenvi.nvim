@@ -97,7 +97,7 @@ local function doc_to_buflines(ctx, r_result, doc, opts)
     log.watch("ATTR", Document.debug_attrs(bufdoc, "[9]DOC ATTR:"))
     local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
-    buf_state.set_buffer_flat(ctx.bufnr, not Attrs.has_grid(attrs))
+    buf_state.set_buffer_tirbuf(ctx.bufnr, Attrs.has_grid(attrs))
     attr_store.write(ctx, attrs)
     local buf_lines = buf_parser.unparse(bufdoc)
     if not util.same_str_array(buf_lines, r_result.lines or "") then
@@ -116,7 +116,7 @@ local function tirdoc_to_flat(ctx, r_result, tirdoc, is_write_pre)
     if not is_write_pre then
         Attrs.remove_range(attrs)
         log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
-        buf_state.set_buffer_flat(ctx.bufnr, true)
+        buf_state.set_buffer_tirbuf(ctx.bufnr, false)
         attr_store.write(ctx, attrs)
     end
     writer.write(ctx, req_w)
@@ -187,7 +187,7 @@ end
 ---@param ctx Context
 ---@return boolean
 local function need_repair(ctx)
-    if buf_state.is_flat(ctx.bufnr) then
+    if not buf_state.is_tirbuf(ctx.bufnr) then
         return false
     end
     if not buf_state.has_grid(ctx) then
