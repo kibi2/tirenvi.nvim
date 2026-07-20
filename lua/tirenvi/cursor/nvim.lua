@@ -1,4 +1,4 @@
-local Cursor = require("tirenvi.cursor.cursor_buf")
+local Cursor = require("tirenvi.cursor.buf")
 local log    = require("tirenvi.util.log")
 
 local M      = {}

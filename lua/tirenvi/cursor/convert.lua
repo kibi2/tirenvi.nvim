@@ -1,7 +1,7 @@
 local Attrs         = require("tirenvi.core.attrs")
 local Attr          = require("tirenvi.core.attr")
 local bufline       = require("tirenvi.parser.bufline")
-local CursorLogical = require("tirenvi.cursor.cursor_logical")
+local CursorLogical = require("tirenvi.cursor.logical")
 local CursorNvim    = require("tirenvi.cursor.nvim")
 local log           = require("tirenvi.util.log")
 
