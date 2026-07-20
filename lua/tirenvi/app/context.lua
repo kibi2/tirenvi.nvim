@@ -2,7 +2,6 @@
 -- Dependencies
 -----------------------------------------------------------------------
 
-local Parser               = require("tirenvi.parser.parser")
 local buffer               = require("tirenvi.io.buffer")
 local buffer_line_provider = require("tirenvi.io.buffer_line_provider")
 local log                  = require("tirenvi.util.log")

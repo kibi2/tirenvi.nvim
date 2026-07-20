@@ -2,8 +2,10 @@
 local Context = require("tirenvi.app.context")
 local Attrs = require("tirenvi.core.attrs")
 local Attr = require("tirenvi.core.attr")
-local CursorNvim = require("tirenvi.cursor.nvim")
+local bufline = require("tirenvi.core.bufline")
 local CursorLogical = require("tirenvi.cursor.cursor_logical")
+local CursorNvim = require("tirenvi.cursor.nvim")
+local CursorConvert = require("tirenvi.cursor.convert")
 local buffer = require("tirenvi.io.buffer")
 local buf_state = require("tirenvi.io.buf_state")
 local reader = require("tirenvi.io.reader")
@@ -18,6 +20,7 @@ local M = {}
 
 local DELIMITER = " //"
 local bo = vim.bo
+local fn = vim.fn
 
 -----------------------------------------------------------------------
 -- Private helpers
@@ -111,7 +114,10 @@ function M.layout(title, single)
 	local ctx                  = Context.from_buf()
     local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)  or {}
     local cursor = reader.cursor(ctx)
-    local logical = Attrs.to_logical(attrs, cursor.row_cur, cursor.col_disp)
+    local line = buffer.get_line(ctx.bufnr, cursor.row_cur) or ""
+    local prefix = bufline.get_prefix_part(line)
+    local pre_disp = fn.strdisplaywidth(prefix)
+    local logical = Attrs.to_logical(attrs, cursor.row_cur, cursor.col_disp - pre_disp)
     local attr_str = Attrs.debug_attrs(attrs, "", logical.iblock, logical.icol, single)
     return string.format("%s %s %s", title, cursor_str(cursor, logical), attr_str)
 end
@@ -122,11 +128,9 @@ end
 function M.goto(iblock, irow, icol)
     local ctx = Context.from_buf()
     local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
-    local logical = CursorLogical.new(iblock, irow, icol, 0)
-    local row_cur, col_disp = Attrs.to_cursor(attrs, logical)
-    local line = buffer.get_line(ctx.bufnr, row_cur) or ""
-    local cursor = CursorNvim.from_col_disp(line, row_cur, col_disp)
-	CursorNvim.move_byte(ctx, row_cur, cursor.col_byte)
+    local cursor_logical = CursorLogical.new(iblock, irow, icol, 0)
+    local cursor = CursorConvert.to_buf(cursor_logical, attrs, ctx.line_provider)
+    CursorNvim.move_byte(ctx, cursor.row_cur, cursor.col_byte)
 end
 
 function M.show_attr_marks(ctx)
@@ -136,10 +140,10 @@ function M.show_attr_marks(ctx)
         return
     end
     local cursor = reader.cursor(ctx)
-    local pos = Attrs.to_logical(attrs, cursor.row_cur, cursor.col_disp)
+    local logical = Attrs.to_logical(attrs, cursor.row_cur, cursor.col_disp)
     for iattr, attr in ipairs(attrs) do
         local icol
-        if pos.iblock == iattr then
+        if logical.iblock == iattr then
             icol = Attr.to_cell_col(attr, cursor.col_char)
         end
         show_attr_marks(ctx, attr, iattr, icol)

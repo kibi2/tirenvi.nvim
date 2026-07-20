@@ -1,7 +1,6 @@
 local Context    = require("tirenvi.app.context")
 local Cell       = require("tirenvi.core.cell")
 local config     = require("tirenvi.config")
-local buffer     = require("tirenvi.io.buffer")
 local CursorNvim = require("tirenvi.cursor.nvim")
 local util       = require("tirenvi.util.util")
 local Range      = require("tirenvi.util.range")
@@ -67,7 +66,7 @@ end
 ---@param line string
 ---@param pipe string
 ---@return integer[]
-local function get_pipe_byte_position(line, pipe)
+local function get_pipe_byte_positions(line, pipe)
     local indexes = {}
     local index = 1
     while index <= #line do
@@ -92,10 +91,10 @@ end
 ---@return integer[]
 function M.get_pipe_byte_position(line)
     local pipen = config.marks.pipe
-    local pipec = config.marks.pipec
-    local indexes = get_pipe_byte_position(line, pipen)
+    local indexes = get_pipe_byte_positions(line, pipen)
     if #indexes == 0 then
-        indexes = get_pipe_byte_position(line, pipec)
+        local pipec = config.marks.pipec
+        indexes = get_pipe_byte_positions(line, pipec)
     end
     return indexes
 end
@@ -132,7 +131,7 @@ function M.get_block_bottom_nrow(ctx, line_provider, irow)
     if Context.is_allow_plain(ctx) then
         return find_block_edge(line_provider, irow, 1)
     else
-        return buffer.line_count(ctx.bufnr)
+        return line_provider.line_count()
     end
 end
 
@@ -247,6 +246,17 @@ function M.get_block_rect(ctx, count, is_around)
             bbyte_pos[end_index] - 1),
     }
     return rect, lines
+end
+
+---@param line string
+---@return string
+function M.get_prefix_part(line)
+    local pipe = M.get_pipe_char(line)
+    if not pipe then
+        return ""
+    end
+    local pos_byte = string.find(line, pipe, 1, true) or 1
+    return string.sub(line, 1, pos_byte - 1)
 end
 
 return M
