@@ -1,7 +1,5 @@
-local config = require("tirenvi.config")
 local CONST = require("tirenvi.constants")
 local Cell = require("tirenvi.core.cell")
-local Bufline = require("tirenvi.parser.bufline")
 local log = require("tirenvi.util.log")
 
 local M = {}
@@ -13,18 +11,6 @@ M.grid = {}
 -----------------------------------------------------------------------
 -- Private helpers
 -----------------------------------------------------------------------
-
----@param bufline string
----@param embedded_key string|nil
----@return Record
-local function from_bufline(bufline, embedded_key)
-    local pipe = Bufline.get_pipe_char(bufline)
-    if pipe then
-        return M.grid.new_from_bufline(bufline, pipe, embedded_key)
-    else
-        return M.plain.new_from_bufline(bufline)
-    end
-end
 
 -----------------------------------------------------------------------
 -- Public API
@@ -40,7 +26,7 @@ end
 
 ---@param bufline string
 ---@return Record_plain
-function M.plain.new_from_bufline(bufline)
+function M.plain.new(bufline)
     return { kind = CONST.KIND.PLAIN, line = bufline }
 end
 
@@ -69,25 +55,6 @@ end
 ---@return Record_grid
 function M.grid.new(cells)
     return { kind = CONST.KIND.GRID, row = cells or {} }
-end
-
----@param bufline string
----@param pipe string
----@param embedded_key string|nil
----@return Record_grid
-function M.grid.new_from_bufline(bufline, pipe, embedded_key)
-    local pos = string.find(bufline, pipe, 1, true) or 1
-    local prefix = string.sub(bufline, 1, pos - 1)
-    if vim.trim(prefix) == embedded_key then
-        bufline = string.sub(bufline, pos)
-    end
-    local cells = Bufline.get_cells(bufline)
-    local record = M.grid.new(cells)
-    if vim.trim(prefix) == embedded_key then
-        record.prefix = prefix
-    end
-    record._has_continuation = pipe == config.marks.pipec
-    return record
 end
 
 ---@param self Record_grid
@@ -159,39 +126,6 @@ function M.get_max_ncol(records)
         max_col = math.max(max_col, #record.row)
     end
     return max_col
-end
-
----@param buflines string[]
----@param embedded_key string|nil
----@return Record[]
-function M.from_buflines(buflines, embedded_key)
-    local records = {}
-    for index = 1, #buflines do
-        records[index] = from_bufline(buflines[index], embedded_key)
-    end
-    return records
-end
-
----@param records Record[]
----@return string[]
-function M.to_buflines(records)
-    local pipec = config.marks.pipec
-    local pipen = config.marks.pipe
-    local buflines = {}
-    for _, record in ipairs(records) do
-        local kind = record.kind
-        if kind == CONST.KIND.PLAIN then
-            buflines[#buflines + 1] = record.line or ""
-        elseif kind == CONST.KIND.GRID then
-            local pipe = record._has_continuation and pipec or pipen
-            local row_items = record.row
-            local row = table.concat(row_items, pipe)
-            row = pipe .. row .. pipe
-            local line = (record.prefix or "") .. row
-            buflines[#buflines + 1] = line
-        end
-    end
-    return buflines
 end
 
 ---@param self Record_grid[]
