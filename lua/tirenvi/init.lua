@@ -65,10 +65,8 @@ function M.setup(opts)
 	end
 	vim.g.tirenvi_initialized = true
 	config.setup(opts)
-	require("tirenvi.editor.autocmd").setup()
-	require("tirenvi.editor.commands").setup()
-	require("tirenvi.editor.textobj").setup()
 	require("tirenvi.ui").setup()
+	require("tirenvi.editor").setup()
 end
 
 --- Convert current buffer (or specified buffer) from plain format to tir-vim format
