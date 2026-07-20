@@ -4,7 +4,7 @@ lua << EOF
 function print_wrap(title)
     local Context = require("tirenvi.app.context")
 	ctx =  Context.from_buf()
-    require("tirenvi.init").auto_wrap(ctx)
+    require("tirenvi.app.pipeline").auto_wrap(ctx)
     print(tostring(vim.wo[0].wrap) .. " : " .. (title or ""))
 end
 EOF

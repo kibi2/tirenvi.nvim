@@ -1,0 +1,74 @@
+-----------------------------------------------------------------------
+-- Dependencies
+-----------------------------------------------------------------------
+local Context = require("tirenvi.app.context")
+local Bufline = require("tirenvi.parser.bufline")
+local buffer = require("tirenvi.io.buffer")
+local reader = require("tirenvi.io.reader")
+local util = require("tirenvi.util.util")
+local Range = require("tirenvi.util.range")
+local config = require("tirenvi.config")
+local log = require("tirenvi.util.log")
+
+-----------------------------------------------------------------------
+-- Module
+-----------------------------------------------------------------------
+
+local M = {}
+
+local api = vim.api
+local fn = vim.fn
+local bo = vim.bo
+
+-- private helpers
+
+-----------------------------------------------------------------------
+-- Public API
+-----------------------------------------------------------------------
+
+---@param ctx Context
+function M.insert_char_in_newline(ctx)
+    local cursor = reader.cursor(ctx)
+    local row_cur = cursor.row_cur
+    local line_new = buffer.get_line(ctx.bufnr, row_cur)
+    if line_new ~= "" then
+        return
+    end
+    local line_prev, line_next = buffer.get_lines_around(ctx.bufnr, Range.from_lua(row_cur, row_cur))
+    local line_ref = line_prev
+    if not Context.is_allow_plain(ctx) then
+        line_ref = line_ref or line_next
+    end
+    local pipe = Bufline.get_pipe_char(line_ref)
+    if not pipe then
+        return
+    end
+    vim.v.char = pipe .. vim.v.char
+end
+
+---@return string
+function M.keymap_lf()
+    local col = fn.col(".")
+    local line = fn.getline(".")
+    if not Bufline.get_pipe_char(line) then
+        return util.get_termcodes("<CR>")
+    end
+    if col == 1 or col > #line then
+        return util.get_termcodes("<CR>")
+    end
+    return config.marks.lf
+end
+
+---@return string
+function M.keymap_tab()
+    local line = fn.getline(".")
+    if not Bufline.get_pipe_char(line) then
+        return util.get_termcodes("<Tab>")
+    end
+    if bo.expandtab then
+        return util.get_termcodes("<Tab>")
+    end
+    return config.marks.tab
+end
+
+return M

@@ -1,10 +1,10 @@
 -- dependencies
 local Context = require("tirenvi.app.context")
+local pipeline = require("tirenvi.app.pipeline")
 local autocmd = require("tirenvi.editor.autocmd")
 local WidthOp = require("tirenvi.width.op")
 local buf_state = require("tirenvi.io.buf_state")
 local buffer = require("tirenvi.io.buffer")
-local init = require("tirenvi.init")
 local ui = require("tirenvi.ui")
 local guard = require("tirenvi.util.guard")
 local notify = require("tirenvi.util.notify")
@@ -29,7 +29,7 @@ local function cmd_width(ctx, opts)
 		return
 	end
 	log.debug(width_op:to_string())
-	init.width(ctx, width_op)
+	pipeline.cmd_width(ctx, width_op)
 end
 
 ---@param ctx Context
@@ -43,7 +43,7 @@ local function cmd_fit(ctx, opts)
 		return
 	end
 	log.debug(width_op:to_string())
-	init.fit(ctx, width_op)
+	pipeline.cmd_fit(ctx, width_op)
 end
 
 ---@param ctx Context
@@ -57,7 +57,7 @@ local function cmd_wrap(ctx, opts)
 		return
 	end
 	log.debug(width_op:to_string())
-	init.wrap(ctx, width_op)
+	pipeline.cmd_wrap(ctx, width_op)
 end
 
 ---@param ctx Context
@@ -72,7 +72,7 @@ local function cmd_toggle(ctx, opts)
 		return
 	end
 	ui.special_apply(ctx.winid)
-	init.toggle(ctx)
+	pipeline.toggle(ctx)
 	if buf_state.is_tirbuf(ctx.bufnr) then
 		autocmd.register_buf_autocmd(ctx.bufnr)
 	else
@@ -85,7 +85,7 @@ end
 ---@return nil
 local function cmd_redraw(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr) then return end
-	init.redraw(ctx)
+	pipeline.cmd_redraw(ctx)
 end
 
 local warned = false
@@ -100,7 +100,7 @@ local function cmd_repair(ctx, opts)
 			warned = true
 			notify.warn("Tir repair is deprecated and will be removed in v0.5. Use :Tir redraw")
 		end
-		init.redraw(ctx)
+		pipeline.cmd_redraw(ctx)
 		return
 	elseif arg == "toggle" then
 		buffer.set_repair(ctx.bufnr, not buffer.get_repair(ctx.bufnr))
@@ -130,7 +130,7 @@ local function cmd_debug_read_tir(ctx, opts)
 		notify.error("Tir _read_tir need filename")
 		return
 	end
-	init.debug_read_tir(ctx, filename)
+	pipeline.debug_read_tir(ctx, filename)
 end
 
 ---@param ctx Context
@@ -143,7 +143,7 @@ local function cmd_debug_write_tir(ctx, opts)
 		notify.error("Tir _write_tir need filename")
 		return
 	end
-	init.debug_write_tir(ctx, filename)
+	pipeline.debug_write_tir(ctx, filename)
 end
 
 ----------------------------------------------------------------------
@@ -255,7 +255,7 @@ function M.keymap_lf()
 	if buf_state.should_skip(ctx.bufnr) then
 		return util.get_termcodes("<CR>")
 	end
-	return init.keymap_lf()
+	return pipeline.keymap_lf()
 end
 
 ---@return string
@@ -266,7 +266,7 @@ function M.keymap_tab()
 	if buf_state.should_skip(ctx.bufnr) then
 		return util.get_termcodes("<Tab>")
 	end
-	return init.keymap_tab()
+	return pipeline.keymap_tab()
 end
 
 ----------------------------------------------------------------------
