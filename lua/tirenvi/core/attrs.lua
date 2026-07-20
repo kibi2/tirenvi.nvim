@@ -1,11 +1,10 @@
-local Attr          = require("tirenvi.core.attr")
-local CursorLogical = require("tirenvi.cursor.cursor_logical")
-local Range         = require("tirenvi.util.range")
-local util          = require("tirenvi.util.util")
-local log           = require("tirenvi.util.log")
+local Attr  = require("tirenvi.core.attr")
+local Range = require("tirenvi.util.range")
+local util  = require("tirenvi.util.util")
+local log   = require("tirenvi.util.log")
 
-local M             = {}
-local api           = vim.api
+local M     = {}
+local api   = vim.api
 
 -- constants / defaults
 
@@ -245,33 +244,6 @@ function M:get_invalid_attrs()
         prev = attr
     end
     return invalid
-end
-
----@param self Attr[]
----@param row_cur integer
----@param col_disp integer
----@return CursorLogical
-function M:to_logical(row_cur, col_disp)
-    local _, iblock = M.get(self, row_cur)
-    if not iblock then
-        return {}
-    end
-    local attr = self[iblock]
-    log.assert(attr, "invalid position %d", row_cur)
-    local irow = row_cur - attr.range.first + 1
-    local icol, offset = Attr.to_cell_col(attr, col_disp)
-    return CursorLogical.new(iblock, irow, icol, offset)
-end
-
----@param self Attr[]
----@param logical CursorLogical
----@return integer
----@return integer
-function M:to_cursor(logical)
-    local attr = self[logical.iblock]
-    local row_cur = attr.range.first + logical.irow - 1
-    local col_disp = Attr.get_start_pos(attr, logical.icol)
-    return row_cur, col_disp
 end
 
 ---@param self Attr[]

@@ -117,7 +117,7 @@ function M.layout(title, single)
     local line = buffer.get_line(ctx.bufnr, cursor.row_cur) or ""
     local prefix = bufline.get_prefix_part(line)
     local pre_disp = fn.strdisplaywidth(prefix)
-    local logical = Attrs.to_logical(attrs, cursor.row_cur, cursor.col_disp - pre_disp)
+    local logical = CursorConvert.to_logical(attrs, cursor.row_cur, cursor.col_disp - pre_disp)
     local attr_str = Attrs.debug_attrs(attrs, "", logical.iblock, logical.icol, single)
     return string.format("%s %s %s", title, cursor_str(cursor, logical), attr_str)
 end
@@ -140,7 +140,7 @@ function M.show_attr_marks(ctx)
         return
     end
     local cursor = reader.cursor(ctx)
-    local logical = Attrs.to_logical(attrs, cursor.row_cur, cursor.col_disp)
+    local logical = CursorConvert.to_logical(attrs, cursor.row_cur, cursor.col_disp)
     for iattr, attr in ipairs(attrs) do
         local icol
         if logical.iblock == iattr then

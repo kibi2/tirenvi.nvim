@@ -5,6 +5,7 @@ local common = require("tirenvi.app.pipeline.common")
 local Attrs = require("tirenvi.core.attrs")
 local Attr = require("tirenvi.core.attr")
 local Cell = require("tirenvi.core.cell")
+local CursorConvert = require("tirenvi.cursor.convert")
 local Bufline = require("tirenvi.parser.bufline")
 local LinProvider = require("tirenvi.io.buffer_line_provider")
 local buffer = require("tirenvi.io.buffer")
@@ -137,7 +138,7 @@ end
 ---@param width_op WidthOp
 local function width_info(ctx, width_op)
     local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
-    local logical = Attrs.to_logical(attrs, width_op.row_cur, width_op.col_disp)
+    local logical = CursorConvert.to_logical(attrs, width_op.row_cur, width_op.col_disp)
     local attr = attrs[logical.iblock]
     if Attr.is_plain(attr) then
         print("kind=plain")

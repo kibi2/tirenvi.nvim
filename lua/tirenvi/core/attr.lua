@@ -1,7 +1,6 @@
 local config = require("tirenvi.config")
 local Record = require("tirenvi.core.record")
 local Cell = require("tirenvi.core.cell")
-local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
 local M = {}
