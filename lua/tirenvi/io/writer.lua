@@ -1,5 +1,5 @@
 local Request     = require("tirenvi.app.request")
-local dirty_range = require("tirenvi.core.dirty_range")
+local dirty_range = require("tirenvi.parser.dirty_range")
 local buffer      = require("tirenvi.io.buffer")
 local dirty       = require("tirenvi.io.dirty")
 local log         = require("tirenvi.util.log")

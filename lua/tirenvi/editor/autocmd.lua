@@ -1,8 +1,7 @@
 -- dependencies
 local config = require("tirenvi.config")
 local Context = require("tirenvi.app.context")
-local Bufline = require("tirenvi.core.bufline")
-local reader = require("tirenvi.io.reader")
+local Bufline = require("tirenvi.parser.bufline")
 local buffer = require("tirenvi.io.buffer")
 local init = require("tirenvi.init")
 local buf_state = require("tirenvi.io.buf_state")

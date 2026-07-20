@@ -1,6 +1,6 @@
 local Attr = require("tirenvi.core.attr")
 local Attrs = require("tirenvi.core.attrs")
-local Bufline = require("tirenvi.core.bufline")
+local Bufline = require("tirenvi.parser.bufline")
 local Range3 = require("tirenvi.util.range3")
 local Range = require("tirenvi.util.range")
 local util = require("tirenvi.util.util")

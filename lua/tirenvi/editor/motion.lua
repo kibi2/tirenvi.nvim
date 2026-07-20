@@ -2,7 +2,7 @@ local Context    = require("tirenvi.app.context")
 local buffer     = require("tirenvi.io.buffer")
 local reader     = require("tirenvi.io.reader")
 local Attrs      = require("tirenvi.core.attrs")
-local Bufline    = require("tirenvi.core.bufline")
+local Bufline    = require("tirenvi.parser.bufline")
 local CursorNvim = require("tirenvi.cursor.nvim")
 local log        = require("tirenvi.util.log")
 

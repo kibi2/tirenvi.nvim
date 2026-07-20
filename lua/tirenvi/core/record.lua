@@ -1,7 +1,7 @@
 local config = require("tirenvi.config")
 local CONST = require("tirenvi.constants")
 local Cell = require("tirenvi.core.cell")
-local Bufline = require("tirenvi.core.bufline")
+local Bufline = require("tirenvi.parser.bufline")
 local log = require("tirenvi.util.log")
 
 local M = {}
