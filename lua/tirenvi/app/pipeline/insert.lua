@@ -1,30 +1,26 @@
------------------------------------------------------------------------
--- Dependencies
------------------------------------------------------------------------
-local Context = require("tirenvi.app.context")
-local Bufline = require("tirenvi.parser.bufline")
-local buffer = require("tirenvi.io.buffer")
+local fn = vim.fn -- Neovim
+local bo = vim.bo
+
+local config = require("tirenvi.config")          -- Root
+
+local Context = require("tirenvi.app.context")    -- App
+
+local Bufline = require("tirenvi.parser.bufline") -- Parser
+
+local buffer = require("tirenvi.io.buffer")       -- IO
 local reader = require("tirenvi.io.reader")
-local util = require("tirenvi.util.util")
+
+local util = require("tirenvi.util.util") -- Util
 local Range = require("tirenvi.util.range")
-local config = require("tirenvi.config")
 local log = require("tirenvi.util.log")
 
------------------------------------------------------------------------
--- Module
------------------------------------------------------------------------
+-- =============================================================================
 
 local M = {}
 
-local api = vim.api
-local fn = vim.fn
-local bo = vim.bo
 
--- private helpers
-
------------------------------------------------------------------------
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param ctx Context
 function M.insert_char_in_newline(ctx)

@@ -1,26 +1,21 @@
------------------------------------------------------------------------
--- Dependencies
------------------------------------------------------------------------
-local common = require("tirenvi.app.pipeline.common")
-local Parser = require("tirenvi.parser.parser")
-local buffer = require("tirenvi.io.buffer")
+local bo = vim.bo                                     -- Neovim
+
+local common = require("tirenvi.app.pipeline.common") -- App
+
+local Parser = require("tirenvi.parser.parser")       -- Parser
+
+local buffer = require("tirenvi.io.buffer")           -- IO
 local buf_state = require("tirenvi.io.buf_state")
 local attr_store = require("tirenvi.io.attr_store")
-local log = require("tirenvi.util.log")
 
------------------------------------------------------------------------
--- Module
------------------------------------------------------------------------
+local log = require("tirenvi.util.log") -- Util
+
+-- =============================================================================
 
 local M = {}
 
-local bo = vim.bo
-
--- private helpers
-
------------------------------------------------------------------------
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param ctx Context
 function M.on_filetype(ctx)

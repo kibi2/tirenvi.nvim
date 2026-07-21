@@ -1,18 +1,16 @@
-local Cursor = require("tirenvi.cursor.buf")
-local log    = require("tirenvi.util.log")
+local api    = vim.api -- Neovim
+local fn     = vim.fn
+
+local Cursor = require("tirenvi.cursor.buf") -- Cursor
+
+local log    = require("tirenvi.util.log")   -- Util
+
+-- =============================================================================
 
 local M      = {}
 
--- constants / defaults
-
-local api    = vim.api
-local fn     = vim.fn
-local bo     = vim.bo
-local b      = vim.b
-
------------------------------------------------------------------------
--- Private helpers
------------------------------------------------------------------------
+-- =============================================================================
+--#region Private
 
 ---@param line string
 ---@param col_char integer
@@ -73,9 +71,9 @@ local function disp_to_byte(line, col_disp)
     return #line + 1
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param ctx Context
 ---@return CursorBuf

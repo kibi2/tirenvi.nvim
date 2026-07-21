@@ -1,22 +1,30 @@
--- dependencies
-local Context = require("tirenvi.app.context")
+local api = vim.api                               -- Neovim
+
+local ui = require("tirenvi.ui")                  -- Root
+
+local autocmd = require("tirenvi.editor.autocmd") -- Editor
+local Debug = require("tirenvi.editor.debug")
+
+local Context = require("tirenvi.app.context") -- App
 local pipeline = require("tirenvi.app.pipeline")
-local autocmd = require("tirenvi.editor.autocmd")
+
 local WidthOp = require("tirenvi.width.op")
-local buf_state = require("tirenvi.io.buf_state")
+
+local buf_state = require("tirenvi.io.buf_state") -- IO
 local buffer = require("tirenvi.io.buffer")
-local ui = require("tirenvi.ui")
-local guard = require("tirenvi.util.guard")
+
+local guard = require("tirenvi.util.guard") -- Util
 local notify = require("tirenvi.util.notify")
 local errors = require("tirenvi.util.errors")
 local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
-local Debug = require("tirenvi.editor.debug")
 
--- module
+-- =============================================================================
+
 local M = {}
 
-local api = vim.api
+-- =============================================================================
+--#region Private
 
 ---@param ctx Context
 ---@param opts {[string]:any}
@@ -146,10 +154,6 @@ local function cmd_debug_write_tir(ctx, opts)
 	pipeline.debug_write_tir(ctx, filename)
 end
 
-----------------------------------------------------------------------
--- Registration (private)
-----------------------------------------------------------------------
-
 local commands = {
 	toggle = { func = cmd_toggle, sub = {} },
 	redraw = { func = cmd_redraw, sub = {} },
@@ -243,9 +247,9 @@ local function register_keymaps()
 	})
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@return string
 function M.keymap_lf()
@@ -268,10 +272,6 @@ function M.keymap_tab()
 	end
 	return pipeline.keymap_tab()
 end
-
-----------------------------------------------------------------------
--- Setup
-----------------------------------------------------------------------
 
 function M.setup()
 	register_user_command()

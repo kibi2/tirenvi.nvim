@@ -1,29 +1,16 @@
---- Execution guard for user-facing commands.
----
---- Wraps functions with error handling:
----   - Domain errors -> user notification only
----   - Unexpected errors -> traceback notification
----
-
------------------------------------------------------------------------
--- Dependencies
------------------------------------------------------------------------
-
-local errors = require("tirenvi.util.errors")
-local notify = require("tirenvi.util.notify")
-local buf_state = require("tirenvi.io.buf_state")
+local buf_state = require("tirenvi.io.buf_state") -- IO
 local buffer = require("tirenvi.io.buffer")
+
+local errors = require("tirenvi.util.errors") -- Util
+local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
 
------------------------------------------------------------------------
--- Module
------------------------------------------------------------------------
+-- =============================================================================
 
 local M = {}
 
------------------------------------------------------------------------
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 --- Wrap a function with guarded error handling.
 ---@param func fun(...)

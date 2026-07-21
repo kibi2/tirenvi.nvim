@@ -1,16 +1,23 @@
-local CONST = require("tirenvi.constants")
-local Record = require("tirenvi.core.record")
+local CONST = require("tirenvi.constants") -- Root
 local config = require("tirenvi.config")
+
+local Record = require("tirenvi.core.record") -- Core
 local Attr = require("tirenvi.core.attr")
 local Attrs = require("tirenvi.core.attrs")
-local util = require("tirenvi.util.util")
+
+local util = require("tirenvi.util.util") -- Util
 local log = require("tirenvi.util.log")
+
+-- =============================================================================
 
 local M = {}
 M.plain = {}
 M.grid = {}
 
--- constants / defaults
+-- =============================================================================
+--#region Private
+
+local function nop(...) end
 
 ---@param self Block
 ---@param method string
@@ -39,12 +46,6 @@ local function prepare_replace_map(map)
     end
     return out
 end
-
------------------------------------------------------------------------
--- Private helpers
------------------------------------------------------------------------
-
-local function nop(...) end
 
 ---@return {[string]: string}
 local function get_escape_map()
@@ -167,9 +168,9 @@ local function set_consistent_width(self)
     end
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@return Block
 function M.new()

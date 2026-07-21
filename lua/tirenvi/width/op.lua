@@ -1,3 +1,8 @@
+local Cell      = require("tirenvi.core.cell")  -- Core
+
+local Range     = require("tirenvi.util.range") -- Util
+local log       = require("tirenvi.util.log")
+
 ---@alias WidthCommand
 ---| "width"
 ---| "fit"
@@ -11,6 +16,7 @@
 ---| "info"
 ---| "none"
 
+-- =============================================================================
 ---@class WidthOp
 ---@field args string
 ---@field command WidthCommand
@@ -21,15 +27,8 @@
 local WidthOp   = {}
 WidthOp.__index = WidthOp
 
-local Cell      = require("tirenvi.core.cell")
-local Range     = require("tirenvi.util.range")
-local log       = require("tirenvi.util.log")
-
--- constants / defaults
-
------------------------------------------------------------------------
--- Private helpers
------------------------------------------------------------------------
+-- =============================================================================
+--#region Private
 
 local map       = {
     ["="] = "set",
@@ -129,9 +128,9 @@ local function try_new(opts)
     return self
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param opts {[string]:any}
 ---@return WidthOp|nil

@@ -1,27 +1,21 @@
---- Utilities for handling NDJSON records and converting them into
---- plain/grid block structures.
----
---- Design:
----   - Blocks are separated so that plain and grid records never mix.
----   - Column expansion is applied only to grid blocks.
+local CONST = require("tirenvi.constants") -- Root
 
-local CONST = require("tirenvi.constants")
-local Attr = require("tirenvi.core.attr")
+local Attr = require("tirenvi.core.attr")  -- Core
 local Block = require("tirenvi.core.block")
 local Record = require("tirenvi.core.record")
-local util = require("tirenvi.util.util")
+
+local util = require("tirenvi.util.util") -- Util
 local Range = require("tirenvi.util.range")
 local errors = require("tirenvi.util.errors")
 local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
 
+-- =============================================================================
+
 local M = {}
 
--- constants / defaults
-
------------------------------------------------------------------------
--- Utility
------------------------------------------------------------------------
+-- =============================================================================
+--#region Private
 
 ---@param self Blocks
 ---@param method string
@@ -43,10 +37,6 @@ local function apply(self, method, ...)
 	end
 	return result
 end
-
------------------------------------------------------------------------
--- Block construction
------------------------------------------------------------------------
 
 --- Split NDJSON records into plain/grid blocks.
 ---@param ndjsons Ndjson[]
@@ -114,10 +104,6 @@ local function build_blocks_attr_driven(ndjsons, attrs)
 	return self
 end
 
------------------------------------------------------------------------
--- Attribute handling
------------------------------------------------------------------------
-
 ---@alias RefAttrError
 ---| "conflict"
 ---| "grid in plain"
@@ -134,9 +120,9 @@ local function rebuild_attr_range(bufblocks, first)
 	end
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@self Blocks
 ---@return Attr[]

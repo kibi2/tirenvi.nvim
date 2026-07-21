@@ -1,19 +1,20 @@
-local Attrs = require("tirenvi.core.attrs")
-local buffer = require("tirenvi.io.buffer")
+local ReadResult = require("tirenvi.app.read_result") -- App
+
+local buffer = require("tirenvi.io.buffer")           -- IO
 local attr_store = require("tirenvi.io.attr_store")
-local CursorNvim = require("tirenvi.cursor.nvim")
-local ReadResult = require("tirenvi.app.read_result")
-local log = require("tirenvi.util.log")
+
+local CursorNvim = require("tirenvi.cursor.nvim") -- Cursor
+
+local Attrs = require("tirenvi.core.attrs")       -- Core
+
+local log = require("tirenvi.util.log")           -- Util
+
+-- =============================================================================
 
 local M = {}
 
--- constants / defaults
-
--- private helpers
-
------------------------------------------------------------------------
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param ctx Context
 ---@param range Range

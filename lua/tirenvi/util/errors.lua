@@ -1,27 +1,10 @@
---- Centralized error definitions and error message builders for tirenvi.
----
---- This module:
----   - Defines domain error tag
----   - Provides user-facing error message builders
----   - Centralizes all error strings
----
-
------------------------------------------------------------------------
--- Module
------------------------------------------------------------------------
+-- =============================================================================
 
 local M = {}
-
------------------------------------------------------------------------
--- Domain error tag
------------------------------------------------------------------------
 
 --- Unique tag used to identify domain validation errors.
 M.DOMAIN_ERROR = {}
 
------------------------------------------------------------------------
--- Static error messages
------------------------------------------------------------------------
 local PREFIX = "tirenvi: "
 M.ERR = {
 	INVALID_TABLE_MESSAGE = PREFIX .. "This change would break the table structure. Changes have been undone.",
@@ -29,9 +12,8 @@ M.ERR = {
 	TABLE_IS_NOT_ALIGNED = PREFIX .. "Cannot select column: table is not aligned.",
 }
 
------------------------------------------------------------------------
--- Error builders
------------------------------------------------------------------------
+-- =============================================================================
+-- Public API
 
 --- Create a domain error object.
 ---@param message string

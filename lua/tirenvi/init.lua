@@ -1,19 +1,13 @@
------ dependencies
-local config = require("tirenvi.config")
-local log = require("tirenvi.util.log")
+local log = require("tirenvi.util.log") -- Util
 
--- module
+-- =============================================================================
+
 local M = {}
 
 M.motion = require("tirenvi.editor.motion")
 
--- constants / defaults
-
--- private helpers
-
------------------------------------------------------------------------
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 --- Set up tirenvi plugin (load autocmds and commands)
 ---@param opts {[string]:any}
@@ -23,11 +17,9 @@ function M.setup(opts)
 		return
 	end
 	vim.g.tirenvi_initialized = true
-	config.setup(opts)
-	require("tirenvi.editor.autocmd").setup()
-	require("tirenvi.editor.commands").setup()
-	require("tirenvi.editor.textobj").setup()
+	require("tirenvi.config").setup(opts)
 	require("tirenvi.ui").setup()
+	require("tirenvi.editor").setup()
 end
 
 return M

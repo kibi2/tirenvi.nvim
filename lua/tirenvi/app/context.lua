@@ -1,30 +1,21 @@
------------------------------------------------------------------------
--- Dependencies
------------------------------------------------------------------------
+local api                  = vim.api                      -- Neovim
 
-local buffer               = require("tirenvi.io.buffer")
+local buffer               = require("tirenvi.io.buffer") -- io
 local buffer_line_provider = require("tirenvi.io.buffer_line_provider")
-local log                  = require("tirenvi.util.log")
 
------------------------------------------------------------------------
--- Module
------------------------------------------------------------------------
+local log                  = require("tirenvi.util.log") -- util
 
-local M                    = {}
-
-local api                  = vim.api
+-- =============================================================================
 
 ---@class Context
 ---@field bufnr number
 ---@field winid number
 ---@field parser Parser|nil
 ---@field line_provider LineProvider
+local M                    = {}
 
--- private helpers
-
------------------------------------------------------------------------
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param bufnr number|nil
 ---@return Context

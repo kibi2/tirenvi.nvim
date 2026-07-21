@@ -1,24 +1,23 @@
------------------------------------------------------------------------
--- Dependencies
------------------------------------------------------------------------
-local Document = require("tirenvi.core.document")
-local Attrs = require("tirenvi.core.attrs")
-local dirty_range = require("tirenvi.parser.dirty_range")
+local dirty_range = require("tirenvi.parser.dirty_range") -- Parser
 local buf_parser = require("tirenvi.parser.buf_parser")
-local LinProvider = require("tirenvi.io.buffer_line_provider")
+
+local LineProvider = require("tirenvi.io.buffer_line_provider") -- IO
 local attr_store = require("tirenvi.io.attr_store")
 local reader = require("tirenvi.io.reader")
 local dirty = require("tirenvi.io.dirty")
-local Range3 = require("tirenvi.util.range3")
+
+local Document = require("tirenvi.core.document") -- Core
+local Attrs = require("tirenvi.core.attrs")
+
+local Range3 = require("tirenvi.util.range3") -- Util
 local log = require("tirenvi.util.log")
 
------------------------------------------------------------------------
--- Module
------------------------------------------------------------------------
+-- =============================================================================
 
 local M = {}
 
--- private helpers
+-- =============================================================================
+--#region Private
 
 ---@param r_result ReadResult
 ---@param bufdoc  Document
@@ -42,7 +41,7 @@ end
 ---@param range3 Range3
 local function reconcile_dirty_ranges(bufnr, attrs, range3)
     local prev_ranges = dirty.get_ranges(bufnr)
-    local line_provider = LinProvider.new(bufnr)
+    local line_provider = LineProvider.new(bufnr)
     local inv_ranges = dirty_range.reconcile(line_provider, prev_ranges, attrs, range3)
     log.watch("INVD", inv_ranges)
     dirty.set_ranges(bufnr, inv_ranges)
@@ -62,9 +61,9 @@ local function update_attrs(ctx, range3, r_result)
     attr_store.write(ctx, attrs)
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param ctx Context
 ---@param range3 Range3

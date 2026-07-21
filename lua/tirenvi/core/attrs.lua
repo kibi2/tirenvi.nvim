@@ -1,16 +1,17 @@
-local Attr  = require("tirenvi.core.attr")
-local Range = require("tirenvi.util.range")
+local api   = vim.api                       -- Neovim
+
+local Attr  = require("tirenvi.core.attr")  -- Core
+
+local Range = require("tirenvi.util.range") -- Util
 local util  = require("tirenvi.util.util")
 local log   = require("tirenvi.util.log")
 
+-- =============================================================================
+
 local M     = {}
-local api   = vim.api
 
--- constants / defaults
-
------------------------------------------------------------------------
--- Private helpers
------------------------------------------------------------------------
+-- =============================================================================
+--#region Private
 
 ---@param self Attr[]
 ---@return Attr[]
@@ -72,9 +73,9 @@ local function get_index(self, row_cur)
     return nil
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param self Attr[]|nil
 ---@return table|nil

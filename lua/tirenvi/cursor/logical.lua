@@ -1,21 +1,15 @@
+-- =============================================================================
+
 ---@class CursorLogical
 ---@field restore_mode "none"|"buffer"|"logical"
 ---@field iblock integer            -- current block index (1-based)
 ---@field irow integer              -- current row index (1-based)
 ---@field icol integer              -- current column index (1-based)
 ---@field col_offset integer        --  current column offset (1-based)
-
 local M = {}
 
--- constants / defaults
-
------------------------------------------------------------------------
--- Private helpers
------------------------------------------------------------------------
-
------------------------------------------------------------------------
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param iblock integer
 ---@param irow integer

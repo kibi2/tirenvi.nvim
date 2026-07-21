@@ -1,12 +1,17 @@
+local api = vim.api                     -- Neovim
+
+local log = require("tirenvi.util.log") -- Util
+
+-- =============================================================================
+
 ---@class Range
 ---@field first integer
 ---@field last integer
 
-local log = require("tirenvi.util.log")
-
 local M   = {}
 
-local api = vim.api
+-- =============================================================================
+--#region Private
 
 ---@param first integer
 ---@param last integer
@@ -38,21 +43,15 @@ local function union_range(prev, next)
     return new(math.min(prev.first, next.first), math.max(prev.last, next.last))
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
+---@param self Range|Attr
 ---@return Range
 function M:get_range()
     return self.range or self
 end
-
---@param first0 integer
---@param last0 integer
---@return Range
--- function M.from_vim(first0, last0)
--- return new(first0 + 1, last0)
--- end
 
 ---@param first integer
 ---@param last integer

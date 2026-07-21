@@ -1,30 +1,29 @@
------------------------------------------------------------------------
--- Dependencies
------------------------------------------------------------------------
-local common = require("tirenvi.app.pipeline.common")
-local ReadResult = require("tirenvi.app.read_result")
-local Document = require("tirenvi.core.document")
-local Attrs = require("tirenvi.core.attrs")
-local Bufline = require("tirenvi.parser.bufline")
+local common = require("tirenvi.app.pipeline.common") -- App
 local Request = require("tirenvi.app.request")
+local ReadResult = require("tirenvi.app.read_result")
+
+local Bufline = require("tirenvi.parser.bufline") -- Parser
 local flat_parser = require("tirenvi.parser.flat_parser")
 local Parser = require("tirenvi.parser.parser")
-local buffer = require("tirenvi.io.buffer")
+
+local buffer = require("tirenvi.io.buffer") -- IO
 local buf_state = require("tirenvi.io.buf_state")
 local writer = require("tirenvi.io.writer")
-local attr_store = require("tirenvi.io.attr_store")
 local reader = require("tirenvi.io.reader")
-local util = require("tirenvi.util.util")
+
+local Document = require("tirenvi.core.document") -- Core
+local Attrs = require("tirenvi.core.attrs")
+
+local util = require("tirenvi.util.util") -- Util
 local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
------------------------------------------------------------------------
--- Module
------------------------------------------------------------------------
+-- =============================================================================
 
 local M = {}
 
--- private helpers
+-- =============================================================================
+--#region Private
 
 ---@param ctx Context
 ---@param r_result ReadResult
@@ -51,9 +50,9 @@ local function embedded_off(ctx)
     buffer.set(ctx.bufnr, buffer.IKEY.PARSER, nil)
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param ctx Context
 ---@return nil

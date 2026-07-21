@@ -1,11 +1,14 @@
-local config = require("tirenvi.config")
-local notify = require("tirenvi.util.notify")
-
-local M = {}
-
-local api = vim.api
+local api = vim.api -- Neovim
 local bo = vim.bo
 local fn = vim.fn
+
+local config = require("tirenvi.config")      -- Root
+
+local notify = require("tirenvi.util.notify") -- Util
+
+-- =============================================================================
+
+local M = {}
 
 local levels = vim.log.levels
 
@@ -24,6 +27,9 @@ local last_tick = 0
 local last_mem = 0
 local last_time = uv.now()
 local monitoring = false
+
+-- =============================================================================
+--#region Private
 
 ---@return integer
 local function get_tick()
@@ -360,6 +366,10 @@ local function emit(force, level, opts, fmt, ...)
 		notify.notify(final, level)
 	end
 end
+
+--#endregion
+-- =============================================================================
+-- Public API
 
 ---@param ... unknown
 function M.debug(...)

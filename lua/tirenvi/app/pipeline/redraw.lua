@@ -1,28 +1,26 @@
------------------------------------------------------------------------
--- Dependencies
------------------------------------------------------------------------
-local common = require("tirenvi.app.pipeline.common")
-local Document = require("tirenvi.core.document")
-local Attrs = require("tirenvi.core.attrs")
-local buf_parser = require("tirenvi.parser.buf_parser")
-local buf_state = require("tirenvi.io.buf_state")
+local api = vim.api                                     -- Neovim
+
+local common = require("tirenvi.app.pipeline.common")   -- App
+
+local buf_parser = require("tirenvi.parser.buf_parser") -- Parse
+
+local buf_state = require("tirenvi.io.buf_state")       -- IO
 local reader = require("tirenvi.io.reader")
 local dirty = require("tirenvi.io.dirty")
-local Range = require("tirenvi.util.range")
+
+local Document = require("tirenvi.core.document") -- Core
+local Attrs = require("tirenvi.core.attrs")
+
+local Range = require("tirenvi.util.range") -- Util
 local Range3 = require("tirenvi.util.range3")
 local log = require("tirenvi.util.log")
 
------------------------------------------------------------------------
--- Module
------------------------------------------------------------------------
+-- =============================================================================
 
 local M = {}
 
-local api = vim.api
-local fn = vim.fn
-local bo = vim.bo
-
--- private helpers
+-- =============================================================================
+--#region Private
 
 ---@param ctx Context
 ---@param r_result ReadResult
@@ -77,9 +75,9 @@ local function need_repair(ctx)
     return true
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param ctx Context
 ---@param opts DocToBufLinesOpts|nil

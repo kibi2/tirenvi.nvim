@@ -1,15 +1,21 @@
-local Context    = require("tirenvi.app.context")
-local Cell       = require("tirenvi.core.cell")
-local config     = require("tirenvi.config")
-local CursorNvim = require("tirenvi.cursor.nvim")
-local util       = require("tirenvi.util.util")
+local config     = require("tirenvi.config")      -- Root
+
+local Context    = require("tirenvi.app.context") -- App
+
+local CursorNvim = require("tirenvi.cursor.nvim") -- Cursor
+
+local Cell       = require("tirenvi.core.cell")   -- Core
+
+local util       = require("tirenvi.util.util")   -- Util
 local Range      = require("tirenvi.util.range")
 local log        = require("tirenvi.util.log")
 
+-- =============================================================================
+
 local M          = {}
 
-local api        = vim.api
--- private helpers
+-- =============================================================================
+--#region Private
 
 ---@param line string
 ---@return string
@@ -85,7 +91,9 @@ local function get_pipe_byte_positions(line, pipe)
     return indexes
 end
 
--- public API
+--#endregion
+-- =============================================================================
+-- Public API
 
 ---@param line string
 ---@return integer[]

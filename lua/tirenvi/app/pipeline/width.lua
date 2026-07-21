@@ -1,30 +1,33 @@
------------------------------------------------------------------------
--- Dependencies
------------------------------------------------------------------------
-local common = require("tirenvi.app.pipeline.common")
-local Attrs = require("tirenvi.core.attrs")
-local Attr = require("tirenvi.core.attr")
-local Cell = require("tirenvi.core.cell")
-local CursorConvert = require("tirenvi.cursor.convert")
-local Bufline = require("tirenvi.parser.bufline")
-local LinProvider = require("tirenvi.io.buffer_line_provider")
+local fn = vim.fn                                              -- Neovim
+
+local common = require("tirenvi.app.pipeline.common")          -- App
+
+local widthOP = require("tirenvi.app.pipeline.common")         -- App
+
+local Bufline = require("tirenvi.parser.bufline")              -- Parser
+
+local LinProvider = require("tirenvi.io.buffer_line_provider") -- IO
 local buffer = require("tirenvi.io.buffer")
 local attr_store = require("tirenvi.io.attr_store")
 local reader = require("tirenvi.io.reader")
-local util = require("tirenvi.util.util")
+
+local CursorConvert = require("tirenvi.cursor.convert") -- Cursor
+
+local Attrs = require("tirenvi.core.attrs")             -- Core
+local Attr = require("tirenvi.core.attr")
+local Cell = require("tirenvi.core.cell")
+
+local util = require("tirenvi.util.util") -- Util
 local Range = require("tirenvi.util.range")
 local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
 
------------------------------------------------------------------------
--- Module
------------------------------------------------------------------------
+-- =============================================================================
 
 local M = {}
 
-local fn = vim.fn
-
--- private helpers
+-- =============================================================================
+--#region Private
 
 ---@class DocToBufLinesOpts
 ---@field no_undo? boolean
@@ -170,9 +173,9 @@ local function set_repeat(command)
     end
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param ctx Context
 ---@param width_op WidthOp

@@ -1,23 +1,21 @@
-local Attrs         = require("tirenvi.core.attrs")
+local fn            = vim.fn                            -- Neovim
+
+local bufline       = require("tirenvi.parser.bufline") -- Parser
+
+local Attrs         = require("tirenvi.core.attrs")     -- Core
 local Attr          = require("tirenvi.core.attr")
-local bufline       = require("tirenvi.parser.bufline")
-local CursorLogical = require("tirenvi.cursor.logical")
+
+local CursorLogical = require("tirenvi.cursor.logical") -- Cursor
 local CursorNvim    = require("tirenvi.cursor.nvim")
-local log           = require("tirenvi.util.log")
+
+local log           = require("tirenvi.util.log") -- Util
+
+-- =============================================================================
 
 local M             = {}
 
--- constants / defaults
-
-local fn            = vim.fn
-
------------------------------------------------------------------------
--- Private helpers
------------------------------------------------------------------------
-
------------------------------------------------------------------------
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param cursor_logical CursorLogical
 ---@param attrs Attr[]

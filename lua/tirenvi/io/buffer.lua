@@ -1,19 +1,20 @@
------------------------------------------------------------------------
--- Module
------------------------------------------------------------------------
------ dependencies
-local config        = require("tirenvi.config")
-local CursorNvim    = require("tirenvi.cursor.nvim")
-local Range         = require("tirenvi.util.range")
-local util          = require("tirenvi.util.util")
-local log           = require("tirenvi.util.log")
-
-local M             = {}
-
-local api           = vim.api
+local api           = vim.api -- Neovim
 local fn            = vim.fn
 local bo            = vim.bo
 local b             = vim.b
+
+local config        = require("tirenvi.config")      -- Root
+
+local CursorNvim    = require("tirenvi.cursor.nvim") -- Cursor
+
+local Range         = require("tirenvi.util.range")  -- Util
+local util          = require("tirenvi.util.util")
+local log           = require("tirenvi.util.log")
+
+-- =============================================================================
+
+local M             = {}
+
 local cache         = { bufnr = -1, start = -1, lines = {}, }
 local STEP          = 25
 
@@ -67,9 +68,8 @@ local initial_value = {
 	[M.IKEY.TIRBUF] = false,
 }
 
------------------------------------------------------------------------
--- Private helpers
------------------------------------------------------------------------
+-- =============================================================================
+--#region Private
 
 ---@param ctx Context
 ---@param cursor CursorBuf
@@ -171,9 +171,9 @@ local function get_state(bufnr)
 	return b[bufnr].tirenvi
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param bufnr number
 ---@param key string

@@ -1,11 +1,19 @@
-local config = require("tirenvi.config")
-local namespaces = require("tirenvi.io.namespaces")
+local config = require("tirenvi.config")            -- Root
+
+local Attrs = require("tirenvi.core.attrs")         -- Core
+
+local namespaces = require("tirenvi.io.namespaces") -- IO
 local buffer = require("tirenvi.io.buffer")
-local Range = require("tirenvi.util.range")
+
+local Range = require("tirenvi.util.range") -- Util
 local log = require("tirenvi.util.log")
-local Attrs = require("tirenvi.core.attrs")
+
+-- =============================================================================
 
 local M = {}
+
+-- =============================================================================
+--#region Private
 
 ---@param bufnr number
 ---@param range Range
@@ -57,9 +65,9 @@ local function set_dirty_attrs(bufnr)
     end
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param bufnr number
 ---@param ranges Range[]

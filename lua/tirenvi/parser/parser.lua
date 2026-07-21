@@ -1,16 +1,11 @@
------------------------------------------------------------------------
--- Dependencies
------------------------------------------------------------------------
+local fn = vim.fn                             -- Neovim
 
-local config = require("tirenvi.config")
-local errors = require("tirenvi.util.errors")
+local config = require("tirenvi.config")      -- Root
+
+local errors = require("tirenvi.util.errors") -- Util
 local log = require("tirenvi.util.log")
 
------------------------------------------------------------------------
--- Module
------------------------------------------------------------------------
-
-local M = {}
+-- =============================================================================
 
 ---@class Parser
 ---@field executable string             Parser executable name
@@ -21,6 +16,7 @@ local M = {}
 ---@field _installed_version? string    installed version
 ---@field _err_code? string             error code
 ---@field _checked? boolean             is checked
+local M = {}
 
 local ERR = {
     EXECUTABLE_NOT_FOUND = "executable_not_found",
@@ -29,9 +25,9 @@ local ERR = {
     VERSION_TOO_OLD = "version_too_old",
 }
 M.ERR = ERR
-local fn = vim.fn
 
--- private helpers
+-- =============================================================================
+--#region Private
 
 --- Get parser configuration for a file.
 ---@param filetype string|nil
@@ -126,9 +122,9 @@ local function is_available_version(self)
     return true
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param self Parser
 ---@param subcmd string Subcommand ("parse" or "unparse")

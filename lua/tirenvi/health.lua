@@ -1,10 +1,18 @@
-local Parser = require("tirenvi.parser.parser")
-local config = require("tirenvi.config")
+local health = vim.health or require("health") -- Neovim
+
+local config = require("tirenvi.config")       -- Root
 local version = require("tirenvi.version")
-local log = require("tirenvi.util.log")
+
+local Parser = require("tirenvi.parser.parser") -- Parser
+
+local log = require("tirenvi.util.log")         -- Util
+
+-- =============================================================================
 
 local M = {}
-local health = vim.health or require("health")
+
+-- =============================================================================
+--#region Private
 
 local function report(item)
 	if item.status == "ok" then
@@ -72,6 +80,10 @@ local function check_command(parser)
 		report(item)
 	end
 end
+
+--#endregion
+-- =============================================================================
+-- Public API
 
 function M.check()
 	health.start("tirenvi")

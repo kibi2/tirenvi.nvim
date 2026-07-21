@@ -1,27 +1,25 @@
------------------------------------------------------------------------
--- Module
------------------------------------------------------------------------
+local CONST = require("tirenvi.constants") -- Root
+local config = require("tirenvi.config")
 
------ dependencies
-local CONST = require("tirenvi.constants")
-local Bufline = require("tirenvi.parser.bufline")
-local Document = require("tirenvi.core.document")
+local Context = require("tirenvi.app.context")    -- App
+
+local Bufline = require("tirenvi.parser.bufline") -- Parser
+
+local Document = require("tirenvi.core.document") -- Core
 local Record = require("tirenvi.core.record")
 local Attr = require("tirenvi.core.attr")
 local Attrs = require("tirenvi.core.attrs")
-local Context = require("tirenvi.app.context")
-local config = require("tirenvi.config")
-local Range = require("tirenvi.util.range")
+
+local Range = require("tirenvi.util.range") -- Util
 local Range3 = require("tirenvi.util.range3")
 local log = require("tirenvi.util.log")
 
+-- =============================================================================
+
 local M = {}
 
--- constants / defaults
-
------------------------------------------------------------------------
--- Private helpers
------------------------------------------------------------------------
+-- =============================================================================
+--#region Private
 
 ---@param bufline string
 ---@param pipe string
@@ -138,9 +136,9 @@ local function to_buflines(records)
 	return buflines
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param ctx Context
 ---@param r_result ReadResult

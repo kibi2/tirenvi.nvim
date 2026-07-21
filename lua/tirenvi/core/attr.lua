@@ -1,18 +1,18 @@
-local config = require("tirenvi.config")
-local Record = require("tirenvi.core.record")
+local config = require("tirenvi.config")      -- Root
+
+local Record = require("tirenvi.core.record") -- Core
 local Cell = require("tirenvi.core.cell")
-local log = require("tirenvi.util.log")
+
+local log = require("tirenvi.util.log") -- Util
+
+-- =============================================================================
 
 local M = {}
-
 M.plain = {}
 M.grid = {}
 
--- constants / defaults
-
------------------------------------------------------------------------
--- Private helpers
------------------------------------------------------------------------
+-- =============================================================================
+--#region Private
 
 ---@param cells Cell[]
 ---@return Attr_column[]
@@ -47,9 +47,18 @@ local function new_from_columns(columns)
     return self
 end
 
------------------------------------------------------------------------
+local short_map = { plain = "", nowrap = "n", wrap_auto = "a", wrap_fit = "f", wrap_width = "w" }
+---@param self Attr
+---@return string
+local function get_mode_short(self)
+    local wrap_mode = M.get_wrap_mode(self)
+    return short_map[wrap_mode]
+end
+
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
+
 
 ---@return Attr
 function M.new()
@@ -113,14 +122,6 @@ function M.get_attr_short(self)
         key = ""
     end
     return kind .. key .. range_str
-end
-
-local short_map = { plain = "", nowrap = "n", wrap_auto = "a", wrap_fit = "f", wrap_width = "w" }
----@param self Attr
----@return string
-local function get_mode_short(self)
-    local wrap_mode = M.get_wrap_mode(self)
-    return short_map[wrap_mode]
 end
 
 ---@param attr Attr

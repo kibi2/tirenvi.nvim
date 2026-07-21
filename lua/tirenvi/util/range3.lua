@@ -1,10 +1,15 @@
+local Range = require("tirenvi.util.range") -- Util
+
+-- =============================================================================
+
 ---@class Range3
 ---@field first integer
 ---@field last integer
 ---@field new_last integer
 local Range3 = {}
 
-local Range = require("tirenvi.util.range")
+-- =============================================================================
+--#region Private
 
 ---@param self Range3
 ---@return integer
@@ -32,9 +37,9 @@ local function get_update_str(self)
     return get_update(self) > 0 and tostring(get_update(self) .. "U") or ""
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param self Range3
 ---@return integer

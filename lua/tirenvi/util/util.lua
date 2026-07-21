@@ -1,28 +1,17 @@
---- Small utility helpers used across tirenvi modules.
----
---- Notes:
----   - This module contains only pure helper utilities.
----   - No side effects.
+local api = vim.api -- Neovim
+local fn = vim.fn
 
------------------------------------------------------------------------
--- Dependencies
------------------------------------------------------------------------
+local config = require("tirenvi.config")      -- Root
 
-local config = require("tirenvi.config")
-local errors = require("tirenvi.util.errors")
-local notify = require("tirenvi.util.notify")
+local errors = require("tirenvi.util.errors") -- Util
 local log = require("tirenvi.util.log")
 
-
------------------------------------------------------------------------
--- Module
------------------------------------------------------------------------
+-- =============================================================================
 
 local M = {}
 
-local api = vim.api
-local fn = vim.fn
--- private helpers
+-- =============================================================================
+--#region Private
 
 ---@return {[string]:string}
 local function collect_reserved_chars()
@@ -55,9 +44,9 @@ local function find_reserved_marks(fllines)
 	return result
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param str string
 ---@return string[]

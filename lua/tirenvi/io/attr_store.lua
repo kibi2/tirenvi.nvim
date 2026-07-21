@@ -1,15 +1,13 @@
-local buffer = require("tirenvi.io.buffer")
-local log = require("tirenvi.util.log")
+local buffer = require("tirenvi.io.buffer") -- IO
+
+local log = require("tirenvi.util.log")     -- Util
+
+-- =============================================================================
 
 local M = {}
 
--- constants / defaults
-
--- private helpers
-
------------------------------------------------------------------------
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param bufnr number
 ---@return Attr[]

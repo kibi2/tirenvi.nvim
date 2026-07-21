@@ -1,17 +1,22 @@
-local Context = require("tirenvi.app.context")
-local Bufline = require("tirenvi.parser.bufline")
+local config = require("tirenvi.config")          -- Root
+
+local Context = require("tirenvi.app.context")    -- App
+
+local Bufline = require("tirenvi.parser.bufline") -- Parser
 local buf_parser = require("tirenvi.parser.buf_parser")
-local config = require("tirenvi.config")
-local CursorNvim = require("tirenvi.cursor.nvim")
-local LinProvider = require("tirenvi.io.buffer_line_provider")
-local buffer = require("tirenvi.io.buffer")
-local errors = require("tirenvi.util.errors")
+
+local CursorNvim = require("tirenvi.cursor.nvim") -- Cursor
+
+local errors = require("tirenvi.util.errors")     -- Util
 local notify = require("tirenvi.util.notify")
 local log = require("tirenvi.util.log")
 
+-- =============================================================================
+
 local M = {}
 
--- private helpers
+-- =============================================================================
+--#region Private
 
 ---@param is_around boolean|nil
 local function setup_vl(is_around)
@@ -40,9 +45,9 @@ local function setup_val()
     setup_vl(true)
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 function M.setup()
     vim.keymap.set({ "x" }, "i" .. config.textobj.column, setup_vil, {

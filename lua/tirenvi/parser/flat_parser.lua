@@ -1,24 +1,14 @@
---- Utility for converting between flat format lines and NDJSON lines using external parsers.
----
---- Purpose:
----   - parse: Convert flat lines to NDJSON via parser command.
----   - unparse: Convert NDJSON to flat lines via parser command.
----
---- Notes:
----   - Errors from parser commands throw domain-specific errors (handled by guard.lua).
----   - Logging at debug level is only active in development mode.
+local Context = require("tirenvi.app.context")    -- App
 
------ dependencies
-local Document = require("tirenvi.core.document")
-local Context = require("tirenvi.app.context")
-local Parser = require("tirenvi.parser.parser")
-local errors = require("tirenvi.util.errors")
+local Parser = require("tirenvi.parser.parser")   -- Parser
+
+local Document = require("tirenvi.core.document") -- Core
+
+local errors = require("tirenvi.util.errors")     -- Util
 local log = require("tirenvi.util.log")
 
--- module
+-- =============================================================================
 local M = {}
-
--- constants / defaults
 
 ---@class Vim_system
 ---@field code integer
@@ -26,7 +16,8 @@ local M = {}
 ---@field stdout? string
 ---@field stderr? string
 
--- private helpers
+-- =============================================================================
+--#region Private
 
 --- Convert flat lines to NDJSON lines
 ---@param parser Parser
@@ -124,9 +115,9 @@ local function collapse_grid_prefix(ndjsons)
 	end
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param ctx Context
 ---@param jslines string[]

@@ -1,15 +1,24 @@
-local Context = require("tirenvi.app.context")
-local config = require("tirenvi.config")
-local Range3 = require("tirenvi.util.range3")
-local Attrs = require("tirenvi.core.attrs")
-local buffer = require("tirenvi.io.buffer")
+local api = vim.api -- Neovim
+local fn = vim.fn
+local bo = vim.bo
+
+local config = require("tirenvi.config")       -- Root
+
+local Context = require("tirenvi.app.context") -- App
+
+local Attrs = require("tirenvi.core.attrs")    -- Core
+
+local buffer = require("tirenvi.io.buffer")    -- IO
+
+local Range3 = require("tirenvi.util.range3")  -- Util
 local log = require("tirenvi.util.log")
+
+-- =============================================================================
 
 local M = {}
 
-local api = vim.api
-local fn = vim.fn
-local bo = vim.bo
+-- =============================================================================
+--#region Private
 
 ---@class Check_options
 ---@field supported? boolean
@@ -29,7 +38,6 @@ local INSERT_LEAVE = "INSERT_LEAVE"
 local INSERT_MODE = "INSERT_MODE"
 local UNDO_REDO_MODE = "UNDO_REDO_MODE"
 local NORMAL_MODE = "NORMAL_MODE"
-
 
 ---@param bufnr number
 ---@param message string
@@ -116,9 +124,23 @@ local checks = {
 	end,
 }
 
------------------------------------------------------------------------
+---@param ctx Context
+---@return string
+local function get_count(ctx)
+	if not Context.is_allow_plain(ctx) then
+		return "P0G1"
+	end
+	local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+	local count = Attrs.get_count(attrs)
+	if not count then
+		return "NIL"
+	end
+	return string.format("P%dG%d", count.plain, count.grid)
+end
+
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@return boolean
 function M.is_vscode()
@@ -168,20 +190,6 @@ end
 ---@param value boolean
 function M.set_buffer_tirbuf(bufnr, value)
 	buffer.set(bufnr, buffer.IKEY.TIRBUF, value)
-end
-
----@param ctx Context
----@return string
-local function get_count(ctx)
-	if not Context.is_allow_plain(ctx) then
-		return "P0G1"
-	end
-	local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
-	local count = Attrs.get_count(attrs)
-	if not count then
-		return "NIL"
-	end
-	return string.format("P%dG%d", count.plain, count.grid)
 end
 
 ---@param bufnr number

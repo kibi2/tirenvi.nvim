@@ -1,27 +1,28 @@
------------------------------------------------------------------------
--- Dependencies
------------------------------------------------------------------------
-local Document = require("tirenvi.core.document")
-local Attrs = require("tirenvi.core.attrs")
-local Request = require("tirenvi.app.request")
-local width_layout = require("tirenvi.width.layout")
-local flat_parser = require("tirenvi.parser.flat_parser")
+local Request = require("tirenvi.app.request")            -- App
+
+local width_layout = require("tirenvi.width.layout")      -- Width
+
+local flat_parser = require("tirenvi.parser.flat_parser") -- Parser
 local buf_parser = require("tirenvi.parser.buf_parser")
-local buf_state = require("tirenvi.io.buf_state")
+
+local buf_state = require("tirenvi.io.buf_state") -- IO
 local writer = require("tirenvi.io.writer")
 local attr_store = require("tirenvi.io.attr_store")
 local reader = require("tirenvi.io.reader")
-local util = require("tirenvi.util.util")
+
+local Document = require("tirenvi.core.document") -- Core
+local Attrs = require("tirenvi.core.attrs")
+
+local util = require("tirenvi.util.util") -- Util
 local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
------------------------------------------------------------------------
--- Module
------------------------------------------------------------------------
+-- =============================================================================
 
 local M = {}
 
--- private helpers
+-- =============================================================================
+--#region Private
 
 ---@param ctx Context
 ---@param tirdoc Document
@@ -45,9 +46,9 @@ local function tirdoc_to_flat(ctx, r_result, tirdoc, is_write_pre)
     writer.write(ctx, req_w)
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param ctx Context
 ---@param r_result ReadResult

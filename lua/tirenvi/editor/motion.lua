@@ -1,13 +1,21 @@
-local Context       = require("tirenvi.app.context")
-local buffer        = require("tirenvi.io.buffer")
+local Context       = require("tirenvi.app.context")    -- App
+
+local Bufline       = require("tirenvi.parser.bufline") -- Parser
+
+local buffer        = require("tirenvi.io.buffer")      -- IO
 local reader        = require("tirenvi.io.reader")
-local Attrs         = require("tirenvi.core.attrs")
-local Bufline       = require("tirenvi.parser.bufline")
-local CursorNvim    = require("tirenvi.cursor.nvim")
+
+local CursorNvim    = require("tirenvi.cursor.nvim") -- Cursor
 local CursorConvert = require("tirenvi.cursor.convert")
-local log           = require("tirenvi.util.log")
+
+local log           = require("tirenvi.util.log") -- Util
+
+-- =============================================================================
 
 local M             = {}
+
+-- =============================================================================
+--#region Private
 
 ---@return string
 local function get_pipe()
@@ -24,9 +32,9 @@ local function build_motion(op)
 	end
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 M.f = build_motion("f")
 M.F = build_motion("F")

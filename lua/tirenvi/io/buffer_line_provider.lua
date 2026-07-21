@@ -1,7 +1,12 @@
-local buffer = require("tirenvi.io.buffer")
+local buffer = require("tirenvi.io.buffer") -- IO
+
+-- =============================================================================
 
 ---@class BufferLineProvider : LineProvider
 local M = {}
+
+-- =============================================================================
+-- Public API
 
 ---@param bufnr number
 ---@return BufferLineProvider

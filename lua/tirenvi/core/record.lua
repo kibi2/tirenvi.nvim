@@ -1,20 +1,18 @@
-local CONST = require("tirenvi.constants")
-local Cell = require("tirenvi.core.cell")
-local log = require("tirenvi.util.log")
+local CONST = require("tirenvi.constants") -- Root
+
+local Cell = require("tirenvi.core.cell")  -- Core
+
+local log = require("tirenvi.util.log")    -- Util
+
+
+-- =============================================================================
 
 local M = {}
 M.plain = {}
 M.grid = {}
 
--- constants / defaults
-
------------------------------------------------------------------------
--- Private helpers
------------------------------------------------------------------------
-
------------------------------------------------------------------------
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param self Record_grid
 ---@param ncol integer

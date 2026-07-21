@@ -1,28 +1,18 @@
------------------------------------------------------------------------
--- Dependencies
------------------------------------------------------------------------
-
-local Range = require("tirenvi.util.range")
+local Range = require("tirenvi.util.range") -- Util
 local Range3 = require("tirenvi.util.range3")
 local log = require("tirenvi.util.log")
 
------------------------------------------------------------------------
--- Module
------------------------------------------------------------------------
-
-local M = {}
+-- =============================================================================
 
 ---@class Request
 ---@field range Range
 ---@field lines string[]
 ---@field no_undo boolean
 ---@field cursor CursorBuf
+local M = {}
 
--- private helpers
-
------------------------------------------------------------------------
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param r_req ReadResult
 ---@param lines string[]

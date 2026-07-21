@@ -1,19 +1,17 @@
-local Document   = require("tirenvi.core.document")
-local Block      = require("tirenvi.core.block")
-local Cell       = require("tirenvi.core.cell")
-local Attr       = require("tirenvi.core.attr")
-local buffer     = require("tirenvi.io.buffer")
-local attr_store = require("tirenvi.io.attr_store")
-local util       = require("tirenvi.util.util")
-local log        = require("tirenvi.util.log")
+local buffer = require("tirenvi.io.buffer")  -- IO
 
-local M          = {}
+local Block  = require("tirenvi.core.block") -- Core
+local Cell   = require("tirenvi.core.cell")
+local Attr   = require("tirenvi.core.attr")
 
--- constants / defaults
+local util   = require("tirenvi.util.util") -- Util
+local log    = require("tirenvi.util.log")
 
------------------------------------------------------------------------
--- Private helpers
------------------------------------------------------------------------
+-- =============================================================================
+local M      = {}
+
+-- =============================================================================
+--#region Private
 
 ---@param widths integer[]
 ---@return integer[]
@@ -170,9 +168,9 @@ local function wrap(winid, block, wrap_mode)
     end
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param winid number
 ---@param tirdoc Document

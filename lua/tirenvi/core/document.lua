@@ -1,20 +1,21 @@
-local CONST = require("tirenvi.constants")
-local Attr = require("tirenvi.core.attr")
+local CONST = require("tirenvi.constants") -- Root
+
+local Attr = require("tirenvi.core.attr")  -- Core
 local Attrs = require("tirenvi.core.attrs")
 local Blocks = require("tirenvi.core.blocks")
 local Block = require("tirenvi.core.block")
-local Range = require("tirenvi.util.range")
+
+local Range = require("tirenvi.util.range") -- Util
 local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
 
-local M = {}
-
--- constants / defaults
+-- =============================================================================
 
 ---@class Document
 ---@field _tir boolean
 ---@field attr Attr_doc
 ---@field blocks Blocks
+local M = {}
 
 ---@alias Blocks Block[]
 
@@ -69,9 +70,10 @@ local M = {}
 
 ---@alias Ndjson Attr_file|Record
 
-local VERSION = "tir/0.1"
+-- =============================================================================
+--#region Private
 
--- private helpers
+local VERSION = "tir/0.1"
 
 ---@param ndjsons Record[]
 ---@param allow_plain boolean
@@ -131,9 +133,9 @@ local function to_flatdoc(tirdoc)
     tirdoc._tir = true
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param ndjsons Ndjson[]
 ---@param allow_plain boolean

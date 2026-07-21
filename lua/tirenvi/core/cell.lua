@@ -1,19 +1,22 @@
-local config = require("tirenvi.config")
-local util = require("tirenvi.util.util")
+local fn = vim.fn                         -- Neovim
+
+local config = require("tirenvi.config")  -- Root
+
+local util = require("tirenvi.util.util") -- Util
 local log = require("tirenvi.util.log")
+
+-- =============================================================================
 
 local M = {}
 
--- constants / defaults
 M.MIN_WIDTH = 2
-local fn = vim.fn
+
+-- =============================================================================
+--#region Private
+
 local padding = config.marks.padding
 local escaped_padding = vim.pesc(padding)
 local lf = config.marks.lf
-
------------------------------------------------------------------------
--- Private helpers
------------------------------------------------------------------------
 
 ---@param self Cell
 ---@return integer
@@ -89,11 +92,11 @@ local function join(cells, ncol)
     return join_row
 end
 
-local lf_len = display_width(lf)
-
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
+
+local lf_len = display_width(lf)
 
 ---@param cells Cell[]
 ---@param no_wrap boolean|nil

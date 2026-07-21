@@ -1,22 +1,19 @@
------------------------------------------------------------------------
--- Dependencies
------------------------------------------------------------------------
-local Bufline = require("tirenvi.parser.bufline")
-local buffer = require("tirenvi.io.buffer")
-local config = require("tirenvi.config")
-local log = require("tirenvi.util.log")
+local fn = vim.fn                                 --Neovim
 
------------------------------------------------------------------------
--- Module
------------------------------------------------------------------------
+local config = require("tirenvi.config")          -- Root
+
+local Bufline = require("tirenvi.parser.bufline") -- Parser
+
+local buffer = require("tirenvi.io.buffer")       -- IO
+
+local log = require("tirenvi.util.log")           -- Util
+
+-- =============================================================================
 
 local M = {}
 
-local api = vim.api
-local fn = vim.fn
-local bo = vim.bo
-
--- private helpers
+-- =============================================================================
+--#region Private
 
 local function apply_wrap(winid, should_wrap)
     if vim.wo[winid].wrap ~= should_wrap then
@@ -24,9 +21,9 @@ local function apply_wrap(winid, should_wrap)
     end
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param ctx Context
 function M.auto_wrap(ctx)

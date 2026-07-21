@@ -1,17 +1,18 @@
-local config  = require("tirenvi.config")
-local buffer  = require("tirenvi.io.buffer")
-local log     = require("tirenvi.util.log")
+local api     = vim.api -- Neovim
+local fn      = vim.fn
 
-local matches = {}
+local config  = require("tirenvi.config")   -- Root
+
+local log     = require("tirenvi.util.log") -- Util
+
+-- =============================================================================
 
 local M       = {}
 
-local api     = vim.api
-local fn      = vim.fn
+local matches = {}
 
------------------------------------------------------------------------
--- utils
------------------------------------------------------------------------
+-- =============================================================================
+--#region Private
 
 ---@param targets string[]
 ---@return string
@@ -63,10 +64,6 @@ local function special_setup()
     safe_link_multi("TirenviSpecialChar", { "NonText", })
 end
 
------------------------------------------------------------------------
--- special chars
------------------------------------------------------------------------
-
 ---@param winid integer
 ---@param group string
 ---@param pattern string
@@ -89,9 +86,9 @@ local function pat_inner_text(pipe)
     return pipe .. "\\zs.\\{-}\\ze" .. pipe
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 function M.setup()
     special_setup()

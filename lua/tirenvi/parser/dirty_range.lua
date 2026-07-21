@@ -1,18 +1,19 @@
-local Attr = require("tirenvi.core.attr")
+local Bufline = require("tirenvi.parser.bufline") -- Parser
+
+local Attr = require("tirenvi.core.attr")         -- Core
 local Attrs = require("tirenvi.core.attrs")
-local Bufline = require("tirenvi.parser.bufline")
-local Range3 = require("tirenvi.util.range3")
+
+local Range3 = require("tirenvi.util.range3") -- Util
 local Range = require("tirenvi.util.range")
 local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
 
+-- =============================================================================
+
 local M = {}
 
--- constants / defaults
-
------------------------------------------------------------------------
--- Private helpers
------------------------------------------------------------------------
+-- =============================================================================
+--#region Private
 
 ---@param line_provider LineProvider
 ---@param range Range
@@ -156,9 +157,9 @@ local function check_dirty(line_provider, new_ranges, attrs)
     return inv_ranges
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param line_provider LineProvider
 ---@param prev_ranges Range[]

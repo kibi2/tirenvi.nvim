@@ -1,30 +1,32 @@
--- dependencies
-local Context = require("tirenvi.app.context")
-local Attrs = require("tirenvi.core.attrs")
-local Attr = require("tirenvi.core.attr")
-local bufline = require("tirenvi.parser.bufline")
-local CursorLogical = require("tirenvi.cursor.logical")
+local bo = vim.bo -- Neovim
+local fn = vim.fn
+
+local Context = require("tirenvi.app.context") -- App
+
+local bufline = require("tirenvi.parser.bufline") -- Parser
+
+local CursorLogical = require("tirenvi.cursor.logical") -- IO
 local CursorNvim = require("tirenvi.cursor.nvim")
 local CursorConvert = require("tirenvi.cursor.convert")
 local buffer = require("tirenvi.io.buffer")
 local buf_state = require("tirenvi.io.buf_state")
 local reader = require("tirenvi.io.reader")
 local namespaces = require("tirenvi.io.namespaces")
-local Range = require("tirenvi.util.range")
+
+local Attrs = require("tirenvi.core.attrs") -- Core
+local Attr = require("tirenvi.core.attr")
+
+local Range = require("tirenvi.util.range") -- Util
 local log = require("tirenvi.util.log")
 
--- module
+-- =============================================================================
+
 local M = {}
 
--- constants / defaults
+-- =============================================================================
+--#region Private
 
 local DELIMITER = " //"
-local bo = vim.bo
-local fn = vim.fn
-
------------------------------------------------------------------------
--- Private helpers
------------------------------------------------------------------------
 
 ---@param bufnr number
 ---@param title string
@@ -94,9 +96,9 @@ local function show_attr_marks(ctx, attr, iattr, icol)
 
 end
 
-----------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
-----------------------------------------------------------------------
 
 function M.ui_entry(bufnr, name)
     debug_trace(bufnr, "ENTRY", name)

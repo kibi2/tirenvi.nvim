@@ -1,30 +1,34 @@
--- dependencies
-local config = require("tirenvi.config")
-local pipeline = require("tirenvi.app.pipeline")
-local Context = require("tirenvi.app.context")
-local Bufline = require("tirenvi.parser.bufline")
-local buffer = require("tirenvi.io.buffer")
-local buf_state = require("tirenvi.io.buf_state")
+local api = vim.api                      -- Neovim
+
+local config = require("tirenvi.config") -- Root
 local ui = require("tirenvi.ui")
-local guard = require("tirenvi.util.guard")
+
+local Debug = require("tirenvi.editor.debug")    -- Editor
+
+local pipeline = require("tirenvi.app.pipeline") -- App
+local Context = require("tirenvi.app.context")
+
+local Bufline = require("tirenvi.parser.bufline") -- Parser
+
+local buffer = require("tirenvi.io.buffer")       -- IO
+local buf_state = require("tirenvi.io.buf_state")
+
+local guard = require("tirenvi.util.guard") -- Util
 local Range3 = require("tirenvi.util.range3")
 local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
-local Debug = require("tirenvi.editor.debug")
 
--- module
+-- =============================================================================
+
 local M = {}
 
--- constants / defaults
+-- =============================================================================
+--#region Private
 
 local GROUP_NAME = "tirenvi"
 
-local api = vim.api
-
-----------------------------------------------------------------------
--- Event handlers (private)
-----------------------------------------------------------------------
-
+---@param bufnr number
+---@return Context
 local function get_context(bufnr)
 	return Context.from_buf(bufnr)
 end
@@ -133,10 +137,6 @@ end
 
 ---@param args table
 local function on_vim_leave(args) end
-
-----------------------------------------------------------------------
--- Autocmd registration (private)
-----------------------------------------------------------------------
 
 ---@param bufnr number
 local function clear_buffer_local_autocmds(bufnr)
@@ -325,9 +325,9 @@ local function register_autocmds()
 	end
 end
 
-----------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
-----------------------------------------------------------------------
 
 function M.setup()
 	register_autocmds()
