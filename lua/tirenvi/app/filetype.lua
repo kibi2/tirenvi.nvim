@@ -1,10 +1,10 @@
-local bo = vim.bo                                     -- Neovim
+local bo = vim.bo                               -- Neovim
 
-local common = require("tirenvi.app.pipeline.common") -- App
+local common = require("tirenvi.app.common")    -- App
 
-local Parser = require("tirenvi.parser.parser")       -- Parser
+local Parser = require("tirenvi.parser.parser") -- Parser
 
-local buffer = require("tirenvi.io.buffer")           -- IO
+local buffer = require("tirenvi.io.buffer")     -- IO
 local buf_state = require("tirenvi.io.buf_state")
 local attr_store = require("tirenvi.io.attr_store")
 

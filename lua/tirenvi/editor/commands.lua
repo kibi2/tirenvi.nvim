@@ -5,7 +5,7 @@ local ui = require("tirenvi.ui")                  -- Root
 local autocmd = require("tirenvi.editor.autocmd") -- Editor
 local Debug = require("tirenvi.editor.debug")
 
-local pipeline = require("tirenvi.app.pipeline")  -- App
+local app = require("tirenvi.app")                -- App
 
 local WidthOp = require("tirenvi.width.op")       -- Width
 
@@ -37,7 +37,7 @@ local function cmd_width(ctx, opts)
 		return
 	end
 	log.debug(width_op:to_string())
-	pipeline.cmd_width(ctx, width_op)
+	app.cmd_width(ctx, width_op)
 end
 
 ---@param ctx Context
@@ -51,7 +51,7 @@ local function cmd_fit(ctx, opts)
 		return
 	end
 	log.debug(width_op:to_string())
-	pipeline.cmd_fit(ctx, width_op)
+	app.cmd_fit(ctx, width_op)
 end
 
 ---@param ctx Context
@@ -65,7 +65,7 @@ local function cmd_wrap(ctx, opts)
 		return
 	end
 	log.debug(width_op:to_string())
-	pipeline.cmd_wrap(ctx, width_op)
+	app.cmd_wrap(ctx, width_op)
 end
 
 ---@param ctx Context
@@ -80,7 +80,7 @@ local function cmd_toggle(ctx, opts)
 		return
 	end
 	ui.special_apply(ctx.winid)
-	pipeline.toggle(ctx)
+	app.toggle(ctx)
 	if buf_state.is_tirbuf(ctx.bufnr) then
 		autocmd.register_buf_autocmd(ctx.bufnr)
 	else
@@ -93,7 +93,7 @@ end
 ---@return nil
 local function cmd_redraw(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr) then return end
-	pipeline.cmd_redraw(ctx)
+	app.cmd_redraw(ctx)
 end
 
 local warned = false
@@ -108,7 +108,7 @@ local function cmd_repair(ctx, opts)
 			warned = true
 			notify.warn("Tir repair is deprecated and will be removed in v0.5. Use :Tir redraw")
 		end
-		pipeline.cmd_redraw(ctx)
+		app.cmd_redraw(ctx)
 		return
 	elseif arg == "toggle" then
 		buffer.set_repair(ctx.bufnr, not buffer.get_repair(ctx.bufnr))
@@ -138,7 +138,7 @@ local function cmd_debug_read_tir(ctx, opts)
 		notify.error("Tir _read_tir need filename")
 		return
 	end
-	pipeline.debug_read_tir(ctx, filename)
+	app.debug_read_tir(ctx, filename)
 end
 
 ---@param ctx Context
@@ -151,7 +151,7 @@ local function cmd_debug_write_tir(ctx, opts)
 		notify.error("Tir _write_tir need filename")
 		return
 	end
-	pipeline.debug_write_tir(ctx, filename)
+	app.debug_write_tir(ctx, filename)
 end
 
 local commands = {
@@ -259,7 +259,7 @@ function M.keymap_lf()
 	if buf_state.should_skip(ctx.bufnr) then
 		return util.get_termcodes("<CR>")
 	end
-	return pipeline.keymap_lf()
+	return app.keymap_lf()
 end
 
 ---@return string
@@ -270,7 +270,7 @@ function M.keymap_tab()
 	if buf_state.should_skip(ctx.bufnr) then
 		return util.get_termcodes("<Tab>")
 	end
-	return pipeline.keymap_tab()
+	return app.keymap_tab()
 end
 
 function M.setup()

@@ -1,6 +1,6 @@
-local common = require("tirenvi.app.pipeline.common") -- App
+local common = require("tirenvi.app.common")      -- App
 
-local Bufline = require("tirenvi.parser.bufline")     -- Parser
+local Bufline = require("tirenvi.parser.bufline") -- Parser
 local flat_parser = require("tirenvi.parser.flat_parser")
 local Parser = require("tirenvi.parser.parser")
 

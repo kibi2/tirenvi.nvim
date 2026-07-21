@@ -1,6 +1,6 @@
 local api = vim.api                                     -- Neovim
 
-local common = require("tirenvi.app.pipeline.common")   -- App
+local common = require("tirenvi.app.common")            -- App
 
 local buf_parser = require("tirenvi.parser.buf_parser") -- Parse
 

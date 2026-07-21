@@ -5,7 +5,7 @@ local ui = require("tirenvi.ui")
 
 local Debug = require("tirenvi.editor.debug")     -- Editor
 
-local pipeline = require("tirenvi.app.pipeline")  -- App
+local app = require("tirenvi.app")                -- App
 
 local Bufline = require("tirenvi.parser.bufline") -- Parser
 
@@ -55,8 +55,8 @@ local function on_lines(_, bufnr, tick, range3, bytecount)
 	if buf_state.should_skip(bufnr) then return end
 	local ctx = get_context(bufnr)
 	Debug.ui_entry(bufnr, Range3.short(range3))
-	pipeline.on_lines(ctx, range3)
-	pipeline.check_and_repair(ctx, range3)
+	app.on_lines(ctx, range3)
+	app.check_and_repair(ctx, range3)
 	Debug.ui_exit(bufnr, Range3.short(range3))
 end
 
@@ -92,28 +92,28 @@ end
 
 ---@param ctx Context
 local function on_insert_leave(ctx)
-	pipeline.check_and_repair(ctx)
+	app.check_and_repair(ctx)
 end
 
 ---@param ctx Context
 local function on_buf_read_post(ctx)
 	buffer.clear_buf_local(ctx.bufnr)
-	pipeline.read_post(ctx)
+	app.read_post(ctx)
 end
 
 ---@param ctx Context
 local function on_buf_write_pre(ctx)
-	pipeline.write_pre(ctx)
+	app.write_pre(ctx)
 end
 
 ---@param ctx Context
 local function on_buf_write_post(ctx)
-	pipeline.write_post(ctx)
+	app.write_post(ctx)
 end
 
 ---@param ctx Context
 local function on_insert_char_pre(ctx)
-	pipeline.insert_char_in_newline(ctx)
+	app.insert_char_in_newline(ctx)
 end
 
 ---@param args table
@@ -127,12 +127,12 @@ local function on_cursor_moved(args)
 	if vim.log.levels.DEBUG >= config.log.level then
 		Debug.show_attr_marks(ctx)
 	end
-	pipeline.auto_wrap(ctx)
+	app.auto_wrap(ctx)
 end
 
 ---@param ctx Context
 local function on_filetype(ctx)
-	pipeline.on_filetype(ctx)
+	app.on_filetype(ctx)
 end
 
 ---@param args table

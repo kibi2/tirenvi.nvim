@@ -1,8 +1,6 @@
 local fn = vim.fn                                              -- Neovim
 
-local common = require("tirenvi.app.pipeline.common")          -- App
-
-local widthOP = require("tirenvi.app.pipeline.common")         -- App
+local common = require("tirenvi.app.common")                   -- App
 
 local Bufline = require("tirenvi.parser.bufline")              -- Parser
 
