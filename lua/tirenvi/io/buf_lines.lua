@@ -1,72 +1,21 @@
-local api           = vim.api -- Neovim
-local fn            = vim.fn
-local bo            = vim.bo
-local b             = vim.b
+local api        = vim.api -- Neovim
+local fn         = vim.fn
+local bo         = vim.bo
 
-local config        = require("tirenvi.config")      -- Root
+local buf_state  = require("tirenvi.io.buf_state") -- IO
 
-local CursorNvim    = require("tirenvi.cursor.nvim") -- Cursor
+local CursorNvim = require("tirenvi.cursor.nvim")  -- Cursor
 
-local Range         = require("tirenvi.util.range")  -- Util
-local util          = require("tirenvi.util.util")
-local log           = require("tirenvi.util.log")
+local Range      = require("tirenvi.util.range")   -- Util
+local util       = require("tirenvi.util.util")
+local log        = require("tirenvi.util.log")
 
 -- =============================================================================
 
-local M             = {}
+local M          = {}
 
-local cache         = { bufnr = -1, start = -1, lines = {}, }
-local STEP          = 25
-
--- Buffer-local flags.
-M.IKEY              = {
-	-- true when in insert mode
-	INSERT_MODE = "insert_mode",
-
-	-- Set only when the on_lines callback is attached.
-	ATTACHED = "attached",
-
-	-- Depth of patch recursion
-	PATCH_DEPTH = "patch_depth",
-
-	-- create autocmd
-	AUTOCMD = "autocmd",
-
-	-- fn.undotree().seq_last
-	UNDO_TREE_LAST = "undo_tree_last",
-
-	-- bo[bufnr].filetype
-	FILETYPE = "filetype",
-
-	-- parser
-	PARSER = "parser",
-
-	-- repair flag
-	REPAIR = "repair",
-
-	-- block attrs
-	ATTRS = "attrs",
-
-	-- dirty row #
-	DIRTY = "dirty",
-
-	-- buffer is flat or tir-buffer
-	TIRBUF = "tirbuf",
-}
-
-local initial_value = {
-	[M.IKEY.INSERT_MODE] = false,
-	[M.IKEY.ATTACHED] = false,
-	[M.IKEY.PATCH_DEPTH] = 0,
-	[M.IKEY.AUTOCMD] = false,
-	[M.IKEY.UNDO_TREE_LAST] = -1,
-	[M.IKEY.FILETYPE] = nil,
-	[M.IKEY.PARSER] = nil,
-	[M.IKEY.REPAIR] = nil,
-	[M.IKEY.ATTRS] = nil,
-	[M.IKEY.DIRTY] = nil,
-	[M.IKEY.TIRBUF] = false,
-}
+local cache      = { bufnr = -1, start = -1, lines = {}, }
+local STEP       = 25
 
 -- =============================================================================
 --#region Private
@@ -94,7 +43,7 @@ end
 ---@param bufnr number
 local function set_undo_tree_last(bufnr)
 	local next = fn.undotree(bufnr).seq_last
-	M.set(bufnr, M.IKEY.UNDO_TREE_LAST, next)
+	buf_state.set(bufnr, buf_state.IKEY.UNDO_TREE_LAST, next)
 end
 
 ---@param ctx Context
@@ -162,34 +111,9 @@ local function get_lines_from_cache(bufnr, first, last)
 	return vim.list_slice(cache.lines, istart, ilast)
 end
 
----@param bufnr number
----@return {[string]: boolean|integer|string|integer[][]|nil}
-local function get_state(bufnr)
-	if not b[bufnr].tirenvi then
-		b[bufnr].tirenvi = initial_value
-	end
-	return b[bufnr].tirenvi
-end
-
 --#endregion
 -- =============================================================================
 -- Public API
-
----@param bufnr number
----@param key string
----@return any
-function M.get(bufnr, key)
-	return get_state(bufnr)[key]
-end
-
----@param bufnr number
----@param key string
----@param val boolean|integer|string|integer[][]|nil
-function M.set(bufnr, key, val)
-	local state = get_state(bufnr)
-	state[key] = val
-	b[bufnr].tirenvi = state
-end
 
 ---@param ctx Context
 ---@param range Range
@@ -198,23 +122,18 @@ end
 ---@param cursor CursorBuf|nil
 function M.set_lines(ctx, range, lines, no_undo, cursor)
 	local bufnr = ctx.bufnr
-	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) + 1)
+	buf_state.set(bufnr, buf_state.IKEY.PATCH_DEPTH, buf_state.get(bufnr, buf_state.IKEY.PATCH_DEPTH) + 1)
 	local before = fn.undotree(bufnr).seq_last
 	local ok, err = pcall(set_lines, ctx, range, lines, no_undo, cursor)
 	local after = fn.undotree(bufnr).seq_last
 	local first, last = Range.to_lua(range)
 	log.watch("UNDO", "%s[%d->%d]set_lines lines[%d]='%s'...[%d]='%s'", tostring(no_undo),
 		before, after, first, tostring(lines[1]), last, tostring(lines[#lines]))
-	M.set(bufnr, M.IKEY.PATCH_DEPTH, M.get(bufnr, M.IKEY.PATCH_DEPTH) - 1)
-	log.assert(M.get(bufnr, M.IKEY.PATCH_DEPTH) == 0, "PATCH_DEPTH should be 0 after set_lines")
+	buf_state.set(bufnr, buf_state.IKEY.PATCH_DEPTH, buf_state.get(bufnr, buf_state.IKEY.PATCH_DEPTH) - 1)
+	log.assert(buf_state.get(bufnr, buf_state.IKEY.PATCH_DEPTH) == 0, "PATCH_DEPTH should be 0 after set_lines")
 	if not ok then
 		error(err)
 	end
-end
-
-function M.clear_buf_local(bufnr)
-	M.set(bufnr, M.IKEY.ATTRS, nil)
-	M.set(bufnr, M.IKEY.DIRTY, nil)
 end
 
 function M.clear_cache()
@@ -277,33 +196,9 @@ function M.get_lines_around(bufnr, range)
 	return M.get_line(bufnr, range.first - 1), M.get_line(bufnr, range.last + 1)
 end
 
----@param bufnr number
----@param value boolean
-function M.set_repair(bufnr, value)
-	M.set(bufnr, M.IKEY.REPAIR, value)
-end
-
----@param bufnr number
----@return boolean
-function M.get_repair(bufnr)
-	local auto_repair = M.get(bufnr, M.IKEY.REPAIR)
-	if auto_repair == nil then
-		auto_repair = config.table.auto_reconcile
-		M.set_repair(bufnr, auto_repair)
-	end
-	return auto_repair
-end
-
 ---@param step integer
 function M.set_step(step)
 	STEP = step
-end
-
----@param winid integer
----@return integer
-function M.get_win_span(winid)
-	local info = fn.getwininfo(winid)[1]
-	return info.width - info.textoff
 end
 
 return M

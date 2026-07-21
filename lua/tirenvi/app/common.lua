@@ -34,7 +34,7 @@ end
 ---@param tirdoc Document
 ---@param is_write_pre boolean|nil
 local function tirdoc_to_flat(ctx, r_result, tirdoc, is_write_pre)
-    local parser = buf_lines.get(ctx.bufnr, buf_lines.IKEY.PARSER)
+    local parser = buf_state.get(ctx.bufnr, buf_state.IKEY.PARSER)
     local fltlines = flat_parser.unparse(parser, tirdoc)
     local req_w = Request.new_writer(r_result, fltlines, is_write_pre)
     local attrs = vim.deepcopy(r_result.attrs)

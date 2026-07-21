@@ -19,7 +19,7 @@ local M = {}
 
 ---@param ctx Context
 function M.on_filetype(ctx)
-    local old_filetype = buf_lines.get(ctx.bufnr, buf_lines.IKEY.FILETYPE)
+    local old_filetype = buf_state.get(ctx.bufnr, buf_state.IKEY.FILETYPE)
     local new_filetype = bo[ctx.bufnr].filetype
     -- log.debug("filetype %s -> %s", tostring(old_filetype), tostring(new_filetype))
     if old_filetype and old_filetype == new_filetype then
@@ -28,11 +28,11 @@ function M.on_filetype(ctx)
     if old_filetype then
         common.to_flat(ctx)
     end
-    buf_lines.set(ctx.bufnr, buf_lines.IKEY.FILETYPE, new_filetype)
+    buf_state.set(ctx.bufnr, buf_state.IKEY.FILETYPE, new_filetype)
     buf_state.set_buffer_tirbuf(ctx.bufnr, false)
     attr_store.write(ctx, nil)
     local parser = Parser.resolve_parser(new_filetype)
-    buf_lines.set(ctx.bufnr, buf_lines.IKEY.PARSER, parser)
+    buf_state.set(ctx.bufnr, buf_state.IKEY.PARSER, parser)
 end
 
 return M

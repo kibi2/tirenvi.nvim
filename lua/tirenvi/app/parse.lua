@@ -29,7 +29,7 @@ local M = {}
 ---@param r_result ReadResult
 ---@return Document
 local function fltlines_to_tirdoc(ctx, r_result)
-    local parser = buf_lines.get(ctx.bufnr, buf_lines.IKEY.PARSER)
+    local parser = buf_state.get(ctx.bufnr, buf_state.IKEY.PARSER)
     local tirdoc = flat_parser.parse(parser, r_result)
     log.watch("ATTR", Document.debug_attrs(tirdoc, "[1]DOC ATTR:"))
     Document.apply_attrs(tirdoc, r_result.attrs)
@@ -38,17 +38,17 @@ local function fltlines_to_tirdoc(ctx, r_result)
 end
 
 local function embedded_on(ctx)
-    local parser = buf_lines.get(ctx.bufnr, buf_lines.IKEY.PARSER)
+    local parser = buf_state.get(ctx.bufnr, buf_state.IKEY.PARSER)
     if parser then
         return
     end
     parser = Parser.resolve_parser("*")
-    buf_lines.set(ctx.bufnr, buf_lines.IKEY.PARSER, parser)
+    buf_state.set(ctx.bufnr, buf_state.IKEY.PARSER, parser)
 end
 
 ---@param ctx Context
 local function embedded_off(ctx)
-    buf_lines.set(ctx.bufnr, buf_lines.IKEY.PARSER, nil)
+    buf_state.set(ctx.bufnr, buf_state.IKEY.PARSER, nil)
 end
 
 --#endregion
@@ -131,10 +131,10 @@ function M.toggle(ctx)
     local is_flat = not buf_state.is_tirbuf(ctx.bufnr)
     if is_flat then
         M.from_flat(ctx)
-        if not buf_state.has_grid(ctx) then
+        if not buf_state.has_grid(ctx.bufnr) then
             embedded_off(ctx)
         end
-    elseif buf_state.has_grid(ctx) then
+    elseif buf_state.has_grid(ctx.bufnr) then
         M.to_flat(ctx)
     end
 end

@@ -1,6 +1,7 @@
 local buf_lines = require("tirenvi.io.buf_lines") -- IO
+local buf_state = require("tirenvi.io.buf_state")
 
-local Block     = require("tirenvi.core.block")   -- Core
+local Block     = require("tirenvi.core.block") -- Core
 local Cell      = require("tirenvi.core.cell")
 local Attr      = require("tirenvi.core.attr")
 
@@ -122,7 +123,7 @@ end
 local function wrap_auto(winid, block)
     local max_widths = Block.grid.get_max_width(block)
     local max_width = util.sum(max_widths)
-    local fit_span = buf_lines.get_win_span(winid)
+    local fit_span = buf_state.get_win_span(winid)
     local fit_width = get_fit_width(#max_widths, fit_span)
     local fit_widths
     if max_width < fit_width then
@@ -139,7 +140,7 @@ end
 ---@param winid number
 ---@param block Block_grid
 local function wrap_fit(winid, block)
-    local fit_span = block.attr.fit_span or buf_lines.get_win_span(winid)
+    local fit_span = block.attr.fit_span or buf_state.get_win_span(winid)
     local max_widths = Block.grid.get_max_width(block)
     local fit_width = get_fit_width(#max_widths, fit_span)
     local fit_widths = get_fit_widths(max_widths, fit_width)

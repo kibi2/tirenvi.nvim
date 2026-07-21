@@ -111,17 +111,17 @@ local function cmd_repair(ctx, opts)
 		app.cmd_redraw(ctx)
 		return
 	elseif arg == "toggle" then
-		buf_lines.set_repair(ctx.bufnr, not buf_lines.get_repair(ctx.bufnr))
+		buf_state.set_repair(ctx.bufnr, not buf_state.get_repair(ctx.bufnr))
 	elseif arg == "enable" then
-		buf_lines.set_repair(ctx.bufnr, true)
+		buf_state.set_repair(ctx.bufnr, true)
 	elseif arg == "disable" then
-		buf_lines.set_repair(ctx.bufnr, false)
+		buf_state.set_repair(ctx.bufnr, false)
 	else
 		notify.error("[Tirenvi] invalid argument: " .. arg .. " (expected: [enable|disable|toggle])")
 		return
 	end
 	notify.info(string.format("[Tirenvi] repair:%s ",
-		buf_lines.get_repair(ctx.bufnr) and "enable" or "disable"))
+		buf_state.get_repair(ctx.bufnr) and "enable" or "disable"))
 end
 
 ---@param ctx Context

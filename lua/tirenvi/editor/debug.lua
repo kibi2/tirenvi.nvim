@@ -113,7 +113,7 @@ end
 function M.layout(title, single)
     title = case_tag() .. (title or "") .. DELIMITER
 	local ctx                  = Context.from_buf()
-    local attrs = buf_lines.get(ctx.bufnr, buf_lines.IKEY.ATTRS)  or {}
+    local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)  or {}
     local cursor = reader.cursor(ctx)
     local line = buf_lines.get_line(ctx.bufnr, cursor.row_cur) or ""
     local prefix = tir_buf.get_prefix_part(line)
@@ -128,14 +128,14 @@ end
 ---@param icol integer
 function M.goto(iblock, irow, icol)
     local ctx = Context.from_buf()
-    local attrs = buf_lines.get(ctx.bufnr, buf_lines.IKEY.ATTRS)
+    local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
     local cursor_logical = CursorLogical.new(iblock, irow, icol, 0)
     local cursor = CursorConvert.to_buf(cursor_logical, attrs, ctx.line_provider)
     CursorNvim.move_byte(ctx, cursor.row_cur, cursor.col_byte)
 end
 
 function M.show_attr_marks(ctx)
-    local attrs = buf_lines.get(ctx.bufnr, buf_lines.IKEY.ATTRS)
+    local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
     vim.api.nvim_buf_clear_namespace(ctx.bufnr, namespaces.ATTR, 0, -1)
     if not attrs then
         return

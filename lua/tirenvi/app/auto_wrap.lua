@@ -39,7 +39,7 @@ function M.auto_wrap(ctx)
     -- We only need the current line of the current window.
     local line = vim.api.nvim_get_current_line()
     local line_width = fn.strdisplaywidth(line)
-    local win_span = buf_lines.get_win_span(ctx.winid)
+    local win_span = buf_state.get_win_span(ctx.winid)
     local is_over = win_span < line_width
     local is_plain = not tir_buf.has_pipe({ line })
     if is_over then

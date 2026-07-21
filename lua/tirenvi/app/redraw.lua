@@ -67,7 +67,7 @@ local function need_repair(ctx)
     if not buf_state.is_tirbuf(ctx.bufnr) then
         return false
     end
-    if not buf_state.has_grid(ctx) then
+    if not buf_state.has_grid(ctx.bufnr) then
         return false
     end
     -- repair must remove redundant padding,
