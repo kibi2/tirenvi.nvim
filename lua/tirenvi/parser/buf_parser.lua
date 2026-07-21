@@ -149,7 +149,8 @@ function M.parse(ctx, r_result, opts)
 	local records = buflines_to_records(r_result.lines, embedded_key)
 	local allow_plain = buf_state.is_allow_plain(ctx.bufnr)
 	promote_empty_lines(records, r_result, allow_plain, opts.range3)
-	local bufdoc = Document.new_bufdoc(records, allow_plain, opts.attrs, opts.first)
+	local bufdoc =
+		Document.new_bufdoc(records, allow_plain, opts.attrs, opts.first)
 	return bufdoc
 end
 

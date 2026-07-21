@@ -1,7 +1,7 @@
 local api = vim.api -- Neovim
 local fn = vim.fn
 
-local config = require("tirenvi.config")      -- Root
+local config = require("tirenvi.config") -- Root
 
 local errors = require("tirenvi.util.errors") -- Util
 local log = require("tirenvi.util.log")
@@ -95,7 +95,7 @@ end
 ---@param str string
 ---@return boolean
 function M.end_with(line, str)
-	return line:sub(- #str) == str
+	return line:sub(-#str) == str
 end
 
 ---@param code string

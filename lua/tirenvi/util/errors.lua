@@ -7,9 +7,12 @@ M.DOMAIN_ERROR = {}
 
 local PREFIX = "tirenvi: "
 M.ERR = {
-	INVALID_TABLE_MESSAGE = PREFIX .. "This change would break the table structure. Changes have been undone.",
-	ENSURE_TIRVIM_MODE = PREFIX .. "This command is only available in a tir-vim buffer.",
-	TABLE_IS_NOT_ALIGNED = PREFIX .. "Cannot select column: table is not aligned.",
+	INVALID_TABLE_MESSAGE = PREFIX
+		.. "This change would break the table structure. Changes have been undone.",
+	ENSURE_TIRVIM_MODE = PREFIX
+		.. "This command is only available in a tir-vim buffer.",
+	TABLE_IS_NOT_ALIGNED = PREFIX
+		.. "Cannot select column: table is not aligned.",
 }
 
 -- =============================================================================
@@ -32,8 +35,8 @@ function M.err_no_usable_characters(missing)
 	table.sort(missing)
 	return string.format(
 		PREFIX
-		.. "No usable characters found for marks: [%s].\n"
-		.. "Please configure alternative characters in tirenvi.setup().",
+			.. "No usable characters found for marks: [%s].\n"
+			.. "Please configure alternative characters in tirenvi.setup().",
 		table.concat(missing, ", ")
 	)
 end
@@ -56,7 +59,11 @@ function M.vim_system_error(system, command)
 	end
 
 	return string.format(
-		PREFIX .. "External command failed\n\n" .. "Command:\n  %s\n\n" .. "Exit code: %d\n\n" .. "Error output:\n%s",
+		PREFIX
+			.. "External command failed\n\n"
+			.. "Command:\n  %s\n\n"
+			.. "Exit code: %d\n\n"
+			.. "Error output:\n%s",
 		table.concat(command, " "),
 		system.code,
 		stderr
@@ -68,7 +75,10 @@ end
 ---@return string
 function M.not_found_parser_error(executable)
 	return string.format(
-		PREFIX .. "Required command '%s' not found.\n\n" .. "Install it with:\n\n" .. "    pip install %s",
+		PREFIX
+			.. "Required command '%s' not found.\n\n"
+			.. "Install it with:\n\n"
+			.. "    pip install %s",
 		executable,
 		executable
 	)
@@ -79,13 +89,17 @@ end
 ---@param required_version string
 ---@param installed_version string
 ---@return string
-function M.outdated_parser_error(executable, required_version, installed_version)
+function M.outdated_parser_error(
+	executable,
+	required_version,
+	installed_version
+)
 	return string.format(
 		PREFIX
-		.. "Command '%s' version is too old.\n\n"
-		.. "Required version: %s\n"
-		.. "Installed version: %s\n\n"
-		.. "Use :checkhealth tirenvi for details.",
+			.. "Command '%s' version is too old.\n\n"
+			.. "Required version: %s\n"
+			.. "Installed version: %s\n\n"
+			.. "Use :checkhealth tirenvi for details.",
 		executable,
 		required_version or "unknown",
 		installed_version or "unknown"
@@ -96,13 +110,21 @@ end
 ---@param message string
 ---@return string
 function M.invalid_json_error(jsline, message)
-	return string.format(PREFIX .. "tirenvi: invalid JSON from parser\n%s\nerror: %s", jsline, message)
+	return string.format(
+		PREFIX .. "tirenvi: invalid JSON from parser\n%s\nerror: %s",
+		jsline,
+		message
+	)
 end
 
 function M.table_merge_warning(irow)
 	return string.format(
-		PREFIX .. "Tables were not merged: talble attribute differ in line %d-%d.\n" ..
-		"Align the table attribute to merge them.", irow, irow + 2)
+		PREFIX
+			.. "Tables were not merged: talble attribute differ in line %d-%d.\n"
+			.. "Align the table attribute to merge them.",
+		irow,
+		irow + 2
+	)
 end
 
 return M

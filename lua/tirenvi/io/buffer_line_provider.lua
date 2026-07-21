@@ -11,22 +11,22 @@ local M = {}
 ---@param bufnr number
 ---@return BufferLineProvider
 function M.new(bufnr)
-    return {
-        get_lines = function(first, last)
-            ---@diagnostic disable-next-line: redundant-parameter
-            return buf_lines.get_lines(bufnr, first, last)
-        end,
+	return {
+		get_lines = function(first, last)
+			---@diagnostic disable-next-line: redundant-parameter
+			return buf_lines.get_lines(bufnr, first, last)
+		end,
 
-        get_line = function(row)
-            ---@diagnostic disable-next-line: redundant-parameter
-            return buf_lines.get_line(bufnr, row)
-        end,
+		get_line = function(row)
+			---@diagnostic disable-next-line: redundant-parameter
+			return buf_lines.get_line(bufnr, row)
+		end,
 
-        line_count = function()
-            ---@diagnostic disable-next-line: redundant-parameter
-            return buf_lines.line_count(bufnr)
-        end,
-    }
+		line_count = function()
+			---@diagnostic disable-next-line: redundant-parameter
+			return buf_lines.line_count(bufnr)
+		end,
+	}
 end
 
 return M

@@ -1,21 +1,21 @@
-local api        = vim.api -- Neovim
-local fn         = vim.fn
-local bo         = vim.bo
+local api = vim.api -- Neovim
+local fn = vim.fn
+local bo = vim.bo
 
-local buf_state  = require("tirenvi.io.buf_state") -- IO
+local buf_state = require("tirenvi.io.buf_state") -- IO
 
-local CursorNvim = require("tirenvi.cursor.nvim")  -- Cursor
+local CursorNvim = require("tirenvi.cursor.nvim") -- Cursor
 
-local Range      = require("tirenvi.util.range")   -- Util
-local util       = require("tirenvi.util.util")
-local log        = require("tirenvi.util.log")
+local Range = require("tirenvi.util.range") -- Util
+local util = require("tirenvi.util.util")
+local log = require("tirenvi.util.log")
 
 -- =============================================================================
 
-local M          = {}
+local M = {}
 
-local cache      = { bufnr = -1, start = -1, lines = {}, }
-local STEP       = 25
+local cache = { bufnr = -1, start = -1, lines = {} }
+local STEP = 25
 
 -- =============================================================================
 --#region Private
@@ -75,14 +75,19 @@ end
 ---@param first integer -- 1-based
 ---@param last integer -- 1-based
 local function get_lines_and_cache(bufnr, first, last)
-	local start  = math.max(first - 1, 0)
-	local end0   = util.trim(last, start + 2 * STEP, M.line_count(bufnr))
+	local start = math.max(first - 1, 0)
+	local end0 = util.trim(last, start + 2 * STEP, M.line_count(bufnr))
 	local start0 = util.trim(start, 0, end0 - 2 * STEP)
-	local lines  = api.nvim_buf_get_lines(bufnr, start0, end0, false)
-	cache        = { bufnr = bufnr, start = start0, lines = lines, }
-	log.debug("=== cache[#%d] lines[%d]='%s'...[%d]='%s'", cache.bufnr,
-		cache.start + 1, tostring(cache.lines[1]),
-		cache.start + #cache.lines, tostring(cache.lines[#cache.lines]))
+	local lines = api.nvim_buf_get_lines(bufnr, start0, end0, false)
+	cache = { bufnr = bufnr, start = start0, lines = lines }
+	log.debug(
+		"=== cache[#%d] lines[%d]='%s'...[%d]='%s'",
+		cache.bufnr,
+		cache.start + 1,
+		tostring(cache.lines[1]),
+		cache.start + #cache.lines,
+		tostring(cache.lines[#cache.lines])
+	)
 end
 
 ---@param bufnr number
@@ -122,22 +127,42 @@ end
 ---@param cursor CursorBuf|nil
 function M.set_lines(ctx, range, lines, no_undo, cursor)
 	local bufnr = ctx.bufnr
-	buf_state.set(bufnr, buf_state.IKEY.PATCH_DEPTH, buf_state.get(bufnr, buf_state.IKEY.PATCH_DEPTH) + 1)
+	buf_state.set(
+		bufnr,
+		buf_state.IKEY.PATCH_DEPTH,
+		buf_state.get(bufnr, buf_state.IKEY.PATCH_DEPTH) + 1
+	)
 	local before = fn.undotree(bufnr).seq_last
 	local ok, err = pcall(set_lines, ctx, range, lines, no_undo, cursor)
 	local after = fn.undotree(bufnr).seq_last
 	local first, last = Range.to_lua(range)
-	log.watch("UNDO", "%s[%d->%d]set_lines lines[%d]='%s'...[%d]='%s'", tostring(no_undo),
-		before, after, first, tostring(lines[1]), last, tostring(lines[#lines]))
-	buf_state.set(bufnr, buf_state.IKEY.PATCH_DEPTH, buf_state.get(bufnr, buf_state.IKEY.PATCH_DEPTH) - 1)
-	log.assert(buf_state.get(bufnr, buf_state.IKEY.PATCH_DEPTH) == 0, "PATCH_DEPTH should be 0 after set_lines")
+	log.watch(
+		"UNDO",
+		"%s[%d->%d]set_lines lines[%d]='%s'...[%d]='%s'",
+		tostring(no_undo),
+		before,
+		after,
+		first,
+		tostring(lines[1]),
+		last,
+		tostring(lines[#lines])
+	)
+	buf_state.set(
+		bufnr,
+		buf_state.IKEY.PATCH_DEPTH,
+		buf_state.get(bufnr, buf_state.IKEY.PATCH_DEPTH) - 1
+	)
+	log.assert(
+		buf_state.get(bufnr, buf_state.IKEY.PATCH_DEPTH) == 0,
+		"PATCH_DEPTH should be 0 after set_lines"
+	)
 	if not ok then
 		error(err)
 	end
 end
 
 function M.clear_cache()
-	cache = { bufnr = -1, start = -1, lines = {}, }
+	cache = { bufnr = -1, start = -1, lines = {} }
 end
 
 ---@param bufnr number

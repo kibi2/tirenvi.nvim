@@ -42,7 +42,7 @@ let g:case_name = ""
 
 function! At(block, row, col) abort
   execute printf(
-        \ 'lua Debug.goto(%d,%d,%d)',
+        \ 'lua Debug.goto_cell(%d,%d,%d)',
         \ a:block, a:row, a:col)
 endfunction
 

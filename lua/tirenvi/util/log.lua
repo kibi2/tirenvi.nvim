@@ -2,7 +2,7 @@ local api = vim.api -- Neovim
 local bo = vim.bo
 local fn = vim.fn
 
-local config = require("tirenvi.config")      -- Root
+local config = require("tirenvi.config") -- Root
 
 local notify = require("tirenvi.util.notify") -- Util
 
@@ -151,13 +151,19 @@ end
 local category_hl_map = {}
 local category_match_id = {}
 api.nvim_set_hl(0, "TirLog_Entry", { fg = "#55ffff", bold = true })
-api.nvim_set_hl(0, "TirLog_Error", { fg = "#ffffff", bg = "#ff0000", bold = true })
+api.nvim_set_hl(
+	0,
+	"TirLog_Error",
+	{ fg = "#ffffff", bg = "#ff0000", bold = true }
+)
 api.nvim_set_hl(0, "TirLog_num", { fg = "#cc55cc", bold = true })
 
 ---@param bufnr number
 local function apply_log_highlight(bufnr)
 	local winid = fn.bufwinid(bufnr)
-	if winid == -1 then return end
+	if winid == -1 then
+		return
+	end
 	api.nvim_win_call(winid, function()
 		fn.clearmatches()
 		fn.matchadd("TirLog_Entry", "===")
@@ -262,8 +268,12 @@ end
 
 local unpack = table.unpack or unpack -- Lua 5.1/5.2 compatibility
 local palette = {
-	"#ff5555", "#55aaaa", "#ffff55",
-	"#aaff55", "#aa55ff", "#ffaa55",
+	"#ff5555",
+	"#55aaaa",
+	"#ffff55",
+	"#aaff55",
+	"#aa55ff",
+	"#ffaa55",
 }
 
 local assigned = {}
@@ -357,7 +367,16 @@ local function emit(force, level, opts, fmt, ...)
 	elseif category then
 		name = category
 	end
-	local final = string.format("[%s]%s%s[%s][%s %d] %s", PREFIX, ts, mon, name, file, line, msg)
+	local final = string.format(
+		"[%s]%s%s[%s][%s %d] %s",
+		PREFIX,
+		ts,
+		mon,
+		name,
+		file,
+		line,
+		msg
+	)
 	if config.log.output == "buffer" then
 		write_buffer(final)
 	elseif config.log.output == "file" then

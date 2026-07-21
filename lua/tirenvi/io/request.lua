@@ -19,26 +19,26 @@ local M = {}
 ---@param no_undo boolean|nil
 ---@return Request
 function M.new_writer(r_req, lines, no_undo)
-    ---@type Request
-    return {
-        range = r_req.range,
-        lines = lines,
-        no_undo = no_undo or false,
-        cursor = r_req.cursor
-    }
+	---@type Request
+	return {
+		range = r_req.range,
+		lines = lines,
+		no_undo = no_undo or false,
+		cursor = r_req.cursor,
+	}
 end
 
 ---@param self Request
 ---@return Range3
 function M:get_range3()
-    local first, last = Range.to_lua(self.range)
-    return Range3.new(first, last, first + #self.lines - 1)
+	local first, last = Range.to_lua(self.range)
+	return Range3.new(first, last, first + #self.lines - 1)
 end
 
 ---@param self Request
 ---@return boolean
 function M:is_no_undo()
-    return self.no_undo == true
+	return self.no_undo == true
 end
 
 return M

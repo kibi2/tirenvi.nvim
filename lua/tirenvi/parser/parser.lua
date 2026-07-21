@@ -1,6 +1,6 @@
-local fn = vim.fn                             -- Neovim
+local fn = vim.fn -- Neovim
 
-local config = require("tirenvi.config")      -- Root
+local config = require("tirenvi.config") -- Root
 
 local errors = require("tirenvi.util.errors") -- Util
 local log = require("tirenvi.util.log")
@@ -19,10 +19,10 @@ local log = require("tirenvi.util.log")
 local M = {}
 
 local ERR = {
-    EXECUTABLE_NOT_FOUND = "executable_not_found",
-    VERSION_COMMAND_FAILED = "version_command_failed",
-    VERSION_PARSE_FAILED = "version_parse_failed",
-    VERSION_TOO_OLD = "version_too_old",
+	EXECUTABLE_NOT_FOUND = "executable_not_found",
+	VERSION_COMMAND_FAILED = "version_command_failed",
+	VERSION_PARSE_FAILED = "version_parse_failed",
+	VERSION_TOO_OLD = "version_too_old",
 }
 M.ERR = ERR
 
@@ -33,45 +33,46 @@ M.ERR = ERR
 ---@param filetype string|nil
 ---@return Parser|nil
 local function get_parser_for_filetype(filetype)
-    if not filetype then
-        return nil
-    end
-    local parser = config.parser_map[filetype]
-    if not parser or not parser.executable then
-        return nil
-    end
-    return parser
+	if not filetype then
+		return nil
+	end
+	local parser = config.parser_map[filetype]
+	if not parser or not parser.executable then
+		return nil
+	end
+	return parser
 end
 
 ---@param command string[]
 ---@param input string[]
 ---@return Vim_system
 local function vim_system(command, input)
-    log.debug("=== [exec] %s ===", table.concat(command, " "))
-    local result = vim.system(command, { stdin = input }):wait()
-    if result.stdout and #result.stdout > 0 then
-        -- log.debug(util.to_hex(result.stdout):sub(1, 80) .. " ")
-    end
-    return result
+	log.debug("=== [exec] %s ===", table.concat(command, " "))
+	local result = vim.system(command, { stdin = input }):wait()
+	if result.stdout and #result.stdout > 0 then
+		-- log.debug(util.to_hex(result.stdout):sub(1, 80) .. " ")
+	end
+	return result
 end
 
 ---@param self Parser
 local function ensure_parser(self)
-    if not self._err_code then
-        return
-    end
-    local message
-    if self._err_code == ERR.EXECUTABLE_NOT_FOUND then
-        message = errors.not_found_parser_error(self.executable)
-    elseif self._err_code == ERR.VERSION_TOO_OLD then
-        message = errors.outdated_parser_error(
-            self.executable,
-            self.required_version,
-            self._installed_version)
-    else
-        message = errors.no_parser_error()
-    end
-    error(errors.new_domain_error(message))
+	if not self._err_code then
+		return
+	end
+	local message
+	if self._err_code == ERR.EXECUTABLE_NOT_FOUND then
+		message = errors.not_found_parser_error(self.executable)
+	elseif self._err_code == ERR.VERSION_TOO_OLD then
+		message = errors.outdated_parser_error(
+			self.executable,
+			self.required_version,
+			self._installed_version
+		)
+	else
+		message = errors.no_parser_error()
+	end
+	error(errors.new_domain_error(message))
 end
 
 --- run external parser command
@@ -81,48 +82,50 @@ end
 ---@param lines string[] Input lines
 ---@return string stdout
 local function run_parser(executable, subcmd, options, lines)
-    local command = { executable, subcmd }
-    if options then
-        vim.list_extend(command, options)
-    end
-    local result = vim_system(command, lines)
-    if result.code ~= 0 then
-        error(errors.new_domain_error(errors.vim_system_error(result, command)))
-    end
-    return result.stdout
+	local command = { executable, subcmd }
+	if options then
+		vim.list_extend(command, options)
+	end
+	local result = vim_system(command, lines)
+	if result.code ~= 0 then
+		error(errors.new_domain_error(errors.vim_system_error(result, command)))
+	end
+	return result.stdout
 end
 
 ---@param self Parser
 ---@return string|nil
 local function get_string_version(self)
-    if fn.executable(self.executable) ~= 1 then
-        error({ code = ERR.EXECUTABLE_NOT_FOUND })
-    end
-    self._installed_version = vim.trim(fn.system({ self.executable, "--version" }))
-    if vim.v.shell_error ~= 0 then
-        -- TODO
-        self._installed_version = vim.trim(fn.system({ self.executable, "version" }))
-        if vim.v.shell_error ~= 0 then
-            error({ code = ERR.VERSION_COMMAND_FAILED })
-        end
-    end
-    return self._installed_version
+	if fn.executable(self.executable) ~= 1 then
+		error({ code = ERR.EXECUTABLE_NOT_FOUND })
+	end
+	self._installed_version =
+		vim.trim(fn.system({ self.executable, "--version" }))
+	if vim.v.shell_error ~= 0 then
+		-- TODO
+		self._installed_version =
+			vim.trim(fn.system({ self.executable, "version" }))
+		if vim.v.shell_error ~= 0 then
+			error({ code = ERR.VERSION_COMMAND_FAILED })
+		end
+	end
+	return self._installed_version
 end
 
 ---@param self Parser
 ---@return integer|nil
 local function get_int_version(self)
-    local str_ver = get_string_version(self)
-    return config.version_to_integer(str_ver)
+	local str_ver = get_string_version(self)
+	return config.version_to_integer(str_ver)
 end
 
 ---@return boolean
 local function is_available_version(self)
-    local iver = get_int_version(self)
-    if M.is_old(self._required_version_int, iver) then
-        error({ code = ERR.VERSION_TOO_OLD })
-    end
-    return true
+	local iver = get_int_version(self)
+	if M.is_old(self._required_version_int, iver) then
+		error({ code = ERR.VERSION_TOO_OLD })
+	end
+	return true
 end
 
 --#endregion
@@ -135,49 +138,49 @@ end
 ---@param lines string[] Input lines
 ---@return string stdout
 function M.run(self, subcmd, options, lines)
-    ensure_parser(self)
-    return run_parser(self.executable, subcmd, options, lines)
+	ensure_parser(self)
+	return run_parser(self.executable, subcmd, options, lines)
 end
 
 ---@param self Parser
 ---@return boolean
 ---@return string|nil
 function M.check(self)
-    if self._checked then
-        return self._err_code == nil, self._err_code
-    end
-    local ok, err = pcall(is_available_version, self)
-    self._checked = true
-    local error_code
-    if not ok then
-        if type(err) == "table" and err.code then
-            error_code = err.code
-        else
-            error_code = tostring(err)
-        end
-    end
-    return ok, error_code
+	if self._checked then
+		return self._err_code == nil, self._err_code
+	end
+	local ok, err = pcall(is_available_version, self)
+	self._checked = true
+	local error_code
+	if not ok then
+		if type(err) == "table" and err.code then
+			error_code = err.code
+		else
+			error_code = tostring(err)
+		end
+	end
+	return ok, error_code
 end
 
 ---@param filetype string|nil
 ---@return Parser|nil
 function M.resolve_parser(filetype)
-    local parser = get_parser_for_filetype(filetype)
-    if not parser then
-        return nil
-    end
-    _, parser._err_code = M.check(parser)
-    return parser
+	local parser = get_parser_for_filetype(filetype)
+	if not parser then
+		return nil
+	end
+	_, parser._err_code = M.check(parser)
+	return parser
 end
 
 ---@param require integer|nil
 ---@param target integer|nil
 ---@return boolean
 function M.is_old(require, target)
-    if require == nil or target == nil then
-        return false
-    end
-    return require > target
+	if require == nil or target == nil then
+		return false
+	end
+	return require > target
 end
 
 return M

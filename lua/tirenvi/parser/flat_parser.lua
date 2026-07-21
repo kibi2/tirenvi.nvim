@@ -1,10 +1,10 @@
-local Parser = require("tirenvi.parser.parser")   -- Parser
+local Parser = require("tirenvi.parser.parser") -- Parser
 
 local buf_state = require("tirenvi.io.buf_state") -- IO
 
 local Document = require("tirenvi.core.document") -- Core
 
-local errors = require("tirenvi.util.errors")     -- Util
+local errors = require("tirenvi.util.errors") -- Util
 local log = require("tirenvi.util.log")
 
 -- =============================================================================
@@ -41,7 +41,11 @@ local function jslines_to_ndjsons(jslines)
 		if jsline ~= nil and jsline ~= "" then
 			local ok, ndjson = pcall(vim.json.decode, jsline)
 			if not ok then
-				error(errors.new_domain_error(errors.invalid_json_error(jsline, ndjson)))
+				error(
+					errors.new_domain_error(
+						errors.invalid_json_error(jsline, ndjson)
+					)
+				)
 			end
 			ndjsons[#ndjsons + 1] = ndjson
 		end
@@ -53,7 +57,13 @@ end
 ---@return string|nil
 local function ndjson_to_line(ndjson)
 	local ok, line = pcall(vim.json.encode, ndjson)
-	log.assert(ok, ("tirenvi: internal JSON encode failure\n%s\nerror: %s"):format(vim.inspect(ndjson), line))
+	log.assert(
+		ok,
+		("tirenvi: internal JSON encode failure\n%s\nerror: %s"):format(
+			vim.inspect(ndjson),
+			line
+		)
+	)
 	return line
 end
 
@@ -139,7 +149,7 @@ function M.parse(parser, r_result)
 	return tirdoc
 end
 
----@param tirdoc Document	
+---@param tirdoc Document
 ---@return string[]
 function M.to_jslines(tirdoc)
 	local ndjsons = Document.serialize_to_flat(tirdoc)
@@ -148,13 +158,19 @@ end
 
 --- Convert display lines back to TSV format
 ---@param parser Parser
----@param tirdoc Document	
+---@param tirdoc Document
 ---@return string[]
 function M.unparse(parser, tirdoc)
 	local ndjsons = Document.serialize_to_flat(tirdoc)
 	collapse_grid_prefix(ndjsons)
 	local jslines = ndjsons_to_lines(ndjsons)
-	log.debug("[%d]='%s'...[%d]='%s'", 1, tostring(jslines[1]), #jslines, tostring(jslines[#jslines]))
+	log.debug(
+		"[%d]='%s'...[%d]='%s'",
+		1,
+		tostring(jslines[1]),
+		#jslines,
+		tostring(jslines[#jslines])
+	)
 	return jslines_to_flat(jslines, parser)
 end
 

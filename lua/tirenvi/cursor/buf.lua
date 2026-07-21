@@ -17,10 +17,10 @@ local M = {}
 ---@param col_byte integer
 ---@return CursorBuf
 function M.new(row_cur, col_byte)
-    return {
-        row_cur = row_cur,
-        col_byte = col_byte,
-    }
+	return {
+		row_cur = row_cur,
+		col_byte = col_byte,
+	}
 end
 
 return M

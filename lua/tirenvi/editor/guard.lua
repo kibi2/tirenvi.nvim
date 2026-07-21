@@ -38,7 +38,10 @@ function M.guarded(func, opts)
 				opts.on_error(unpack(args), result)
 			end
 
-			if type(result) == "table" and result.tag == errors.DOMAIN_ERROR then
+			if
+				type(result) == "table"
+				and result.tag == errors.DOMAIN_ERROR
+			then
 				notify.error(result.message)
 			else
 				notify.error(result)

@@ -23,10 +23,26 @@ local defaults = {
 	---@type {[string]: Parser}
 	parser_map = {
 		csv = { executable = "tir-csv", required_version = "0.1.4" },
-		tsv = { executable = "tir-csv", options = { "--delimiter", "\t" }, required_version = "0.1.4" },
-		markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = "0.1.6" },
-		pukiwiki = { executable = "tir-pukiwiki", allow_plain = true, required_version = "0.1.1" },
-		['*'] = { executable = "tir-embedded", allow_plain = true, cursor = true },
+		tsv = {
+			executable = "tir-csv",
+			options = { "--delimiter", "\t" },
+			required_version = "0.1.4",
+		},
+		markdown = {
+			executable = "tir-gfm-lite",
+			allow_plain = true,
+			required_version = "0.1.6",
+		},
+		pukiwiki = {
+			executable = "tir-pukiwiki",
+			allow_plain = true,
+			required_version = "0.1.1",
+		},
+		["*"] = {
+			executable = "tir-embedded",
+			allow_plain = true,
+			cursor = true,
+		},
 	},
 	textobj = {
 		column = "l",
@@ -44,7 +60,7 @@ local defaults = {
 		highlight = {
 			line = "TirenviDirty",
 			sign = "TirenviDirtySign",
-		}
+		},
 	},
 	log = {
 		level = levels.WARN,
@@ -71,7 +87,8 @@ end
 ---@param parser_map Parser[]
 local function parse_version(parser_map)
 	for _, parser in pairs(parser_map) do
-		parser._required_version_int = M.version_to_integer(parser.required_version)
+		parser._required_version_int =
+			M.version_to_integer(parser.required_version)
 	end
 end
 

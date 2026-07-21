@@ -17,14 +17,14 @@ local M = {}
 ---@param offset integer
 ---@return CursorLogical
 function M.new(iblock, irow, icol, offset)
-    ---@type CursorLogical
-    return {
-        restore_mode = "none",
-        iblock = iblock,
-        irow = irow,
-        icol = icol,
-        col_offset = offset,
-    }
+	---@type CursorLogical
+	return {
+		restore_mode = "none",
+		iblock = iblock,
+		irow = irow,
+		icol = icol,
+		col_offset = offset,
+	}
 end
 
 return M

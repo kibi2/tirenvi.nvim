@@ -1,14 +1,14 @@
-local api = vim.api                               -- Neovim
+local api = vim.api -- Neovim
 
-local ui = require("tirenvi.ui")                  -- Root
+local ui = require("tirenvi.ui") -- Root
 
 local autocmd = require("tirenvi.editor.autocmd") -- Editor
 local Debug = require("tirenvi.editor.debug")
 local guard = require("tirenvi.editor.guard")
 
-local app = require("tirenvi.app")                -- App
+local app = require("tirenvi.app") -- App
 
-local WidthOp = require("tirenvi.width.op")       -- Width
+local WidthOp = require("tirenvi.width.op") -- Width
 
 local buf_state = require("tirenvi.io.buf_state") -- IO
 local buf_lines = require("tirenvi.io.buf_lines")
@@ -30,7 +30,9 @@ local M = {}
 ---@param opts {[string]:any}
 ---@return nil
 local function cmd_width(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
+	if buf_state.should_skip(ctx.bufnr, { has_grid = true }) then
+		return
+	end
 	local width_op = WidthOp.new(opts)
 	if not width_op then
 		notify.error(errors.err_invalid_command(opts.args))
@@ -44,7 +46,9 @@ end
 ---@param opts {[string]:any}
 ---@return nil
 local function cmd_fit(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
+	if buf_state.should_skip(ctx.bufnr, { has_grid = true }) then
+		return
+	end
 	local width_op = WidthOp.new(opts)
 	if not width_op then
 		notify.error(errors.err_invalid_command(opts.args))
@@ -58,7 +62,9 @@ end
 ---@param opts {[string]:any}
 ---@return nil
 local function cmd_wrap(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
+	if buf_state.should_skip(ctx.bufnr, { has_grid = true }) then
+		return
+	end
 	local width_op = WidthOp.new(opts)
 	if not width_op then
 		notify.error(errors.err_invalid_command(opts.args))
@@ -72,11 +78,13 @@ end
 ---@param opts {[string]:any}
 ---@return nil
 local function cmd_toggle(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr, {
+	if
+		buf_state.should_skip(ctx.bufnr, {
 			is_tirbuf = false,
 			has_grid = false,
 			has_parser = false,
-		}) then
+		})
+	then
 		return
 	end
 	ui.special_apply(ctx.winid)
@@ -92,7 +100,9 @@ end
 ---@param opts {[string]:any}
 ---@return nil
 local function cmd_redraw(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr) then return end
+	if buf_state.should_skip(ctx.bufnr) then
+		return
+	end
 	app.cmd_redraw(ctx)
 end
 
@@ -101,12 +111,16 @@ local warned = false
 ---@param opts {[string]:any}
 ---@return nil
 local function cmd_repair(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr) then return end
+	if buf_state.should_skip(ctx.bufnr) then
+		return
+	end
 	local arg = opts.fargs[2]
 	if arg == nil then
 		if not warned then
 			warned = true
-			notify.warn("Tir repair is deprecated and will be removed in v0.5. Use :Tir redraw")
+			notify.warn(
+				"Tir repair is deprecated and will be removed in v0.5. Use :Tir redraw"
+			)
 		end
 		app.cmd_redraw(ctx)
 		return
@@ -117,11 +131,19 @@ local function cmd_repair(ctx, opts)
 	elseif arg == "disable" then
 		buf_state.set_repair(ctx.bufnr, false)
 	else
-		notify.error("[Tirenvi] invalid argument: " .. arg .. " (expected: [enable|disable|toggle])")
+		notify.error(
+			"[Tirenvi] invalid argument: "
+				.. arg
+				.. " (expected: [enable|disable|toggle])"
+		)
 		return
 	end
-	notify.info(string.format("[Tirenvi] repair:%s ",
-		buf_state.get_repair(ctx.bufnr) and "enable" or "disable"))
+	notify.info(
+		string.format(
+			"[Tirenvi] repair:%s ",
+			buf_state.get_repair(ctx.bufnr) and "enable" or "disable"
+		)
+	)
 end
 
 ---@param ctx Context
@@ -129,8 +151,8 @@ end
 ---@return nil
 local function cmd_debug_read_tir(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr, {
-			is_tirbuf = false,
-		}) then
+		is_tirbuf = false,
+	}) then
 		return
 	end
 	local filename = opts.fargs[2]
@@ -145,7 +167,9 @@ end
 ---@param opts {[string]:any}
 ---@return nil
 local function cmd_debug_write_tir(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr) then return end
+	if buf_state.should_skip(ctx.bufnr) then
+		return
+	end
 	local filename = opts.fargs[2]
 	if filename == nil then
 		notify.error("Tir _write_tir need filename")
@@ -192,7 +216,8 @@ local function on_tir(opts)
 		return
 	end
 	local ctx = Context.from_buf()
-	local debug_name = string.format("%s %s", opts.name, table.concat(opts.fargs, " "))
+	local debug_name =
+		string.format("%s %s", opts.name, table.concat(opts.fargs, " "))
 	Debug.ui_entry(ctx.bufnr, debug_name)
 	local command_name = sub:match("^[A-Za-z_]+") or ""
 	local command = commands[command_name]
@@ -228,7 +253,7 @@ local function register_user_command()
 		nargs = "*",
 		range = true,
 		complete = complete_tir,
-		desc = build_desc()
+		desc = build_desc(),
 	})
 end
 
@@ -266,7 +291,10 @@ end
 function M.keymap_tab()
 	local ctx = Context.from_buf()
 	buf_lines.clear_cache()
-	log.debug("===+===+===+===+=== keymap_tab %s ===+===+===+===+===", ctx.bufnr)
+	log.debug(
+		"===+===+===+===+=== keymap_tab %s ===+===+===+===+===",
+		ctx.bufnr
+	)
 	if buf_state.should_skip(ctx.bufnr) then
 		return util.get_termcodes("<Tab>")
 	end

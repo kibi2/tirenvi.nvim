@@ -1,21 +1,21 @@
-local api            = vim.api -- Neovim
-local fn             = vim.fn
-local bo             = vim.bo
-local b              = vim.b
+local api = vim.api -- Neovim
+local fn = vim.fn
+local bo = vim.bo
+local b = vim.b
 
-local config         = require("tirenvi.config")      -- Root
+local config = require("tirenvi.config") -- Root
 
-local Attrs          = require("tirenvi.core.attrs")  -- Core
+local Attrs = require("tirenvi.core.attrs") -- Core
 
-local Range3         = require("tirenvi.util.range3") -- Util
-local log            = require("tirenvi.util.log")
+local Range3 = require("tirenvi.util.range3") -- Util
+local log = require("tirenvi.util.log")
 
 -- =============================================================================
 
-local M              = {}
+local M = {}
 
 -- Buffer-local flags.
-M.IKEY               = {
+M.IKEY = {
 	-- true when in insert mode
 	INSERT_MODE = "insert_mode",
 
@@ -50,7 +50,7 @@ M.IKEY               = {
 	TIRBUF = "tirbuf",
 }
 
-local initial_value  = {
+local initial_value = {
 	[M.IKEY.INSERT_MODE] = false,
 	[M.IKEY.ATTACHED] = false,
 	[M.IKEY.PATCH_DEPTH] = 0,
@@ -73,18 +73,18 @@ local initial_value  = {
 ---@field is_tirbuf? boolean
 ---@field no_vscode? boolean
 
-local DEFAULT_OPTS   = {
+local DEFAULT_OPTS = {
 	supported = true,
 	has_parser = true,
 	is_tirbuf = true,
 	has_grid = false,
 	no_vscode = true,
 }
-local REPAIR_OFF     = "REPAIR_OFF"
-local INSERT_LEAVE   = "INSERT_LEAVE"
-local INSERT_MODE    = "INSERT_MODE"
+local REPAIR_OFF = "REPAIR_OFF"
+local INSERT_LEAVE = "INSERT_LEAVE"
+local INSERT_MODE = "INSERT_MODE"
 local UNDO_REDO_MODE = "UNDO_REDO_MODE"
-local NORMAL_MODE    = "NORMAL_MODE"
+local NORMAL_MODE = "NORMAL_MODE"
 
 ---@param bufnr number
 ---@param message string
@@ -93,12 +93,8 @@ local function log_watch(bufnr, message, range3)
 	range3 = range3 or Range3.new(0, 0, 0)
 	local pre = M.get(bufnr, M.IKEY.UNDO_TREE_LAST)
 	local next = fn.undotree(bufnr).seq_last
-	local status = string.format(
-		"[tree:%d->%d]%s",
-		pre,
-		next,
-		Range3.short(range3)
-	)
+	local status =
+		string.format("[tree:%d->%d]%s", pre, next, Range3.short(range3))
 	log.watch("UNDO", message .. status)
 end
 
@@ -118,7 +114,12 @@ local function is_undo_mode(bufnr)
 	local pre = M.get(bufnr, M.IKEY.UNDO_TREE_LAST)
 	local next = fn.undotree(bufnr).seq_last
 	if pre == next then
-		log.debug("===-===-===-=== und/redo mode[%d] (%d, %d) ===-===-===-===", bufnr, pre, next)
+		log.debug(
+			"===-===-===-=== und/redo mode[%d] (%d, %d) ===-===-===-===",
+			bufnr,
+			pre,
+			next
+		)
 		return true
 	end
 	return false
@@ -273,9 +274,17 @@ function M.debug_state(bufnr)
 	local form = M.is_tirbuf(bufnr) and "|A|" or ",A,"
 	local count = get_count(bufnr)
 	if not allow_plain then
-		log.assert(count == "P0G1", "grid must be enabled when plain is not allowed")
+		log.assert(
+			count == "P0G1",
+			"grid must be enabled when plain is not allowed"
+		)
 	end
-	return string.format("%s/%s/%s", allow_plain and "GFM" or "CSV", form, count)
+	return string.format(
+		"%s/%s/%s",
+		allow_plain and "GFM" or "CSV",
+		form,
+		count
+	)
 end
 
 ---@param bufnr number

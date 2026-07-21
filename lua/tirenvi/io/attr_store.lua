@@ -13,13 +13,13 @@ local M = {}
 ---@param bufnr number
 ---@return Attr[]
 function M.read(bufnr)
-    return buf_state.get(bufnr, buf_state.IKEY.ATTRS) or {}
+	return buf_state.get(bufnr, buf_state.IKEY.ATTRS) or {}
 end
 
 ---@param ctx Context
 ---@param attrs Attr[]|nil
 function M.write(ctx, attrs)
-    buf_state.set(ctx.bufnr, buf_state.IKEY.ATTRS, attrs)
+	buf_state.set(ctx.bufnr, buf_state.IKEY.ATTRS, attrs)
 end
 
 return M

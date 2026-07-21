@@ -1,6 +1,6 @@
 local CONST = require("tirenvi.constants") -- Root
 
-local Attr = require("tirenvi.core.attr")  -- Core
+local Attr = require("tirenvi.core.attr") -- Core
 local Block = require("tirenvi.core.block")
 local Record = require("tirenvi.core.record")
 
@@ -46,7 +46,7 @@ local function build_blocks_text_driven(ndjsons)
 	---@type Block
 	local block = Block.new()
 	local function flush_block()
-		if #(block.records) ~= 0 then
+		if #block.records ~= 0 then
 			table.insert(self, block)
 		end
 		block = Block.new()
@@ -77,7 +77,10 @@ local function build_blocks_attr_driven(ndjsons, attrs)
 	local self = {}
 	for iattr, attr in ipairs(attrs) do
 		local block = Block.new()
-		Block.set_kind(block, Attr.is_plain(attr) and CONST.KIND.PLAIN or CONST.KIND.GRID)
+		Block.set_kind(
+			block,
+			Attr.is_plain(attr) and CONST.KIND.PLAIN or CONST.KIND.GRID
+		)
 		local has_continuation = false
 		for irow = attr.range.first, attr.range.last do
 			local record = ndjsons[irow]
@@ -86,7 +89,10 @@ local function build_blocks_attr_driven(ndjsons, attrs)
 				break
 			end
 			if record.kind == CONST.KIND.ATTR_FILE then
-			elseif record.kind == CONST.KIND.PLAIN or record.kind == CONST.KIND.GRID then
+			elseif
+				record.kind == CONST.KIND.PLAIN
+				or record.kind == CONST.KIND.GRID
+			then
 				record = Record[record.kind].change_kind(record, block.kind)
 				if record.kind == "grid" then
 					Record.apply_column_count(record, #attr.columns)
@@ -116,7 +122,7 @@ local function rebuild_attr_range(bufblocks, first)
 		block.attr = attr
 		local last = first + #block.records - 1
 		attr.range = Range.from_lua(first, last)
-		first      = last + 1
+		first = last + 1
 	end
 end
 
