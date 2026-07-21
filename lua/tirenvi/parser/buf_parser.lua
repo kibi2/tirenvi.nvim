@@ -1,9 +1,9 @@
 local CONST = require("tirenvi.constants") -- Root
 local config = require("tirenvi.config")
 
-local Context = require("tirenvi.app.context")    -- App
-
 local Bufline = require("tirenvi.parser.bufline") -- Parser
+
+local buf_state = require("tirenvi.io.buf_state") -- IO
 
 local Document = require("tirenvi.core.document") -- Core
 local Record = require("tirenvi.core.record")
@@ -147,7 +147,7 @@ end
 function M.parse(ctx, r_result, opts)
 	local embedded_key = Attrs.get_embedded_key(r_result.attrs)
 	local records = buflines_to_records(r_result.lines, embedded_key)
-	local allow_plain = Context.is_allow_plain(ctx)
+	local allow_plain = buf_state.is_allow_plain(ctx.bufnr)
 	promote_empty_lines(records, r_result, allow_plain, opts.range3)
 	local bufdoc = Document.new_bufdoc(records, allow_plain, opts.attrs, opts.first)
 	return bufdoc

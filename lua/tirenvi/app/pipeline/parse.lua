@@ -29,20 +29,21 @@ local M = {}
 ---@param r_result ReadResult
 ---@return Document
 local function fltlines_to_tirdoc(ctx, r_result)
-    local tirdoc = flat_parser.parse(ctx, r_result)
+    local parser = buffer.get(ctx.bufnr, buffer.IKEY.PARSER)
+    local tirdoc = flat_parser.parse(parser, r_result)
     log.watch("ATTR", Document.debug_attrs(tirdoc, "[1]DOC ATTR:"))
     Document.apply_attrs(tirdoc, r_result.attrs)
     log.watch("ATTR", Document.debug_attrs(tirdoc, "[4]CACHED:"))
     return tirdoc
 end
 
----@param ctx Context
 local function embedded_on(ctx)
-    if ctx.parser then
+    local parser = buffer.get(ctx.bufnr, buffer.IKEY.PARSER)
+    if parser then
         return
     end
-    ctx.parser = Parser.resolve_parser("*")
-    buffer.set(ctx.bufnr, buffer.IKEY.PARSER, ctx.parser)
+    parser = Parser.resolve_parser("*")
+    buffer.set(ctx.bufnr, buffer.IKEY.PARSER, parser)
 end
 
 ---@param ctx Context

@@ -8,6 +8,7 @@ local Context = require("tirenvi.app.context")    -- App
 local Bufline = require("tirenvi.parser.bufline") -- Parser
 
 local buffer = require("tirenvi.io.buffer")       -- IO
+local buf_state = require("tirenvi.io.buf_state") -- IO
 local reader = require("tirenvi.io.reader")
 
 local util = require("tirenvi.util.util") -- Util
@@ -32,7 +33,7 @@ function M.insert_char_in_newline(ctx)
     end
     local line_prev, line_next = buffer.get_lines_around(ctx.bufnr, Range.from_lua(row_cur, row_cur))
     local line_ref = line_prev
-    if not Context.is_allow_plain(ctx) then
+    if not buf_state.is_allow_plain(ctx.bufnr) then
         line_ref = line_ref or line_next
     end
     local pipe = Bufline.get_pipe_char(line_ref)

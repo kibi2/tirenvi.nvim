@@ -127,7 +127,7 @@ local checks = {
 ---@param ctx Context
 ---@return string
 local function get_count(ctx)
-	if not Context.is_allow_plain(ctx) then
+	if not M.is_allow_plain(ctx.bufnr) then
 		return "P0G1"
 	end
 	local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
@@ -199,7 +199,7 @@ function M.debug_state(bufnr)
 		return ""
 	end
 	local ctx = Context.from_buf(bufnr)
-	local allow_plain = Context.is_allow_plain(ctx)
+	local allow_plain = M.is_allow_plain(ctx.bufnr)
 	local form = M.is_tirbuf(bufnr) and "|A|" or ",A,"
 	local count = get_count(ctx)
 	if not allow_plain then
@@ -217,11 +217,18 @@ end
 ---@param ctx Context
 ---@return boolean
 function M.has_grid(ctx)
-	if not Context.is_allow_plain(ctx) then
+	if not M.is_allow_plain(ctx.bufnr) then
 		return true
 	end
 	local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
 	return Attrs.has_grid(attrs)
+end
+
+---@param bufnr number
+---@return boolean
+function M.is_allow_plain(bufnr)
+	local parser = buffer.get(bufnr, buffer.IKEY.PARSER)
+	return parser and (parser.allow_plain or false) or false
 end
 
 return M

@@ -6,6 +6,7 @@ local flat_parser = require("tirenvi.parser.flat_parser") -- Parser
 local buf_parser = require("tirenvi.parser.buf_parser")
 
 local buf_state = require("tirenvi.io.buf_state") -- IO
+local buffer = require("tirenvi.io.buffer")
 local writer = require("tirenvi.io.writer")
 local attr_store = require("tirenvi.io.attr_store")
 local reader = require("tirenvi.io.reader")
@@ -34,7 +35,8 @@ end
 ---@param tirdoc Document
 ---@param is_write_pre boolean|nil
 local function tirdoc_to_flat(ctx, r_result, tirdoc, is_write_pre)
-    local fltlines = flat_parser.unparse(ctx, tirdoc)
+    local parser = buffer.get(ctx.bufnr, buffer.IKEY.PARSER)
+    local fltlines = flat_parser.unparse(parser, tirdoc)
     local req_w = Request.new_writer(r_result, fltlines, is_write_pre)
     local attrs = vim.deepcopy(r_result.attrs)
     if not is_write_pre then

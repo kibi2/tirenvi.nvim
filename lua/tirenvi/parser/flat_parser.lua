@@ -1,6 +1,6 @@
-local Context = require("tirenvi.app.context")    -- App
-
 local Parser = require("tirenvi.parser.parser")   -- Parser
+
+local buf_state = require("tirenvi.io.buf_state") -- IO
 
 local Document = require("tirenvi.core.document") -- Core
 
@@ -124,17 +124,18 @@ end
 ---@return Document
 function M.from_jslines(ctx, jslines)
 	local ndjsons = jslines_to_ndjsons(jslines)
-	return Document.new_tirdoc(ndjsons, Context.is_allow_plain(ctx))
+	return Document.new_tirdoc(ndjsons, buf_state.is_allow_plain(ctx.bufnr))
 end
 
----@param ctx Context
+---@param parser Parser
 ---@param r_result ReadResult
 ---@return Document
-function M.parse(ctx, r_result)
-	local jslines = flat_to_jslines(ctx.parser, r_result.lines, r_result.cursor)
+function M.parse(parser, r_result)
+	local jslines = flat_to_jslines(parser, r_result.lines, r_result.cursor)
 	local ndjsons = jslines_to_ndjsons(jslines)
 	expand_grid_prefix(ndjsons)
-	local tirdoc = Document.new_tirdoc(ndjsons, Context.is_allow_plain(ctx))
+	local allow_plain = parser.allow_plain or false
+	local tirdoc = Document.new_tirdoc(ndjsons, allow_plain)
 	return tirdoc
 end
 
@@ -146,15 +147,15 @@ function M.to_jslines(tirdoc)
 end
 
 --- Convert display lines back to TSV format
----@param ctx Context
+---@param parser Parser
 ---@param tirdoc Document	
 ---@return string[]
-function M.unparse(ctx, tirdoc)
+function M.unparse(parser, tirdoc)
 	local ndjsons = Document.serialize_to_flat(tirdoc)
 	collapse_grid_prefix(ndjsons)
 	local jslines = ndjsons_to_lines(ndjsons)
 	log.debug("[%d]='%s'...[%d]='%s'", 1, tostring(jslines[1]), #jslines, tostring(jslines[#jslines]))
-	return jslines_to_flat(jslines, ctx.parser)
+	return jslines_to_flat(jslines, parser)
 end
 
 return M

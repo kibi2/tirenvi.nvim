@@ -2,6 +2,8 @@ local config     = require("tirenvi.config")      -- Root
 
 local Context    = require("tirenvi.app.context") -- App
 
+local buf_state  = require("tirenvi.io.buf_state") -- Cursor
+
 local CursorNvim = require("tirenvi.cursor.nvim") -- Cursor
 
 local Cell       = require("tirenvi.core.cell")   -- Core
@@ -124,7 +126,7 @@ end
 ---@param irow integer
 ---@return integer
 function M.get_block_top_nrow(ctx, line_provider, irow)
-    if Context.is_allow_plain(ctx) then
+    if buf_state.is_allow_plain(ctx.bufnr) then
         return find_block_edge(line_provider, irow, -1)
     else
         return 1
@@ -136,7 +138,7 @@ end
 ---@param irow integer
 ---@return integer
 function M.get_block_bottom_nrow(ctx, line_provider, irow)
-    if Context.is_allow_plain(ctx) then
+    if buf_state.is_allow_plain(ctx.bufnr) then
         return find_block_edge(line_provider, irow, 1)
     else
         return line_provider.line_count()

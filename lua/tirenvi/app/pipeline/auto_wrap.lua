@@ -5,8 +5,9 @@ local config = require("tirenvi.config")          -- Root
 local Bufline = require("tirenvi.parser.bufline") -- Parser
 
 local buffer = require("tirenvi.io.buffer")       -- IO
+local buf_state = require("tirenvi.io.buf_state")
 
-local log = require("tirenvi.util.log")           -- Util
+local log = require("tirenvi.util.log") -- Util
 
 -- =============================================================================
 
@@ -30,7 +31,7 @@ function M.auto_wrap(ctx)
     if not config.ui.manage_wrap then
         return
     end
-    if not ctx.parser.allow_plain then
+    if not buf_state.is_allow_plain(ctx.bufnr) then
         apply_wrap(ctx.winid, false)
         return
     end
