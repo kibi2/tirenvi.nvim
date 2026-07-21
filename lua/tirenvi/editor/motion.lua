@@ -1,9 +1,8 @@
-local Context       = require("tirenvi.app.context")    -- App
-
 local Bufline       = require("tirenvi.parser.bufline") -- Parser
 
 local buffer        = require("tirenvi.io.buffer")      -- IO
 local reader        = require("tirenvi.io.reader")
+local Context       = require("tirenvi.io.context")
 
 local CursorNvim    = require("tirenvi.cursor.nvim") -- Cursor
 local CursorConvert = require("tirenvi.cursor.convert")

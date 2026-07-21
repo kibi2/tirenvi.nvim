@@ -1,8 +1,6 @@
 local common = require("tirenvi.app.pipeline.common") -- App
-local Request = require("tirenvi.app.request")
-local ReadResult = require("tirenvi.app.read_result")
 
-local Bufline = require("tirenvi.parser.bufline") -- Parser
+local Bufline = require("tirenvi.parser.bufline")     -- Parser
 local flat_parser = require("tirenvi.parser.flat_parser")
 local Parser = require("tirenvi.parser.parser")
 
@@ -10,6 +8,8 @@ local buffer = require("tirenvi.io.buffer") -- IO
 local buf_state = require("tirenvi.io.buf_state")
 local writer = require("tirenvi.io.writer")
 local reader = require("tirenvi.io.reader")
+local Request = require("tirenvi.io.request")
+local ReadResult = require("tirenvi.io.read_result")
 
 local Document = require("tirenvi.core.document") -- Core
 local Attrs = require("tirenvi.core.attrs")

@@ -1,9 +1,9 @@
 local config = require("tirenvi.config")          -- Root
 
-local Context = require("tirenvi.app.context")    -- App
-
 local Bufline = require("tirenvi.parser.bufline") -- Parser
 local buf_parser = require("tirenvi.parser.buf_parser")
+
+local Context = require("tirenvi.io.context")     -- IO
 
 local CursorNvim = require("tirenvi.cursor.nvim") -- Cursor
 

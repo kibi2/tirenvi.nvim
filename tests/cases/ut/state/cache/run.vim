@@ -10,7 +10,7 @@ lua << EOF
 		probe = true, output = "print",
   	},
   })
-  Context = require("tirenvi.app.context")
+  Context = require("tirenvi.io.context")
   Buffer = require("tirenvi.io.buffer")
   Range = require("tirenvi.util.range")
   local lines = {}

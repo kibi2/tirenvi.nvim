@@ -16,7 +16,7 @@ lua << EOF
   require("tirenvi").setup(opts)
   Range = require("tirenvi.util.range")
   log = require("tirenvi.util.log")
-  Context = require("tirenvi.app.context")
+  Context = require("tirenvi.io.context")
 EOF
 
 CASE log.xxx(...)

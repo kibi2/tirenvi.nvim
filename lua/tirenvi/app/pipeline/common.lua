@@ -1,5 +1,3 @@
-local Request = require("tirenvi.app.request")            -- App
-
 local width_layout = require("tirenvi.width.layout")      -- Width
 
 local flat_parser = require("tirenvi.parser.flat_parser") -- Parser
@@ -10,6 +8,7 @@ local buffer = require("tirenvi.io.buffer")
 local writer = require("tirenvi.io.writer")
 local attr_store = require("tirenvi.io.attr_store")
 local reader = require("tirenvi.io.reader")
+local Request = require("tirenvi.io.request")
 
 local Document = require("tirenvi.core.document") -- Core
 local Attrs = require("tirenvi.core.attrs")

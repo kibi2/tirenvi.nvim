@@ -3,8 +3,6 @@ local bo = vim.bo
 
 local config = require("tirenvi.config")          -- Root
 
-local Context = require("tirenvi.app.context")    -- App
-
 local Bufline = require("tirenvi.parser.bufline") -- Parser
 
 local buffer = require("tirenvi.io.buffer")       -- IO

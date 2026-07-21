@@ -1,14 +1,12 @@
-local config     = require("tirenvi.config")      -- Root
-
-local Context    = require("tirenvi.app.context") -- App
+local config     = require("tirenvi.config")       -- Root
 
 local buf_state  = require("tirenvi.io.buf_state") -- Cursor
 
-local CursorNvim = require("tirenvi.cursor.nvim") -- Cursor
+local CursorNvim = require("tirenvi.cursor.nvim")  -- Cursor
 
-local Cell       = require("tirenvi.core.cell")   -- Core
+local Cell       = require("tirenvi.core.cell")    -- Core
 
-local util       = require("tirenvi.util.util")   -- Util
+local util       = require("tirenvi.util.util")    -- Util
 local Range      = require("tirenvi.util.range")
 local log        = require("tirenvi.util.log")
 

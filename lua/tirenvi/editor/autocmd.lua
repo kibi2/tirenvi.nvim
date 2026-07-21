@@ -3,15 +3,15 @@ local api = vim.api                      -- Neovim
 local config = require("tirenvi.config") -- Root
 local ui = require("tirenvi.ui")
 
-local Debug = require("tirenvi.editor.debug")    -- Editor
+local Debug = require("tirenvi.editor.debug")     -- Editor
 
-local pipeline = require("tirenvi.app.pipeline") -- App
-local Context = require("tirenvi.app.context")
+local pipeline = require("tirenvi.app.pipeline")  -- App
 
 local Bufline = require("tirenvi.parser.bufline") -- Parser
 
 local buffer = require("tirenvi.io.buffer")       -- IO
 local buf_state = require("tirenvi.io.buf_state")
+local Context = require("tirenvi.io.context")
 
 local guard = require("tirenvi.util.guard") -- Util
 local Range3 = require("tirenvi.util.range3")

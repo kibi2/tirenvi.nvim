@@ -1,8 +1,6 @@
 local bo = vim.bo -- Neovim
 local fn = vim.fn
 
-local Context = require("tirenvi.app.context") -- App
-
 local bufline = require("tirenvi.parser.bufline") -- Parser
 
 local CursorLogical = require("tirenvi.cursor.logical") -- IO
@@ -12,6 +10,7 @@ local buffer = require("tirenvi.io.buffer")
 local buf_state = require("tirenvi.io.buf_state")
 local reader = require("tirenvi.io.reader")
 local namespaces = require("tirenvi.io.namespaces")
+local Context = require("tirenvi.io.context")
 
 local Attrs = require("tirenvi.core.attrs") -- Core
 local Attr = require("tirenvi.core.attr")

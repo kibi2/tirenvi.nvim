@@ -5,13 +5,13 @@ local ui = require("tirenvi.ui")                  -- Root
 local autocmd = require("tirenvi.editor.autocmd") -- Editor
 local Debug = require("tirenvi.editor.debug")
 
-local Context = require("tirenvi.app.context") -- App
-local pipeline = require("tirenvi.app.pipeline")
+local pipeline = require("tirenvi.app.pipeline")  -- App
 
-local WidthOp = require("tirenvi.width.op")
+local WidthOp = require("tirenvi.width.op")       -- Width
 
 local buf_state = require("tirenvi.io.buf_state") -- IO
 local buffer = require("tirenvi.io.buffer")
+local Context = require("tirenvi.io.context")
 
 local guard = require("tirenvi.util.guard") -- Util
 local notify = require("tirenvi.util.notify")

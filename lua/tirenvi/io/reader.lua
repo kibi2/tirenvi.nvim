@@ -1,7 +1,6 @@
-local ReadResult = require("tirenvi.app.read_result") -- App
-
-local buffer = require("tirenvi.io.buffer")           -- IO
+local buffer = require("tirenvi.io.buffer") -- IO
 local attr_store = require("tirenvi.io.attr_store")
+local ReadResult = require("tirenvi.io.read_result")
 
 local CursorNvim = require("tirenvi.cursor.nvim") -- Cursor
 

@@ -7,12 +7,12 @@ lua require("tirenvi.config").log.probe = true
 lua require("tirenvi.config").log.output = "print"
 
 lua << EOF
-  local Context = require("tirenvi.app.context")
+  local Context = require("tirenvi.io.context")
   local Range = require("tirenvi.util.range")
   local reader = require("tirenvi.io.reader")
 	ctx =  Context.from_buf(bufnr)
   buf_parser = require("tirenvi.parser.buf_parser")
-  ReadResult = require("tirenvi.app.read_result")
+  ReadResult = require("tirenvi.io.read_result")
   Attrs = require("tirenvi.core.attrs")
   Document = require("tirenvi.core.document")
   r_result = reader.read(ctx, Range.WHOLE)

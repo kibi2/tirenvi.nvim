@@ -1,9 +1,8 @@
-local Request     = require("tirenvi.app.request")        -- App
-
 local dirty_range = require("tirenvi.parser.dirty_range") -- Parser
 
 local buffer      = require("tirenvi.io.buffer")          -- IO
 local dirty       = require("tirenvi.io.dirty")
+local Request     = require("tirenvi.io.request")
 
 local log         = require("tirenvi.util.log") -- Util
 

@@ -2,15 +2,14 @@ local api = vim.api -- Neovim
 local fn = vim.fn
 local bo = vim.bo
 
-local config = require("tirenvi.config")       -- Root
+local config = require("tirenvi.config")    -- Root
 
-local Context = require("tirenvi.app.context") -- App
+local Attrs = require("tirenvi.core.attrs") -- Core
 
-local Attrs = require("tirenvi.core.attrs")    -- Core
+local buffer = require("tirenvi.io.buffer") -- IO
+local Context = require("tirenvi.io.context")
 
-local buffer = require("tirenvi.io.buffer")    -- IO
-
-local Range3 = require("tirenvi.util.range3")  -- Util
+local Range3 = require("tirenvi.util.range3") -- Util
 local log = require("tirenvi.util.log")
 
 -- =============================================================================
