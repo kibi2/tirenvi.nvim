@@ -1,7 +1,7 @@
 local bo = vim.bo -- Neovim
 local fn = vim.fn
 
-local bufline = require("tirenvi.parser.bufline") -- Parser
+local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
 
 local CursorLogical = require("tirenvi.cursor.logical") -- IO
 local CursorNvim = require("tirenvi.cursor.nvim")
@@ -116,7 +116,7 @@ function M.layout(title, single)
     local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)  or {}
     local cursor = reader.cursor(ctx)
     local line = buffer.get_line(ctx.bufnr, cursor.row_cur) or ""
-    local prefix = bufline.get_prefix_part(line)
+    local prefix = tir_buf.get_prefix_part(line)
     local pre_disp = fn.strdisplaywidth(prefix)
     local logical = CursorConvert.to_logical(attrs, cursor.row_cur, cursor.col_disp - pre_disp)
     local attr_str = Attrs.debug_attrs(attrs, "", logical.iblock, logical.icol, single)

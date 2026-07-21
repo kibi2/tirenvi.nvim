@@ -3,7 +3,7 @@ local bo = vim.bo
 
 local config = require("tirenvi.config")          -- Root
 
-local Bufline = require("tirenvi.parser.bufline") -- Parser
+local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
 
 local buffer = require("tirenvi.io.buffer")       -- IO
 local buf_state = require("tirenvi.io.buf_state") -- IO
@@ -34,7 +34,7 @@ function M.insert_char_in_newline(ctx)
     if not buf_state.is_allow_plain(ctx.bufnr) then
         line_ref = line_ref or line_next
     end
-    local pipe = Bufline.get_pipe_char(line_ref)
+    local pipe = tir_buf.get_pipe_char(line_ref)
     if not pipe then
         return
     end
@@ -45,7 +45,7 @@ end
 function M.keymap_lf()
     local col = fn.col(".")
     local line = fn.getline(".")
-    if not Bufline.get_pipe_char(line) then
+    if not tir_buf.get_pipe_char(line) then
         return util.get_termcodes("<CR>")
     end
     if col == 1 or col > #line then
@@ -57,7 +57,7 @@ end
 ---@return string
 function M.keymap_tab()
     local line = fn.getline(".")
-    if not Bufline.get_pipe_char(line) then
+    if not tir_buf.get_pipe_char(line) then
         return util.get_termcodes("<Tab>")
     end
     if bo.expandtab then

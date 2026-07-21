@@ -7,7 +7,7 @@ local Debug = require("tirenvi.editor.debug")     -- Editor
 
 local app = require("tirenvi.app")                -- App
 
-local Bufline = require("tirenvi.parser.bufline") -- Parser
+local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
 
 local buffer = require("tirenvi.io.buffer")       -- IO
 local buf_state = require("tirenvi.io.buf_state")
@@ -41,7 +41,7 @@ local function recover_flat(bufnr, range3)
 	if #lines ~= buffer.line_count(bufnr) then
 		return
 	end
-	buf_state.set_buffer_tirbuf(bufnr, Bufline.has_pipe(lines))
+	buf_state.set_buffer_tirbuf(bufnr, tir_buf.has_pipe(lines))
 end
 
 ---@param _ string

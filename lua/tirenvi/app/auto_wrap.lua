@@ -2,7 +2,7 @@ local fn = vim.fn                                 --Neovim
 
 local config = require("tirenvi.config")          -- Root
 
-local Bufline = require("tirenvi.parser.bufline") -- Parser
+local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
 
 local buffer = require("tirenvi.io.buffer")       -- IO
 local buf_state = require("tirenvi.io.buf_state")
@@ -41,7 +41,7 @@ function M.auto_wrap(ctx)
     local line_width = fn.strdisplaywidth(line)
     local win_span = buffer.get_win_span(ctx.winid)
     local is_over = win_span < line_width
-    local is_plain = not Bufline.has_pipe({ line })
+    local is_plain = not tir_buf.has_pipe({ line })
     if is_over then
         apply_wrap(ctx.winid, is_plain)
     end

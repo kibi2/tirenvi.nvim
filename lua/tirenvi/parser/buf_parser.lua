@@ -1,7 +1,7 @@
 local CONST = require("tirenvi.constants") -- Root
 local config = require("tirenvi.config")
 
-local Bufline = require("tirenvi.parser.bufline") -- Parser
+local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
 
 local buf_state = require("tirenvi.io.buf_state") -- IO
 
@@ -31,7 +31,7 @@ local function new_from_bufline(bufline, pipe, embedded_key)
 	if vim.trim(prefix) == embedded_key then
 		bufline = string.sub(bufline, pos)
 	end
-	local cells = Bufline.get_cells(bufline)
+	local cells = tir_buf.get_cells(bufline)
 	local record = Record.grid.new(cells)
 	if vim.trim(prefix) == embedded_key then
 		record.prefix = prefix
@@ -44,7 +44,7 @@ end
 ---@param embedded_key string|nil
 ---@return Record
 local function bufline_to_records(bufline, embedded_key)
-	local pipe = Bufline.get_pipe_char(bufline)
+	local pipe = tir_buf.get_pipe_char(bufline)
 	if pipe then
 		return new_from_bufline(bufline, pipe, embedded_key)
 	else

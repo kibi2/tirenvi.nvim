@@ -1,6 +1,6 @@
 local fn            = vim.fn                            -- Neovim
 
-local bufline       = require("tirenvi.parser.bufline") -- Parser
+local tir_buf       = require("tirenvi.parser.tir_buf") -- Parser
 
 local Attrs         = require("tirenvi.core.attrs")     -- Core
 local Attr          = require("tirenvi.core.attr")
@@ -24,7 +24,7 @@ local M             = {}
 function M.to_buf(cursor_logical, attrs, line_provider)
     local row_cur, col_disp = M.to_cursor(attrs, cursor_logical)
     local line = line_provider.get_line(row_cur) or ""
-    local prefix = bufline.get_prefix_part(line)
+    local prefix = tir_buf.get_prefix_part(line)
     col_disp = col_disp + fn.strdisplaywidth(prefix)
     local cursor = CursorNvim.from_col_disp(line, row_cur, col_disp)
     return cursor

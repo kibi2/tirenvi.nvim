@@ -1,4 +1,4 @@
-local Bufline       = require("tirenvi.parser.bufline") -- Parser
+local tir_buf       = require("tirenvi.parser.tir_buf") -- Parser
 
 local buffer        = require("tirenvi.io.buffer")      -- IO
 local reader        = require("tirenvi.io.reader")
@@ -20,7 +20,7 @@ local M             = {}
 local function get_pipe()
 	local ctx = Context.from_buf()
 	local cursor = reader.cursor(ctx)
-	return Bufline.get_pipe_char(cursor.line) or ""
+	return tir_buf.get_pipe_char(cursor.line) or ""
 end
 
 ---@param op string

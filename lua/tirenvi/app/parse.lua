@@ -1,6 +1,6 @@
 local common = require("tirenvi.app.common")      -- App
 
-local Bufline = require("tirenvi.parser.bufline") -- Parser
+local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
 local flat_parser = require("tirenvi.parser.flat_parser")
 local Parser = require("tirenvi.parser.parser")
 
@@ -59,7 +59,7 @@ end
 ---@return nil
 function M.read_post(ctx)
     local r_result = reader.read(ctx, Range.WHOLE)
-    if not Bufline.has_pipe(r_result.lines) then
+    if not tir_buf.has_pipe(r_result.lines) then
         util.ensure_no_reserved_marks(r_result.lines)
         local tirdoc = fltlines_to_tirdoc(ctx, r_result)
         common.doc_to_buflines(ctx, r_result, tirdoc, { no_undo = true })

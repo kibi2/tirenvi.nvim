@@ -1,6 +1,6 @@
 local config = require("tirenvi.config")          -- Root
 
-local Bufline = require("tirenvi.parser.bufline") -- Parser
+local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
 local buf_parser = require("tirenvi.parser.buf_parser")
 
 local Context = require("tirenvi.io.context")     -- IO
@@ -23,7 +23,7 @@ local function setup_vl(is_around)
     local ctx = Context.from_buf()
     is_around = is_around or false
     local count = vim.v.count1
-    local rect, lines = Bufline.get_block_rect(ctx, count, is_around)
+    local rect, lines = tir_buf.get_block_rect(ctx, count, is_around)
     if not rect then
         return
     end

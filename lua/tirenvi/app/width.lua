@@ -2,7 +2,7 @@ local fn = vim.fn                                              -- Neovim
 
 local common = require("tirenvi.app.common")                   -- App
 
-local Bufline = require("tirenvi.parser.bufline")              -- Parser
+local tir_buf = require("tirenvi.parser.tir_buf")              -- Parser
 
 local LinProvider = require("tirenvi.io.buffer_line_provider") -- IO
 local buffer = require("tirenvi.io.buffer")
@@ -35,8 +35,8 @@ local M = {}
 ---@param irow integer
 local function expand_rect(ctx, irow)
     local line_provider = LinProvider.new(ctx.bufnr)
-    local top = Bufline.get_block_top_nrow(ctx, line_provider, irow)
-    local bottom = Bufline.get_block_bottom_nrow(ctx, line_provider, irow)
+    local top = tir_buf.get_block_top_nrow(ctx, line_provider, irow)
+    local bottom = tir_buf.get_block_bottom_nrow(ctx, line_provider, irow)
     return Range.from_lua(top, bottom)
 end
 
@@ -92,7 +92,7 @@ local MAX_HEAD = 5
 local function get_head(bufnr, attr, icol)
     local irow = attr.range.first
     local line = buffer.get_line(bufnr, irow) or ""
-    local cells = Bufline.get_cells(line)
+    local cells = tir_buf.get_cells(line)
     local head = Cell.remove_padding(cells[icol] or "")
     local head_chars = util.utf8_chars(head)
     if #head_chars > MAX_HEAD then
