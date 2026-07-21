@@ -2,11 +2,11 @@ local api = vim.api -- Neovim
 local fn = vim.fn
 local bo = vim.bo
 
-local config = require("tirenvi.config")    -- Root
+local config = require("tirenvi.config")          -- Root
 
-local Attrs = require("tirenvi.core.attrs") -- Core
+local Attrs = require("tirenvi.core.attrs")       -- Core
 
-local buffer = require("tirenvi.io.buffer") -- IO
+local buf_lines = require("tirenvi.io.buf_lines") -- IO
 local Context = require("tirenvi.io.context")
 
 local Range3 = require("tirenvi.util.range3") -- Util
@@ -43,7 +43,7 @@ local NORMAL_MODE = "NORMAL_MODE"
 ---@param range3 Range3|nil
 local function log_watch(bufnr, message, range3)
 	range3 = range3 or Range3.new(0, 0, 0)
-	local pre = buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST)
+	local pre = buf_lines.get(bufnr, buf_lines.IKEY.UNDO_TREE_LAST)
 	local next = fn.undotree(bufnr).seq_last
 	local status = string.format(
 		"[tree:%d->%d]%s",
@@ -57,7 +57,7 @@ end
 ---@param bufnr number
 ---@return boolean
 local function is_insert_mode(bufnr)
-	local mode = buffer.get(bufnr, buffer.IKEY.INSERT_MODE) == true
+	local mode = buf_lines.get(bufnr, buf_lines.IKEY.INSERT_MODE) == true
 	if mode then
 		log.debug("===-===-===-=== insert mode[%d] ===-===-===-===", bufnr)
 	end
@@ -67,7 +67,7 @@ end
 ---@param bufnr number
 ---@return boolean
 local function is_undo_mode(bufnr)
-	local pre = buffer.get(bufnr, buffer.IKEY.UNDO_TREE_LAST)
+	local pre = buf_lines.get(bufnr, buf_lines.IKEY.UNDO_TREE_LAST)
 	local next = fn.undotree(bufnr).seq_last
 	if pre == next then
 		log.debug("===-===-===-=== und/redo mode[%d] (%d, %d) ===-===-===-===", bufnr, pre, next)
@@ -80,7 +80,7 @@ end
 ---@param range3 Range3|nil
 ---@return string
 local function get_status(ctx, range3)
-	if buffer.get_repair(ctx.bufnr) == false then
+	if buf_lines.get_repair(ctx.bufnr) == false then
 		return REPAIR_OFF
 	end
 	if not range3 then
@@ -105,7 +105,7 @@ local checks = {
 	end,
 
 	has_parser = function(bufnr)
-		return buffer.get(bufnr, buffer.IKEY.PARSER) ~= nil
+		return buf_lines.get(bufnr, buf_lines.IKEY.PARSER) ~= nil
 	end,
 
 	is_tirbuf = function(bufnr)
@@ -129,7 +129,7 @@ local function get_count(ctx)
 	if not M.is_allow_plain(ctx.bufnr) then
 		return "P0G1"
 	end
-	local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+	local attrs = buf_lines.get(ctx.bufnr, buf_lines.IKEY.ATTRS)
 	local count = Attrs.get_count(attrs)
 	if not count then
 		return "NIL"
@@ -188,7 +188,7 @@ end
 ---@param bufnr number
 ---@param value boolean
 function M.set_buffer_tirbuf(bufnr, value)
-	buffer.set(bufnr, buffer.IKEY.TIRBUF, value)
+	buf_lines.set(bufnr, buf_lines.IKEY.TIRBUF, value)
 end
 
 ---@param bufnr number
@@ -210,7 +210,7 @@ end
 ---@param bufnr number
 ---@return boolean
 function M.is_tirbuf(bufnr)
-	return buffer.get(bufnr, buffer.IKEY.TIRBUF)
+	return buf_lines.get(bufnr, buf_lines.IKEY.TIRBUF)
 end
 
 ---@param ctx Context
@@ -219,14 +219,14 @@ function M.has_grid(ctx)
 	if not M.is_allow_plain(ctx.bufnr) then
 		return true
 	end
-	local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+	local attrs = buf_lines.get(ctx.bufnr, buf_lines.IKEY.ATTRS)
 	return Attrs.has_grid(attrs)
 end
 
 ---@param bufnr number
 ---@return boolean
 function M.is_allow_plain(bufnr)
-	local parser = buffer.get(bufnr, buffer.IKEY.PARSER)
+	local parser = buf_lines.get(bufnr, buf_lines.IKEY.PARSER)
 	return parser and (parser.allow_plain or false) or false
 end
 

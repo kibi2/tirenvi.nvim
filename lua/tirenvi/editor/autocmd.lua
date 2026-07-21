@@ -9,7 +9,7 @@ local app = require("tirenvi.app")                -- App
 
 local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
 
-local buffer = require("tirenvi.io.buffer")       -- IO
+local buf_lines = require("tirenvi.io.buf_lines") -- IO
 local buf_state = require("tirenvi.io.buf_state")
 local Context = require("tirenvi.io.context")
 
@@ -37,8 +37,8 @@ end
 local function recover_flat(bufnr, range3)
 	-- local r_result = reader.read(get_context(bufnr), Range3.get_new_range(range3))
 	local first, last = Range.to_lua(Range3.get_new_range(range3))
-	local lines = buffer.get_lines(bufnr, first, last)
-	if #lines ~= buffer.line_count(bufnr) then
+	local lines = buf_lines.get_lines(bufnr, first, last)
+	if #lines ~= buf_lines.line_count(bufnr) then
 		return
 	end
 	buf_state.set_buffer_tirbuf(bufnr, tir_buf.has_pipe(lines))
@@ -50,7 +50,7 @@ end
 ---@param range3 Range3
 ---@param bytecount integer
 local function on_lines(_, bufnr, tick, range3, bytecount)
-	buffer.clear_cache()
+	buf_lines.clear_cache()
 	recover_flat(bufnr, range3)
 	if buf_state.should_skip(bufnr) then return end
 	local ctx = get_context(bufnr)
@@ -62,7 +62,7 @@ end
 
 ---@param bufnr number
 local function attach_on_lines(bufnr)
-	if buffer.get(bufnr, buffer.IKEY.ATTACHED) then
+	if buf_lines.get(bufnr, buf_lines.IKEY.ATTACHED) then
 		return
 	end
 	log.debug("===+=== attach on_lines")
@@ -72,22 +72,22 @@ local function attach_on_lines(bufnr)
 		-- this handler. In this case, `on_detach` is NOT called automatically, so any
 		-- state (e.g. ATTACHED flag) must be updated manually here.
 		on_lines = function(_, bufnr, tick, first, last, new_last, bytecount)
-			if buffer.get(bufnr, buffer.IKEY.PARSER) == nil then
+			if buf_lines.get(bufnr, buf_lines.IKEY.PARSER) == nil then
 				log.debug("===+=== auto detach (no filetype)")
-				buffer.set(bufnr, buffer.IKEY.ATTACHED, false)
+				buf_lines.set(bufnr, buf_lines.IKEY.ATTACHED, false)
 				return true -- detach
 			end
-			if buffer.get(bufnr, buffer.IKEY.PATCH_DEPTH) > 0 then
+			if buf_lines.get(bufnr, buf_lines.IKEY.PATCH_DEPTH) > 0 then
 				return
 			end
 			on_lines(_, bufnr, tick, Range3.new(first + 1, last, new_last), bytecount)
 		end,
 		on_detach = function()
 			log.debug("===+=== detach on_lines")
-			buffer.set(bufnr, buffer.IKEY.ATTACHED, false)
+			buf_lines.set(bufnr, buf_lines.IKEY.ATTACHED, false)
 		end,
 	})
-	buffer.set(bufnr, buffer.IKEY.ATTACHED, true)
+	buf_lines.set(bufnr, buf_lines.IKEY.ATTACHED, true)
 end
 
 ---@param ctx Context
@@ -97,7 +97,7 @@ end
 
 ---@param ctx Context
 local function on_buf_read_post(ctx)
-	buffer.clear_buf_local(ctx.bufnr)
+	buf_lines.clear_buf_local(ctx.bufnr)
 	app.read_post(ctx)
 end
 
@@ -140,17 +140,17 @@ local function on_vim_leave(args) end
 
 ---@param bufnr number
 local function clear_buffer_local_autocmds(bufnr)
-	buffer.set(bufnr, buffer.IKEY.AUTOCMD, false)
+	buf_lines.set(bufnr, buf_lines.IKEY.AUTOCMD, false)
 	local augroup = api.nvim_create_augroup(GROUP_NAME, { clear = false })
 	api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
 end
 
 ---@param bufnr number
 local function register_buffer_local_autocmds(bufnr)
-	if buffer.get(bufnr, buffer.IKEY.AUTOCMD) then
+	if buf_lines.get(bufnr, buf_lines.IKEY.AUTOCMD) then
 		return
 	end
-	buffer.set(bufnr, buffer.IKEY.AUTOCMD, true)
+	buf_lines.set(bufnr, buf_lines.IKEY.AUTOCMD, true)
 	local augroup = api.nvim_create_augroup(GROUP_NAME, { clear = false })
 	attach_on_lines(bufnr)
 
@@ -208,9 +208,9 @@ local function register_buffer_local_autocmds(bufnr)
 		callback = guard.guarded(function(args)
 			if buf_state.should_skip(args.buf) then return end
 			Debug.ui_entry(args.buf, args.event)
-			log.assert(not buffer.get(args.buf, buffer.IKEY.INSERT_MODE),
+			log.assert(not buf_lines.get(args.buf, buf_lines.IKEY.INSERT_MODE),
 				"InsertEnter triggered while already in insert mode")
-			buffer.set(args.buf, buffer.IKEY.INSERT_MODE, true)
+			buf_lines.set(args.buf, buf_lines.IKEY.INSERT_MODE, true)
 			Debug.ui_exit(args.buf, args.event)
 		end),
 	})
@@ -225,7 +225,7 @@ local function register_buffer_local_autocmds(bufnr)
 			-- InsertLeave may be triggered without a preceding InsertEnter
 			-- due to the behavior of other plugins (e.g., Telescope).
 			-- Do not assert insert_mode here.
-			buffer.set(args.buf, buffer.IKEY.INSERT_MODE, false)
+			buf_lines.set(args.buf, buf_lines.IKEY.INSERT_MODE, false)
 			on_insert_leave(ctx)
 			Debug.ui_exit(args.buf, args.event)
 		end),

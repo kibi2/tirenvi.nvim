@@ -1,4 +1,4 @@
-local buffer = require("tirenvi.io.buffer") -- IO
+local buf_lines = require("tirenvi.io.buf_lines") -- IO
 
 -- =============================================================================
 
@@ -14,17 +14,17 @@ function M.new(bufnr)
     return {
         get_lines = function(first, last)
             ---@diagnostic disable-next-line: redundant-parameter
-            return buffer.get_lines(bufnr, first, last)
+            return buf_lines.get_lines(bufnr, first, last)
         end,
 
         get_line = function(row)
             ---@diagnostic disable-next-line: redundant-parameter
-            return buffer.get_line(bufnr, row)
+            return buf_lines.get_line(bufnr, row)
         end,
 
         line_count = function()
             ---@diagnostic disable-next-line: redundant-parameter
-            return buffer.line_count(bufnr)
+            return buf_lines.line_count(bufnr)
         end,
     }
 end

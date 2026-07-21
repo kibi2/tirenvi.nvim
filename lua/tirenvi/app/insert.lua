@@ -5,7 +5,7 @@ local config = require("tirenvi.config")          -- Root
 
 local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
 
-local buffer = require("tirenvi.io.buffer")       -- IO
+local buf_lines = require("tirenvi.io.buf_lines") -- IO
 local buf_state = require("tirenvi.io.buf_state") -- IO
 local reader = require("tirenvi.io.reader")
 
@@ -25,11 +25,11 @@ local M = {}
 function M.insert_char_in_newline(ctx)
     local cursor = reader.cursor(ctx)
     local row_cur = cursor.row_cur
-    local line_new = buffer.get_line(ctx.bufnr, row_cur)
+    local line_new = buf_lines.get_line(ctx.bufnr, row_cur)
     if line_new ~= "" then
         return
     end
-    local line_prev, line_next = buffer.get_lines_around(ctx.bufnr, Range.from_lua(row_cur, row_cur))
+    local line_prev, line_next = buf_lines.get_lines_around(ctx.bufnr, Range.from_lua(row_cur, row_cur))
     local line_ref = line_prev
     if not buf_state.is_allow_plain(ctx.bufnr) then
         line_ref = line_ref or line_next

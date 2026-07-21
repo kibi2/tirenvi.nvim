@@ -4,7 +4,7 @@ local flat_parser = require("tirenvi.parser.flat_parser") -- Parser
 local buf_parser = require("tirenvi.parser.buf_parser")
 
 local buf_state = require("tirenvi.io.buf_state") -- IO
-local buffer = require("tirenvi.io.buffer")
+local buf_lines = require("tirenvi.io.buf_lines")
 local writer = require("tirenvi.io.writer")
 local attr_store = require("tirenvi.io.attr_store")
 local reader = require("tirenvi.io.reader")
@@ -34,7 +34,7 @@ end
 ---@param tirdoc Document
 ---@param is_write_pre boolean|nil
 local function tirdoc_to_flat(ctx, r_result, tirdoc, is_write_pre)
-    local parser = buffer.get(ctx.bufnr, buffer.IKEY.PARSER)
+    local parser = buf_lines.get(ctx.bufnr, buf_lines.IKEY.PARSER)
     local fltlines = flat_parser.unparse(parser, tirdoc)
     local req_w = Request.new_writer(r_result, fltlines, is_write_pre)
     local attrs = vim.deepcopy(r_result.attrs)
@@ -81,9 +81,9 @@ function M.doc_to_buflines(ctx, r_result, doc, opts)
     log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
     buf_state.set_buffer_tirbuf(ctx.bufnr, Attrs.has_grid(attrs))
     attr_store.write(ctx, attrs)
-    local buf_lines = buf_parser.unparse(bufdoc)
-    if not util.same_str_array(buf_lines, r_result.lines or "") then
-        local req_w = Request.new_writer(r_result, buf_lines, no_undo)
+    local buflines = buf_parser.unparse(bufdoc)
+    if not util.same_str_array(buflines, r_result.lines or "") then
+        local req_w = Request.new_writer(r_result, buflines, no_undo)
         writer.write(ctx, req_w)
     end
 end

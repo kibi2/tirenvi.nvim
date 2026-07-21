@@ -6,7 +6,7 @@ local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
 local CursorLogical = require("tirenvi.cursor.logical") -- IO
 local CursorNvim = require("tirenvi.cursor.nvim")
 local CursorConvert = require("tirenvi.cursor.convert")
-local buffer = require("tirenvi.io.buffer")
+local buf_lines = require("tirenvi.io.buf_lines")
 local buf_state = require("tirenvi.io.buf_state")
 local reader = require("tirenvi.io.reader")
 local namespaces = require("tirenvi.io.namespaces")
@@ -83,7 +83,7 @@ local function show_attr_marks(ctx, attr, iattr, icol)
     ---- NOTE:
     -- virt_text screen position is not always stable and may differ
     -- from the extmark's actual buffer position.
-    local nlines = buffer.line_count(ctx.bufnr)
+    local nlines = buf_lines.line_count(ctx.bufnr)
     start0 = math.min(start0, nlines - 1)
     local ok = pcall(vim.api.nvim_buf_set_extmark, ctx.bufnr, namespaces.ATTR, start0, 0, opts)
   if not ok then
@@ -113,9 +113,9 @@ end
 function M.layout(title, single)
     title = case_tag() .. (title or "") .. DELIMITER
 	local ctx                  = Context.from_buf()
-    local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)  or {}
+    local attrs = buf_lines.get(ctx.bufnr, buf_lines.IKEY.ATTRS)  or {}
     local cursor = reader.cursor(ctx)
-    local line = buffer.get_line(ctx.bufnr, cursor.row_cur) or ""
+    local line = buf_lines.get_line(ctx.bufnr, cursor.row_cur) or ""
     local prefix = tir_buf.get_prefix_part(line)
     local pre_disp = fn.strdisplaywidth(prefix)
     local logical = CursorConvert.to_logical(attrs, cursor.row_cur, cursor.col_disp - pre_disp)
@@ -128,14 +128,14 @@ end
 ---@param icol integer
 function M.goto(iblock, irow, icol)
     local ctx = Context.from_buf()
-    local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+    local attrs = buf_lines.get(ctx.bufnr, buf_lines.IKEY.ATTRS)
     local cursor_logical = CursorLogical.new(iblock, irow, icol, 0)
     local cursor = CursorConvert.to_buf(cursor_logical, attrs, ctx.line_provider)
     CursorNvim.move_byte(ctx, cursor.row_cur, cursor.col_byte)
 end
 
 function M.show_attr_marks(ctx)
-    local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+    local attrs = buf_lines.get(ctx.bufnr, buf_lines.IKEY.ATTRS)
     vim.api.nvim_buf_clear_namespace(ctx.bufnr, namespaces.ATTR, 0, -1)
     if not attrs then
         return

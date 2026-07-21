@@ -3,7 +3,7 @@
 [TIR][DEBUG][[string ":lua"]] <boolean> false
 [TIR][🟧PRB][[string ":lua"] 1] -0.003
 [TIR][CATEGORY][[string ":lua"]] format 38 foo (12,34)
-[TIR][DEBUG][buffer.lua] === cache[#1] lines[1]='gfm'...[6]='┊Bob⠀⠀┊31⠀┊大阪↲⠀⠀⠀⠀⠀⠀┊'
+[TIR][DEBUG][buf_lines.lua] === cache[#1] lines[1]='gfm'...[6]='┊Bob⠀⠀┊31⠀┊大阪↲⠀⠀⠀⠀⠀⠀┊'
 --- log file ---
 === MESSAGE ===
  

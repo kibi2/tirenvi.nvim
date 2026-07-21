@@ -1,6 +1,6 @@
-local tir_buf       = require("tirenvi.parser.tir_buf") -- Parser
+local tir_buf       = require("tirenvi.parser.tir_buf")  -- Parser
 
-local buffer        = require("tirenvi.io.buffer")      -- IO
+local buf_lines     = require("tirenvi.io.buf_lines")    -- IO
 local reader        = require("tirenvi.io.reader")
 local Context       = require("tirenvi.io.context")
 
@@ -42,7 +42,7 @@ M.T = build_motion("T")
 
 function M.block_top()
 	local ctx     = Context.from_buf()
-	local attrs   = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+	local attrs   = buf_lines.get(ctx.bufnr, buf_lines.IKEY.ATTRS)
 	local cursor  = reader.cursor(ctx)
 	local pos     = CursorConvert.to_logical(attrs, cursor.row_cur, cursor.col_disp)
 	local top_row = attrs[pos.iblock].range.first
@@ -51,7 +51,7 @@ end
 
 function M.block_bottom()
 	local ctx        = Context.from_buf()
-	local attrs      = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+	local attrs      = buf_lines.get(ctx.bufnr, buf_lines.IKEY.ATTRS)
 	local cursor     = reader.cursor(ctx)
 	local pos        = CursorConvert.to_logical(attrs, cursor.row_cur, cursor.col_disp)
 	local bottom_row = attrs[pos.iblock].range.last

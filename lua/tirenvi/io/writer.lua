@@ -1,6 +1,6 @@
 local dirty_range = require("tirenvi.parser.dirty_range") -- Parser
 
-local buffer      = require("tirenvi.io.buffer")          -- IO
+local buf_lines   = require("tirenvi.io.buf_lines")       -- IO
 local dirty       = require("tirenvi.io.dirty")
 local Request     = require("tirenvi.io.request")
 
@@ -16,7 +16,7 @@ local M           = {}
 ---@param ctx Context
 ---@param req Request
 function M.write(ctx, req)
-    buffer.set_lines(ctx, req.range, req.lines, Request.is_no_undo(req), req.cursor)
+    buf_lines.set_lines(ctx, req.range, req.lines, Request.is_no_undo(req), req.cursor)
     local range3 = Request.get_range3(req)
     local prev_ranges = dirty.get_ranges(ctx.bufnr)
     local new_ranges = dirty_range.remove(prev_ranges, range3)

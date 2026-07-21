@@ -31,9 +31,9 @@ require("tirenvi").setup(opts)
 vim.g.tirenvi_initialized = false
 Debug = require("tirenvi.editor.debug")
 Motion = require("tirenvi.editor.motion")
-local buffer = require("tirenvi.io.buffer")
-buffer.clear_cache()
-buffer.set_step(3)
+local buf_lines = require("tirenvi.io.buf_lines")
+buf_lines.clear_cache()
+buf_lines.set_step(3)
 EOF
 
 " ----------------------------

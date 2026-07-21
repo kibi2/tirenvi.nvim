@@ -10,7 +10,7 @@ local app = require("tirenvi.app")                -- App
 local WidthOp = require("tirenvi.width.op")       -- Width
 
 local buf_state = require("tirenvi.io.buf_state") -- IO
-local buffer = require("tirenvi.io.buffer")
+local buf_lines = require("tirenvi.io.buf_lines")
 local Context = require("tirenvi.io.context")
 
 local guard = require("tirenvi.util.guard") -- Util
@@ -111,17 +111,17 @@ local function cmd_repair(ctx, opts)
 		app.cmd_redraw(ctx)
 		return
 	elseif arg == "toggle" then
-		buffer.set_repair(ctx.bufnr, not buffer.get_repair(ctx.bufnr))
+		buf_lines.set_repair(ctx.bufnr, not buf_lines.get_repair(ctx.bufnr))
 	elseif arg == "enable" then
-		buffer.set_repair(ctx.bufnr, true)
+		buf_lines.set_repair(ctx.bufnr, true)
 	elseif arg == "disable" then
-		buffer.set_repair(ctx.bufnr, false)
+		buf_lines.set_repair(ctx.bufnr, false)
 	else
 		notify.error("[Tirenvi] invalid argument: " .. arg .. " (expected: [enable|disable|toggle])")
 		return
 	end
 	notify.info(string.format("[Tirenvi] repair:%s ",
-		buffer.get_repair(ctx.bufnr) and "enable" or "disable"))
+		buf_lines.get_repair(ctx.bufnr) and "enable" or "disable"))
 end
 
 ---@param ctx Context
@@ -254,7 +254,7 @@ end
 ---@return string
 function M.keymap_lf()
 	local ctx = Context.from_buf()
-	buffer.clear_cache()
+	buf_lines.clear_cache()
 	log.debug("===+===+===+===+=== keymap_lf %s ===+===+===+===+===", ctx.bufnr)
 	if buf_state.should_skip(ctx.bufnr) then
 		return util.get_termcodes("<CR>")
@@ -265,7 +265,7 @@ end
 ---@return string
 function M.keymap_tab()
 	local ctx = Context.from_buf()
-	buffer.clear_cache()
+	buf_lines.clear_cache()
 	log.debug("===+===+===+===+=== keymap_tab %s ===+===+===+===+===", ctx.bufnr)
 	if buf_state.should_skip(ctx.bufnr) then
 		return util.get_termcodes("<Tab>")

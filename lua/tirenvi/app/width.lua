@@ -5,7 +5,7 @@ local common = require("tirenvi.app.common")                   -- App
 local tir_buf = require("tirenvi.parser.tir_buf")              -- Parser
 
 local LinProvider = require("tirenvi.io.buffer_line_provider") -- IO
-local buffer = require("tirenvi.io.buffer")
+local buf_lines = require("tirenvi.io.buf_lines")
 local attr_store = require("tirenvi.io.attr_store")
 local reader = require("tirenvi.io.reader")
 
@@ -91,7 +91,7 @@ local MAX_HEAD = 5
 ---@return string
 local function get_head(bufnr, attr, icol)
     local irow = attr.range.first
-    local line = buffer.get_line(bufnr, irow) or ""
+    local line = buf_lines.get_line(bufnr, irow) or ""
     local cells = tir_buf.get_cells(line)
     local head = Cell.remove_padding(cells[icol] or "")
     local head_chars = util.utf8_chars(head)
@@ -138,7 +138,7 @@ end
 ---@param ctx Context
 ---@param width_op WidthOp
 local function width_info(ctx, width_op)
-    local attrs = buffer.get(ctx.bufnr, buffer.IKEY.ATTRS)
+    local attrs = buf_lines.get(ctx.bufnr, buf_lines.IKEY.ATTRS)
     local logical = CursorConvert.to_logical(attrs, width_op.row_cur, width_op.col_disp)
     local attr = attrs[logical.iblock]
     if Attr.is_plain(attr) then

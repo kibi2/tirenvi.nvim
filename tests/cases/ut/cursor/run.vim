@@ -4,14 +4,14 @@ new
 
 lua << EOF
   Context = require("tirenvi.io.context")
-  Buffer = require("tirenvi.io.buffer")
+  buf_lines = require("tirenvi.io.buf_lines")
   Range = require("tirenvi.util.range")
   local lines = {
     "1あA",
     "123A",
   }
   ctx = Context.from_buf()
-  Buffer.set_lines(ctx, Range.WHOLE, lines)
+  buf_lines.set_lines(ctx, Range.WHOLE, lines)
 EOF
 
 			lua print("irow, col_byte, col_char ")

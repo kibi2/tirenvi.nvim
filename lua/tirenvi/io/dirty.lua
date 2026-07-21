@@ -3,7 +3,7 @@ local config = require("tirenvi.config")            -- Root
 local Attrs = require("tirenvi.core.attrs")         -- Core
 
 local namespaces = require("tirenvi.io.namespaces") -- IO
-local buffer = require("tirenvi.io.buffer")
+local buf_lines = require("tirenvi.io.buf_lines")
 
 local Range = require("tirenvi.util.range") -- Util
 local log = require("tirenvi.util.log")
@@ -48,7 +48,7 @@ end
 ---@param bufnr number
 ---@param ranges Range[]
 local function set_dirty_ranges(bufnr, ranges)
-    buffer.set(bufnr, buffer.IKEY.DIRTY, ranges)
+    buf_lines.set(bufnr, buf_lines.IKEY.DIRTY, ranges)
     log.watch("INVD", ranges)
     for irange, range in ipairs(ranges) do
         show_marks(bufnr, range, irange, "dirty")
@@ -80,13 +80,13 @@ end
 ---@param bufnr number
 ---@return Range[]
 function M.get_ranges(bufnr)
-    return buffer.get(bufnr, buffer.IKEY.DIRTY) or {}
+    return buf_lines.get(bufnr, buf_lines.IKEY.DIRTY) or {}
 end
 
 ---@param bufnr number
 ---@return Attr[]
 function M.get_invalid_attrs(bufnr)
-    local attrs = buffer.get(bufnr, buffer.IKEY.ATTRS) or {}
+    local attrs = buf_lines.get(bufnr, buf_lines.IKEY.ATTRS) or {}
     return Attrs.get_invalid_attrs(attrs)
 end
 

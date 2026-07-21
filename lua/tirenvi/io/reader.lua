@@ -1,4 +1,4 @@
-local buffer = require("tirenvi.io.buffer") -- IO
+local buf_lines = require("tirenvi.io.buf_lines") -- IO
 local attr_store = require("tirenvi.io.attr_store")
 local ReadResult = require("tirenvi.io.read_result")
 
@@ -25,7 +25,7 @@ function M.read(ctx, range, opts)
     local result = ReadResult.new_reader(range)
     result.attrs = attr_store.read(ctx.bufnr)
     local first, last = ReadResult.lua_range(result)
-    result.lines = buffer.get_lines(ctx.bufnr, first, last)
+    result.lines = buf_lines.get_lines(ctx.bufnr, first, last)
     if opts.cursor ~= false then
         result.cursor = M.cursor(ctx)
         result.cursor.restore_mode = restore_mode or "none"

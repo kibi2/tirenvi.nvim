@@ -4,7 +4,7 @@ local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
 local flat_parser = require("tirenvi.parser.flat_parser")
 local Parser = require("tirenvi.parser.parser")
 
-local buffer = require("tirenvi.io.buffer") -- IO
+local buf_lines = require("tirenvi.io.buf_lines") -- IO
 local buf_state = require("tirenvi.io.buf_state")
 local writer = require("tirenvi.io.writer")
 local reader = require("tirenvi.io.reader")
@@ -29,7 +29,7 @@ local M = {}
 ---@param r_result ReadResult
 ---@return Document
 local function fltlines_to_tirdoc(ctx, r_result)
-    local parser = buffer.get(ctx.bufnr, buffer.IKEY.PARSER)
+    local parser = buf_lines.get(ctx.bufnr, buf_lines.IKEY.PARSER)
     local tirdoc = flat_parser.parse(parser, r_result)
     log.watch("ATTR", Document.debug_attrs(tirdoc, "[1]DOC ATTR:"))
     Document.apply_attrs(tirdoc, r_result.attrs)
@@ -38,17 +38,17 @@ local function fltlines_to_tirdoc(ctx, r_result)
 end
 
 local function embedded_on(ctx)
-    local parser = buffer.get(ctx.bufnr, buffer.IKEY.PARSER)
+    local parser = buf_lines.get(ctx.bufnr, buf_lines.IKEY.PARSER)
     if parser then
         return
     end
     parser = Parser.resolve_parser("*")
-    buffer.set(ctx.bufnr, buffer.IKEY.PARSER, parser)
+    buf_lines.set(ctx.bufnr, buf_lines.IKEY.PARSER, parser)
 end
 
 ---@param ctx Context
 local function embedded_off(ctx)
-    buffer.set(ctx.bufnr, buffer.IKEY.PARSER, nil)
+    buf_lines.set(ctx.bufnr, buf_lines.IKEY.PARSER, nil)
 end
 
 --#endregion

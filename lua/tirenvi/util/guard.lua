@@ -1,5 +1,5 @@
 local buf_state = require("tirenvi.io.buf_state") -- IO
-local buffer = require("tirenvi.io.buffer")
+local buf_lines = require("tirenvi.io.buf_lines")
 
 local errors = require("tirenvi.util.errors") -- Util
 local notify = require("tirenvi.util.notify")
@@ -18,7 +18,7 @@ local M = {}
 ---@return fun(...)
 function M.guarded(func, opts)
 	opts = opts or {}
-	buffer.clear_cache()
+	buf_lines.clear_cache()
 
 	return function(...)
 		if buf_state.is_vscode() then
