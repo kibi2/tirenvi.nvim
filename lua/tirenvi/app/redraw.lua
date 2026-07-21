@@ -56,7 +56,7 @@ end
 ---@param ctx Context
 ---@param range3 Range3|nil
 local function repair_request(ctx, range3)
-    if buf_state.is_repair(ctx, range3) then
+    if buf_state.is_repair(ctx.bufnr, range3) then
         schedule_repair(ctx, range3)
     end
 end

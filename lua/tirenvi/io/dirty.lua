@@ -1,9 +1,10 @@
+local api = vim.api                                 -- Neovim
+
 local config = require("tirenvi.config")            -- Root
 
 local Attrs = require("tirenvi.core.attrs")         -- Core
 
 local namespaces = require("tirenvi.io.namespaces") -- IO
-local buf_lines = require("tirenvi.io.buf_lines")
 local buf_state = require("tirenvi.io.buf_state")
 
 local Range = require("tirenvi.util.range") -- Util
@@ -43,7 +44,7 @@ local function show_marks(bufnr, range, id, text)
             opts.sign_text = tostring(id):sub(-2)
         end
     end
-    vim.api.nvim_buf_set_extmark(bufnr, namespaces.DIRTY, start0, 0, opts)
+    api.nvim_buf_set_extmark(bufnr, namespaces.DIRTY, start0, 0, opts)
 end
 
 ---@param bufnr number
@@ -73,7 +74,7 @@ end
 ---@param bufnr number
 ---@param ranges Range[]
 function M.set_ranges(bufnr, ranges)
-    vim.api.nvim_buf_clear_namespace(bufnr, namespaces.DIRTY, 0, -1)
+    api.nvim_buf_clear_namespace(bufnr, namespaces.DIRTY, 0, -1)
     set_dirty_ranges(bufnr, ranges)
     set_dirty_attrs(bufnr)
 end

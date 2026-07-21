@@ -1,3 +1,5 @@
+local api = vim.api                               -- Neovim
+
 local fn = vim.fn                                 --Neovim
 
 local config = require("tirenvi.config")          -- Root
@@ -37,7 +39,7 @@ function M.auto_wrap(ctx)
     end
     -- Fast path for CursorMoved.
     -- We only need the current line of the current window.
-    local line = vim.api.nvim_get_current_line()
+    local line = api.nvim_get_current_line()
     local line_width = fn.strdisplaywidth(line)
     local win_span = buf_state.get_win_span(ctx.winid)
     local is_over = win_span < line_width

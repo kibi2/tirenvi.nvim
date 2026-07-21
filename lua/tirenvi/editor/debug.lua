@@ -1,5 +1,7 @@
-local bo = vim.bo -- Neovim
+local api = vim.api                               -- Neovim
+local bo = vim.bo
 local fn = vim.fn
+
 
 local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
 
@@ -85,12 +87,12 @@ local function show_attr_marks(ctx, attr, iattr, icol)
     -- from the extmark's actual buffer position.
     local nlines = buf_lines.line_count(ctx.bufnr)
     start0 = math.min(start0, nlines - 1)
-    local ok = pcall(vim.api.nvim_buf_set_extmark, ctx.bufnr, namespaces.ATTR, start0, 0, opts)
+    local ok = pcall(api.nvim_buf_set_extmark, ctx.bufnr, namespaces.ATTR, start0, 0, opts)
   if not ok then
     opts = vim.deepcopy(opts)
     opts.virt_text = nil
     opts.virt_text_pos = nil
-    vim.api.nvim_buf_set_extmark(ctx.bufnr, namespaces.ATTR, start0, 0, opts)
+    api.nvim_buf_set_extmark(ctx.bufnr, namespaces.ATTR, start0, 0, opts)
   end
 
 end
@@ -136,7 +138,7 @@ end
 
 function M.show_attr_marks(ctx)
     local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
-    vim.api.nvim_buf_clear_namespace(ctx.bufnr, namespaces.ATTR, 0, -1)
+    api.nvim_buf_clear_namespace(ctx.bufnr, namespaces.ATTR, 0, -1)
     if not attrs then
         return
     end

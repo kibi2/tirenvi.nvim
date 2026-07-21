@@ -62,9 +62,12 @@ local function ensure_parser(self)
     end
     local message
     if self._err_code == ERR.EXECUTABLE_NOT_FOUND then
-        message = errors.not_found_parser_error(self)
+        message = errors.not_found_parser_error(self.executable)
     elseif self._err_code == ERR.VERSION_TOO_OLD then
-        message = errors.outdated_parser_error(self)
+        message = errors.outdated_parser_error(
+            self.executable,
+            self.required_version,
+            self._installed_version)
     else
         message = errors.no_parser_error()
     end

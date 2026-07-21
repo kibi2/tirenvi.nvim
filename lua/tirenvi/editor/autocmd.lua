@@ -3,7 +3,8 @@ local api = vim.api                      -- Neovim
 local config = require("tirenvi.config") -- Root
 local ui = require("tirenvi.ui")
 
-local Debug = require("tirenvi.editor.debug")     -- Editor
+local Debug = require("tirenvi.editor.debug") -- Editor
+local guard = require("tirenvi.editor.guard")
 
 local app = require("tirenvi.app")                -- App
 
@@ -13,8 +14,7 @@ local buf_lines = require("tirenvi.io.buf_lines") -- IO
 local buf_state = require("tirenvi.io.buf_state")
 local Context = require("tirenvi.io.context")
 
-local guard = require("tirenvi.util.guard") -- Util
-local Range3 = require("tirenvi.util.range3")
+local Range3 = require("tirenvi.util.range3") -- Util
 local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
@@ -243,7 +243,7 @@ local function register_buffer_local_autocmds(bufnr)
 		end),
 	})
 
-	vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
+	api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
 		group = augroup,
 		buffer = bufnr,
 		callback = guard.guarded(function(args)
@@ -258,7 +258,7 @@ end
 
 local function register_autocmds()
 	local augroup = api.nvim_create_augroup(GROUP_NAME, { clear = true })
-	vim.api.nvim_create_autocmd("FileType", {
+	api.nvim_create_autocmd("FileType", {
 		group = augroup,
 		callback = guard.guarded(function(args)
 			local bufnr = args.buf
@@ -293,7 +293,7 @@ local function register_autocmds()
 		end),
 	})
 
-	vim.api.nvim_create_autocmd("WinClosed", {
+	api.nvim_create_autocmd("WinClosed", {
 		group = augroup,
 		callback = guard.guarded(function(args)
 			local winid = tonumber(args.match)
@@ -313,7 +313,7 @@ local function register_autocmds()
 	if vim.g.tirenvi_test_mode == 1 then
 		local ok, luacov = pcall(require, "luacov")
 		if ok then
-			vim.api.nvim_create_autocmd("VimLeavePre", {
+			api.nvim_create_autocmd("VimLeavePre", {
 				group = augroup,
 				callback = function(args)
 					Debug.ui_entry(args.buf, args.event)

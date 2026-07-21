@@ -124,21 +124,21 @@ local function is_undo_mode(bufnr)
 	return false
 end
 
----@param ctx Context
+---@param bufnr number
 ---@param range3 Range3|nil
 ---@return string
-local function get_status(ctx, range3)
-	if M.get_repair(ctx.bufnr) == false then
+local function get_status(bufnr, range3)
+	if M.get_repair(bufnr) == false then
 		return REPAIR_OFF
 	end
 	if not range3 then
 		return INSERT_LEAVE
-	elseif is_insert_mode(ctx.bufnr) then
+	elseif is_insert_mode(bufnr) then
 		-- Modifying the buffer in insert mode may corrupt the undo node.
 		-- Therefore, in insert mode, only record the dirty changed region
 		-- and repair it when leaving insert mode.
 		return INSERT_MODE
-	elseif is_undo_mode(ctx.bufnr) then
+	elseif is_undo_mode(bufnr) then
 		-- Moving the cursor in insert mode may create an dirty table undo node.
 		-- Therefore, when performing undo/redo, skip table validation.
 		return UNDO_REDO_MODE
@@ -239,12 +239,12 @@ function M.should_skip(bufnr, user_opts)
 	return false
 end
 
----@param ctx Context
+---@param bufnr number
 ---@param range3 Range3|nil
 ---@return boolean
-function M.is_repair(ctx, range3)
-	local status = get_status(ctx, range3)
-	log_watch(ctx.bufnr, status, range3)
+function M.is_repair(bufnr, range3)
+	local status = get_status(bufnr, range3)
+	log_watch(bufnr, status, range3)
 	if status == INSERT_MODE then
 		return false
 	end

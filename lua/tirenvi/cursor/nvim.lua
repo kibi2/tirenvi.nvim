@@ -61,8 +61,8 @@ local function disp_to_byte(line, col_disp)
     local nchar = vim.str_utfindex(line)
     local disp = 1
     for ichar = 1, nchar do
-        local char = vim.fn.strcharpart(line, ichar - 1, 1)
-        local width = vim.fn.strdisplaywidth(char)
+        local char = fn.strcharpart(line, ichar - 1, 1)
+        local width = fn.strdisplaywidth(char)
         if col_disp < disp + width then
             return char_to_byte(line, ichar)
         end

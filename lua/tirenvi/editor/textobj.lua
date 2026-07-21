@@ -1,3 +1,5 @@
+local api = vim.api                               -- Neovim
+
 local config = require("tirenvi.config")          -- Root
 
 local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
@@ -32,7 +34,7 @@ local function setup_vl(is_around)
         return
     end
     CursorNvim.move_byte(ctx, rect.row.first, rect.col.first)
-    vim.api.nvim_feedkeys(vim.keycode("<C-v>"), "n", false)
+    api.nvim_feedkeys(vim.keycode("<C-v>"), "n", false)
     vim.cmd("normal! o")
     CursorNvim.move_byte(ctx, rect.row.last, rect.col.last)
 end

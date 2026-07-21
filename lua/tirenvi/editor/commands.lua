@@ -4,6 +4,7 @@ local ui = require("tirenvi.ui")                  -- Root
 
 local autocmd = require("tirenvi.editor.autocmd") -- Editor
 local Debug = require("tirenvi.editor.debug")
+local guard = require("tirenvi.editor.guard")
 
 local app = require("tirenvi.app")                -- App
 
@@ -13,8 +14,7 @@ local buf_state = require("tirenvi.io.buf_state") -- IO
 local buf_lines = require("tirenvi.io.buf_lines")
 local Context = require("tirenvi.io.context")
 
-local guard = require("tirenvi.util.guard") -- Util
-local notify = require("tirenvi.util.notify")
+local notify = require("tirenvi.util.notify") -- Util
 local errors = require("tirenvi.util.errors")
 local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")

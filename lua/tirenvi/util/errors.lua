@@ -64,29 +64,31 @@ function M.vim_system_error(system, command)
 end
 
 --- Parser command not found in PATH.
----@param parser Parser
+---@param executable string
 ---@return string
-function M.not_found_parser_error(parser)
+function M.not_found_parser_error(executable)
 	return string.format(
 		PREFIX .. "Required command '%s' not found.\n\n" .. "Install it with:\n\n" .. "    pip install %s",
-		parser.executable,
-		parser.executable
+		executable,
+		executable
 	)
 end
 
 --- Parser version is too old.
----@param parser Parser
+---@param executable string
+---@param required_version string
+---@param installed_version string
 ---@return string
-function M.outdated_parser_error(parser)
+function M.outdated_parser_error(executable, required_version, installed_version)
 	return string.format(
 		PREFIX
 		.. "Command '%s' version is too old.\n\n"
 		.. "Required version: %s\n"
 		.. "Installed version: %s\n\n"
 		.. "Use :checkhealth tirenvi for details.",
-		parser.executable,
-		parser.required_version or "unknown",
-		parser._installed_version or "unknown"
+		executable,
+		required_version or "unknown",
+		installed_version or "unknown"
 	)
 end
 

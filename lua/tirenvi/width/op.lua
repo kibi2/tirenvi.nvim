@@ -1,3 +1,5 @@
+local fn        = vim.fn                        -- Neovim
+
 local Cell      = require("tirenvi.core.cell")  -- Core
 
 local Range     = require("tirenvi.util.range") -- Util
@@ -41,18 +43,18 @@ local map       = {
 ---@return Rect
 local function get_selection(opts)
     local row_range = Range.from_lua_normal(opts.line1, opts.line2)
-    local is_block  = (vim.fn.visualmode() == "\22")
+    local is_block  = (fn.visualmode() == "\22")
     local col_disp_start, col_disp_end
     if opts.range > 0 then
         if is_block then
-            col_disp_start = vim.fn.virtcol("'<")
-            col_disp_end   = vim.fn.virtcol("'>")
+            col_disp_start = fn.virtcol("'<")
+            col_disp_end   = fn.virtcol("'>")
         else
             col_disp_start = 1
             col_disp_end   = math.huge
         end
     else
-        local col      = vim.fn.virtcol(".")
+        local col      = fn.virtcol(".")
         col_disp_start = col
         col_disp_end   = col
     end

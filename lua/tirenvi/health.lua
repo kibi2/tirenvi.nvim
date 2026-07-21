@@ -1,15 +1,17 @@
-local health = vim.health or require("health") -- Neovim
+local fn      = vim.fn                         -- Neovim
 
-local config = require("tirenvi.config")       -- Root
+local health  = vim.health or require("health") -- Neovim
+
+local config  = require("tirenvi.config")      -- Root
 local version = require("tirenvi.version")
 
-local Parser = require("tirenvi.parser.parser") -- Parser
+local Parser  = require("tirenvi.parser.parser") -- Parser
 
-local log = require("tirenvi.util.log")         -- Util
+local log     = require("tirenvi.util.log")     -- Util
 
 -- =============================================================================
 
-local M = {}
+local M       = {}
 
 -- =============================================================================
 --#region Private
@@ -88,8 +90,8 @@ end
 function M.check()
 	health.start("tirenvi")
 	health.info("version: " .. version.VERSION)
-	pcall(vim.fn["repeat#set"], "")
-	if vim.fn.exists("*repeat#set") == 1 then
+	pcall(fn["repeat#set"], "")
+	if fn.exists("*repeat#set") == 1 then
 		vim.health.ok("vim-repeat is available")
 	else
 		vim.health.warn("vim-repeat not found ('.' repeat disabled)")

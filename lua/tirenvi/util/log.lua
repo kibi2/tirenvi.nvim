@@ -150,28 +150,30 @@ end
 
 local category_hl_map = {}
 local category_match_id = {}
-vim.api.nvim_set_hl(0, "TirLog_Entry", { fg = "#55ffff", bold = true })
-vim.api.nvim_set_hl(0, "TirLog_Error", { fg = "#ffffff", bg = "#ff0000", bold = true })
-vim.api.nvim_set_hl(0, "TirLog_num", { fg = "#cc55cc", bold = true })
+api.nvim_set_hl(0, "TirLog_Entry", { fg = "#55ffff", bold = true })
+api.nvim_set_hl(0, "TirLog_Error", { fg = "#ffffff", bg = "#ff0000", bold = true })
+api.nvim_set_hl(0, "TirLog_num", { fg = "#cc55cc", bold = true })
 
+---@param bufnr number
 local function apply_log_highlight(bufnr)
-	local winid = vim.fn.bufwinid(bufnr)
+	local winid = fn.bufwinid(bufnr)
 	if winid == -1 then return end
-	vim.api.nvim_win_call(winid, function()
-		vim.fn.clearmatches()
-		vim.fn.matchadd("TirLog_Entry", "===")
-		--vim.fn.matchadd("TirLog_Error", [[\[[0-9,]\+\]]])
-		vim.fn.matchadd("TirLog_num", "\\[[0-9,]\\+\\]")
-		vim.fn.matchadd("TirLog_Error", "\\[ERROR\\]")
+	api.nvim_win_call(winid, function()
+		fn.clearmatches()
+		fn.matchadd("TirLog_Entry", "===")
+		--fn.matchadd("TirLog_Error", [[\[[0-9,]\+\]]])
+		fn.matchadd("TirLog_num", "\\[[0-9,]\\+\\]")
+		fn.matchadd("TirLog_Error", "\\[ERROR\\]")
 		for cat, hl in pairs(category_hl_map) do
-			vim.fn.matchadd(hl, "\\[" .. cat .. "\\]")
+			fn.matchadd(hl, "\\[" .. cat .. "\\]")
 		end
 	end)
 end
 
-local aug = vim.api.nvim_create_augroup("TirenviLogHL", { clear = true })
+local aug = api.nvim_create_augroup("TirenviLogHL", { clear = true })
+---@param bufnr number
 local function register_autocmds(bufnr)
-	vim.api.nvim_create_autocmd("BufWinEnter", {
+	api.nvim_create_autocmd("BufWinEnter", {
 		group = aug,
 		buffer = bufnr,
 		callback = function(args)
@@ -271,8 +273,8 @@ local function pick_color(cat)
 	if assigned[cat] then
 		return assigned[cat]
 	end
-	local hash = vim.fn.sha256(cat)
-	local base = (vim.fn.str2nr(hash:sub(1, 8), 16) % #palette) + 1
+	local hash = fn.sha256(cat)
+	local base = (fn.str2nr(hash:sub(1, 8), 16) % #palette) + 1
 	for i = 0, #palette - 1 do
 		local idx = ((base + i - 1) % #palette) + 1
 		local color = palette[idx]
@@ -295,7 +297,7 @@ local function ensure_category_highlight(category)
 	local hl = "TirLog_" .. category
 	local color = pick_color(category)
 
-	vim.api.nvim_set_hl(0, hl, { fg = color, bold = true })
+	api.nvim_set_hl(0, hl, { fg = color, bold = true })
 
 	category_hl_map[category] = hl
 	return hl
@@ -306,9 +308,9 @@ local function ensure_match(bufnr, category, hl)
 		return
 	end
 
-	vim.api.nvim_buf_call(bufnr, function()
+	api.nvim_buf_call(bufnr, function()
 		local pattern = "\\[" .. category .. "\\]"
-		local id = vim.fn.matchadd(hl, pattern)
+		local id = fn.matchadd(hl, pattern)
 		category_match_id[category] = id
 	end)
 end

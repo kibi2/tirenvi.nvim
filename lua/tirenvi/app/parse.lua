@@ -1,10 +1,11 @@
+local fn = vim.fn                                 -- Neovim
+
 local common = require("tirenvi.app.common")      -- App
 
 local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
 local flat_parser = require("tirenvi.parser.flat_parser")
 local Parser = require("tirenvi.parser.parser")
 
-local buf_lines = require("tirenvi.io.buf_lines") -- IO
 local buf_state = require("tirenvi.io.buf_state")
 local writer = require("tirenvi.io.writer")
 local reader = require("tirenvi.io.reader")
@@ -12,9 +13,8 @@ local Request = require("tirenvi.io.request")
 local ReadResult = require("tirenvi.io.read_result")
 
 local Document = require("tirenvi.core.document") -- Core
-local Attrs = require("tirenvi.core.attrs")
 
-local util = require("tirenvi.util.util") -- Util
+local util = require("tirenvi.util.util")         -- Util
 local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
@@ -95,7 +95,7 @@ end
 ---@param filename string
 function M.debug_read_tir(ctx, filename)
     local r_result = ReadResult.new_reader(Range.WHOLE)
-    local jslines = vim.fn.readfile(filename)
+    local jslines = fn.readfile(filename)
     local tirdoc = flat_parser.from_jslines(ctx, jslines)
     common.doc_to_buflines(ctx, r_result, tirdoc)
 end
@@ -107,7 +107,7 @@ function M.debug_write_tir(ctx, filename)
     local bufdoc = common.buflines_to_bufdoc_text_driven(ctx, r_result)
     local tirdoc = Document.from_bufdoc(bufdoc)
     local jslines = flat_parser.to_jslines(tirdoc)
-    vim.fn.writefile(jslines, filename)
+    fn.writefile(jslines, filename)
 end
 
 ---@param ctx Context
