@@ -2,15 +2,8 @@
 
 source $TIRENVI_ROOT/tests/common.vim
 
-lua << EOF
-local M = require("tirenvi")
-M.setup({
-  log = {
-    output = "file", -- "notify" | "buffer" | "print" | "file"
-    file_name = "/tmp/tirenvi.log",
-  },
-})
-EOF
+lua require("tirenvi.config").log.output = "file"
+lua require("tirenvi.config").log.file_name = "/tmp/tirenvi.log"
 
 " ===== CSV =====
 edit $TIRENVI_ROOT/tests/data/simple.csv

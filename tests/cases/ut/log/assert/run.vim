@@ -1,16 +1,8 @@
 source $TIRENVI_ROOT/tests/common.vim
 
-lua << EOF
-  M = require("tirenvi")
-  levels = vim.log.levels
-  vim.g.tirenvi_initialized = false
-  M.setup({
-  	log = {
-		level = levels.ERROR,
-  	},
-  })
-  log = require("tirenvi.util.log")
-EOF
+lua require("tirenvi.config").log.level = vim.log.levels.ERROR
+lua require("tirenvi.config").setup({})
+lua log = require("tirenvi.util.log")
 
 CASE log ERROR
 
@@ -19,14 +11,8 @@ lua log.assert(false, "test case for log.assert ERROR", "bar")
 
 call Snapshot({'desc': 'ERROR' })
 
-lua << EOF
-  vim.g.tirenvi_initialized = false
-  M.setup({
-  	log = {
-		level = levels.DEBUG,
-  	},
-  })
-EOF
+lua require("tirenvi.config").log.level = vim.log.levels.DEBUG
+lua require("tirenvi.config").setup({})
 
 CASE log trace
 

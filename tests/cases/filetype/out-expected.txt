@@ -14,7 +14,15 @@ CASE 18 // cur(1,1) b1:r1:c1+0<│>  g(1,9)n[10*,2]
  
 --- CASE 25: filetype markdown -> bar ---
 v:true
+markdown
+tir-gfm-lite
+----
+v:true
+bar
+----
 false
+bar
+nil
 
 === DISPLAY ===
 gfm

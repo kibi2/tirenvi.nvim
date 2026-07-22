@@ -1,3 +1,10 @@
+local fn = vim.fn -- Neovim
+
+local Cell = require("tirenvi.core.cell") -- Core
+
+local Range = require("tirenvi.util.range") -- Util
+local log = require("tirenvi.util.log")
+
 ---@alias WidthCommand
 ---| "width"
 ---| "fit"
@@ -11,6 +18,7 @@
 ---| "info"
 ---| "none"
 
+-- =============================================================================
 ---@class WidthOp
 ---@field args string
 ---@field command WidthCommand
@@ -18,158 +26,159 @@
 ---@field number integer
 ---@field row_cur integer
 ---@field col_disp integer
-local WidthOp   = {}
+local WidthOp = {}
 WidthOp.__index = WidthOp
 
-local Cell      = require("tirenvi.core.cell")
-local Range     = require("tirenvi.util.range")
-local log       = require("tirenvi.util.log")
+-- =============================================================================
+--#region Private
 
--- constants / defaults
-
------------------------------------------------------------------------
--- Private helpers
------------------------------------------------------------------------
-
-local map       = {
-    ["="] = "set",
-    ["+"] = "add",
-    ["-"] = "sub",
-    ["?"] = "info",
+local map = {
+	["="] = "set",
+	["+"] = "add",
+	["-"] = "sub",
+	["?"] = "info",
 }
 
 ---@param opts {[string]:any}
 ---@return Rect
 local function get_selection(opts)
-    local row_range = Range.from_lua_normal(opts.line1, opts.line2)
-    local is_block  = (vim.fn.visualmode() == "\22")
-    local col_disp_start, col_disp_end
-    if opts.range > 0 then
-        if is_block then
-            col_disp_start = vim.fn.virtcol("'<")
-            col_disp_end   = vim.fn.virtcol("'>")
-        else
-            col_disp_start = 1
-            col_disp_end   = math.huge
-        end
-    else
-        local col      = vim.fn.virtcol(".")
-        col_disp_start = col
-        col_disp_end   = col
-    end
-    local col_range = Range.from_lua_normal(col_disp_start, col_disp_end)
-    return {
-        row = row_range,
-        col = col_range
-    }
+	local row_range = Range.from_lua_normal(opts.line1, opts.line2)
+	local is_block = (fn.visualmode() == "\22")
+	local col_disp_start, col_disp_end
+	if opts.range > 0 then
+		if is_block then
+			col_disp_start = fn.virtcol("'<")
+			col_disp_end = fn.virtcol("'>")
+		else
+			col_disp_start = 1
+			col_disp_end = math.huge
+		end
+	else
+		local col = fn.virtcol(".")
+		col_disp_start = col
+		col_disp_end = col
+	end
+	local col_range = Range.from_lua_normal(col_disp_start, col_disp_end)
+	---@type Rect
+	return {
+		row = row_range,
+		col = col_range,
+	}
 end
 
 ---@param str string
 ---@return integer
 local function get_number(str)
-    if not str or str == "" then
-        return 1
-    end
-    local num = tonumber(str)
-    if not num or num < 0 then
-        error(string.format("%s is not positive number", str))
-    end
-    return math.max(1, num)
+	if not str or str == "" then
+		return 1
+	end
+	local num = tonumber(str)
+	if not num or num < 0 then
+		error(string.format("%s is not positive number", str))
+	end
+	return math.max(1, num)
 end
 
 ---@param opts {[string]:any}
 ---@return WidthOperation|nil
 ---@return integer|nil
 local function get_operation(opts)
-    local sub = table.concat(opts.command.sub, "%")
-    local regex = string.format("^%s%%s*([%s])(.*)", opts.command_name, sub)
-    local op, value = opts.args:match(regex)
-    if not op then
-        error(string.format("%s need operator %s", opts.command_name, sub))
-    end
-    if op == "?" and #value ~= 0 then
-        return nil, nil
-    end
-    local num = get_number(value)
-    if op == "=" and num <= 1 then
-        return "auto", 0
-    end
-    return map[op], num
+	local sub = table.concat(opts.command.sub, "%")
+	local regex = string.format("^%s%%s*([%s])(.*)", opts.command_name, sub)
+	local op, value = opts.args:match(regex)
+	if not op then
+		error(string.format("%s need operator %s", opts.command_name, sub))
+	end
+	if op == "?" and #value ~= 0 then
+		return nil, nil
+	end
+	local num = get_number(value)
+	if op == "=" and num <= 1 then
+		return "auto", 0
+	end
+	return map[op], num
 end
 
 ---@param opts {[string]:any}
 ---@return WidthOp|nil
 local function try_new(opts)
-    local command_name = opts.command_name
-    ---@cast command_name WidthCommand
-    local rect = get_selection(opts)
-    local row_cur = rect.row.first
-    local col_disp = rect.col.first
-    local self = setmetatable({
-        args = opts.args,
-        command = command_name,
-        operation = "none",
-        number = 0,
-        row_cur = row_cur,
-        col_disp = col_disp,
-    }, WidthOp)
-    if not opts.command.has_op then
-        if opts.args ~= command_name then
-            return nil
-        end
-        return self
-    end
-    local operation, number = get_operation(opts)
-    if not operation or not number then
-        return nil
-    end
-    self.operation = operation
-    self.number = number
-    return self
+	local command_name = opts.command_name
+	---@cast command_name WidthCommand
+	local rect = get_selection(opts)
+	local row_cur = rect.row.first
+	local col_disp = rect.col.first
+	local self = setmetatable({
+		args = opts.args,
+		command = command_name,
+		operation = "none",
+		number = 0,
+		row_cur = row_cur,
+		col_disp = col_disp,
+	}, WidthOp)
+	if not opts.command.has_op then
+		if opts.args ~= command_name then
+			return nil
+		end
+		return self
+	end
+	local operation, number = get_operation(opts)
+	if not operation or not number then
+		return nil
+	end
+	self.operation = operation
+	self.number = number
+	return self
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param opts {[string]:any}
 ---@return WidthOp|nil
 function WidthOp.new(opts)
-    local ok, self = pcall(try_new, opts)
-    if not ok or not self then
-        return nil
-    end
-    return self
+	local ok, self = pcall(try_new, opts)
+	if not ok or not self then
+		return nil
+	end
+	return self
 end
 
 function WidthOp:to_cmd()
-    return string.format(":<C-u>Tir %s<CR>", self.args)
+	return string.format(":<C-u>Tir %s<CR>", self.args)
 end
 
 ---@param self WidthOp
+---@return string
 function WidthOp:to_string()
-    return string.format("WidthOp %s %s (%d, %d) [%s] %s",
-        self.command, self.operation or "nil",
-        self.row_cur, self.col_disp, self.number or "nil", self:to_cmd())
+	return string.format(
+		"WidthOp %s %s (%d, %d) [%s] %s",
+		self.command,
+		self.operation or "nil",
+		self.row_cur,
+		self.col_disp,
+		self.number or "nil",
+		self:to_cmd()
+	)
 end
 
 ---@param self WidthOp
 ---@param current integer
 ---@return integer
 function WidthOp:apply(current)
-    local operation = self.operation
-    local count = self.number
-    if operation == "set" then
-        return math.max(count, Cell.MIN_WIDTH)
-    elseif operation == "add" then
-        return current + count
-    elseif operation == "sub" then
-        return math.max(current - count, Cell.MIN_WIDTH)
-    elseif operation == "auto" then
-        return 0
-    else
-        return current
-    end
+	local operation = self.operation
+	local count = self.number
+	if operation == "set" then
+		return math.max(count, Cell.MIN_WIDTH)
+	elseif operation == "add" then
+		return current + count
+	elseif operation == "sub" then
+		return math.max(current - count, Cell.MIN_WIDTH)
+	elseif operation == "auto" then
+		return 0
+	else
+		return current
+	end
 end
 
 return WidthOp

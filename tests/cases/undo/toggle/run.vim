@@ -8,7 +8,7 @@ CASE Tir toggle + undo
         Tir toggle
         Tir toggle
         u
-            sleep 1m | echomsg b:tirenvi.flat
+            sleep 1m | echomsg b:tirenvi.tirbuf
     normal! 1G2l
         normal! D
 

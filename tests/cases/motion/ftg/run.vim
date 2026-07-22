@@ -8,11 +8,11 @@ CASE initial
             lua print(Debug.layout())
 
 CASE block#2 bottom
-        lua require('tirenvi').motion.block_bottom()
+        lua require('tirenvi.editor.motion').block_bottom()
             lua print(Debug.layout())
 
 CASE block#2 top
-        lua require('tirenvi').motion.block_top()
+        lua require('tirenvi.editor.motion').block_top()
             lua print(Debug.layout())
 
 CASE next cell
@@ -45,13 +45,13 @@ CASE prev cell
 edit $TIRENVI_ROOT/tests/data/simple.csv
 
 CASE CSV bottom
-lua require('tirenvi').motion.block_bottom()
+lua require('tirenvi.editor.motion').block_bottom()
         execute "normal! " . luaeval("require('tirenvi.editor.motion').t()")
         normal! 2;
             lua print(Debug.layout())
 
 CASE CSV top
-        lua require('tirenvi').motion.block_top()
+        lua require('tirenvi.editor.motion').block_top()
             lua print(Debug.layout())
 
 call Snapshot({ 'desc': 'motion f F t T g G' })

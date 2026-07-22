@@ -1,41 +1,41 @@
-local Attr          = require("tirenvi.core.attr")
-local CursorLogical = require("tirenvi.cursor.cursor_logical")
-local Range         = require("tirenvi.util.range")
-local util          = require("tirenvi.util.util")
-local log           = require("tirenvi.util.log")
+local api = vim.api -- Neovim
 
-local M             = {}
-local api           = vim.api
+local Attr = require("tirenvi.core.attr") -- Core
 
--- constants / defaults
+local Range = require("tirenvi.util.range") -- Util
+local util = require("tirenvi.util.util")
+local log = require("tirenvi.util.log")
 
------------------------------------------------------------------------
--- Private helpers
------------------------------------------------------------------------
+-- =============================================================================
+
+local M = {}
+
+-- =============================================================================
+--#region Private
 
 ---@param self Attr[]
 ---@return Attr[]
 local function connect(self)
-    local attrs = { self[1] }
-    for iattr = 2, #self do
-        local attr = self[iattr]
-        if Attr.is_same_ncol(attrs[#attrs], attr) then
-            attrs[#attrs].range.last = attr.range.last
-        else
-            attrs[#attrs + 1] = attr
-        end
-    end
-    return attrs
+	local attrs = { self[1] }
+	for iattr = 2, #self do
+		local attr = self[iattr]
+		if Attr.is_same_ncol(attrs[#attrs], attr) then
+			attrs[#attrs].range.last = attr.range.last
+		else
+			attrs[#attrs + 1] = attr
+		end
+	end
+	return attrs
 end
 
 ---@param self Attr[]
 local function reset_range(self)
-    local last = self[1].range.last
-    for iattr = 2, #self do
-        local range = self[iattr].range
-        Range.move_to(range, last + 1)
-        last = range.last
-    end
+	local last = self[1].range.last
+	for iattr = 2, #self do
+		local range = self[iattr].range
+		Range.move_to(range, last + 1)
+		last = range.last
+	end
 end
 
 ---@param seq integer
@@ -43,14 +43,14 @@ end
 ---@param size integer
 ---@param new_size integer
 local function get_new_seq(seq, range3, size, new_size)
-    local pos = seq - range3.first
-    local new_pos = pos
-    if 0 <= pos and pos < size then
-        new_pos = pos * new_size / size
-    elseif size <= pos then
-        new_pos = pos + new_size - size
-    end
-    return new_pos + range3.first
+	local pos = seq - range3.first
+	local new_pos = pos
+	if 0 <= pos and pos < size then
+		new_pos = pos * new_size / size
+	elseif size <= pos then
+		new_pos = pos + new_size - size
+	end
+	return new_pos + range3.first
 end
 
 local current_index = 1
@@ -58,68 +58,68 @@ local current_index = 1
 ---@param row_cur integer
 ---@return integer|nil
 local function get_index(self, row_cur)
-    if not self or #self == 0 or not self[1].range then
-        return nil
-    end
-    if current_index > #self then
-        current_index = 1
-    end
-    for _ = 1, #self do
-        if Range.contains(self[current_index].range, row_cur) then
-            return current_index
-        end
-        current_index = current_index % #self + 1
-    end
-    return nil
+	if not self or #self == 0 or not self[1].range then
+		return nil
+	end
+	if current_index > #self then
+		current_index = 1
+	end
+	for _ = 1, #self do
+		if Range.contains(self[current_index].range, row_cur) then
+			return current_index
+		end
+		current_index = current_index % #self + 1
+	end
+	return nil
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param self Attr[]|nil
 ---@return table|nil
 function M.get_count(self)
-    local count = { plain = 0, grid = 0 }
-    if not self then
-        return nil
-    end
-    for _, attr in ipairs(self) do
-        if Attr.is_grid(attr) then
-            count.grid = count.grid + 1
-        else
-            count.plain = count.plain + 1
-        end
-    end
-    return count
+	local count = { plain = 0, grid = 0 }
+	if not self then
+		return nil
+	end
+	for _, attr in ipairs(self) do
+		if Attr.is_grid(attr) then
+			count.grid = count.grid + 1
+		else
+			count.plain = count.plain + 1
+		end
+	end
+	return count
 end
 
 ---@param self Attr[]|nil
----@return boolean|nil
+---@return boolean
 function M.has_grid(self)
-    if not self then
-        return nil
-    end
-    local count = M.get_count(self)
-    for _, attr in ipairs(self) do
-        if Attr.is_grid(attr) then
-            return true
-        end
-    end
-    return count and count.grid > 0 or false
+	if not self then
+		return false
+	end
+	local count = M.get_count(self)
+	for _, attr in ipairs(self) do
+		if Attr.is_grid(attr) then
+			return true
+		end
+	end
+	return count and count.grid > 0 or false
 end
 
 ---@param self Attr[]|nil
 ---@return Attr[]
 function M.get_grid_attrs(self)
-    self = self or {}
-    local attrs = {}
-    for _, attr in ipairs(self) do
-        if Attr.is_grid(attr) then
-            attrs[#attrs + 1] = attr
-        end
-    end
-    return attrs
+	self = self or {}
+	local attrs = {}
+	for _, attr in ipairs(self) do
+		if Attr.is_grid(attr) then
+			attrs[#attrs + 1] = attr
+		end
+	end
+	return attrs
 end
 
 ---@param self Attr[]
@@ -127,18 +127,21 @@ end
 ---@param doc_attrs Attr[]
 ---@return Attr[]
 function M:replace_attrs(range, doc_attrs)
-    local attrs1, _, attrs3 = Range.split(self, range)
-    local attrs = attrs1
-    log.watch("ATTR", range)
-    log.watch("ATTR", M.debug_attrs(self, "MERGE ORIGIN:"))
-    log.watch("ATTR", M.debug_attrs(attrs1, "MERGE:") ..
-        M.debug_attrs(doc_attrs, " + ") ..
-        M.debug_attrs(attrs3, " + "))
-    util.extend(attrs, doc_attrs)
-    util.extend(attrs, attrs3)
-    attrs = connect(attrs)
-    reset_range(attrs)
-    return attrs
+	local attrs1, _, attrs3 = Range.split(self, range)
+	local attrs = attrs1
+	log.watch("ATTR", range)
+	log.watch("ATTR", M.debug_attrs(self, "MERGE ORIGIN:"))
+	log.watch(
+		"ATTR",
+		M.debug_attrs(attrs1, "MERGE:")
+			.. M.debug_attrs(doc_attrs, " + ")
+			.. M.debug_attrs(attrs3, " + ")
+	)
+	util.extend(attrs, doc_attrs)
+	util.extend(attrs, attrs3)
+	attrs = connect(attrs)
+	reset_range(attrs)
+	return attrs
 end
 
 local nmax = 4
@@ -150,77 +153,77 @@ local nmax = 4
 ---@param single boolean|nil
 ---@return string
 function M:debug_attrs(title, iblock, icol, single)
-    single = single or false
-    if not log.is_debug() and not vim.g.tirenvi_test_mode then
-        return ""
-    end
-    if not self then
-        return title .. " nil"
-    end
-    local strings = { title }
-    if single then
-        strings[1] = Attr.get_attr_long(self[iblock], icol)
-    else
-        for iattr = 1, math.min(#self, nmax) do
-            local ccol
-            if iblock and iattr == iblock then
-                ccol = icol
-            end
-            strings[#strings + 1] = Attr.get_attr_long(self[iattr], ccol)
-        end
-    end
-    return table.concat(strings, " ")
+	single = single or false
+	if not log.is_debug() and not vim.g.tirenvi_test_mode then
+		return ""
+	end
+	if not self then
+		return title .. " nil"
+	end
+	local strings = { title }
+	if single then
+		strings[1] = Attr.get_attr_long(self[iblock], icol)
+	else
+		for iattr = 1, math.min(#self, nmax) do
+			local ccol
+			if iblock and iattr == iblock then
+				ccol = icol
+			end
+			strings[#strings + 1] = Attr.get_attr_long(self[iattr], ccol)
+		end
+	end
+	return table.concat(strings, " ")
 end
 
 ---@param self Attr[]
 function M:remove_range()
-    for _, attr in ipairs(self) do
-        attr.range = nil
-    end
+	for _, attr in ipairs(self) do
+		attr.range = nil
+	end
 end
 
 ---@param attrs Attr[]
 ---@param range3 Range3
 ---@return Attr[]
 function M.adjust(attrs, range3)
-    if #attrs == 0 then
-        return attrs
-    end
-    if not attrs[1].range then
-        return attrs
-    end
-    local size = range3.last - range3.first + 1
-    local new_size = range3.new_last - range3.first + 1
-    for _, attr in ipairs(attrs) do
-        attr.range.first = get_new_seq(attr.range.first, range3, size, new_size)
-        attr.range.last = get_new_seq(attr.range.last, range3, size, new_size)
-    end
-    log.watch("ATTR", M.debug_attrs(attrs, "UPDATE RANGE expand 1:"))
-    for iattr = 1, #attrs - 1 do
-        attrs[iattr].range.last = attrs[iattr + 1].range.first - 1
-    end
-    attrs[1].range.first = 1
-    attrs[#attrs].range.last = api.nvim_buf_line_count(0)
-    log.watch("ATTR", M.debug_attrs(attrs, "UPDATE RANGE expand 2:"))
-    local new_attrs = {}
-    for _, attr in ipairs(attrs) do
-        if attr.range.first <= attr.range.last then
-            new_attrs[#new_attrs + 1] = attr
-        end
-    end
-    return new_attrs
+	if #attrs == 0 then
+		return attrs
+	end
+	if not attrs[1].range then
+		return attrs
+	end
+	local size = range3.last - range3.first + 1
+	local new_size = range3.new_last - range3.first + 1
+	for _, attr in ipairs(attrs) do
+		attr.range.first = get_new_seq(attr.range.first, range3, size, new_size)
+		attr.range.last = get_new_seq(attr.range.last, range3, size, new_size)
+	end
+	log.watch("ATTR", M.debug_attrs(attrs, "UPDATE RANGE expand 1:"))
+	for iattr = 1, #attrs - 1 do
+		attrs[iattr].range.last = attrs[iattr + 1].range.first - 1
+	end
+	attrs[1].range.first = 1
+	attrs[#attrs].range.last = api.nvim_buf_line_count(0)
+	log.watch("ATTR", M.debug_attrs(attrs, "UPDATE RANGE expand 2:"))
+	local new_attrs = {}
+	for _, attr in ipairs(attrs) do
+		if attr.range.first <= attr.range.last then
+			new_attrs[#new_attrs + 1] = attr
+		end
+	end
+	return new_attrs
 end
 
 ---@param attrs Attr[]
 ---@param range Range
 ---@return Attr|nil
 function M.get_attr(attrs, range)
-    for _, attr in ipairs(attrs) do
-        if Range.intersects(attr.range, range) then
-            return attr
-        end
-    end
-    return nil
+	for _, attr in ipairs(attrs) do
+		if Range.intersects(attr.range, range) then
+			return attr
+		end
+	end
+	return nil
 end
 
 ---@param self Attr[]
@@ -228,50 +231,34 @@ end
 ---@return Attr|nil
 ---@return integer|nil
 function M:get(row_cur)
-    local iblock = get_index(self, row_cur)
-    return self[iblock], iblock
+	local iblock = get_index(self, row_cur)
+	return self[iblock], iblock
 end
 
 ---@param self Attr[]
 ---@return Attr[]
 function M:get_invalid_attrs()
-    local invalid = {}
-    local prev = self[1]
-    for iattr = 2, #self do
-        local attr = self[iattr]
-        if not Attr.is_consistent(prev, attr) then
-            invalid[#invalid + 1] = attr
-        end
-        prev = attr
-    end
-    return invalid
+	local invalid = {}
+	local prev = self[1]
+	for iattr = 2, #self do
+		local attr = self[iattr]
+		if not Attr.is_consistent(prev, attr) then
+			invalid[#invalid + 1] = attr
+		end
+		prev = attr
+	end
+	return invalid
 end
 
 ---@param self Attr[]
----@param row_cur integer
----@param col_disp integer
----@return CursorLogical
-function M:to_logical(row_cur, col_disp)
-    local _, iblock = M.get(self, row_cur)
-    if not iblock then
-        return {}
-    end
-    local attr = self[iblock]
-    log.assert(attr, "invalid position %d", row_cur)
-    local irow = row_cur - attr.range.first + 1
-    local icol, offset = Attr.to_cell_col(attr, col_disp)
-    return CursorLogical.new(iblock, irow, icol, offset)
-end
-
----@param self Attr[]
----@param logical CursorLogical
----@return integer
----@return integer
-function M:to_cursor(logical)
-    local attr = self[logical.iblock]
-    local row_cur = attr.range.first + logical.irow - 1
-    local col_disp = Attr.get_start_pos(attr, logical.icol)
-    return row_cur, col_disp
+---@return string|nil
+function M:get_embedded_key()
+	for _, attr in ipairs(self) do
+		if Attr.is_grid(attr) then
+			return attr.prefix and vim.trim(attr.prefix) or nil
+		end
+	end
+	return nil
 end
 
 return M

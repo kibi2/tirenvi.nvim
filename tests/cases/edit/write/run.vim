@@ -3,14 +3,7 @@ let outcsv = 'gen.csv'
 let outtsv = 'gen.tsv'
 let outxxx = 'gen.xxx'
 
-lua << EOF
-local M = require("tirenvi")
-M.setup({
-  table = {
-		wrap_mode = "wrap",
-    },
-})
-EOF
+lua require("tirenvi.config").table.wrap_mode = "wrap"
 
 " ===== SIMPLE CSV =====
 CASE simple csv

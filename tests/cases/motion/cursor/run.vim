@@ -2,9 +2,9 @@ source $TIRENVI_ROOT/tests/common.vim
 
 lua << EOF
 function print_wrap(title)
-    local Context = require("tirenvi.app.context")
+    local Context = require("tirenvi.io.context")
 	ctx =  Context.from_buf()
-    require("tirenvi.init").auto_wrap(ctx)
+    require("tirenvi.app").auto_wrap(ctx)
     print(tostring(vim.wo[0].wrap) .. " : " .. (title or ""))
 end
 EOF
@@ -46,14 +46,7 @@ CASE CSV grid
 	call At(1, 2, 1) | lua print_wrap("grid")
             
 " ===== CONFIG =====
-lua << EOF
-    local M = require("tirenvi")
-    M.setup({
-      ui = {
-        manage_wrap = false
-      },
-    })
-EOF
+lua require("tirenvi.config").ui.manage_wrap = false
 
 CASE CSV confg
     lua vim.wo[0].wrap = true
