@@ -1,7 +1,7 @@
 -- =============================================================================
 
 ---@class CursorBuf
----@field restore_mode "none"|"buffer"|"logical"
+---@field restore_mode "none"|"buffer"|"tir"
 ---@field row_cur integer           -- current row (1-based)
 ---@field col_byte integer          -- current column (1-based, byte index)
 ---@field col_char integer|nil      -- current column (1-based, character index)

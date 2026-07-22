@@ -1,7 +1,7 @@
 local dirty_range = require("tirenvi.parser.dirty_range") -- Parser
 local buf_parser = require("tirenvi.parser.buf_parser")
 
-local LineProvider = require("tirenvi.io.buffer_line_provider") -- IO
+local LineProvider = require("tirenvi.io.buf_line_provider") -- IO
 local attr_store = require("tirenvi.io.attr_store")
 local reader = require("tirenvi.io.reader")
 local dirty = require("tirenvi.io.dirty")
@@ -59,7 +59,7 @@ local function update_attrs(ctx, range3, r_result)
 	log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
 	local attrs = reconcile_attrs(r_result, bufdoc, range3)
 	reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
-	attr_store.write(ctx, attrs)
+	attr_store.write(ctx.bufnr, attrs)
 end
 
 --#endregion

@@ -41,7 +41,7 @@ local function tirdoc_to_flat(ctx, r_result, tirdoc, is_write_pre)
 		Attrs.remove_range(attrs)
 		log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
 		buf_state.set_buffer_tirbuf(ctx.bufnr, false)
-		attr_store.write(ctx, attrs)
+		attr_store.write(ctx.bufnr, attrs)
 	end
 	writer.write(ctx, req_w)
 end
@@ -79,7 +79,7 @@ function M.doc_to_buflines(ctx, r_result, doc, opts)
 	local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
 	log.watch("ATTR", Attrs.debug_attrs(attrs, "[9]CHACHED:"))
 	buf_state.set_buffer_tirbuf(ctx.bufnr, Attrs.has_grid(attrs))
-	attr_store.write(ctx, attrs)
+	attr_store.write(ctx.bufnr, attrs)
 	local buflines = buf_parser.unparse(bufdoc)
 	if not util.same_str_array(buflines, r_result.lines or "") then
 		local req_w = Request.new_writer(r_result, buflines, no_undo)

@@ -21,7 +21,7 @@ function M.write(ctx, req)
 		req.range,
 		req.lines,
 		Request.is_no_undo(req),
-		req.cursor
+		req.cursor_buf
 	)
 	local range3 = Request.get_range3(req)
 	local prev_ranges = dirty.get_ranges(ctx.bufnr)

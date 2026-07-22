@@ -9,7 +9,7 @@ local M = {}
 -- Public API
 
 ---@param bufnr number
----@return BufferLineProvider
+---@return LineProvider
 function M.new(bufnr)
 	return {
 		get_lines = function(first, last)

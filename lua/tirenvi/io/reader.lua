@@ -1,8 +1,7 @@
 local buf_lines = require("tirenvi.io.buf_lines") -- IO
 local attr_store = require("tirenvi.io.attr_store")
 local ReadResult = require("tirenvi.io.read_result")
-
-local CursorNvim = require("tirenvi.cursor.nvim") -- Cursor
+local CursorNvim = require("tirenvi.io.cursor_nvim")
 
 local Attrs = require("tirenvi.core.attrs") -- Core
 
@@ -17,7 +16,7 @@ local M = {}
 
 ---@param ctx Context
 ---@param range Range
----@pram opts {restore_mode: "none"|"buffer"|"logical"|nil, curosr:boolean|nil}
+---@pram opts {restore_mode: "none"|"buffer"|"tir"|nil, curosr:boolean|nil}
 ---@return ReadResult
 function M.read(ctx, range, opts)
 	opts = opts or {}
@@ -27,8 +26,8 @@ function M.read(ctx, range, opts)
 	local first, last = ReadResult.lua_range(result)
 	result.lines = buf_lines.get_lines(ctx.bufnr, first, last)
 	if opts.cursor ~= false then
-		result.cursor = M.cursor(ctx)
-		result.cursor.restore_mode = restore_mode or "none"
+		result.cursor_buf = M.cursor_buf(ctx)
+		result.cursor_buf.restore_mode = restore_mode or "none"
 	end
 	log.watch("ATTR", Attrs.debug_attrs(result.attrs, "[0]CHACHED ATTRS:"))
 	return result
@@ -36,7 +35,7 @@ end
 
 ---@param ctx Context
 ---@return CursorBuf
-function M.cursor(ctx)
+function M.cursor_buf(ctx)
 	return CursorNvim.capture(ctx)
 end
 

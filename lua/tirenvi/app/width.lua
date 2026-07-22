@@ -3,14 +3,13 @@ local fn = vim.fn -- Neovim
 local common = require("tirenvi.app.common") -- App
 
 local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
+local Cursor = require("tirenvi.parser.cursor")
 
-local LinProvider = require("tirenvi.io.buffer_line_provider") -- IO
+local LinProvider = require("tirenvi.io.buf_line_provider") -- IO
 local buf_lines = require("tirenvi.io.buf_lines")
 local buf_state = require("tirenvi.io.buf_state")
 local attr_store = require("tirenvi.io.attr_store")
 local reader = require("tirenvi.io.reader")
-
-local CursorConvert = require("tirenvi.cursor.convert") -- Cursor
 
 local Attrs = require("tirenvi.core.attrs") -- Core
 local Attr = require("tirenvi.core.attr")
@@ -110,14 +109,14 @@ end
 
 local DELTA = 2
 ---@param attr Attr
----@param logical CursorLogical
+---@param cursor_tir CursorTir
 ---@return string
-local function get_col_info(attr, logical)
+local function get_col_info(attr, cursor_tir)
 	local widths = Attr.get_width_array(attr.columns)
 	---@cast widths string[]
-	widths[logical.icol] = widths[logical.icol] .. "*"
-	local first = math.max(1, logical.icol - DELTA)
-	local last = math.min(#widths, logical.icol + DELTA)
+	widths[cursor_tir.icol] = widths[cursor_tir.icol] .. "*"
+	local first = math.max(1, cursor_tir.icol - DELTA)
+	local last = math.min(#widths, cursor_tir.icol + DELTA)
 	local info = table.concat(widths, ",", first, last)
 	if first ~= 1 then
 		info = "..," .. info
@@ -130,18 +129,18 @@ end
 
 ---@param bufnr number
 ---@param attr Attr
----@param logical CursorLogical
+---@param cursor_tir CursorTir
 ---@return string
-local function get_width_info(bufnr, attr, logical)
+local function get_width_info(bufnr, attr, cursor_tir)
 	local mode = Attr.get_wrap_kind(attr)
 	local span = Attr.get_fit_span(attr)
-	local head = get_head(bufnr, attr, logical.icol)
-	local col_info = get_col_info(attr, logical)
+	local head = get_head(bufnr, attr, cursor_tir.icol)
+	local col_info = get_col_info(attr, cursor_tir)
 	return string.format(
 		"mode=%s span=%d col=%d/%d header=%q widths=%s",
 		mode,
 		span,
-		logical.icol,
+		cursor_tir.icol,
 		#attr.columns,
 		head,
 		col_info
@@ -152,13 +151,12 @@ end
 ---@param width_op WidthOp
 local function width_info(ctx, width_op)
 	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
-	local logical =
-		CursorConvert.to_logical(attrs, width_op.row_cur, width_op.col_disp)
-	local attr = attrs[logical.iblock]
+	local curosr_tir = Cursor.to_tir(attrs, width_op.row_cur, width_op.col_disp)
+	local attr = attrs[curosr_tir.iblock]
 	if Attr.is_plain(attr) then
 		print("kind=plain")
 	else
-		print(get_width_info(ctx.bufnr, attr, logical))
+		print(get_width_info(ctx.bufnr, attr, curosr_tir))
 	end
 end
 
@@ -168,7 +166,7 @@ local function toggle_wrap_mode(ctx, width_op)
 	local attrs = attr_store.read(ctx.bufnr)
 	local attr = Attrs.get(attrs, width_op.row_cur)
 	Attr.toggle_wrap_mode(attr or {})
-	attr_store.write(ctx, attrs)
+	attr_store.write(ctx.bufnr, attrs)
 end
 
 local warned = false

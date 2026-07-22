@@ -29,7 +29,7 @@ function M.on_filetype(ctx)
 	end
 	buf_state.set(ctx.bufnr, buf_state.IKEY.FILETYPE, new_filetype)
 	buf_state.set_buffer_tirbuf(ctx.bufnr, false)
-	attr_store.write(ctx, nil)
+	attr_store.write(ctx.bufnr, nil)
 	local parser = Parser.resolve_parser(new_filetype)
 	buf_state.set(ctx.bufnr, buf_state.IKEY.PARSER, parser)
 end

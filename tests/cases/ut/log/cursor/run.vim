@@ -6,7 +6,7 @@ lua << EOF
   Context = require("tirenvi.io.context")
   buf_lines = require("tirenvi.io.buf_lines")
   Range = require("tirenvi.util.range")
-  CursorNvim = require("tirenvi.cursor.nvim")
+  CursorNvim = require("tirenvi.io.cursor_nvim")
   local lines = {
     "1234567890",
     "あいうえおかきくけこ",
@@ -15,7 +15,7 @@ lua << EOF
   ctx = Context.from_buf()
   buf_lines.set_lines(ctx, Range.WHOLE, lines)
 	function print_cursor()
-		local cursor = require("tirenvi.io.reader").cursor(ctx)
+		local cursor = require("tirenvi.io.reader").cursor_buf(ctx)
 		print(cursor.row_cur, cursor.col_byte, cursor.col_char)
 	end
 EOF

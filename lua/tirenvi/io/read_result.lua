@@ -7,7 +7,7 @@ local log = require("tirenvi.util.log")
 ---@field range Range
 ---@field lines string[]
 ---@field attrs Attr[]
----@field cursor CursorBuf
+---@field cursor_buf CursorBuf
 local M = {}
 
 -- =============================================================================

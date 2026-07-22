@@ -3,10 +3,10 @@ local bo = vim.bo
 local fn = vim.fn
 
 local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
+local Cursor = require("tirenvi.parser.cursor")
 
-local CursorLogical = require("tirenvi.cursor.logical") -- IO
-local CursorNvim = require("tirenvi.cursor.nvim")
-local CursorConvert = require("tirenvi.cursor.convert")
+local CursorTir = require("tirenvi.core.cursor") -- IO
+local CursorNvim = require("tirenvi.io.cursor_nvim")
 local buf_lines = require("tirenvi.io.buf_lines")
 local buf_state = require("tirenvi.io.buf_state")
 local reader = require("tirenvi.io.reader")
@@ -53,19 +53,19 @@ local function case_tag()
 	return vim.g.case_tag or ""
 end
 
----@param cursor CursorBuf
----@param logical CursorLogical
+---@param cursor_buf CursorBuf
+---@param cursor_tir CursorTir
 ---@return string
-local function cursor_str(cursor, logical)
+local function cursor_str(cursor_buf, cursor_tir)
 	return string.format(
 		"cur(%d,%d) b%s:r%s:c%s%+d<%s>",
-		cursor.row_cur,
-		cursor.col_disp,
-		logical.iblock,
-		logical.irow,
-		logical.icol,
-		logical.col_offset or 0,
-		cursor.char
+		cursor_buf.row_cur,
+		cursor_buf.col_disp,
+		cursor_tir.iblock,
+		cursor_tir.irow,
+		cursor_tir.icol,
+		cursor_tir.col_offset or 0,
+		cursor_buf.char
 	)
 end
 
@@ -129,21 +129,18 @@ function M.layout(title, single)
 	title = case_tag() .. (title or "") .. DELIMITER
 	local ctx = Context.from_buf()
 	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS) or {}
-	local cursor = reader.cursor(ctx)
-	local line = buf_lines.get_line(ctx.bufnr, cursor.row_cur) or ""
+	local cursor_buf = reader.cursor_buf(ctx)
+	local line = buf_lines.get_line(ctx.bufnr, cursor_buf.row_cur) or ""
 	local prefix = tir_buf.get_prefix_part(line)
 	local pre_disp = fn.strdisplaywidth(prefix)
-	local logical = CursorConvert.to_logical(
-		attrs,
-		cursor.row_cur,
-		cursor.col_disp - pre_disp
-	)
+	local cursor_tir =
+		Cursor.to_tir(attrs, cursor_buf.row_cur, cursor_buf.col_disp - pre_disp)
 	local attr_str =
-		Attrs.debug_attrs(attrs, "", logical.iblock, logical.icol, single)
+		Attrs.debug_attrs(attrs, "", cursor_tir.iblock, cursor_tir.icol, single)
 	return string.format(
 		"%s %s %s",
 		title,
-		cursor_str(cursor, logical),
+		cursor_str(cursor_buf, cursor_tir),
 		attr_str
 	)
 end
@@ -154,10 +151,9 @@ end
 function M.goto_cell(iblock, irow, icol)
 	local ctx = Context.from_buf()
 	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
-	local cursor_logical = CursorLogical.new(iblock, irow, icol, 0)
-	local cursor =
-		CursorConvert.to_buf(cursor_logical, attrs, ctx.line_provider)
-	CursorNvim.move_byte(ctx, cursor.row_cur, cursor.col_byte)
+	local cursor_tir = CursorTir.new(iblock, irow, icol, 0)
+	local cursor_buf = Cursor.to_buf(cursor_tir, attrs, ctx.line_provider)
+	CursorNvim.move_byte(ctx, cursor_buf.row_cur, cursor_buf.col_byte)
 end
 
 function M.show_attr_marks(ctx)
@@ -166,13 +162,13 @@ function M.show_attr_marks(ctx)
 	if not attrs then
 		return
 	end
-	local cursor = reader.cursor(ctx)
-	local logical =
-		CursorConvert.to_logical(attrs, cursor.row_cur, cursor.col_disp)
+	local cursor_buf = reader.cursor_buf(ctx)
+	local cursor_tir =
+		Cursor.to_tir(attrs, cursor_buf.row_cur, cursor_buf.col_disp)
 	for iattr, attr in ipairs(attrs) do
 		local icol
-		if logical.iblock == iattr then
-			icol = Attr.to_cell_col(attr, cursor.col_char)
+		if cursor_tir.iblock == iattr then
+			icol = Attr.to_cell_col(attr, cursor_buf.col_char)
 		end
 		show_attr_marks(ctx, attr, iattr, icol)
 	end

@@ -6,8 +6,7 @@ local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
 local buf_parser = require("tirenvi.parser.buf_parser")
 
 local Context = require("tirenvi.io.context") -- IO
-
-local CursorNvim = require("tirenvi.cursor.nvim") -- Cursor
+local CursorNvim = require("tirenvi.io.cursor_nvim")
 
 local errors = require("tirenvi.util.errors") -- Util
 local notify = require("tirenvi.util.notify")

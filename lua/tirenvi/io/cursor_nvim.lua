@@ -1,7 +1,7 @@
 local api = vim.api -- Neovim
 local fn = vim.fn
 
-local Cursor = require("tirenvi.cursor.buf") -- Cursor
+local CursorBuf = require("tirenvi.io.cursor") -- IO
 
 local log = require("tirenvi.util.log") -- Util
 
@@ -29,15 +29,15 @@ local function char_to_byte(line, col_char)
 	return vim.str_byteindex(line, col_char - 1) + 1
 end
 
----@param cursor CursorBuf
+---@param cursor_buf CursorBuf
 ---@param line string
-local function complete(cursor, line)
-	cursor.line = line
-	cursor.col_char = vim.str_utfindex(line, cursor.col_byte - 1) + 1
-	cursor.col_byte = char_to_byte(line, cursor.col_char)
-	cursor.char = fn.strcharpart(line, cursor.col_char - 1, 1)
-	local prefix = fn.strcharpart(line, 0, cursor.col_char - 1)
-	cursor.col_disp = fn.strdisplaywidth(prefix) + 1
+local function complete(cursor_buf, line)
+	cursor_buf.line = line
+	cursor_buf.col_char = vim.str_utfindex(line, cursor_buf.col_byte - 1) + 1
+	cursor_buf.col_byte = char_to_byte(line, cursor_buf.col_char)
+	cursor_buf.char = fn.strcharpart(line, cursor_buf.col_char - 1, 1)
+	local prefix = fn.strcharpart(line, 0, cursor_buf.col_char - 1)
+	cursor_buf.col_disp = fn.strdisplaywidth(prefix) + 1
 end
 
 ---@param ctx Context
@@ -45,10 +45,10 @@ end
 ---@param col_byte integer
 ---@return CursorBuf
 local function get_cursor(ctx, row_cur, col_byte)
-	local cursor = Cursor.new(row_cur, col_byte)
-	local line = ctx.line_provider.get_line(cursor.row_cur) or ""
-	complete(cursor, line)
-	return cursor
+	local cursor_buf = CursorBuf.new(row_cur, col_byte)
+	local line = ctx.line_provider.get_line(cursor_buf.row_cur) or ""
+	complete(cursor_buf, line)
+	return cursor_buf
 end
 
 ---@param row_cur integer
@@ -94,13 +94,13 @@ end
 ---@return CursorBuf
 function M.from_col_disp(line, row_cur, col_disp)
 	local col_byte = disp_to_byte(line, col_disp)
-	return Cursor.new(row_cur, col_byte)
+	return CursorBuf.new(row_cur, col_byte)
 end
 
 ---@param ctx Context
 function M.reset(ctx)
-	local cursor = M.capture(ctx)
-	restore_cursor(cursor.row_cur, cursor.col_byte)
+	local cursor_buf = M.capture(ctx)
+	restore_cursor(cursor_buf.row_cur, cursor_buf.col_byte)
 end
 
 --- Normal cursor movement.
@@ -109,8 +109,8 @@ end
 ---@param row_cur integer
 ---@param col_byte integer
 function M.restore_byte(ctx, row_cur, col_byte)
-	local cursor = get_cursor(ctx, row_cur, col_byte)
-	restore_cursor(cursor.row_cur, cursor.col_byte)
+	local cursor_buf = get_cursor(ctx, row_cur, col_byte)
+	restore_cursor(cursor_buf.row_cur, cursor_buf.col_byte)
 end
 
 ---@param ctx Context
@@ -118,8 +118,8 @@ end
 ---@param col_disp integer
 function M.restore_disp(ctx, row_cur, col_disp)
 	local line = ctx.line_provider.get_line(row_cur) or ""
-	local cursor = M.from_col_disp(line, row_cur, col_disp)
-	M.restore_byte(ctx, row_cur, cursor.col_byte)
+	local cursor_buf = M.from_col_disp(line, row_cur, col_disp)
+	M.restore_byte(ctx, row_cur, cursor_buf.col_byte)
 end
 
 --- Direct cursor update.

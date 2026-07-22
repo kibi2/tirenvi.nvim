@@ -1,8 +1,7 @@
 local config = require("tirenvi.config") -- Root
 
-local buf_state = require("tirenvi.io.buf_state") -- Cursor
-
-local CursorNvim = require("tirenvi.cursor.nvim") -- Cursor
+local buf_state = require("tirenvi.io.buf_state") -- IO
+local CursorNvim = require("tirenvi.io.cursor_nvim")
 
 local Cell = require("tirenvi.core.cell") -- Core
 
@@ -226,9 +225,9 @@ end
 ---@return Rect|nil
 ---@return string[]
 function M.get_block_rect(ctx, count, is_around)
-	local cursor = CursorNvim.capture(ctx)
-	local row_cur = cursor.row_cur
-	local col_byte = cursor.col_byte
+	local cursor_buf = CursorNvim.capture(ctx)
+	local row_cur = cursor_buf.row_cur
+	local col_byte = cursor_buf.col_byte
 	local cline = ctx.line_provider.get_line(row_cur) or ""
 	local cbyte_pos = M.get_pipe_byte_position(cline)
 	if #cbyte_pos == 0 then

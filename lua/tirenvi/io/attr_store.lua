@@ -15,10 +15,10 @@ function M.read(bufnr)
 	return buf_state.get(bufnr, buf_state.IKEY.ATTRS) or {}
 end
 
----@param ctx Context
+---@param bufnr number
 ---@param attrs Attr[]|nil
-function M.write(ctx, attrs)
-	buf_state.set(ctx.bufnr, buf_state.IKEY.ATTRS, attrs)
+function M.write(bufnr, attrs)
+	buf_state.set(bufnr, buf_state.IKEY.ATTRS, attrs)
 end
 
 return M

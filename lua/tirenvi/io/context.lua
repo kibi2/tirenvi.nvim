@@ -1,6 +1,6 @@
 local api = vim.api -- Neovim
 
-local buffer_line_provider = require("tirenvi.io.buffer_line_provider") -- IO
+local LineProvider = require("tirenvi.io.buf_line_provider") -- IO
 
 local log = require("tirenvi.util.log") -- util
 
@@ -18,13 +18,12 @@ local M = {}
 ---@param bufnr number|nil
 ---@return Context
 function M.from_buf(bufnr)
-	bufnr = bufnr or api.nvim_get_current_buf()
-	local winid = api.nvim_get_current_win()
+	local bufnr = bufnr or api.nvim_get_current_buf()
 	---@type Context
 	return {
 		bufnr = bufnr,
-		winid = winid,
-		line_provider = buffer_line_provider.new(bufnr),
+		winid = api.nvim_get_current_win(),
+		line_provider = LineProvider.new(bufnr),
 	}
 end
 

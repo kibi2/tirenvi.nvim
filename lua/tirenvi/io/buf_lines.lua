@@ -3,8 +3,7 @@ local fn = vim.fn
 local bo = vim.bo
 
 local buf_state = require("tirenvi.io.buf_state") -- IO
-
-local CursorNvim = require("tirenvi.cursor.nvim") -- Cursor
+local CursorNvim = require("tirenvi.io.cursor_nvim")
 
 local Range = require("tirenvi.util.range") -- Util
 local util = require("tirenvi.util.util")
@@ -21,20 +20,20 @@ local STEP = 25
 --#region Private
 
 ---@param ctx Context
----@param cursor CursorBuf
-local function reset_cursor_logical(ctx, cursor)
+---@param cursor_buf CursorBuf
+local function reset_cursor_tir(ctx, cursor_buf)
 	-- CursorNvim.move(ctx, cursor.row_cur, cursor.col_byte)
 end
 
 ---@param ctx Context
----@param cursor CursorBuf|nil
-local function set_cursor_pos(ctx, cursor)
-	if not cursor then
+---@param cursor_buf CursorBuf|nil
+local function set_cursor_pos(ctx, cursor_buf)
+	if not cursor_buf then
 		CursorNvim.reset(ctx)
-	elseif cursor.restore_mode == "buffer" then
-		CursorNvim.restore_byte(ctx, cursor.row_cur, cursor.col_byte)
-	elseif cursor.restore_mode == "logical" then
-		reset_cursor_logical(ctx, cursor)
+	elseif cursor_buf.restore_mode == "buffer" then
+		CursorNvim.restore_byte(ctx, cursor_buf.row_cur, cursor_buf.col_byte)
+	elseif cursor_buf.restore_mode == "tir" then
+		reset_cursor_tir(ctx, cursor_buf)
 	else
 		CursorNvim.reset(ctx)
 	end
@@ -50,8 +49,8 @@ end
 ---@param range Range
 ---@param lines string[]
 ---@param no_undo boolean
----@param cursor CursorBuf|nil
-local function set_lines(ctx, range, lines, no_undo, cursor)
+---@param cursor_buf CursorBuf|nil
+local function set_lines(ctx, range, lines, no_undo, cursor_buf)
 	M.clear_cache()
 	local bufnr = ctx.bufnr
 	local undolevels = bo[bufnr].undolevels
@@ -67,7 +66,7 @@ local function set_lines(ctx, range, lines, no_undo, cursor)
 	start0 = math.max(start0, 0)
 	api.nvim_buf_set_lines(bufnr, start0, end0, false, lines)
 	set_undo_tree_last(bufnr)
-	set_cursor_pos(ctx, cursor)
+	set_cursor_pos(ctx, cursor_buf)
 	bo[bufnr].undolevels = undolevels
 end
 
@@ -124,8 +123,8 @@ end
 ---@param range Range
 ---@param lines string[]
 ---@param no_undo boolean|nil
----@param cursor CursorBuf|nil
-function M.set_lines(ctx, range, lines, no_undo, cursor)
+---@param cursor_buf CursorBuf|nil
+function M.set_lines(ctx, range, lines, no_undo, cursor_buf)
 	local bufnr = ctx.bufnr
 	buf_state.set(
 		bufnr,
@@ -133,7 +132,7 @@ function M.set_lines(ctx, range, lines, no_undo, cursor)
 		buf_state.get(bufnr, buf_state.IKEY.PATCH_DEPTH) + 1
 	)
 	local before = fn.undotree(bufnr).seq_last
-	local ok, err = pcall(set_lines, ctx, range, lines, no_undo, cursor)
+	local ok, err = pcall(set_lines, ctx, range, lines, no_undo, cursor_buf)
 	local after = fn.undotree(bufnr).seq_last
 	local first, last = Range.to_lua(range)
 	log.watch(

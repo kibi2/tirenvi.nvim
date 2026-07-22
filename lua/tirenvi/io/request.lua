@@ -8,7 +8,7 @@ local log = require("tirenvi.util.log")
 ---@field range Range
 ---@field lines string[]
 ---@field no_undo boolean
----@field cursor CursorBuf
+---@field cursor_buf CursorBuf
 local M = {}
 
 -- =============================================================================
@@ -24,7 +24,7 @@ function M.new_writer(r_req, lines, no_undo)
 		range = r_req.range,
 		lines = lines,
 		no_undo = no_undo or false,
-		cursor = r_req.cursor,
+		cursor_buf = r_req.cursor_buf,
 	}
 end
 

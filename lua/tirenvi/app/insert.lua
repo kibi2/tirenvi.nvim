@@ -22,8 +22,8 @@ local M = {}
 
 ---@param ctx Context
 function M.insert_char_in_newline(ctx)
-	local cursor = reader.cursor(ctx)
-	local row_cur = cursor.row_cur
+	local cursor_buf = reader.cursor_buf(ctx)
+	local row_cur = cursor_buf.row_cur
 	local line_new = buf_lines.get_line(ctx.bufnr, row_cur)
 	if line_new ~= "" then
 		return

@@ -22,12 +22,12 @@ local M = {}
 --- Convert flat lines to NDJSON lines
 ---@param parser Parser
 ---@param fllines string[]
----@param cursor CursorBuf
+---@param cursor_buf CursorBuf
 ---@return string[] NDJSON lines
-local function flat_to_jslines(parser, fllines, cursor)
+local function flat_to_jslines(parser, fllines, cursor_buf)
 	local options = vim.deepcopy(parser.options) or {}
 	if parser.executable == "tir-embedded" then
-		options[#options + 1] = "--cursor-line=" .. cursor.row_cur
+		options[#options + 1] = "--cursor-line=" .. cursor_buf.row_cur
 	end
 	local js_string = Parser.run(parser, "parse", options, fllines)
 	return vim.split(js_string, "\n", { plain = true })
@@ -141,7 +141,7 @@ end
 ---@param r_result ReadResult
 ---@return Document
 function M.parse(parser, r_result)
-	local jslines = flat_to_jslines(parser, r_result.lines, r_result.cursor)
+	local jslines = flat_to_jslines(parser, r_result.lines, r_result.cursor_buf)
 	local ndjsons = jslines_to_ndjsons(jslines)
 	expand_grid_prefix(ndjsons)
 	local allow_plain = parser.allow_plain or false

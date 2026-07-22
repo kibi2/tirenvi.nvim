@@ -75,7 +75,7 @@ local backup_cursor
 function M.write_pre(ctx)
 	local r_result = M.to_flat(ctx, true)
 	backup_buffer = r_result.lines
-	backup_cursor = r_result.cursor
+	backup_cursor = r_result.cursor_buf
 	backup_cursor.restore_mode = "buffer"
 end
 
@@ -83,7 +83,7 @@ end
 function M.write_post(ctx)
 	if backup_buffer then
 		local r_result = reader.read(ctx, Range.WHOLE)
-		r_result.cursor = backup_cursor
+		r_result.cursor_buf = backup_cursor
 		local req = Request.new_writer(r_result, backup_buffer, true)
 		writer.write(ctx, req)
 		backup_buffer = nil

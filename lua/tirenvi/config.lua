@@ -41,7 +41,6 @@ local defaults = {
 		["*"] = {
 			executable = "tir-embedded",
 			allow_plain = true,
-			cursor = true,
 		},
 	},
 	textobj = {
