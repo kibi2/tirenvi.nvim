@@ -1,4 +1,3 @@
-local buf_lines = require("tirenvi.io.buf_lines") -- IO
 local buf_state = require("tirenvi.io.buf_state")
 
 local log = require("tirenvi.util.log") -- Util

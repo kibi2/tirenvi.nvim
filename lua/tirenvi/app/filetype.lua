@@ -4,8 +4,7 @@ local common = require("tirenvi.app.common") -- App
 
 local Parser = require("tirenvi.parser.parser") -- Parser
 
-local buf_lines = require("tirenvi.io.buf_lines") -- IO
-local buf_state = require("tirenvi.io.buf_state")
+local buf_state = require("tirenvi.io.buf_state") -- IO
 local attr_store = require("tirenvi.io.attr_store")
 
 local log = require("tirenvi.util.log") -- Util

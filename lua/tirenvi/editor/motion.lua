@@ -1,7 +1,6 @@
 local tir_buf = require("tirenvi.parser.tir_buf") -- Parser
 
-local buf_lines = require("tirenvi.io.buf_lines") -- IO
-local buf_state = require("tirenvi.io.buf_state")
+local buf_state = require("tirenvi.io.buf_state") -- IO
 local reader = require("tirenvi.io.reader")
 local Context = require("tirenvi.io.context")
 

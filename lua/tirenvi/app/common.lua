@@ -4,7 +4,6 @@ local flat_parser = require("tirenvi.parser.flat_parser") -- Parser
 local buf_parser = require("tirenvi.parser.buf_parser")
 
 local buf_state = require("tirenvi.io.buf_state") -- IO
-local buf_lines = require("tirenvi.io.buf_lines")
 local writer = require("tirenvi.io.writer")
 local attr_store = require("tirenvi.io.attr_store")
 local reader = require("tirenvi.io.reader")

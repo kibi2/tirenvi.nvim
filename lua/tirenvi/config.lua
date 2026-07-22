@@ -1,4 +1,4 @@
-local levels = vim.log.levels
+local levels = vim.log.levels -- Neovim
 
 -- =============================================================================
 
