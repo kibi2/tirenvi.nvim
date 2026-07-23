@@ -3,7 +3,8 @@ local config = require("tirenvi.config") -- Root
 local buf_state = require("tirenvi.io.buf_state") -- IO
 local CursorNvim = require("tirenvi.io.cursor_nvim")
 
-local Cell = require("tirenvi.core.cell") -- Core
+local Attrs = require("tirenvi.core.attrs") -- Core
+local Cell = require("tirenvi.core.cell")
 
 local util = require("tirenvi.util.util") -- Util
 local Range = require("tirenvi.util.range")
@@ -53,41 +54,19 @@ local function is_block_boundary(base_pipe, target)
 end
 
 ---@param provider LineProvider
----@param irow integer
+---@param row_cur integer
 ---@param step integer  -- -1 or 1
 ---@return integer
-local function find_block_edge(provider, irow, step)
-	local line = provider.get_line(irow)
+local function find_block_edge(provider, row_cur, step)
+	local line = provider.get_line(row_cur)
 	local base_pipe = (M.get_pipe_char(line) ~= nil)
 	while true do
-		irow = irow + step
-		local line = provider.get_line(irow)
+		row_cur = row_cur + step
+		local line = provider.get_line(row_cur)
 		if is_block_boundary(base_pipe, line) then
-			return irow - step
+			return row_cur - step
 		end
 	end
-end
-
----@param line string
----@param pipe string
----@return integer[]
-local function get_pipe_byte_positions(line, pipe)
-	local indexes = {}
-	local index = 1
-	while index <= #line do
-		if line:sub(index, index + #pipe - 1) == pipe then
-			indexes[#indexes + 1] = index
-			index = index + #pipe
-		else
-			index = index + 1
-		end
-	end
-	if #indexes > 0 then
-		if indexes[1] ~= 1 then
-			table.insert(indexes, 1, 0)
-		end
-	end
-	return indexes
 end
 
 --#endregion
@@ -96,35 +75,43 @@ end
 
 ---@param line string
 ---@return integer[]
-function M.get_pipe_byte_position(line)
-	local pipen = config.marks.pipe
-	local indexes = get_pipe_byte_positions(line, pipen)
-	if #indexes == 0 then
-		local pipec = config.marks.pipec
-		indexes = get_pipe_byte_positions(line, pipec)
+function M.get_pipe_byte_positions(line)
+	local indexes = {}
+	local index = 1
+	local pipe = M.get_pipe_char(line)
+	if not pipe then
+		return indexes
+	end
+	while index <= #line do
+		if line:sub(index, index + #pipe - 1) == pipe then
+			indexes[#indexes + 1] = index
+			index = index + #pipe
+		else
+			index = index + 1
+		end
 	end
 	return indexes
 end
 
 ---@param byte_pos integer[]
----@param icol integer
----@return integer|nil
-function M.get_current_col_index(byte_pos, icol)
+---@param col_byte integer
+---@return integer
+function M.get_current_col_index(byte_pos, col_byte)
 	for index, ibyte in ipairs(byte_pos) do
-		if icol < ibyte then
+		if col_byte < ibyte then
 			return index - 1
 		end
 	end
-	return nil
+	return #byte_pos
 end
 
 ---@param ctx Context
 ---@param line_provider LineProvider
----@param irow integer
+---@param row_cur integer
 ---@return integer
-function M.get_block_top_nrow(ctx, line_provider, irow)
+function M.get_block_top_nrow(ctx, line_provider, row_cur)
 	if buf_state.is_allow_plain(ctx.bufnr) then
-		return find_block_edge(line_provider, irow, -1)
+		return find_block_edge(line_provider, row_cur, -1)
 	else
 		return 1
 	end
@@ -132,11 +119,11 @@ end
 
 ---@param ctx Context
 ---@param line_provider LineProvider
----@param irow integer
+---@param row_cur integer
 ---@return integer
-function M.get_block_bottom_nrow(ctx, line_provider, irow)
+function M.get_block_bottom_nrow(ctx, line_provider, row_cur)
 	if buf_state.is_allow_plain(ctx.bufnr) then
-		return find_block_edge(line_provider, irow, 1)
+		return find_block_edge(line_provider, row_cur, 1)
 	else
 		return line_provider.line_count()
 	end
@@ -220,52 +207,61 @@ function M.is_continue_line(line)
 end
 
 ---@param ctx Context
+---@param attrs Attr[]
 ---@param count integer
+---@param row_cur integer
+---@param col_byte integer
 ---@param is_around boolean
 ---@return Rect|nil
----@return string[]
-function M.get_block_rect(ctx, count, is_around)
-	local cursor_buf = CursorNvim.capture(ctx)
-	local row_cur = cursor_buf.row_cur
-	local col_byte = cursor_buf.col_byte
+function M.get_block_rect(ctx, attrs, count, row_cur, col_byte, is_around)
+	local attr = Attrs.get(attrs, row_cur)
+	if not attr then
+		return nil
+	end
 	local cline = ctx.line_provider.get_line(row_cur) or ""
-	local cbyte_pos = M.get_pipe_byte_position(cline)
+	local cbyte_pos = M.get_pipe_byte_positions(cline)
 	if #cbyte_pos == 0 then
-		return nil, {}
+		return nil
 	end
-	local colIndex = M.get_current_col_index(cbyte_pos, col_byte)
-	if not colIndex then
-		return nil, {}
+	local icol_start = M.get_current_col_index(cbyte_pos, col_byte)
+	if not icol_start or icol_start == 0 then
+		return nil
 	end
-	local trow = M.get_block_top_nrow(ctx, ctx.line_provider, row_cur)
-	local brow = M.get_block_bottom_nrow(ctx, ctx.line_provider, row_cur)
-	local lines = ctx.line_provider.get_lines(trow, brow)
-	local tline = lines[1]
-	local bline = lines[#lines]
-	local tbyte_pos = M.get_pipe_byte_position(tline)
-	local bbyte_pos = M.get_pipe_byte_position(bline)
-	local end_index = colIndex + count
-	end_index = math.min(end_index, #bbyte_pos)
+	icol_start = math.min(icol_start, #cbyte_pos - 1)
+	local tline = ctx.line_provider.get_line(attr.range.first) or ""
+	local bline = ctx.line_provider.get_line(attr.range.last) or ""
+	local tbyte_pos = M.get_pipe_byte_positions(tline)
+	local bbyte_pos = M.get_pipe_byte_positions(bline)
+	local icol_end = icol_start + count
+	icol_end = math.min(icol_end, #bbyte_pos)
 	local pipe = M.get_pipe_char(tline)
 	local rect = {
-		row = Range.from_lua(trow, brow),
+		row = Range.copy(attr.range),
 		col = Range.from_lua(
-			tbyte_pos[colIndex] + (is_around and 0 or #pipe),
-			bbyte_pos[end_index] - 1
+			tbyte_pos[icol_start] + (is_around and 0 or #pipe),
+			bbyte_pos[icol_end] - 1
 		),
 	}
-	return rect, lines
+	return rect
 end
 
 ---@param line string
+---@param embedded_key string|nil
 ---@return string
-function M.get_prefix_part(line)
-	local pipe = M.get_pipe_char(line)
-	if not pipe then
-		return ""
+---@return string
+function M.split_prefix(line, embedded_key)
+	if not embedded_key then
+		return "", line
 	end
-	local pos_byte = string.find(line, pipe, 1, true) or 1
-	return string.sub(line, 1, pos_byte - 1)
+	local byte_pos = M.get_pipe_byte_positions(line)
+	if #byte_pos == 0 or byte_pos[1] == 1 then
+		return "", line
+	end
+	local prefix = string.sub(line, 1, byte_pos[1] - 1)
+	if vim.trim(prefix) ~= embedded_key then
+		return "", line
+	end
+	return prefix, string.sub(line, byte_pos[1])
 end
 
 return M

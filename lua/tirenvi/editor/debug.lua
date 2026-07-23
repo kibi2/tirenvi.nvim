@@ -131,7 +131,8 @@ function M.layout(title, single)
 	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS) or {}
 	local cursor_buf = reader.cursor_buf(ctx)
 	local line = buf_lines.get_line(ctx.bufnr, cursor_buf.row_cur) or ""
-	local prefix = tir_buf.get_prefix_part(line)
+	local embedded_key = Attrs.get_embedded_key(attrs)
+	local prefix = tir_buf.split_prefix(line, embedded_key)
 	local pre_disp = fn.strdisplaywidth(prefix)
 	local cursor_tir =
 		Cursor.to_tir(attrs, cursor_buf.row_cur, cursor_buf.col_disp - pre_disp)

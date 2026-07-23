@@ -53,6 +53,12 @@ function M:get_range()
 	return self.range or self
 end
 
+---@param self Range
+---@return Range
+function M:copy()
+	return new(self.first, self.last)
+end
+
 ---@param first integer
 ---@param last integer
 ---@return Range

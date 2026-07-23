@@ -32,11 +32,11 @@ local M = {}
 ---@field no_normalize? boolean
 
 ---@param ctx Context
----@param irow integer
-local function expand_rect(ctx, irow)
+---@param row_cur integer
+local function expand_rect(ctx, row_cur)
 	local line_provider = LinProvider.new(ctx.bufnr)
-	local top = tir_buf.get_block_top_nrow(ctx, line_provider, irow)
-	local bottom = tir_buf.get_block_bottom_nrow(ctx, line_provider, irow)
+	local top = tir_buf.get_block_top_nrow(ctx, line_provider, row_cur)
+	local bottom = tir_buf.get_block_bottom_nrow(ctx, line_provider, row_cur)
 	return Range.from_lua(top, bottom)
 end
 

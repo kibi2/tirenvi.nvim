@@ -24,7 +24,8 @@ local M = {}
 function M.to_buf(cursor_tir, attrs, line_provider)
 	local row_cur, col_disp = M.to_cursor(attrs, cursor_tir)
 	local line = line_provider.get_line(row_cur) or ""
-	local prefix = tir_buf.get_prefix_part(line)
+	local embedded_key = Attrs.get_embedded_key(attrs)
+	local prefix = tir_buf.split_prefix(line, embedded_key)
 	col_disp = col_disp + fn.strdisplaywidth(prefix)
 	local cursor_buf = CursorNvim.from_col_disp(line, row_cur, col_disp)
 	return cursor_buf
