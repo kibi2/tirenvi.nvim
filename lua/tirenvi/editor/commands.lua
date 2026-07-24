@@ -8,7 +8,7 @@ local guard = require("tirenvi.editor.guard")
 
 local app = require("tirenvi.app") -- App
 
-local WidthOp = require("tirenvi.width.op") -- Width
+local WidthRequest = require("tirenvi.width.request") -- Width
 
 local buf_state = require("tirenvi.io.buf_state") -- IO
 local buf_lines = require("tirenvi.io.buf_lines")
@@ -27,57 +27,61 @@ local M = {}
 --#region Private
 
 ---@param ctx Context
----@param opts {[string]:any}
+---@param cmd_opts {[string]:any}
+---@param sub_cmd_name string
+---@param spec {[string]:any}|nil
 ---@return nil
-local function cmd_width(ctx, opts)
+local function cmd_width(ctx, cmd_opts, sub_cmd_name, spec)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true }) then
 		return
 	end
-	local width_op = WidthOp.new(opts)
-	if not width_op then
-		notify.error(errors.err_invalid_command(opts.args))
+	local width_req = WidthRequest.new(cmd_opts, sub_cmd_name, spec)
+	if not width_req then
+		notify.error(errors.err_invalid_command(cmd_opts.args))
 		return
 	end
-	log.debug(width_op:to_string())
-	app.cmd_width(ctx, width_op)
+	log.debug(width_req:to_string())
+	app.cmd_width(ctx, width_req)
 end
 
 ---@param ctx Context
----@param opts {[string]:any}
+---@param cmd_opts {[string]:any}
+---@param sub_cmd_name string
+---@param spec {[string]:any}|nil
 ---@return nil
-local function cmd_fit(ctx, opts)
+local function cmd_fit(ctx, cmd_opts, sub_cmd_name, spec)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true }) then
 		return
 	end
-	local width_op = WidthOp.new(opts)
-	if not width_op then
-		notify.error(errors.err_invalid_command(opts.args))
+	local width_req = WidthRequest.new(cmd_opts, sub_cmd_name, spec)
+	if not width_req then
+		notify.error(errors.err_invalid_command(cmd_opts.args))
 		return
 	end
-	log.debug(width_op:to_string())
-	app.cmd_fit(ctx, width_op)
+	log.debug(width_req:to_string())
+	app.cmd_fit(ctx, width_req)
 end
 
 ---@param ctx Context
----@param opts {[string]:any}
+---@param cmd_opts {[string]:any}
+---@param sub_cmd_name string
 ---@return nil
-local function cmd_wrap(ctx, opts)
+local function cmd_wrap(ctx, cmd_opts, sub_cmd_name)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true }) then
 		return
 	end
-	local width_op = WidthOp.new(opts)
-	if not width_op then
-		notify.error(errors.err_invalid_command(opts.args))
+	local width_req = WidthRequest.new(cmd_opts, sub_cmd_name)
+	if not width_req then
+		notify.error(errors.err_invalid_command(cmd_opts.args))
 		return
 	end
-	log.debug(width_op:to_string())
-	app.cmd_wrap(ctx, width_op)
+	log.debug(width_req:to_string())
+	app.cmd_wrap(ctx, width_req)
 end
 
 ---@param ctx Context
----@param opts {[string]:any}
 ---@return nil
-local function cmd_toggle(ctx, opts)
+local function cmd_toggle(ctx)
 	if
 		buf_state.should_skip(ctx.bufnr, {
 			is_tirbuf = false,
@@ -97,9 +101,8 @@ local function cmd_toggle(ctx, opts)
 end
 
 ---@param ctx Context
----@param opts {[string]:any}
 ---@return nil
-local function cmd_redraw(ctx, opts)
+local function cmd_redraw(ctx)
 	if buf_state.should_skip(ctx.bufnr) then
 		return
 	end
@@ -178,20 +181,20 @@ local function cmd_debug_write_tir(ctx, opts)
 	app.debug_write_tir(ctx, filename)
 end
 
-local commands = {
-	toggle = { func = cmd_toggle, sub = {} },
-	redraw = { func = cmd_redraw, sub = {} },
-	width = { func = cmd_width, sub = { "=", "+", "-", "?" }, has_op = true },
-	fit = { func = cmd_fit, sub = { "=", "+", "-" }, has_op = true },
-	wrap = { func = cmd_wrap, sub = {} },
-	repair = { func = cmd_repair, sub = { "toggle", "enable", "diable" } },
-	_read_tir = { func = cmd_debug_read_tir, sub = {} },
-	_write_tir = { func = cmd_debug_write_tir, sub = {} },
+local command_specs = {
+	toggle = { func = cmd_toggle },
+	redraw = { func = cmd_redraw },
+	width = { func = cmd_width, suffix = { "=", "+", "-", "?" } },
+	fit = { func = cmd_fit, suffix = { "=", "+", "-" } },
+	wrap = { func = cmd_wrap },
+	repair = { func = cmd_repair, suffix = { "toggle", "enable", "diable" } },
+	_read_tir = { func = cmd_debug_read_tir },
+	_write_tir = { func = cmd_debug_write_tir },
 }
 
 local function get_command_keys()
 	local keys = {}
-	for key, _ in pairs(commands) do
+	for key, _ in pairs(command_specs) do
 		if not key:match("^_") then
 			table.insert(keys, key)
 		end
@@ -208,26 +211,25 @@ local function build_desc()
 	return "Tir command: " .. table.concat(get_command_keys(), "/")
 end
 
----@param opts any
-local function on_tir(opts)
-	local sub = opts.fargs[1]
-	if not sub then
+---@param cmd_opts any
+local function on_tir(cmd_opts)
+	local sub_cmd = cmd_opts.fargs[1]
+	if not sub_cmd then
 		notify.info(build_usage())
 		return
 	end
 	local ctx = Context.from_buf()
 	local debug_name =
-		string.format("%s %s", opts.name, table.concat(opts.fargs, " "))
+		string.format("%s %s", cmd_opts.name, table.concat(cmd_opts.fargs, " "))
 	Debug.ui_entry(ctx.bufnr, debug_name)
-	local command_name = sub:match("^[A-Za-z_]+") or ""
-	local command = commands[command_name]
-	if not command then
+	local sub_cmd_name = sub_cmd:match("^[A-Za-z_]+") or ""
+	local spec = command_specs[sub_cmd_name]
+	if not spec then
 		notify.info(build_usage())
 		return
 	end
-	opts.command_name = command_name
-	opts.command = command
-	command.func(ctx, opts)
+	cmd_opts.command = spec
+	spec.func(ctx, cmd_opts, sub_cmd_name, spec)
 	Debug.ui_exit(ctx.bufnr, debug_name)
 end
 
@@ -237,17 +239,17 @@ local function complete_tir(arglead, cmdline)
 		return get_command_keys()
 	elseif #args == 2 then
 		local key = args[2]
-		if commands[key] then
-			return commands[key].sub
+		if command_specs[key] then
+			return command_specs[key].sub
 		end
 	end
 	return {}
 end
 
 local function register_user_command()
-	api.nvim_create_user_command("Tir", function(opts)
+	api.nvim_create_user_command("Tir", function(cmd_opts)
 		guard.guarded(function()
-			on_tir(opts)
+			on_tir(cmd_opts)
 		end)()
 	end, {
 		nargs = "*",

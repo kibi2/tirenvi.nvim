@@ -41,9 +41,9 @@ local function expand_rect(ctx, row_cur)
 end
 
 ---@param ctx Context
----@param width_op WidthOp
-local function change_wrap_width(ctx, width_op)
-	local row_range = expand_rect(ctx, width_op.row_cur)
+---@param width_req WidthRequest
+local function change_wrap_width(ctx, width_req)
+	local row_range = expand_rect(ctx, width_req.row_cur)
 	local r_result = reader.read(ctx, row_range)
 	local bufdoc = common.buflines_to_bufdoc_text_driven(ctx, r_result)
 	log.assert(#bufdoc.blocks == 1, "only one block")
@@ -51,17 +51,17 @@ local function change_wrap_width(ctx, width_op)
 	if Attr.is_plain(attr) then
 		return
 	end
-	local column = Attr.get(attr, width_op.col_disp)
-	column.width = width_op:apply(column.width)
+	local column = Attr.get(attr, width_req.col_disp)
+	column.width = width_req:apply(column.width)
 	attr.fit_span = Attr.get_fit_span(attr)
 	attr.wrap_mode = "wrap_width"
 	common.doc_to_buflines(ctx, r_result, bufdoc)
 end
 
 ---@param ctx Context
----@param width_op WidthOp
-local function change_wrap_fit(ctx, width_op)
-	local row_range = expand_rect(ctx, width_op.row_cur)
+---@param width_req WidthRequest
+local function change_wrap_fit(ctx, width_req)
+	local row_range = expand_rect(ctx, width_req.row_cur)
 	local r_result = reader.read(ctx, row_range)
 	local bufdoc = common.buflines_to_bufdoc_text_driven(ctx, r_result)
 	log.assert(#bufdoc.blocks == 1, "only one block")
@@ -69,15 +69,15 @@ local function change_wrap_fit(ctx, width_op)
 	if Attr.is_plain(attr) then
 		return
 	end
-	attr.fit_span = width_op:apply(Attr.get_fit_span(attr))
+	attr.fit_span = width_req:apply(Attr.get_fit_span(attr))
 	attr.wrap_mode = "wrap_fit"
 	common.doc_to_buflines(ctx, r_result, bufdoc)
 end
 
 ---@param ctx Context
----@param width_op WidthOp
-local function change_wrap_auto(ctx, width_op)
-	local row_range = expand_rect(ctx, width_op.row_cur)
+---@param width_req WidthRequest
+local function change_wrap_auto(ctx, width_req)
+	local row_range = expand_rect(ctx, width_req.row_cur)
 	local r_result = reader.read(ctx, row_range)
 	local bufdoc = common.buflines_to_bufdoc_text_driven(ctx, r_result)
 	log.assert(#bufdoc.blocks == 1, "only one block")
@@ -148,10 +148,11 @@ local function get_width_info(bufnr, attr, cursor_tir)
 end
 
 ---@param ctx Context
----@param width_op WidthOp
-local function width_info(ctx, width_op)
+---@param width_req WidthRequest
+local function width_info(ctx, width_req)
 	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
-	local curosr_tir = Cursor.to_tir(attrs, width_op.row_cur, width_op.col_disp)
+	local curosr_tir =
+		Cursor.to_tir(attrs, width_req.row_cur, width_req.col_disp)
 	local attr = attrs[curosr_tir.iblock]
 	if Attr.is_plain(attr) then
 		print("kind=plain")
@@ -161,10 +162,10 @@ local function width_info(ctx, width_op)
 end
 
 ---@param ctx Context
----@param width_op WidthOp
-local function toggle_wrap_mode(ctx, width_op)
+---@param width_req WidthRequest
+local function toggle_wrap_mode(ctx, width_req)
 	local attrs = attr_store.read(ctx.bufnr)
-	local attr = Attrs.get(attrs, width_op.row_cur)
+	local attr = Attrs.get(attrs, width_req.row_cur)
 	Attr.toggle_wrap_mode(attr or {})
 	attr_store.write(ctx.bufnr, attrs)
 end
@@ -186,31 +187,31 @@ end
 -- Public API
 
 ---@param ctx Context
----@param width_op WidthOp
-function M.cmd_width(ctx, width_op)
-	if width_op.operation == "info" then
-		width_info(ctx, width_op)
+---@param width_req WidthRequest
+function M.cmd_width(ctx, width_req)
+	if width_req.operation == "info" then
+		width_info(ctx, width_req)
 	else
-		change_wrap_width(ctx, width_op)
+		change_wrap_width(ctx, width_req)
 	end
-	set_repeat(util.get_termcodes(width_op:to_cmd()))
+	set_repeat(util.get_termcodes(width_req:to_cmd()))
 end
 
 ---@param ctx Context
----@param width_op WidthOp
-function M.cmd_fit(ctx, width_op)
-	if width_op.operation == "auto" then
-		change_wrap_auto(ctx, width_op)
+---@param width_req WidthRequest
+function M.cmd_fit(ctx, width_req)
+	if width_req.operation == "auto" then
+		change_wrap_auto(ctx, width_req)
 	else
-		change_wrap_fit(ctx, width_op)
+		change_wrap_fit(ctx, width_req)
 	end
-	set_repeat(util.get_termcodes(width_op:to_cmd()))
+	set_repeat(util.get_termcodes(width_req:to_cmd()))
 end
 
 ---@param ctx Context
----@param width_op WidthOp
-function M.cmd_wrap(ctx, width_op)
-	toggle_wrap_mode(ctx, width_op)
+---@param width_req WidthRequest
+function M.cmd_wrap(ctx, width_req)
+	toggle_wrap_mode(ctx, width_req)
 end
 
 return M

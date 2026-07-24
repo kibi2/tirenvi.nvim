@@ -51,21 +51,21 @@ function M.toggle(ctx)
 end
 
 ---@param ctx Context
----@param width_op WidthOp
-function M.cmd_width(ctx, width_op)
-	require("tirenvi.app.width").cmd_width(ctx, width_op)
+---@param width_req WidthRequest
+function M.cmd_width(ctx, width_req)
+	require("tirenvi.app.width").cmd_width(ctx, width_req)
 end
 
 ---@param ctx Context
----@param width_op WidthOp
-function M.cmd_fit(ctx, width_op)
-	require("tirenvi.app.width").cmd_fit(ctx, width_op)
+---@param width_req WidthRequest
+function M.cmd_fit(ctx, width_req)
+	require("tirenvi.app.width").cmd_fit(ctx, width_req)
 end
 
 ---@param ctx Context
----@param width_op WidthOp
-function M.cmd_wrap(ctx, width_op)
-	require("tirenvi.app.width").cmd_wrap(ctx, width_op)
+---@param width_req WidthRequest
+function M.cmd_wrap(ctx, width_req)
+	require("tirenvi.app.width").cmd_wrap(ctx, width_req)
 	M.cmd_redraw(ctx)
 end
 

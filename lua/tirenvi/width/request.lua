@@ -5,12 +5,7 @@ local Cell = require("tirenvi.core.cell") -- Core
 local Range = require("tirenvi.util.range") -- Util
 local log = require("tirenvi.util.log")
 
----@alias WidthCommand
----| "width"
----| "fit"
----| "wrap"
-
----@alias WidthOperation
+---@alias WidthAction
 ---| "set"
 ---| "add"
 ---| "sub"
@@ -19,15 +14,15 @@ local log = require("tirenvi.util.log")
 ---| "none"
 
 -- =============================================================================
----@class WidthOp
+---@class WidthRequest
 ---@field args string
----@field command WidthCommand
----@field operation WidthOperation
+---@field command "width"|"fit"|"wrap"
+---@field operation WidthAction
 ---@field number integer
 ---@field row_cur integer
 ---@field col_disp integer
-local WidthOp = {}
-WidthOp.__index = WidthOp
+local WidthRequest = {}
+WidthRequest.__index = WidthRequest
 
 -- =============================================================================
 --#region Private
@@ -39,13 +34,13 @@ local map = {
 	["?"] = "info",
 }
 
----@param opts {[string]:any}
+---@param cmd_opts {[string]:any}
 ---@return Rect
-local function get_selection(opts)
-	local row_range = Range.from_lua_normal(opts.line1, opts.line2)
+local function get_selection(cmd_opts)
+	local row_range = Range.from_lua_normal(cmd_opts.line1, cmd_opts.line2)
 	local is_block = (fn.visualmode() == "\22")
 	local col_disp_start, col_disp_end
-	if opts.range > 0 then
+	if cmd_opts.range > 0 then
 		if is_block then
 			col_disp_start = fn.virtcol("'<")
 			col_disp_end = fn.virtcol("'>")
@@ -79,54 +74,54 @@ local function get_number(str)
 	return math.max(1, num)
 end
 
----@param opts {[string]:any}
----@return WidthOperation|nil
----@return integer|nil
-local function get_operation(opts)
-	local sub = table.concat(opts.command.sub, "%")
-	local regex = string.format("^%s%%s*([%s])(.*)", opts.command_name, sub)
-	local op, value = opts.args:match(regex)
+---@param self WidthRequest
+---@param suffix string[]
+local function set_operation(self, suffix)
+	local suffixes = table.concat(suffix, "%")
+	local regex = string.format("^%s%%s*([%s])(.*)", self.command, suffixes)
+	local op, value = self.args:match(regex)
 	if not op then
-		error(string.format("%s need operator %s", opts.command_name, sub))
+		error(string.format("%s need operator %s", self.command, suffixes))
 	end
-	if op == "?" and #value ~= 0 then
-		return nil, nil
+	self.operation = map[op]
+	self.number = get_number(value)
+	if self.operation == "info" and #value ~= 0 then
+		-- case: Tir width?10
+		self.operation = nil
+		self.number = nil
+	elseif self.operation == "set" and self.number <= 1 then
+		-- case: Tir width=
+		self.operation = "auto"
+		self.number = 0
 	end
-	local num = get_number(value)
-	if op == "=" and num <= 1 then
-		return "auto", 0
-	end
-	return map[op], num
 end
 
----@param opts {[string]:any}
----@return WidthOp|nil
-local function try_new(opts)
-	local command_name = opts.command_name
-	---@cast command_name WidthCommand
-	local rect = get_selection(opts)
+---@param cmd_opts {[string]:any}
+---@param sub_cmd_name string
+---@param spec {[string]:any}|nil
+---@return WidthRequest|nil
+local function try_new(cmd_opts, sub_cmd_name, spec)
+	local rect = get_selection(cmd_opts)
 	local row_cur = rect.row.first
 	local col_disp = rect.col.first
 	local self = setmetatable({
-		args = opts.args,
-		command = command_name,
+		args = cmd_opts.args,
+		command = sub_cmd_name,
 		operation = "none",
 		number = 0,
 		row_cur = row_cur,
 		col_disp = col_disp,
-	}, WidthOp)
-	if not opts.command.has_op then
-		if opts.args ~= command_name then
+	}, WidthRequest)
+	if not spec then
+		if cmd_opts.args ~= sub_cmd_name then
 			return nil
 		end
 		return self
 	end
-	local operation, number = get_operation(opts)
-	if not operation or not number then
+	set_operation(self, spec.suffix)
+	if not self.operation or not self.number then
 		return nil
 	end
-	self.operation = operation
-	self.number = number
 	return self
 end
 
@@ -134,25 +129,27 @@ end
 -- =============================================================================
 -- Public API
 
----@param opts {[string]:any}
----@return WidthOp|nil
-function WidthOp.new(opts)
-	local ok, self = pcall(try_new, opts)
+---@param cmd_opts {[string]:any}
+---@param sub_cmd_name string
+---@param spec {[string]:any}|nil
+---@return WidthRequest|nil
+function WidthRequest.new(cmd_opts, sub_cmd_name, spec)
+	local ok, self = pcall(try_new, cmd_opts, sub_cmd_name, spec)
 	if not ok or not self then
 		return nil
 	end
 	return self
 end
 
-function WidthOp:to_cmd()
+function WidthRequest:to_cmd()
 	return string.format(":<C-u>Tir %s<CR>", self.args)
 end
 
----@param self WidthOp
+---@param self WidthRequest
 ---@return string
-function WidthOp:to_string()
+function WidthRequest:to_string()
 	return string.format(
-		"WidthOp %s %s (%d, %d) [%s] %s",
+		"WidthRequest %s %s (%d, %d) [%s] %s",
 		self.command,
 		self.operation or "nil",
 		self.row_cur,
@@ -162,10 +159,10 @@ function WidthOp:to_string()
 	)
 end
 
----@param self WidthOp
+---@param self WidthRequest
 ---@param current integer
 ---@return integer
-function WidthOp:apply(current)
+function WidthRequest:apply(current)
 	local operation = self.operation
 	local count = self.number
 	if operation == "set" then
@@ -181,4 +178,4 @@ function WidthOp:apply(current)
 	end
 end
 
-return WidthOp
+return WidthRequest
