@@ -130,12 +130,7 @@ function M.layout(title, single)
 	local ctx = Context.from_buf()
 	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS) or {}
 	local cursor_buf = reader.cursor_buf(ctx)
-	local line = buf_lines.get_line(ctx.bufnr, cursor_buf.row_cur) or ""
-	local embedded_key = Attrs.get_embedded_key(attrs)
-	local prefix = tir_buf.split_prefix(line, embedded_key)
-	local pre_disp = fn.strdisplaywidth(prefix)
-	local cursor_tir =
-		Cursor.to_tir(attrs, cursor_buf.row_cur, cursor_buf.col_disp - pre_disp)
+	local cursor_tir = Cursor.to_tir(attrs, cursor_buf)
 	local attr_str =
 		Attrs.debug_attrs(attrs, "", cursor_tir.iblock, cursor_tir.icol, single)
 	return string.format(
@@ -164,8 +159,7 @@ function M.show_attr_marks(ctx)
 		return
 	end
 	local cursor_buf = reader.cursor_buf(ctx)
-	local cursor_tir =
-		Cursor.to_tir(attrs, cursor_buf.row_cur, cursor_buf.col_disp)
+	local cursor_tir = Cursor.to_tir(attrs, cursor_buf)
 	for iattr, attr in ipairs(attrs) do
 		local icol
 		if cursor_tir.iblock == iattr then

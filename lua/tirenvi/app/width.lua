@@ -34,16 +34,19 @@ local M = {}
 ---@param ctx Context
 ---@param row_cur integer
 local function expand_rect(ctx, row_cur)
-	local line_provider = LinProvider.new(ctx.bufnr)
-	local top = tir_buf.get_block_top_nrow(ctx, line_provider, row_cur)
-	local bottom = tir_buf.get_block_bottom_nrow(ctx, line_provider, row_cur)
-	return Range.from_lua(top, bottom)
+	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
+	local attr = Attrs.get(attrs, row_cur)
+	if attr then
+		return attr.range
+	else
+		return Range.from_lua(1, 1)
+	end
 end
 
 ---@param ctx Context
 ---@param width_req WidthRequest
 local function change_wrap_width(ctx, width_req)
-	local row_range = expand_rect(ctx, width_req.row_cur)
+	local row_range = expand_rect(ctx, width_req.cursor_buf.row_cur)
 	local r_result = reader.read(ctx, row_range)
 	local bufdoc = common.buflines_to_bufdoc_text_driven(ctx, r_result)
 	log.assert(#bufdoc.blocks == 1, "only one block")
@@ -51,7 +54,12 @@ local function change_wrap_width(ctx, width_req)
 	if Attr.is_plain(attr) then
 		return
 	end
-	local column = Attr.get(attr, width_req.col_disp)
+	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
+	local cursor_tir = Cursor.to_tir(attrs, width_req.cursor_buf)
+	local column = attr.columns[cursor_tir.icol]
+	if not column then
+		return
+	end
 	column.width = width_req:apply(column.width)
 	attr.fit_span = Attr.get_fit_span(attr)
 	attr.wrap_mode = "wrap_width"
@@ -61,7 +69,7 @@ end
 ---@param ctx Context
 ---@param width_req WidthRequest
 local function change_wrap_fit(ctx, width_req)
-	local row_range = expand_rect(ctx, width_req.row_cur)
+	local row_range = expand_rect(ctx, width_req.cursor_buf.row_cur)
 	local r_result = reader.read(ctx, row_range)
 	local bufdoc = common.buflines_to_bufdoc_text_driven(ctx, r_result)
 	log.assert(#bufdoc.blocks == 1, "only one block")
@@ -77,7 +85,7 @@ end
 ---@param ctx Context
 ---@param width_req WidthRequest
 local function change_wrap_auto(ctx, width_req)
-	local row_range = expand_rect(ctx, width_req.row_cur)
+	local row_range = expand_rect(ctx, width_req.cursor_buf.row_cur)
 	local r_result = reader.read(ctx, row_range)
 	local bufdoc = common.buflines_to_bufdoc_text_driven(ctx, r_result)
 	log.assert(#bufdoc.blocks == 1, "only one block")
@@ -151,13 +159,12 @@ end
 ---@param width_req WidthRequest
 local function width_info(ctx, width_req)
 	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
-	local curosr_tir =
-		Cursor.to_tir(attrs, width_req.row_cur, width_req.col_disp)
-	local attr = attrs[curosr_tir.iblock]
+	local cursor_tir = Cursor.to_tir(attrs, width_req.cursor_buf)
+	local attr = attrs[cursor_tir.iblock]
 	if Attr.is_plain(attr) then
 		print("kind=plain")
 	else
-		print(get_width_info(ctx.bufnr, attr, curosr_tir))
+		print(get_width_info(ctx.bufnr, attr, cursor_tir))
 	end
 end
 
@@ -165,7 +172,7 @@ end
 ---@param width_req WidthRequest
 local function toggle_wrap_mode(ctx, width_req)
 	local attrs = attr_store.read(ctx.bufnr)
-	local attr = Attrs.get(attrs, width_req.row_cur)
+	local attr = Attrs.get(attrs, width_req.cursor_buf.row_cur)
 	Attr.toggle_wrap_mode(attr or {})
 	attr_store.write(ctx.bufnr, attrs)
 end

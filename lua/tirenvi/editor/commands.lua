@@ -1,4 +1,5 @@
 local api = vim.api -- Neovim
+local fn = vim.fn
 
 local ui = require("tirenvi.ui") -- Root
 
@@ -13,10 +14,12 @@ local WidthRequest = require("tirenvi.width.request") -- Width
 local buf_state = require("tirenvi.io.buf_state") -- IO
 local buf_lines = require("tirenvi.io.buf_lines")
 local Context = require("tirenvi.io.context")
+local CursorBuf = require("tirenvi.io.cursor")
 
 local notify = require("tirenvi.util.notify") -- Util
 local errors = require("tirenvi.util.errors")
 local util = require("tirenvi.util.util")
+local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
 -- =============================================================================
@@ -25,6 +28,49 @@ local M = {}
 
 -- =============================================================================
 --#region Private
+
+---@param cmd_opts {[string]:any}
+---@return Rect
+local function get_cmd_rect(cmd_opts)
+	local row_range = Range.from_lua_normal(cmd_opts.line1, cmd_opts.line2)
+	local is_block = (fn.visualmode() == "\22")
+	local col_disp_start, col_disp_end
+	if cmd_opts.range > 0 then
+		if is_block then
+			col_disp_start = fn.virtcol("'<")
+			col_disp_end = fn.virtcol("'>")
+		else
+			col_disp_start = 1
+			col_disp_end = math.huge
+		end
+	else
+		local col = fn.virtcol(".")
+		col_disp_start = col
+		col_disp_end = col
+	end
+	local col_range = Range.from_lua_normal(col_disp_start, col_disp_end)
+	---@type Rect
+	return {
+		row = row_range,
+		col = col_range,
+	}
+end
+
+---@param cmd_opts {[string]:any}
+---@return CursorBuf
+local function get_cursor_buf(cmd_opts)
+	local rect = get_cmd_rect(cmd_opts)
+	return CursorBuf.new_from_disp(rect.row.first, rect.col.first)
+end
+
+---@param cmd_opts {[string]:any}
+---@param sub_cmd_name string
+---@param spec {[string]:any}|nil
+---@return nil
+local function get_width_request(cmd_opts, sub_cmd_name, spec)
+	local cursor_buf = get_cursor_buf(cmd_opts)
+	return WidthRequest.new(cmd_opts, cursor_buf, sub_cmd_name, spec)
+end
 
 ---@param ctx Context
 ---@param cmd_opts {[string]:any}
@@ -35,7 +81,7 @@ local function cmd_width(ctx, cmd_opts, sub_cmd_name, spec)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true }) then
 		return
 	end
-	local width_req = WidthRequest.new(cmd_opts, sub_cmd_name, spec)
+	local width_req = get_width_request(cmd_opts, sub_cmd_name, spec)
 	if not width_req then
 		notify.error(errors.err_invalid_command(cmd_opts.args))
 		return
@@ -53,7 +99,7 @@ local function cmd_fit(ctx, cmd_opts, sub_cmd_name, spec)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true }) then
 		return
 	end
-	local width_req = WidthRequest.new(cmd_opts, sub_cmd_name, spec)
+	local width_req = get_width_request(cmd_opts, sub_cmd_name, spec)
 	if not width_req then
 		notify.error(errors.err_invalid_command(cmd_opts.args))
 		return
@@ -70,7 +116,7 @@ local function cmd_wrap(ctx, cmd_opts, sub_cmd_name)
 	if buf_state.should_skip(ctx.bufnr, { has_grid = true }) then
 		return
 	end
-	local width_req = WidthRequest.new(cmd_opts, sub_cmd_name)
+	local width_req = get_width_request(cmd_opts, sub_cmd_name)
 	if not width_req then
 		notify.error(errors.err_invalid_command(cmd_opts.args))
 		return

@@ -1,3 +1,5 @@
+local fn = vim.fn -- Neovim
+
 local config = require("tirenvi.config") -- Root
 
 local Record = require("tirenvi.core.record") -- Core
@@ -122,13 +124,7 @@ function M.get_attr_short(self)
 	local range_str = self.range
 			and string.format("(%d,%d)", self.range.first, self.range.last)
 		or "()"
-	local key
-	if self.prefix then
-		key = "'" .. vim.trim(self.prefix) .. "'"
-	else
-		key = ""
-	end
-	return kind .. key .. range_str
+	return kind .. range_str
 end
 
 ---@param attr Attr
@@ -141,11 +137,18 @@ function M.get_attr_long(attr, ccol)
 	if ccol and M.is_plain(attr) then
 		long = "*"
 	else
+		if attr.prefix then
+			if ccol then
+				ccol = ccol + 1
+			end
+			table.insert(widths, 1, vim.trim(attr.prefix))
+		end
 		if ccol then
 			widths[ccol] = widths[ccol] .. "*"
 		end
-		long = #widths > 0 and string.format("[%s]", table.concat(widths, ","))
-			or ""
+		if #widths > 0 then
+			long = string.format("[%s]", table.concat(widths, ","))
+		end
 	end
 	local fit_span = attr.fit_span == 0 and "" or tostring(attr.fit_span)
 	return M.get_attr_short(attr) .. get_mode_short(attr) .. fit_span .. long
@@ -265,7 +268,10 @@ function M:to_cell_col(col_disp)
 	if M.is_plain(self) then
 		return 0, 0
 	end
-	local start = 1
+	local start = fn.strdisplaywidth(self.prefix or "") + 1
+	if col_disp < start then
+		return 0, 0
+	end
 	local last
 	for icol, column in ipairs(self.columns) do
 		last = start + column.width
@@ -279,6 +285,7 @@ end
 
 ---@param self Attr
 ---@param col_byte integer
+---@return Attr_column|nil
 function M:get(col_byte)
 	local icol = M.to_cell_col(self, col_byte)
 	return self.columns[icol]

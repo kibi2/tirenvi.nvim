@@ -43,7 +43,7 @@ function M.block_top()
 	local ctx = Context.from_buf()
 	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
 	local cursor_buf = reader.cursor_buf(ctx)
-	local pos = Cursor.to_tir(attrs, cursor_buf.row_cur, cursor_buf.col_disp)
+	local pos = Cursor.to_tir(attrs, cursor_buf)
 	local top_row = attrs[pos.iblock].range.first
 	CursorNvim.restore_disp(ctx, top_row, cursor_buf.col_disp)
 end
@@ -52,7 +52,7 @@ function M.block_bottom()
 	local ctx = Context.from_buf()
 	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
 	local cursor_buf = reader.cursor_buf(ctx)
-	local pos = Cursor.to_tir(attrs, cursor_buf.row_cur, cursor_buf.col_disp)
+	local pos = Cursor.to_tir(attrs, cursor_buf)
 	local bottom_row = attrs[pos.iblock].range.last
 	CursorNvim.restore_disp(ctx, bottom_row, cursor_buf.col_disp)
 end

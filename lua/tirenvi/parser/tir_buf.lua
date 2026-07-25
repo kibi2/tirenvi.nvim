@@ -1,13 +1,8 @@
 local config = require("tirenvi.config") -- Root
 
-local buf_state = require("tirenvi.io.buf_state") -- IO
-local CursorNvim = require("tirenvi.io.cursor_nvim")
-
-local Attrs = require("tirenvi.core.attrs") -- Core
-local Cell = require("tirenvi.core.cell")
+local Cell = require("tirenvi.core.cell") -- Core
 
 local util = require("tirenvi.util.util") -- Util
-local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
 -- =============================================================================
@@ -41,32 +36,6 @@ local function remove_end_pipe(line)
 		line = line:sub(1, -#pipec - 1)
 	end
 	return line
-end
-
----@param base_pipe boolean
----@param target string|nil
----@return boolean
-local function is_block_boundary(base_pipe, target)
-	if not target then
-		return true
-	end
-	return base_pipe ~= (M.get_pipe_char(target) ~= nil)
-end
-
----@param provider LineProvider
----@param row_cur integer
----@param step integer  -- -1 or 1
----@return integer
-local function find_block_edge(provider, row_cur, step)
-	local line = provider.get_line(row_cur)
-	local base_pipe = (M.get_pipe_char(line) ~= nil)
-	while true do
-		row_cur = row_cur + step
-		local line = provider.get_line(row_cur)
-		if is_block_boundary(base_pipe, line) then
-			return row_cur - step
-		end
-	end
 end
 
 --#endregion
@@ -103,30 +72,6 @@ function M.get_current_col_index(byte_pos, col_byte)
 		end
 	end
 	return #byte_pos
-end
-
----@param ctx Context
----@param line_provider LineProvider
----@param row_cur integer
----@return integer
-function M.get_block_top_nrow(ctx, line_provider, row_cur)
-	if buf_state.is_allow_plain(ctx.bufnr) then
-		return find_block_edge(line_provider, row_cur, -1)
-	else
-		return 1
-	end
-end
-
----@param ctx Context
----@param line_provider LineProvider
----@param row_cur integer
----@return integer
-function M.get_block_bottom_nrow(ctx, line_provider, row_cur)
-	if buf_state.is_allow_plain(ctx.bufnr) then
-		return find_block_edge(line_provider, row_cur, 1)
-	else
-		return line_provider.line_count()
-	end
 end
 
 ---@param line string
@@ -204,45 +149,6 @@ function M.is_continue_line(line)
 		return false
 	end
 	return M.get_pipe_char(line) == pipec
-end
-
----@param ctx Context
----@param attrs Attr[]
----@param count integer
----@param row_cur integer
----@param col_byte integer
----@param is_around boolean
----@return Rect|nil
-function M.get_block_rect(ctx, attrs, count, row_cur, col_byte, is_around)
-	local attr = Attrs.get(attrs, row_cur)
-	if not attr then
-		return nil
-	end
-	local cline = ctx.line_provider.get_line(row_cur) or ""
-	local cbyte_pos = M.get_pipe_byte_positions(cline)
-	if #cbyte_pos == 0 then
-		return nil
-	end
-	local icol_start = M.get_current_col_index(cbyte_pos, col_byte)
-	if not icol_start or icol_start == 0 then
-		return nil
-	end
-	icol_start = math.min(icol_start, #cbyte_pos - 1)
-	local tline = ctx.line_provider.get_line(attr.range.first) or ""
-	local bline = ctx.line_provider.get_line(attr.range.last) or ""
-	local tbyte_pos = M.get_pipe_byte_positions(tline)
-	local bbyte_pos = M.get_pipe_byte_positions(bline)
-	local icol_end = icol_start + count
-	icol_end = math.min(icol_end, #bbyte_pos)
-	local pipe = M.get_pipe_char(tline)
-	local rect = {
-		row = Range.copy(attr.range),
-		col = Range.from_lua(
-			tbyte_pos[icol_start] + (is_around and 0 or #pipe),
-			bbyte_pos[icol_end] - 1
-		),
-	}
-	return rect
 end
 
 ---@param line string

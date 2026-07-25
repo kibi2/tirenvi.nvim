@@ -32,19 +32,18 @@ function M.to_buf(cursor_tir, attrs, line_provider)
 end
 
 ---@param attrs Attr[]
----@param row_cur integer
----@param col_disp integer
+---@param cursor_buf CursorBuf
 ---@return CursorTir
-function M.to_tir(attrs, row_cur, col_disp)
-	local _, iblock = Attrs.get(attrs, row_cur)
+function M.to_tir(attrs, cursor_buf)
+	local _, iblock = Attrs.get(attrs, cursor_buf.row_cur)
 	if not iblock then
 		return {}
 	end
 	local attr = attrs[iblock]
-	log.assert(attr, "invalid position %d", row_cur)
-	local irow = row_cur - attr.range.first + 1
-	local icol, offset = Attr.to_cell_col(attr, col_disp)
-	return CursorTir.new(iblock, irow, icol, offset)
+	log.assert(attr, "invalid position %d", cursor_buf.row_cur)
+	local irow = cursor_buf.row_cur - attr.range.first + 1
+	local icol, offset = Attr.to_cell_col(attr, cursor_buf.col_disp)
+	return CursorTir.new(iblock, irow, icol or 0, offset)
 end
 
 ---@param attrs Attr[]

@@ -19,8 +19,7 @@ local log = require("tirenvi.util.log")
 ---@field command "width"|"fit"|"wrap"
 ---@field operation WidthAction
 ---@field number integer
----@field row_cur integer
----@field col_disp integer
+---@field cursor_buf CursorBuf
 local WidthRequest = {}
 WidthRequest.__index = WidthRequest
 
@@ -33,33 +32,6 @@ local map = {
 	["-"] = "sub",
 	["?"] = "info",
 }
-
----@param cmd_opts {[string]:any}
----@return Rect
-local function get_selection(cmd_opts)
-	local row_range = Range.from_lua_normal(cmd_opts.line1, cmd_opts.line2)
-	local is_block = (fn.visualmode() == "\22")
-	local col_disp_start, col_disp_end
-	if cmd_opts.range > 0 then
-		if is_block then
-			col_disp_start = fn.virtcol("'<")
-			col_disp_end = fn.virtcol("'>")
-		else
-			col_disp_start = 1
-			col_disp_end = math.huge
-		end
-	else
-		local col = fn.virtcol(".")
-		col_disp_start = col
-		col_disp_end = col
-	end
-	local col_range = Range.from_lua_normal(col_disp_start, col_disp_end)
-	---@type Rect
-	return {
-		row = row_range,
-		col = col_range,
-	}
-end
 
 ---@param str string
 ---@return integer
@@ -97,20 +69,17 @@ local function set_operation(self, suffix)
 end
 
 ---@param cmd_opts {[string]:any}
+---@param cursor_buf CursorBuf
 ---@param sub_cmd_name string
 ---@param spec {[string]:any}|nil
 ---@return WidthRequest|nil
-local function try_new(cmd_opts, sub_cmd_name, spec)
-	local rect = get_selection(cmd_opts)
-	local row_cur = rect.row.first
-	local col_disp = rect.col.first
+local function try_new(cmd_opts, cursor_buf, sub_cmd_name, spec)
 	local self = setmetatable({
 		args = cmd_opts.args,
 		command = sub_cmd_name,
 		operation = "none",
 		number = 0,
-		row_cur = row_cur,
-		col_disp = col_disp,
+		cursor_buf = cursor_buf,
 	}, WidthRequest)
 	if not spec then
 		if cmd_opts.args ~= sub_cmd_name then
@@ -130,11 +99,12 @@ end
 -- Public API
 
 ---@param cmd_opts {[string]:any}
+---@param cursor_buf CursorBuf
 ---@param sub_cmd_name string
 ---@param spec {[string]:any}|nil
 ---@return WidthRequest|nil
-function WidthRequest.new(cmd_opts, sub_cmd_name, spec)
-	local ok, self = pcall(try_new, cmd_opts, sub_cmd_name, spec)
+function WidthRequest.new(cmd_opts, cursor_buf, sub_cmd_name, spec)
+	local ok, self = pcall(try_new, cmd_opts, cursor_buf, sub_cmd_name, spec)
 	if not ok or not self then
 		return nil
 	end
@@ -152,8 +122,8 @@ function WidthRequest:to_string()
 		"WidthRequest %s %s (%d, %d) [%s] %s",
 		self.command,
 		self.operation or "nil",
-		self.row_cur,
-		self.col_disp,
+		self.cursor_buf.row_cur,
+		self.cursor_buf.col_disp,
 		self.number or "nil",
 		self:to_cmd()
 	)
