@@ -103,7 +103,7 @@ end
 local function is_insert_mode(bufnr)
 	local mode = M.get(bufnr, M.IKEY.INSERT_MODE) == true
 	if mode then
-		log.debug("===-===-===-=== insert mode[%d] ===-===-===-===", bufnr)
+		log.debug("===-=== insert mode[%d] ===", bufnr)
 	end
 	return mode
 end
@@ -114,12 +114,7 @@ local function is_undo_mode(bufnr)
 	local pre = M.get(bufnr, M.IKEY.UNDO_TREE_LAST)
 	local next = fn.undotree(bufnr).seq_last
 	if pre == next then
-		log.debug(
-			"===-===-===-=== und/redo mode[%d] (%d, %d) ===-===-===-===",
-			bufnr,
-			pre,
-			next
-		)
+		log.debug("===-=== und/redo mode[%d] (%d, %d) ===", bufnr, pre, next)
 		return true
 	end
 	return false

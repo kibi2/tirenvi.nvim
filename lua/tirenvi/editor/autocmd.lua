@@ -55,11 +55,12 @@ local function on_lines(_, bufnr, tick, range3, bytecount)
 	if buf_state.should_skip(bufnr) then
 		return
 	end
+	local debug_name = string.format("OnLines %s", Range3.short(range3))
+	Debug.ui_entry(bufnr, debug_name)
 	local ctx = get_context(bufnr)
-	Debug.ui_entry(bufnr, Range3.short(range3))
 	app.on_lines(ctx, range3)
 	app.check_and_repair(ctx, range3)
-	Debug.ui_exit(bufnr, Range3.short(range3))
+	Debug.ui_exit(bufnr, debug_name)
 end
 
 ---@param bufnr number

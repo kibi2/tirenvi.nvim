@@ -72,16 +72,17 @@ local function promote_empty_lines_gfm(records, r_result, range3)
 	end
 	local first = Range.to_lua(r_result.range)
 	local prev_attr = Attrs.get(r_result.attrs, first - 1)
-	if not Attr.is_grid(prev_attr) then
+	if not prev_attr or not Attr.is_grid(prev_attr) then
 		return records
 	end
 	for _, record in ipairs(records) do
-		if record.kind ~= CONST.KIND.PLAIN or record.line ~= "" then
+		if record.kind ~= CONST.KIND.PLAIN or vim.trim(record.line) ~= "" then
 			return records
 		end
 	end
 	for irec, record in ipairs(records) do
 		records[irec] = Record[record.kind].to_grid(record)
+		records[irec].prefix = prev_attr.prefix
 	end
 end
 

@@ -1,9 +1,9 @@
 === MESSAGE ===
-[TIR][DEBUG][buf_lines.lua] === cache[#1] lines[1]='0'...[6]='5'
-[TIR][UNDO][buf_lines.lua] nil[0->1]set_lines lines[1]='0'...[21]='20'
+[TIR][DEBUG][buf_lines.lua] === cache[#1] lines[1]='0'[6]='5'
+[TIR][UNDO][buf_lines.lua] nil[0->1]set lines[1]='0'[21]='20'
 
 CASE buf_lines.get_lines(bufnr, 0, -1)
-[TIR][DEBUG][buf_lines.lua] === cache[#1] lines[1]='0'...[21]='20'
+[TIR][DEBUG][buf_lines.lua] === cache[#1] lines[1]='0'[21]='20'
 [TIR][DEBUG][[string ":lua"]] <table> { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20" }
 [TIR][DEBUG][[string ":lua"]] <table> { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20" }
 
@@ -11,22 +11,22 @@ CASE buf_lines.get_lines(bufnr, -100, 100)
 [TIR][DEBUG][[string ":lua"]] <table> { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20" }
 
 CASE clear & buf_lines.get_lines(bufnr, 9, 13)
-[TIR][DEBUG][buf_lines.lua] === cache[#1] lines[7]='6'...[16]='15'
+[TIR][DEBUG][buf_lines.lua] === cache[#1] lines[7]='6'[16]='15'
 [TIR][DEBUG][[string ":lua"]] <table> { "9", "10", "11", "12" }
 
 CASE buf_lines.get_line(bufnr, 7)
 [TIR][DEBUG][[string ":lua"]] 6
 
 CASE buf_lines.get_line(bufnr, 3)
-[TIR][DEBUG][buf_lines.lua] === cache[#1] lines[1]='0'...[6]='5'
+[TIR][DEBUG][buf_lines.lua] === cache[#1] lines[1]='0'[6]='5'
 [TIR][DEBUG][[string ":lua"]] 2
 
 CASE buf_lines.get_line(bufnr, 20)
-[TIR][DEBUG][buf_lines.lua] === cache[#1] lines[20]='19'...[21]='20'
+[TIR][DEBUG][buf_lines.lua] === cache[#1] lines[20]='19'[21]='20'
 [TIR][DEBUG][[string ":lua"]] 19
 
 CASE buf_lines.get_line(bufnr, 11)
-[TIR][DEBUG][buf_lines.lua] === cache[#1] lines[5]='4'...[11]='10'
+[TIR][DEBUG][buf_lines.lua] === cache[#1] lines[5]='4'[11]='10'
 [TIR][DEBUG][[string ":lua"]] 10
 
 CASE buf_lines.get_line(bufnr, 0)

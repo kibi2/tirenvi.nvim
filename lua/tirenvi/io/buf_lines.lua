@@ -80,12 +80,12 @@ local function get_lines_and_cache(bufnr, first, last)
 	local lines = api.nvim_buf_get_lines(bufnr, start0, end0, false)
 	cache = { bufnr = bufnr, start = start0, lines = lines }
 	log.debug(
-		"=== cache[#%d] lines[%d]='%s'...[%d]='%s'",
+		"=== cache[#%d] lines[%d]='%s'[%d]='%s'",
 		cache.bufnr,
 		cache.start + 1,
-		tostring(cache.lines[1]),
+		vim.trim(tostring(cache.lines[1])):sub(1, 15),
 		cache.start + #cache.lines,
-		tostring(cache.lines[#cache.lines])
+		vim.trim(tostring(cache.lines[#cache.lines])):sub(1, 15)
 	)
 end
 
@@ -137,14 +137,14 @@ function M.set_lines(ctx, range, lines, no_undo, cursor_buf)
 	local first, last = Range.to_lua(range)
 	log.watch(
 		"UNDO",
-		"%s[%d->%d]set_lines lines[%d]='%s'...[%d]='%s'",
+		"%s[%d->%d]set lines[%d]='%s'[%d]='%s'",
 		tostring(no_undo),
 		before,
 		after,
 		first,
-		tostring(lines[1]),
+		vim.trim(tostring(lines[1])):sub(1, 15),
 		last,
-		tostring(lines[#lines])
+		vim.trim(tostring(lines[#lines])):sub(1, 15)
 	)
 	buf_state.set(
 		bufnr,

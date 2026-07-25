@@ -27,12 +27,12 @@ local M = {}
 -- Prevents line count changes that would break put(); used for repair.
 ---@return Document
 local function buflines_to_bufdoc_attrs_driven(ctx, r_result)
-	log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "CHACHED ATTRS:"))
+	log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[0]CHA ATTR:"))
 	local opts = { attrs = r_result.attrs }
 	local bufdoc = buf_parser.parse(ctx, r_result, opts)
 	log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
 	Document.insert_empty_lines(bufdoc)
-	log.watch("ATTR", Document.debug_attrs(bufdoc, "[7]INSERT EMPTY:"))
+	log.watch("ATTR", Document.debug_attrs(bufdoc, "[7]IN EMPTY:"))
 	return bufdoc
 end
 
@@ -86,11 +86,11 @@ function M.cmd_redraw(ctx, opts)
 	if not need_repair(ctx) then
 		return
 	end
-	log.debug("===+=== START ===+=== %s[#%d] ===", "REPAIR", ctx.bufnr)
+	log.debug("===+=== ENTRY ===+=== Repair [#%d] ===", ctx.bufnr)
 	local r_result = reader.read(ctx, Range.WHOLE)
-	log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[88]MODE:"))
 	local bufdoc = buflines_to_bufdoc_attrs_driven(ctx, r_result)
 	common.doc_to_buflines(ctx, r_result, bufdoc, opts)
+	log.debug("===+=== EXIT! ===+=== Repair [#%d] ===", ctx.bufnr)
 end
 
 ---@param ctx Context

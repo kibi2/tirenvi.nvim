@@ -29,7 +29,6 @@ function M.read(ctx, range, opts)
 		result.cursor_buf = M.cursor_buf(ctx)
 		result.cursor_buf.restore_mode = restore_mode or "none"
 	end
-	log.watch("ATTR", Attrs.debug_attrs(result.attrs, "[0]CHACHED ATTRS:"))
 	return result
 end
 

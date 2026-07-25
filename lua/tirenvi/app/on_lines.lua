@@ -27,12 +27,12 @@ local function reconcile_attrs(r_result, bufdoc, range3)
 	Document.inherit_neighbor_attr(bufdoc, r_result.attrs, range3)
 	log.watch("ATTR", Document.debug_attrs(bufdoc, "[2]NEIGHBOR:"))
 	Document.infer_consistent_attr(bufdoc)
-	log.watch("ATTR", Document.debug_attrs(bufdoc, "[3]CONSISTENT:"))
+	log.watch("ATTR", Document.debug_attrs(bufdoc, "[3]CONSISTE:"))
 	Document.apply_attrs(bufdoc, r_result.attrs)
-	log.watch("ATTR", Document.debug_attrs(bufdoc, "[4]CACHED:"))
+	log.watch("ATTR", Document.debug_attrs(bufdoc, "[4]CACHED  :"))
 	Document.set_max_attr(bufdoc)
 	local attrs = Document.replace_attrs(bufdoc, r_result.range, r_result.attrs)
-	log.watch("ATTR", Attrs.debug_attrs(attrs, "[6]RESULT:"))
+	log.watch("ATTR", Attrs.debug_attrs(attrs, "[6]RESULT   :"))
 	return attrs
 end
 
@@ -53,10 +53,10 @@ end
 ---@param r_result ReadResult
 local function update_attrs(ctx, range3, r_result)
 	r_result.attrs = Attrs.adjust(r_result.attrs, range3)
-	log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[0]UPDATE CHACHED:"))
+	log.watch("ATTR", Attrs.debug_attrs(r_result.attrs, "[0]UPDATE C:"))
 	local opts = { range3 = range3, first = r_result.range.first }
 	local bufdoc = buf_parser.parse(ctx, r_result, opts)
-	log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]DOC ATTR:"))
+	log.watch("ATTR", Document.debug_attrs(bufdoc, "[1]PARSE DC:"))
 	local attrs = reconcile_attrs(r_result, bufdoc, range3)
 	reconcile_dirty_ranges(ctx.bufnr, attrs, range3)
 	attr_store.write(ctx.bufnr, attrs)
