@@ -9,6 +9,8 @@ local buf_lines = require("tirenvi.io.buf_lines") -- IO
 local buf_state = require("tirenvi.io.buf_state") -- IO
 local reader = require("tirenvi.io.reader")
 
+local Attrs = require("tirenvi.core.attrs") -- Core
+
 local util = require("tirenvi.util.util") -- Util
 local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
@@ -25,7 +27,7 @@ function M.insert_char_in_newline(ctx)
 	local cursor_buf = reader.cursor_buf(ctx)
 	local row_cur = cursor_buf.row_cur
 	local line_new = buf_lines.get_line(ctx.bufnr, row_cur)
-	if line_new ~= "" then
+	if vim.trim(line_new) ~= "" then
 		return
 	end
 	local line_prev, line_next =
@@ -35,10 +37,13 @@ function M.insert_char_in_newline(ctx)
 		line_ref = line_ref or line_next
 	end
 	local pipe = tir_buf.get_pipe_char(line_ref)
-	if not pipe then
+	if not line_ref or not pipe then
 		return
 	end
-	vim.v.char = pipe .. vim.v.char
+	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
+	local embedded_key = Attrs.get_embedded_key(attrs)
+	local prefix = tir_buf.split_prefix(line_ref, embedded_key)
+	vim.v.char = prefix:gsub("^%s+", "") .. pipe .. vim.v.char
 end
 
 ---@return string
