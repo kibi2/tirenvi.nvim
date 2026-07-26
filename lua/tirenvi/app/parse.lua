@@ -131,7 +131,8 @@ function M.toggle(ctx)
 	local is_flat = not buf_state.is_tirbuf(ctx.bufnr)
 	if is_flat then
 		M.from_flat(ctx)
-		if not buf_state.has_grid(ctx.bufnr) then
+		local filetype = buf_state.get(ctx.bufnr, buf_state.IKEY.FILETYPE)
+		if not filetype and not buf_state.has_grid(ctx.bufnr) then
 			embedded_off(ctx)
 		end
 	elseif buf_state.has_grid(ctx.bufnr) then

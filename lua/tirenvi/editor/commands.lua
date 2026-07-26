@@ -168,7 +168,7 @@ local function cmd_repair(ctx, opts)
 		if not warned then
 			warned = true
 			notify.warn(
-				"Tir repair is deprecated and will be removed in v0.5. Use :Tir redraw"
+				"Tir repair is deprecated and will be removed in v0.6. Use :Tir redraw"
 			)
 		end
 		app.cmd_redraw(ctx)
@@ -271,6 +271,10 @@ local function on_tir(cmd_opts)
 	local sub_cmd_name = sub_cmd:match("^[A-Za-z_]+") or ""
 	local spec = command_specs[sub_cmd_name]
 	if not spec then
+		notify.info(build_usage())
+		return
+	end
+	if not spec.suffix and sub_cmd_name ~= sub_cmd then
 		notify.info(build_usage())
 		return
 	end

@@ -93,6 +93,9 @@ function M:intersects(target)
 	if not self or not target then
 		return false
 	end
+	if not self.last or not target.first then
+		return false
+	end
 	if self.last < target.first then
 		return false
 	end

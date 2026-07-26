@@ -63,6 +63,20 @@ local function buflines_to_records(buflines, embedded_key)
 	return records
 end
 
+---@param record Record
+---@param embedded_key string
+---@return boolean
+local function is_empty_plain(record, embedded_key)
+	if record.kind ~= CONST.KIND.PLAIN then
+		return false
+	end
+	local trim = vim.trim(record.line)
+	if #trim == 0 then
+		return true
+	end
+	return trim == embedded_key
+end
+
 ---@param records Record[]
 ---@param r_result ReadResult
 ---@param range3 Range3
@@ -75,8 +89,9 @@ local function promote_empty_lines_gfm(records, r_result, range3)
 	if not prev_attr or not Attr.is_grid(prev_attr) then
 		return records
 	end
+	local embedded_key = vim.trim(prev_attr.prefix or "")
 	for _, record in ipairs(records) do
-		if record.kind ~= CONST.KIND.PLAIN or vim.trim(record.line) ~= "" then
+		if not is_empty_plain(record, embedded_key) then
 			return records
 		end
 	end

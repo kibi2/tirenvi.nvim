@@ -21,6 +21,12 @@ function M:apply_column_count(ncol)
 	self.row = Cell.merge_tail(self.row, ncol)
 end
 
+---@param self Record_grid
+---@param prefix string
+function M:apply_prefix(prefix)
+	self.prefix = prefix
+end
+
 ---@param bufline string
 ---@return Record_plain
 function M.plain.new(bufline)

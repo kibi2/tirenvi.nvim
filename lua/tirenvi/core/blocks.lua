@@ -96,6 +96,7 @@ local function build_blocks_attr_driven(ndjsons, attrs)
 				record = Record[record.kind].change_kind(record, block.kind)
 				if record.kind == "grid" then
 					Record.apply_column_count(record, #attr.columns)
+					Record.apply_prefix(record, attr.prefix)
 					if record._has_continuation == nil then
 						record._has_continuation = has_continuation
 					end

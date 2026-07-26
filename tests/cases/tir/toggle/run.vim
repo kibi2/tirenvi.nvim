@@ -31,6 +31,15 @@ edit $TIRENVI_ROOT/tests/data/simple.md
         Tir toggle
         Tir toggle
 
+" ===== NG case =====
+CASE NG case
+        Tir
+        Tir bar
+        Tir toggle=
+        Tir reconcile
+        Tir repair
+            lua print(Debug.layout())
+
 call Snapshot({'desc': 'simple.md' })
 
 " ===== GFM table 0 =====
@@ -38,14 +47,5 @@ CASE table 0
 edit $TIRENVI_ROOT/tests/data/table0.md
         Tir toggle
             sleep 1m | lua print(Debug.layout())
-
-" ===== NG case =====
-CASE NG case
-        Tir
-        Tir bar
-        Tir toggle=
-        Tir repair
-        Tir reconcile
-            lua print(Debug.layout())
 
 call Snapshot({'desc': 'toggle' })

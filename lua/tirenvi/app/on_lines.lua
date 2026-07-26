@@ -71,6 +71,7 @@ end
 function M.on_lines(ctx, range3)
 	local r_result =
 		reader.read(ctx, Range3.get_new_range(range3), { cursor = false })
+	log.debug(r_result.lines[1])
 	update_attrs(ctx, range3, r_result)
 end
 

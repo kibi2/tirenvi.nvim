@@ -1,7 +1,7 @@
 source $TIRENVI_ROOT/tests/common.vim
 
 " ===== GFM =====
-edit $TIRENVI_ROOT/tests/data/table.txt
+edit $TIRENVI_ROOT/tests/data/sample.py
 
 CASE initial cached attrs
         Tir toggle
