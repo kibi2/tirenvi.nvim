@@ -5,25 +5,30 @@ local log = require("tirenvi.util.log") -- Util
 -- =============================================================================
 
 ---@class Range
----@field first integer
----@field last integer
+---@field class string
+---@field first integer|nil
+---@field last integer|nil
 
 local M = {}
 
 -- =============================================================================
 --#region Private
 
----@param first integer
----@param last integer
+---@param first integer|nil
+---@param last integer|nil
+---@param allow_nil boolean|nil
 ---@return Range
-local function new(first, last)
+local function new(first, last, allow_nil)
+	assert(allow_nil or first)
+	assert(allow_nil or last)
 	return {
+		class = "Range",
 		first = first,
 		last = last,
 	}
 end
 
-M.WHOLE = { first = nil, last = nil }
+M.WHOLE = new(nil, nil, true)
 
 ---@return Range[]
 local function sort(ranges)
@@ -37,10 +42,16 @@ end
 ---@param next Range
 ---@return Range|nil
 local function union_range(prev, next)
+	if M.is_whole(prev) or M.is_whole(next) then
+		return M.WHOLE
+	end
 	if prev.last + 1 < next.first then
 		return nil
 	end
-	return new(math.min(prev.first, next.first), math.max(prev.last, next.last))
+	return new(
+		math.min(prev.first or 1, next.first),
+		math.max(prev.last or 1, next.last)
+	)
 end
 
 --#endregion
@@ -48,9 +59,13 @@ end
 -- Public API
 
 ---@param self Range|Attr
----@return Range
+---@return Range|nil
 function M:get_range()
-	return self.range or self
+	if self.class == "Range" then
+		---@type Range
+		return self
+	end
+	return self.range
 end
 
 ---@param self Range
@@ -76,11 +91,16 @@ function M.from_lua_normal(first, last)
 	}
 end
 
+---@param self Range
 ---@return boolean
 function M:is_empty()
+	if M.is_whole(self) then
+		return false
+	end
 	return self.first > self.last
 end
 
+---@param self Range
 ---@return string
 function M:short()
 	return string.format("(%d,%d)", self.first, self.last)
@@ -91,9 +111,6 @@ end
 ---@return boolean
 function M:intersects(target)
 	if not self or not target then
-		return false
-	end
-	if not self.last or not target.first then
 		return false
 	end
 	if self.last < target.first then
@@ -151,6 +168,8 @@ function M:to_lua()
 	return self.first, self.last
 end
 
+---@param self Range
+---@return boolean
 function M:is_whole()
 	return not self.first or not self.last
 end
@@ -211,7 +230,7 @@ function M.slice(items, range)
 	for _, item in ipairs(items) do
 		if M.intersects(M.get_range(item), range) then
 			local new_item = vim.deepcopy(item)
-			local item_range = M.get_range(new_item)
+			local item_range = M.get_range(new_item) or {}
 			item_range.first = math.max(item_range.first, range.first)
 			item_range.last = math.min(item_range.last, range.last)
 			new_items[#new_items + 1] = new_item
