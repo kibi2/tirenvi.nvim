@@ -8,7 +8,7 @@ CASE 6 // cur(1,9) b1:r1:c3+0<│>  g(1,7)n[3,3,2*]
 --- CASE 15: delete(val) -> redraw -> put ---
 CASE 15 // cur(7,3) b1:r7:c1+2<⠀>  g(1,7)n[2*,3,3]
 CASE 15 // cur(1,1) b1:r1:c1+0<│>  g(1,7)n[3*,3]
-Tir repair is deprecated and will be removed in v0.5. Use :Tir redraw
+Tir repair is deprecated and will be removed in v0.6. Use :Tir redraw
 CASE 15 // cur(1,1) b1:r1:c1+0<│>  g(1,4)n[3*,3]
 3 more lines
 CASE 15 // cur(1,8) b1:r1:c1+7<⠀>  g(1,9)n[24*,6]

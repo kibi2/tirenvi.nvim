@@ -2,20 +2,11 @@
 
 source $TIRENVI_ROOT/tests/common.vim
 
-lua << EOF
-local M = require("tirenvi")
-M.setup({
-  parser_map = {
-		markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = "0.2.4" },
-  },
-  log = { level = vim.log.levels.WARN }
-})
-EOF
+lua require("tirenvi.config").parser_map.markdown.required_version = "0.2.4"
+lua require("tirenvi.config").log.level = vim.log.levels.WARN
+lua require("tirenvi.config").setup({})
 
 " ===== GFM =====
-try
-  edit $TIRENVI_ROOT/tests/data/simple.md
-catch
-endtry
+edit $TIRENVI_ROOT/tests/data/simple.md
 
 call Snapshot({})

@@ -1,16 +1,10 @@
 source $TIRENVI_ROOT/tests/common.vim
 
-lua << EOF
-M = require("tirenvi")
-M.setup({
-	parser_map = {
-		csv = { executable = "tir-csv", required_version = "0.1.4" },
-		tsv = { executable = "tir-csv", options = { "--delimiter", "\t" }, required_version = "0.1.1" },
-		markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = "0.1" },
-		pukiwiki = { executable = "tir-pukiwiki", allow_plain = foo },
-	},
-})
-EOF
+lua require("tirenvi.config").parser_map.csv.required_version = "0.1.4"
+lua require("tirenvi.config").parser_map.tsv.required_version = "0.1.1"
+lua require("tirenvi.config").parser_map.markdown.required_version = "0.1"
+lua require("tirenvi.config").parser_map.pukiwiki.allow_plain = foo
+lua require("tirenvi.config").setup({})
 
 " ===== CSV =====
 edit $TIRENVI_ROOT/tests/data/simple.csv
@@ -18,19 +12,13 @@ edit $TIRENVI_ROOT/tests/data/simple.csv
 
 call Snapshot({ 'nomessage': 'true', 'desc': 'checkhealth ok case' })
 
-lua << EOF
-vim.g.tirenvi_initialized = false
-M.setup({
-	parser_map = {
-		csv = { executable = "tir-csv", required_version = "1.1.4" },
-		tsv = { executable = "tir-csv", options = { "--delimiter", "\t" }, required_version = "0.2.4" },
-		markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = "0.2" },
-		pukiwiki = { executable = "tir-pukiwiki", allow_plain = true, required_version = "0." },
-		foo = { executable = "foo", allow_plain = true, required_version = "0.1.1" },
-		-- grep = { executable = "grep", allow_plain = true, required_version = "99999.99999.99999" },
-	},
-})
-EOF
+lua require("tirenvi.config").parser_map.csv.required_version = "1.1.4"
+lua require("tirenvi.config").parser_map.tsv.required_version = "0.2.4"
+lua require("tirenvi.config").parser_map.markdown.required_version = "0.2"
+lua require("tirenvi.config").parser_map.pukiwiki.required_version = "0."
+lua require("tirenvi.config").parser_map.foo = { executable = "foo", required_version = "0.1.1" }
+lua require("tirenvi.config").setup({})
+
 
 " ===== TXT =====
 edit $TIRENVI_ROOT/tests/data/empty.txt

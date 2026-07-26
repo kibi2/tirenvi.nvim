@@ -1,10 +1,20 @@
-local Parser = require("tirenvi.parser.parser")
-local config = require("tirenvi.config")
+local fn = vim.fn -- Neovim
+
+local health = vim.health or require("health") -- Neovim
+
+local config = require("tirenvi.config") -- Root
 local version = require("tirenvi.version")
-local log = require("tirenvi.util.log")
+
+local Parser = require("tirenvi.parser.parser") -- Parser
+
+local log = require("tirenvi.util.log") -- Util
+
+-- =============================================================================
 
 local M = {}
-local health = vim.health or require("health")
+
+-- =============================================================================
+--#region Private
 
 local function report(item)
 	if item.status == "ok" then
@@ -27,8 +37,9 @@ local function check_command(parser)
 	if err == Parser.ERR.EXECUTABLE_NOT_FOUND then
 		report({
 			status = "error",
-			message = parser.executable .. " not found.\nInstall it with:\n    pip install " .. parser
-				.executable,
+			message = parser.executable
+				.. " not found.\nInstall it with:\n    pip install "
+				.. parser.executable,
 		})
 		return
 	end
@@ -45,7 +56,9 @@ local function check_command(parser)
 	if err == Parser.ERR.VERSION_PARSE_FAILED then
 		table.insert(results, {
 			status = "warn",
-			message = "Could not parse " .. parser.executable .. " version string."
+			message = "Could not parse "
+				.. parser.executable
+				.. " version string.",
 		})
 	end
 	if err == Parser.ERR.VERSION_TOO_OLD then
@@ -73,11 +86,15 @@ local function check_command(parser)
 	end
 end
 
+--#endregion
+-- =============================================================================
+-- Public API
+
 function M.check()
 	health.start("tirenvi")
 	health.info("version: " .. version.VERSION)
-	pcall(vim.fn["repeat#set"], "")
-	if vim.fn.exists("*repeat#set") == 1 then
+	pcall(fn["repeat#set"], "")
+	if fn.exists("*repeat#set") == 1 then
 		vim.health.ok("vim-repeat is available")
 	else
 		vim.health.warn("vim-repeat not found ('.' repeat disabled)")
@@ -95,13 +112,20 @@ function M.check()
 		if parser.required_version and not parser._required_version_int then
 			report({
 				status = "error",
-				message = "Could not parse " .. exe .. " version string: " .. parser.required_version,
+				message = "Could not parse "
+					.. exe
+					.. " version string: "
+					.. parser.required_version,
 			})
 		elseif exe then
 			if not command_requirements[exe] then
 				command_requirements[exe] = parser
-			elseif Parser.is_old(parser._required_version_int,
-					command_requirements[exe]._required_version_int) then
+			elseif
+				Parser.is_old(
+					parser._required_version_int,
+					command_requirements[exe]._required_version_int
+				)
+			then
 				command_requirements[exe] = parser
 			end
 		end

@@ -2,15 +2,8 @@
 
 source $TIRENVI_ROOT/tests/common.vim
 
-lua << EOF
-local M = require("tirenvi")
-M.setup({
-  parser_map = {
-    csv = { executable = "tir-my-csv" },
-  },
-  log = { level = vim.log.levels.WARN }
-})
-EOF
+lua require("tirenvi.config").parser_map.csv.executable = "tir-my-csv"
+lua require("tirenvi.config").log.level = vim.log.levels.WARN
 
 " ===== CSV =====
 try

@@ -1,13 +1,6 @@
 source $TIRENVI_ROOT/tests/common.vim
 
-lua << EOF
-local M = require("tirenvi")
-M.setup({
-  textobj = {
-    column = "h"
-  },
-})
-EOF
+lua require("tirenvi").setup({ textobj = { column = "h" }, })
 
 " ===== CSV =====
 edit $TIRENVI_ROOT/tests/data/simple.csv

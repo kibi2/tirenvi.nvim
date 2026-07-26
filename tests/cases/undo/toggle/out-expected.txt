@@ -2,7 +2,7 @@
  
 --- CASE 7: Tir toggle + undo ---
 1 more line; before #2  <time>
-v:true
+v:false
 
 === DISPLAY ===
 1a

@@ -1,29 +1,32 @@
-local Request     = require("tirenvi.app.request")
-local dirty_range = require("tirenvi.core.dirty_range")
-local buffer      = require("tirenvi.io.buffer")
-local dirty       = require("tirenvi.io.dirty")
-local log         = require("tirenvi.util.log")
+local dirty_range = require("tirenvi.parser.dirty_range") -- Parser
 
-local M           = {}
+local buf_lines = require("tirenvi.io.buf_lines") -- IO
+local dirty = require("tirenvi.io.dirty")
+local Request = require("tirenvi.io.request")
 
--- constants / defaults
+local log = require("tirenvi.util.log") -- Util
 
------------------------------------------------------------------------
--- Private helpers
------------------------------------------------------------------------
+-- =============================================================================
 
------------------------------------------------------------------------
+local M = {}
+
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@param ctx Context
 ---@param req Request
 function M.write(ctx, req)
-    buffer.set_lines(ctx, req.range, req.lines, Request.is_no_undo(req), req.cursor)
-    local range3 = Request.get_range3(req)
-    local prev_ranges = dirty.get_ranges(ctx.bufnr)
-    local new_ranges = dirty_range.remove(prev_ranges, range3)
-    dirty.set_ranges(ctx.bufnr, new_ranges)
+	buf_lines.set_lines(
+		ctx,
+		req.range,
+		req.lines,
+		Request.is_no_undo(req),
+		req.cursor_buf
+	)
+	local range3 = Request.get_range3(req)
+	local prev_ranges = dirty.get_ranges(ctx.bufnr)
+	local new_ranges = dirty_range.remove(prev_ranges, range3)
+	dirty.set_ranges(ctx.bufnr, new_ranges)
 end
 
 return M

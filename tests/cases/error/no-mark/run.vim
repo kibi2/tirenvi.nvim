@@ -2,18 +2,9 @@
 
 source $TIRENVI_ROOT/tests/common.vim
 
-lua << EOF
-local M = require("tirenvi")
-M.setup({
-  marks = {
-    padding = "a"
-  },
-	log = {
-		output = "buffer", -- "notify" | "buffer" | "print" | "file"
-		buffer_name = "tirenvi://log",
-	},
-})
-EOF
+lua require("tirenvi.config").marks.padding = "a"
+lua require("tirenvi.config").log.output = "buffer"
+lua require("tirenvi.config").log.buffer_name = "tirenvi://log"
 
 " ===== CSV =====
 try

@@ -13,8 +13,7 @@ filetype plugin indent on
 
 lua << EOF
 require("luacov")
-local M = require("tirenvi")
-M.setup({
+local opts = {
   log = {
 		level = vim.log.levels.WARN,
 		-- level = vim.log.levels.DEBUG,
@@ -27,13 +26,14 @@ M.setup({
   table = {
 		wrap_mode = "nowrap",
 	},
-})
+}
+require("tirenvi").setup(opts)
 vim.g.tirenvi_initialized = false
 Debug = require("tirenvi.editor.debug")
 Motion = require("tirenvi.editor.motion")
-local buffer = require("tirenvi.io.buffer")
-buffer.clear_cache()
-buffer.set_step(3)
+local buf_lines = require("tirenvi.io.buf_lines")
+buf_lines.clear_cache()
+buf_lines.set_step(3)
 EOF
 
 " ----------------------------
@@ -42,7 +42,7 @@ let g:case_name = ""
 
 function! At(block, row, col) abort
   execute printf(
-        \ 'lua Debug.goto(%d,%d,%d)',
+        \ 'lua Debug.goto_cell(%d,%d,%d)',
         \ a:block, a:row, a:col)
 endfunction
 
@@ -58,17 +58,6 @@ function! CaseImpl(id, desc) abort
 endfunction
 
 command! -nargs=1 CASE call CaseImpl(expand('<slnum>'), <q-args>)
-
-function! Case(desc) abort
-  let g:case_no += 1
-  let g:case_name = a:desc
-
-  echomsg " "
-  echomsg printf("=== CASE%d: %s ===",
-    \ g:case_no,
-    \ a:desc)
-
-endfunction
 
 function! Dump(cmd) abort
   redir => msg

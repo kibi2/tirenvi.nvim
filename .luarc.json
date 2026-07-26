@@ -1,0 +1,47 @@
+{
+    "runtime": {
+        "version": "LuaJIT",
+        "path": [
+            "lua/?.lua",
+            "lua/?/init.lua"
+        ]
+    },
+    "workspace": {
+        "checkThirdParty": false,
+        "library": [
+            "${3rd}/luv/library",
+            "${3rd}/busted/library",
+            "${3rd}/neovim/runtime/lua"
+        ]
+    },
+    "diagnostics": {
+        "globals": [
+            "vim"
+        ],
+        "undefined-global": "Error",
+        "strict": true,
+        "type-check": true,
+        "unused-local": "Warning",
+        "unused-function": "Warning",
+        "unused-vararg": "Warning",
+        "redefined-local": "Warning",
+        "duplicate-set-field": "Warning",
+        "missing-parameter": "Warning",
+        "param-type-mismatch": "Warning",
+        "cast-local-type": "Warning",
+        "need-check-nil": "Warning"
+    },
+    "hint": {
+        "enable": true,
+        "setType": true,
+        "paramType": true,
+        "paramName": "All",
+        "arrayIndex": "Auto"
+    },
+    "format": {
+        "enable": false
+    },
+    "telemetry": {
+        "enable": false
+    }
+}

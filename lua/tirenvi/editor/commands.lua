@@ -1,81 +1,158 @@
--- dependencies
-local Context = require("tirenvi.app.context")
-local WidthOp = require("tirenvi.width.op")
-local buf_state = require("tirenvi.io.buf_state")
-local buffer = require("tirenvi.io.buffer")
-local init = require("tirenvi.init")
-local ui = require("tirenvi.ui")
-local guard = require("tirenvi.util.guard")
-local notify = require("tirenvi.util.notify")
+local api = vim.api -- Neovim
+local fn = vim.fn
+
+local ui = require("tirenvi.ui") -- Root
+
+local autocmd = require("tirenvi.editor.autocmd") -- Editor
+local Debug = require("tirenvi.editor.debug")
+local guard = require("tirenvi.editor.guard")
+
+local app = require("tirenvi.app") -- App
+
+local WidthRequest = require("tirenvi.width.request") -- Width
+
+local buf_state = require("tirenvi.io.buf_state") -- IO
+local buf_lines = require("tirenvi.io.buf_lines")
+local Context = require("tirenvi.io.context")
+local CursorBuf = require("tirenvi.io.cursor")
+
+local notify = require("tirenvi.util.notify") -- Util
 local errors = require("tirenvi.util.errors")
 local util = require("tirenvi.util.util")
+local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
-local Debug = require("tirenvi.editor.debug")
 
--- module
+-- =============================================================================
+
 local M = {}
 
-local api = vim.api
+-- =============================================================================
+--#region Private
 
----@param ctx Context
----@param opts {[string]:any}
----@return nil
-local function cmd_width(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
-	local width_op = WidthOp.new(opts)
-	if not width_op then
-		notify.error(errors.err_invalid_command(opts.args))
-		return
+---@param cmd_opts {[string]:any}
+---@return Rect
+local function get_cmd_rect(cmd_opts)
+	local row_range = Range.from_lua_normal(cmd_opts.line1, cmd_opts.line2)
+	local is_block = (fn.visualmode() == "\22")
+	local col_disp_start, col_disp_end
+	if cmd_opts.range > 0 then
+		if is_block then
+			col_disp_start = fn.virtcol("'<")
+			col_disp_end = fn.virtcol("'>")
+		else
+			col_disp_start = 1
+			col_disp_end = math.huge
+		end
+	else
+		local col = fn.virtcol(".")
+		col_disp_start = col
+		col_disp_end = col
 	end
-	log.debug(width_op:to_string())
-	init.width(ctx, width_op)
+	local col_range = Range.from_lua_normal(col_disp_start, col_disp_end)
+	---@type Rect
+	return {
+		row = row_range,
+		col = col_range,
+	}
+end
+
+---@param cmd_opts {[string]:any}
+---@return CursorBuf
+local function get_cursor_buf(cmd_opts)
+	local rect = get_cmd_rect(cmd_opts)
+	return CursorBuf.new_from_disp(rect.row.first, rect.col.first)
+end
+
+---@param cmd_opts {[string]:any}
+---@param sub_cmd_name string
+---@param spec {[string]:any}|nil
+---@return nil
+local function get_width_request(cmd_opts, sub_cmd_name, spec)
+	local cursor_buf = get_cursor_buf(cmd_opts)
+	return WidthRequest.new(cmd_opts, cursor_buf, sub_cmd_name, spec)
 end
 
 ---@param ctx Context
----@param opts {[string]:any}
+---@param cmd_opts {[string]:any}
+---@param sub_cmd_name string
+---@param spec {[string]:any}|nil
 ---@return nil
-local function cmd_fit(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
-	local width_op = WidthOp.new(opts)
-	if not width_op then
-		notify.error(errors.err_invalid_command(opts.args))
+local function cmd_width(ctx, cmd_opts, sub_cmd_name, spec)
+	if buf_state.should_skip(ctx.bufnr, { has_grid = true }) then
 		return
 	end
-	log.debug(width_op:to_string())
-	init.fit(ctx, width_op)
+	local width_req = get_width_request(cmd_opts, sub_cmd_name, spec)
+	if not width_req then
+		notify.error(errors.err_invalid_command(cmd_opts.args))
+		return
+	end
+	log.debug(width_req:to_string())
+	app.cmd_width(ctx, width_req)
 end
 
 ---@param ctx Context
----@param opts {[string]:any}
+---@param cmd_opts {[string]:any}
+---@param sub_cmd_name string
+---@param spec {[string]:any}|nil
 ---@return nil
-local function cmd_wrap(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr, { has_grid = true, }) then return end
-	local width_op = WidthOp.new(opts)
-	if not width_op then
-		notify.error(errors.err_invalid_command(opts.args))
+local function cmd_fit(ctx, cmd_opts, sub_cmd_name, spec)
+	if buf_state.should_skip(ctx.bufnr, { has_grid = true }) then
 		return
 	end
-	log.debug(width_op:to_string())
-	init.wrap(ctx, width_op)
+	local width_req = get_width_request(cmd_opts, sub_cmd_name, spec)
+	if not width_req then
+		notify.error(errors.err_invalid_command(cmd_opts.args))
+		return
+	end
+	log.debug(width_req:to_string())
+	app.cmd_fit(ctx, width_req)
 end
 
 ---@param ctx Context
----@param opts {[string]:any}
+---@param cmd_opts {[string]:any}
+---@param sub_cmd_name string
 ---@return nil
-local function cmd_toggle(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr, { is_tirbuf = false, has_grid = true, }) then
+local function cmd_wrap(ctx, cmd_opts, sub_cmd_name)
+	if buf_state.should_skip(ctx.bufnr, { has_grid = true }) then
+		return
+	end
+	local width_req = get_width_request(cmd_opts, sub_cmd_name)
+	if not width_req then
+		notify.error(errors.err_invalid_command(cmd_opts.args))
+		return
+	end
+	log.debug(width_req:to_string())
+	app.cmd_wrap(ctx, width_req)
+end
+
+---@param ctx Context
+---@return nil
+local function cmd_toggle(ctx)
+	if
+		buf_state.should_skip(ctx.bufnr, {
+			is_tirbuf = false,
+			has_grid = false,
+			has_parser = false,
+		})
+	then
 		return
 	end
 	ui.special_apply(ctx.winid)
-	init.toggle(ctx)
+	app.toggle(ctx)
+	if buf_state.is_tirbuf(ctx.bufnr) then
+		autocmd.register_buf_autocmd(ctx.bufnr)
+	else
+		autocmd.clear_buf_autocmds(ctx.bufnr)
+	end
 end
 
 ---@param ctx Context
----@param opts {[string]:any}
 ---@return nil
-local function cmd_redraw(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr) then return end
-	init.redraw(ctx)
+local function cmd_redraw(ctx)
+	if buf_state.should_skip(ctx.bufnr) then
+		return
+	end
+	app.cmd_redraw(ctx)
 end
 
 local warned = false
@@ -83,27 +160,39 @@ local warned = false
 ---@param opts {[string]:any}
 ---@return nil
 local function cmd_repair(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr) then return end
+	if buf_state.should_skip(ctx.bufnr) then
+		return
+	end
 	local arg = opts.fargs[2]
 	if arg == nil then
 		if not warned then
 			warned = true
-			notify.warn("Tir repair is deprecated and will be removed in v0.5. Use :Tir redraw")
+			notify.warn(
+				"Tir repair is deprecated and will be removed in v0.6. Use :Tir redraw"
+			)
 		end
-		init.redraw(ctx)
+		app.cmd_redraw(ctx)
 		return
 	elseif arg == "toggle" then
-		buffer.set_repair(ctx.bufnr, not buffer.get_repair(ctx.bufnr))
+		buf_state.set_repair(ctx.bufnr, not buf_state.get_repair(ctx.bufnr))
 	elseif arg == "enable" then
-		buffer.set_repair(ctx.bufnr, true)
+		buf_state.set_repair(ctx.bufnr, true)
 	elseif arg == "disable" then
-		buffer.set_repair(ctx.bufnr, false)
+		buf_state.set_repair(ctx.bufnr, false)
 	else
-		notify.error("[Tirenvi] invalid argument: " .. arg .. " (expected: [enable|disable|toggle])")
+		notify.error(
+			"[Tirenvi] invalid argument: "
+				.. arg
+				.. " (expected: [enable|disable|toggle])"
+		)
 		return
 	end
-	notify.info(string.format("[Tirenvi] repair:%s ",
-		buffer.get_repair(ctx.bufnr) and "enable" or "disable"))
+	notify.info(
+		string.format(
+			"[Tirenvi] repair:%s ",
+			buf_state.get_repair(ctx.bufnr) and "enable" or "disable"
+		)
+	)
 end
 
 ---@param ctx Context
@@ -111,8 +200,8 @@ end
 ---@return nil
 local function cmd_debug_read_tir(ctx, opts)
 	if buf_state.should_skip(ctx.bufnr, {
-			is_tirbuf = false,
-		}) then
+		is_tirbuf = false,
+	}) then
 		return
 	end
 	local filename = opts.fargs[2]
@@ -120,40 +209,38 @@ local function cmd_debug_read_tir(ctx, opts)
 		notify.error("Tir _read_tir need filename")
 		return
 	end
-	init.debug_read_tir(ctx, filename)
+	app.debug_read_tir(ctx, filename)
 end
 
 ---@param ctx Context
 ---@param opts {[string]:any}
 ---@return nil
 local function cmd_debug_write_tir(ctx, opts)
-	if buf_state.should_skip(ctx.bufnr) then return end
+	if buf_state.should_skip(ctx.bufnr) then
+		return
+	end
 	local filename = opts.fargs[2]
 	if filename == nil then
 		notify.error("Tir _write_tir need filename")
 		return
 	end
-	init.debug_write_tir(ctx, filename)
+	app.debug_write_tir(ctx, filename)
 end
 
-----------------------------------------------------------------------
--- Registration (private)
-----------------------------------------------------------------------
-
-local commands = {
-	toggle = { func = cmd_toggle, sub = {} },
-	redraw = { func = cmd_redraw, sub = {} },
-	width = { func = cmd_width, sub = { "=", "+", "-", "?" }, has_op = true },
-	fit = { func = cmd_fit, sub = { "=", "+", "-" }, has_op = true },
-	wrap = { func = cmd_wrap, sub = {} },
-	repair = { func = cmd_repair, sub = { "toggle", "enable", "diable" } },
-	_read_tir = { func = cmd_debug_read_tir, sub = {} },
-	_write_tir = { func = cmd_debug_write_tir, sub = {} },
+local command_specs = {
+	toggle = { func = cmd_toggle },
+	redraw = { func = cmd_redraw },
+	width = { func = cmd_width, suffix = { "=", "+", "-", "?" } },
+	fit = { func = cmd_fit, suffix = { "=", "+", "-" } },
+	wrap = { func = cmd_wrap },
+	repair = { func = cmd_repair, suffix = { "toggle", "enable", "diable" } },
+	_read_tir = { func = cmd_debug_read_tir },
+	_write_tir = { func = cmd_debug_write_tir },
 }
 
 local function get_command_keys()
 	local keys = {}
-	for key, _ in pairs(commands) do
+	for key, _ in pairs(command_specs) do
 		if not key:match("^_") then
 			table.insert(keys, key)
 		end
@@ -170,25 +257,29 @@ local function build_desc()
 	return "Tir command: " .. table.concat(get_command_keys(), "/")
 end
 
----@param opts any
-local function on_tir(opts)
-	local sub = opts.fargs[1]
-	if not sub then
+---@param cmd_opts any
+local function on_tir(cmd_opts)
+	local sub_cmd = cmd_opts.fargs[1]
+	if not sub_cmd then
 		notify.info(build_usage())
 		return
 	end
 	local ctx = Context.from_buf()
-	local debug_name = string.format("%s %s", opts.name, table.concat(opts.fargs, " "))
+	local debug_name =
+		string.format("%s %s", cmd_opts.name, table.concat(cmd_opts.fargs, " "))
 	Debug.ui_entry(ctx.bufnr, debug_name)
-	local command_name = sub:match("^[A-Za-z_]+") or ""
-	local command = commands[command_name]
-	if not command then
+	local sub_cmd_name = sub_cmd:match("^[A-Za-z_]+") or ""
+	local spec = command_specs[sub_cmd_name]
+	if not spec then
 		notify.info(build_usage())
 		return
 	end
-	opts.command_name = command_name
-	opts.command = command
-	command.func(ctx, opts)
+	if not spec.suffix and sub_cmd_name ~= sub_cmd then
+		notify.info(build_usage())
+		return
+	end
+	cmd_opts.command = spec
+	spec.func(ctx, cmd_opts, sub_cmd_name, spec)
 	Debug.ui_exit(ctx.bufnr, debug_name)
 end
 
@@ -198,23 +289,23 @@ local function complete_tir(arglead, cmdline)
 		return get_command_keys()
 	elseif #args == 2 then
 		local key = args[2]
-		if commands[key] then
-			return commands[key].sub
+		if command_specs[key] then
+			return command_specs[key].sub
 		end
 	end
 	return {}
 end
 
 local function register_user_command()
-	api.nvim_create_user_command("Tir", function(opts)
+	api.nvim_create_user_command("Tir", function(cmd_opts)
 		guard.guarded(function()
-			on_tir(opts)
+			on_tir(cmd_opts)
 		end)()
 	end, {
 		nargs = "*",
 		range = true,
 		complete = complete_tir,
-		desc = build_desc()
+		desc = build_desc(),
 	})
 end
 
@@ -233,35 +324,34 @@ local function register_keymaps()
 	})
 end
 
------------------------------------------------------------------------
+--#endregion
+-- =============================================================================
 -- Public API
------------------------------------------------------------------------
 
 ---@return string
 function M.keymap_lf()
 	local ctx = Context.from_buf()
-	buffer.clear_cache()
+	buf_lines.clear_cache()
 	log.debug("===+===+===+===+=== keymap_lf %s ===+===+===+===+===", ctx.bufnr)
 	if buf_state.should_skip(ctx.bufnr) then
 		return util.get_termcodes("<CR>")
 	end
-	return init.keymap_lf()
+	return app.keymap_lf()
 end
 
 ---@return string
 function M.keymap_tab()
 	local ctx = Context.from_buf()
-	buffer.clear_cache()
-	log.debug("===+===+===+===+=== keymap_tab %s ===+===+===+===+===", ctx.bufnr)
+	buf_lines.clear_cache()
+	log.debug(
+		"===+===+===+===+=== keymap_tab %s ===+===+===+===+===",
+		ctx.bufnr
+	)
 	if buf_state.should_skip(ctx.bufnr) then
 		return util.get_termcodes("<Tab>")
 	end
-	return init.keymap_tab()
+	return app.keymap_tab()
 end
-
-----------------------------------------------------------------------
--- Setup
-----------------------------------------------------------------------
 
 function M.setup()
 	register_user_command()

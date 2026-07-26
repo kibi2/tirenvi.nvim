@@ -1,8 +1,8 @@
 --- write csv ---
 === MESSAGE ===
  
---- CASE 16: simple csv ---
-CASE 16 // cur(1,1) b1:r1:c1+0<│>  g(1,7)a[3*,4,4]
+--- CASE 9: simple csv ---
+CASE 9 // cur(1,1) b1:r1:c1+0<│>  g(1,7)a[3*,4,4]
 tirenvi: install 'tpope/vim-repeat' to enable '.' repeat
 
 === DISPLAY ===
@@ -66,21 +66,21 @@ b	"
 --- edit save ---
 === MESSAGE ===
  
---- CASE 30: complex csv ---
-CASE 30 // cur(1,1) b1:r1:c1+0<│>  g(1,114)a[20*,11,12,10,11,9]
+--- CASE 23: complex csv ---
+CASE 23 // cur(1,1) b1:r1:c1+0<│>  g(1,114)a[20*,11,12,10,11,9]
  
---- CASE 39: simple md ---
-CASE 39 // cur(1,1) b1:r1:c0+0<g>  p(1,2)* g(3,8)a[7,4,15] p(9,11)
+--- CASE 32: simple md ---
+CASE 32 // cur(1,1) b1:r1:c0+0<g>  p(1,2)* g(3,8)a[7,4,15] p(9,11)
  
---- CASE 45: complex md ---
-CASE 45 // cur(1,1) b1:r1:c0+0<#>  p(1,9)* g(10,14)a[7,4,8] p(15,22) g(23,27)a[6,8,7]
+--- CASE 38: complex md ---
+CASE 38 // cur(1,1) b1:r1:c0+0<#>  p(1,9)* g(10,14)a[7,4,8] p(15,22) g(23,27)a[6,8,7]
  
---- CASE 53: empty txt ---
-CASE 53 // cur(1,1) bnil:rnil:cnil+0<> 
+--- CASE 46: empty txt ---
+CASE 46 // cur(1,1) bnil:rnil:cnil+0<> 
  
---- CASE 58: tir-buf md ---
-CASE 58 // cur(1,1) b1:r1:c0+0<->  p(1,1)* g(2,6)a[7,8] p(7,7) g(8,12)a[7,4,8]
-CASE 58 // cur(1,1) bnil:rnil:cnil+0<->  p() g()a[7,8] p() g()a[7,4,8]
+--- CASE 51: tir-buf md ---
+CASE 51 // cur(1,1) b1:r1:c0+0<->  p(1,1)* g(2,6)a[7,8] p(7,7) g(8,12)a[7,4,8]
+CASE 51 // cur(1,1) bnil:rnil:cnil+0<->  p() g()a[7,8] p() g()a[7,4,8]
 
 === DISPLAY ===
 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
