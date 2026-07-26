@@ -1,9 +1,6 @@
-local fn = vim.fn -- Neovim
-
 local Cell = require("tirenvi.core.cell") -- Core
 
-local Range = require("tirenvi.util.range") -- Util
-local log = require("tirenvi.util.log")
+local log = require("tirenvi.util.log") -- Util
 
 ---@alias WidthAction
 ---| "set"

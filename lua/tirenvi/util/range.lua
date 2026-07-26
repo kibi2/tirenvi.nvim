@@ -5,10 +5,11 @@ local log = require("tirenvi.util.log") -- Util
 -- =============================================================================
 
 ---@class Range
----@field first integer
----@field last integer
+---@field first integer|nil
+---@field last integer|nil
 
 local M = {}
+M.__index = M
 
 -- =============================================================================
 --#region Private
@@ -17,13 +18,14 @@ local M = {}
 ---@param last integer
 ---@return Range
 local function new(first, last)
-	return {
+	local self = setmetatable({
 		first = first,
 		last = last,
-	}
+	}, M)
+	return self
 end
 
-M.WHOLE = { first = nil, last = nil }
+M.WHOLE = setmetatable({}, M)
 
 ---@return Range[]
 local function sort(ranges)
@@ -48,9 +50,13 @@ end
 -- Public API
 
 ---@param self Range|Attr
----@return Range
+---@return Range|nil
 function M:get_range()
-	return self.range or self
+	if getmetatable(self) == M then
+		---@type Range
+		return self
+	end
+	return self.range
 end
 
 ---@param self Range
@@ -91,9 +97,6 @@ end
 ---@return boolean
 function M:intersects(target)
 	if not self or not target then
-		return false
-	end
-	if not self.last or not target.first then
 		return false
 	end
 	if self.last < target.first then

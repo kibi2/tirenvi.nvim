@@ -45,7 +45,7 @@ local M = {}
 ---@field allow_plain boolean
 
 ---@class Attr
----@field range Range
+---@field range Range|nil
 ---@field wrap_mode WrapMode|nil
 ---@field fit_span integer
 ---@field columns Attr_column[]
