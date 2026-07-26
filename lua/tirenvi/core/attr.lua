@@ -284,14 +284,6 @@ function M:to_cell_col(col_disp)
 end
 
 ---@param self Attr
----@param col_byte integer
----@return Attr_column|nil
-function M:get(col_byte)
-	local icol = M.to_cell_col(self, col_byte)
-	return self.columns[icol]
-end
-
----@param self Attr
 ---@param icol integer
 ---@return integer
 function M:get_start_pos(icol)
