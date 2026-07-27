@@ -1,7 +1,7 @@
 === DISPLAY ===
 ==============================================================================
 tirenvi ~
-- version: 0.4.0
+- version: 0.5.0
 - WARNING vim-repeat not found ('.' repeat disabled)
 - OK tir-csv found
 - OK tir-csv version 0.1.4 OK
@@ -14,7 +14,7 @@ tirenvi ~
 === DISPLAY ===
 ==============================================================================
 tirenvi ~
-- version: 0.4.0
+- version: 0.5.0
 - WARNING vim-repeat not found ('.' repeat disabled)
 - ERROR Could not parse tir-pukiwiki version string: 0.
 - ERROR foo not found.

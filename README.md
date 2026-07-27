@@ -8,8 +8,9 @@
 
 > Markdown & CSV table editor for Neovim — structural editing, pure text, always valid.
 
-Supports Markdown and CSV out of the box,
-and can be extended to other formats via custom parsers.
+Supports Markdown and CSV out of the box.
+
+**Edit tables anywhere** — including arbitrary text files via the Tir-embedded format.
 
 ## Markdown (GFM)
 
@@ -24,6 +25,31 @@ Raw → aligned → edit → back to raw (lossless).
 ![demo gif](./demo_csv.gif)
 
 Raw → aligned → edit → back to raw (lossless).
+
+## Embedded tables (NEW)
+
+Edit tables embedded inside source code,
+configuration files, or plain text documents
+without changing the surrounding text.
+
+For example, tirenvi can edit tables embedded in Python source code:
+
+```python
+# | Name  | City   |
+# | ----- | ------ |
+# | Alice | Tokyo  |
+# | Bob   | Osaka  |
+
+print("Hello Tir")
+```
+
+Use :Tir toggle to switch between the original text
+and the structured table view.
+
+For details about the embedded table format, see the
+[tir-embedded documentation](https://github.com/kibi2/tir-embedded).
+
+*Demo coming soon.*
 
 ## Design Philosophy
 
@@ -56,7 +82,7 @@ TIR (intermediate representation)
 tir-buf (structured buffer view)
 ```
 
-Editing happens in **tir-buf format**.
+Editing takes place **tir-buf format**.
 
 On save:
 
@@ -79,17 +105,19 @@ Edit tables directly in Vim while preserving a structured internal model.
 ## Features
 
 * Render CSV/TSV/GFM into an aligned structured view
+* Edit tables embedded in any text file (Tir-embedded)
 * Preserve original file format on save
 * Toggle raw ↔ structured view
 * Immediate or deferred structural repair
 * Dirty line tracking and highlighting
 * Multiline cell support with preserved line breaks
 * Column width control with wrapping support
+* Automatic wrap management for plain and grid views
 * Grid-aware join that preserves column structure
 * Column text objects for structural editing
 * Works with native Vim motions and operators
 * External parser architecture (extensible)
-* No learning curve
+* Uses standard Vim editing
 
 ## Structural Integrity Model
 
@@ -101,7 +129,7 @@ In deferred repair mode:
 * Dirty lines are tracked incrementally
 * Internal attrs/model state remains structurally valid
 * Buffer structure may temporarily diverge from the model
-* `:Tir repair` synchronizes the buffer with the internal model
+* `:Tir redraw` synchronizes the buffer with the internal model
 
 In immediate repair mode:
 
@@ -124,6 +152,7 @@ even if they contain temporary structural inconsistencies.
   dependencies = {
     { "kibi2/tir-csv", build = "pip install ." },
     { "kibi2/tir-gfm-lite", build = "pip install ." },
+    { "kibi2/tir-embedded", build = "pip install ." },
     { "tpope/vim-repeat" }, -- Optional: enables '.' repeat for column width operations
   },
   config = function()
@@ -132,7 +161,7 @@ even if they contain temporary structural inconsistencies.
 }
 ```
 
-The required CSV and GFM parsers are installed automatically when using lazy.nvim.
+The required parser packages are installed automatically when using lazy.nvim.
 
 ### vim-plug
 
@@ -142,6 +171,7 @@ Plug 'kibi2/tirenvi.nvim'
 " Required parsers
 Plug 'kibi2/tir-csv' { 'do': 'pip install .' }
 Plug 'kibi2/tir-gfm-lite' { 'do': 'pip install .' }
+Plug 'kibi2/tir-embedded' { 'do': 'pip install .' }
 
 " Optional: enables '.' repeat for column width operations
 Plug 'tpope/vim-repeat'
@@ -169,6 +199,9 @@ Automatically activates based on filetype (via parser_map):
 * `markdown`
 * `pukiwiki`
 
+For embedded tables, use `:Tir toggle` to switch
+between the original text and the structured table view.
+
 Custom parser mapping:
 
 ```lua
@@ -177,6 +210,7 @@ require("tirenvi").setup({
     csv = { executable = "tir-csv", required_version = "0.1.4" },
     tsv = { executable = "tir-csv", options = { "--delimiter", "\t" }, required_version = "0.1.4" },
     markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = "0.1.6" },
+    ["*"] = { executable = "tir-embedded", allow_plain = true },
     pukiwiki = { executable = "tir-pukiwiki", allow_plain = true, required_version = "0.1.1" },
   }
 })
@@ -186,13 +220,15 @@ require("tirenvi").setup({
 
 | Command                  | Description                                                         |
 | ------------------------ | ------------------------------------------------------------------- |
-| `:Tir repair`            | Repair and reformat dirty tables                                    |
+| `:Tir width{=+-}[count]` | Adjust column width by count (`=`: set, `+/-`: increment/decrement) |
+| `:Tir fit{=+-}[count]`   | Adjust table span by count (`=`: set, `+/-`: increment/decrement)   |
+| `:Tir wrap`              | Toggle nowrap ↔ wrap width mode                                     |
+| `:Tir redraw`            | Redraw and reformat dirty tables                                    |
+| `:Tir toggle`            | Toggle raw ↔ structured table view                                  |
 | `:Tir repair enable`     | Enable automatic structural repair                                  |
 | `:Tir repair disable`    | Disable automatic structural repair                                 |
 | `:Tir repair toggle`     | Toggle automatic structural repair                                  |
-| `:Tir toggle`            | Switch raw ↔ structured table view                                  |
-| `:Tir width[=+-][count]` | Adjust column width by count (`=`: set, `+/-`: increment/decrement) |
-| `:Tir redraw`            | Deprecated. Will be removed in v0.5.<br>Use `:Tir repair` instead   |
+| `:Tir repair`            | Deprecated. Will be removed in v0.6.<br>Use `:Tir redraw` instead   |
 
 All native Vim editing works.
 
@@ -201,6 +237,13 @@ All native Vim editing works.
 * Visual mode command
 
 No special editing mode.
+
+## Editing Tips
+
+* Inserting a line above the first row of a table creates a normal text line.
+* Inserting a line below the last row appends a new table row.
+* Press `D` (or `S`) at the beginning of a table row to split the table.
+* Press `D` at the beginning of the second column to clear the cell contents.
 
 ## Column Editing
 
@@ -257,25 +300,25 @@ It is a structured text editor layer.
 
 ### In Progress
 
-* Text objects (table, row, column, cell)
+* Text objects (table, row, cell)
 
 ### Planned
 
-* Column formatting presets
 * Outline mode
 
 ## Comparison
 
-| Feature | Tirenvi | csv.vim | Spreadsheet tools |
+| Feature                   | Tirenvi | csv.vim | Spreadsheet tools |
 | ------------------------- | ------- | ------- | ----------------- |
-| Native Vim editing | ✅ | ⚠️ | ❌ |
-| Always structurally valid | ✅ | ❌ | ⚠️ |
-| No file format change | ✅ | ❌ | ❌ |
-| No custom buffer type | ✅ | ❌ | ❌ |
-| Toggle raw view | ✅ | ❌ | ❌ |
-| Markdown | ✅ | ❌ | ❌ |
-| Automatic wrapping | ✅ | ❌ | ⚠️ |
-| Grid-aware join | ✅ | ❌ | ❌ |
+| Native Vim editing        | ✅       | ⚠️       | ❌                 |
+| Always structurally valid | ✅       | ❌       | ⚠️                 |
+| No file format change     | ✅       | ❌       | ❌                 |
+| No custom buffer type     | ✅       | ❌       | ❌                 |
+| Toggle raw view           | ✅       | ❌       | ❌                 |
+| Markdown                  | ✅       | ❌       | ❌                 |
+| Automatic wrapping        | ✅       | ❌       | ⚠️                 |
+| Grid-aware join           | ✅       | ❌       | ❌                 |
+| Embedded table            | ✅       | ❌       | ❌                 |
 
 Tirenvi prioritizes **structural safety with Vim purity**.
 
@@ -293,4 +336,3 @@ Please open an issue before major design proposals.
 ## License
 
 MIT License.
-
