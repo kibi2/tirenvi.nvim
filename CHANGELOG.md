@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2026-07-28
+
+### Added
+
+- Implemented Tir-embedded support.
+  - Tables can now be embedded and edited inside arbitrary files such as txt, Python, and Java source files.
+- Added column width adjustment commands.
+  - `:Tir fit=n`
+  - `:Tir fit=`
+  - `:Tir fit{+|-}[n]`
+  - `:Tir wrap`
+- Changed width settings to be managed per table instead of applying to all tables in a file.
+- Added `manage_wrap` mode.
+  - Enables wrap for plain-style lines when content exceeds the window width.
+  - Disables wrap for grid-style lines to preserve table layout.
+- Improved vertical navigation behavior.
+  - Moving through rows with different cell widths now behaves more naturally.
+- Restore the cursor position after `:write` / `WritePost`.
+- Automatically install required parser packages when using lazy.nvim.
+- Added TIR (ndjson) file I/O support for debugging.
+  - `:Tir _read_tir {file}`
+  - `:Tir _write_tir {file}`
+- Added support for opening files saved in tir-buf format.
+
+### Refactoring
+
+- Reorganized internal modules.
+- Reorganized buffer-local layout state handling.
+- Rebuilt CI test cases.
+
 ## [0.4.0] - 2026-05-25
 
 ### Added

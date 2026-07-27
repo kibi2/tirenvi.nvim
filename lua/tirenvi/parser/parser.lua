@@ -93,6 +93,13 @@ local function run_parser(executable, subcmd, options, lines)
 	return result.stdout
 end
 
+---@param version string
+---@return string
+local function normalize_version(version)
+	version = vim.trim(version)
+	return version:match("^%d+%.%d+%.%d+") or version
+end
+
 ---@param self Parser
 ---@return string|nil
 local function get_string_version(self)
@@ -100,11 +107,11 @@ local function get_string_version(self)
 		error({ code = ERR.EXECUTABLE_NOT_FOUND })
 	end
 	self._installed_version =
-		vim.trim(fn.system({ self.executable, "--version" }))
+		normalize_version(fn.system({ self.executable, "--version" }))
 	if vim.v.shell_error ~= 0 then
 		-- TODO
 		self._installed_version =
-			vim.trim(fn.system({ self.executable, "version" }))
+			normalize_version(fn.system({ self.executable, "version" }))
 		if vim.v.shell_error ~= 0 then
 			error({ code = ERR.VERSION_COMMAND_FAILED })
 		end

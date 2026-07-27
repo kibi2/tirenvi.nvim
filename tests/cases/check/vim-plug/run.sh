@@ -1,4 +1,7 @@
 #!/bin/sh
+
+# test for neovim plugin manager "vim-plug"
+
 set -eu
 
 rm -fr ~/.local/share/vimplug-test
