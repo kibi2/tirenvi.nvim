@@ -3,9 +3,10 @@
 --- CASE 7: Tir toggle + undo ---
 1 more line; before #2  <time>
 v:false
+1 line less; before #5  <time>
 
 === DISPLAY ===
-1a
+a,2 
 "1
 ",２,"3
 b	"

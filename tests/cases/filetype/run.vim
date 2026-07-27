@@ -22,6 +22,11 @@ CASE filetype csv -> tsv
         Tir toggle
             sleep 1m | lua print(Debug.layout())
 
+CASE filetype python -> markdown
+    e! $TIRENVI_ROOT/tests/data/sample.py
+        set filetype=markdown
+            sleep 1m | lua print(Debug.layout())
+
 CASE filetype markdown -> bar
     e! $TIRENVI_ROOT/tests/data/simple.md
     call At(2, 3, 1)

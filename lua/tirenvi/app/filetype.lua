@@ -24,7 +24,8 @@ function M.on_filetype(ctx)
 	if old_filetype and old_filetype == new_filetype then
 		return
 	end
-	if old_filetype then
+	local old_parser = buf_state.get(ctx.bufnr, buf_state.IKEY.PARSER)
+	if old_parser then
 		common.to_flat(ctx)
 	end
 	buf_state.set(ctx.bufnr, buf_state.IKEY.FILETYPE, new_filetype)
