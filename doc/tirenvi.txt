@@ -25,20 +25,20 @@ Editing remains pure Vim.
 INSTALLATION                                        *tirenvi-install*
 
 Requirements:
-  - Neovim >= 0.9
+  - Neovim >= 0.10
   - External parser command (e.g. tir-csv, tir-gfm-lite)
-  - UTF-8 environment recommended
-
-Install parsers:
-
-    pip install tir-csv
-    pip install tir-gfm-lite
-    pip install tir-pukiwiki
+  - UTF-8 environment
 
 Using lazy.nvim:
 
     {
       "kibi2/tirenvi.nvim",
+      dependencies = {
+        { "kibi2/tir-csv", build = "pip install ." },
+        { "kibi2/tir-gfm-lite", build = "pip install ." },
+        { "kibi2/tir-embedded", build = "pip install ." },
+        { "tpope/vim-repeat" },
+      },
       config = function()
         require("tirenvi").setup()
       end,
@@ -57,6 +57,7 @@ Supported by default:
   - csv
   - tsv
   - markdown
+  - any text file (via Tir-embedded)
   - pukiwiki
 
 Additional formats can be enabled via parser_map.
@@ -64,12 +65,12 @@ Additional formats can be enabled via parser_map.
 Commands:
 
     :Tir redraw
-        Recalculate column widths
+        Synchronize the buffer with the internal table model
 
     :Tir toggle
         Toggle raw ↔ structured view
 
-    :Tir width[=+-][count]
+    :Tir width{=+-}[count]
         Adjust column width
 
         :Tir width=        Auto-fit column width
@@ -77,6 +78,27 @@ Commands:
         :Tir width+        Increase width by 1
         :Tir width+3       Increase width by 3
         :Tir width-        Decrease width by 1
+
+    :Tir fit{=+-}[count]
+        Adjust table width
+
+        :Tir fit=          Auto-fit table width
+        :Tir fit=80        Set table width to 80
+        :Tir fit+          Increase table width by 1
+        :Tir fit+3         Increase table width by 3
+        :Tir fit-          Decrease table width by 1
+
+    :Tir wrap
+        Toggle nowrap ↔ wrap width mode
+
+    :Tir repair enable
+        Enable automatic structural repair.
+
+    :Tir repair disable
+        Disable automatic structural repair.
+
+    :Tir repair toggle
+        Toggle automatic structural repair.
 
 All normal Vim motions and operators work:
   dd, yy, p, cw, visual, :%s, etc.
@@ -123,14 +145,16 @@ To modify a column:
 
 Column width can be adjusted with:
 
-    :Tir width[=+-][count]
+    :Tir width{=+-}[count]
 
-Column width changes are repeatable with `.`.
+Table width can be adjusted with:
+
+    :Tir fit{=+-}[count]
 
 Operations that would break structural alignment
 are automatically corrected.
 
-Column width changes support '.' repeat when vim-repeat is installed.
+Column and table width changes support '.' repeat when vim-repeat is installed.
 
 ============================================================================== 
 MULTILINE CELLS                                     *tirenvi-multiline*
@@ -194,9 +218,26 @@ Default configuration:
                 required_version = "0.1.5",
             },
         },
+        table = {
+          auto_reconcile = true,
+          wrap_mode = "wrap",
+        },
+        ui = {
+          manage_wrap = true,
+        },
     })
 
 parser_map maps filetype → external parser.
+
+auto_reconcile :
+    Enable automatic structural repair.
+    See |:Tir repair|.
+
+wrap_mode:
+    "wrap" or "nowrap".
+    See |:Tir wrap|.
+
+manage_wrap : Automatically enables wrapping for plain text and disables wrapping for grid tables.
 
 ============================================================================== 
 HOW IT WORKS                                        *tirenvi-architecture*
@@ -207,9 +248,9 @@ Core concept:
 
 Workflow:
 
-  flat format (CSV/TSV/Markdown/...) → TIR → tir-vim
-  edit in tir-vim
-  tir-vim → TIR → original flat format
+  flat format (CSV/TSV/Markdown/...) → TIR → tir-buf
+  edit in tir-buf
+  tir-buf → TIR → original flat format
 
 Key properties:
 

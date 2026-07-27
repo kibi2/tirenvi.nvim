@@ -12,7 +12,10 @@ CASE 10 // cur(1,1) b1:r1:c1+0<│>  g(1,8)n[2*,3,3]
 CASE 18 // cur(1,1) bnil:rnil:cnil+0<1> 
 CASE 18 // cur(1,1) b1:r1:c1+0<│>  g(1,9)n[10*,2]
  
---- CASE 25: filetype markdown -> bar ---
+--- CASE 25: filetype python -> markdown ---
+CASE 25 // cur(1,1) bnil:rnil:cnil+0<#> 
+ 
+--- CASE 30: filetype markdown -> bar ---
 v:true
 markdown
 tir-gfm-lite

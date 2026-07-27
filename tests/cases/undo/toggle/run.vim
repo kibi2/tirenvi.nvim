@@ -9,7 +9,13 @@ CASE Tir toggle + undo
         Tir toggle
         u
             sleep 1m | echomsg b:tirenvi.tirbuf
+        Tir toggle
+        normal! 02x
+            sleep 1m
+        Tir toggle
+        u
     normal! 1G2l
+        Tir toggle
         normal! D
 
 call Snapshot({})
