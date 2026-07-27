@@ -9,9 +9,18 @@ local log = require("tirenvi.util.log") -- Util
 
 -- =============================================================================
 
+---@class Attr
+---@field range Range|nil
+---@field wrap_mode WrapMode|nil
+---@field fit_span integer
+---@field columns Attr_column[]
+---@field prefix string|nil
 local M = {}
 M.plain = {}
 M.grid = {}
+
+---@class Attr_column
+---@field width integer                 display width (logical column width)
 
 -- =============================================================================
 --#region Private
