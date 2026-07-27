@@ -13,3 +13,9 @@
 ---| "wrap_fit"
 ---| "wrap_width"
 ---| "plain"
+
+---@class Attr_file
+---@field kind "attr_file"
+---@field version string
+
+---@alias Ndjson Attr_file|Record

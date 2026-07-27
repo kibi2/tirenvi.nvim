@@ -10,8 +10,25 @@ local log = require("tirenvi.util.log")
 
 -- =============================================================================
 
+---@alias Block
+---| Block_plain
+---| Block_grid
 local M = {}
+
+---@alias Block_kind
+---| "plain"
+---| "grid"
+
+---@class Block_plain
+---@field kind "plain"
+---@field attr Attr
+---@field records Record_plain[]
 M.plain = {}
+
+---@class Block_grid
+---@field kind "grid"
+---@field attr Attr
+---@field records Record_grid[]
 M.grid = {}
 
 -- =============================================================================

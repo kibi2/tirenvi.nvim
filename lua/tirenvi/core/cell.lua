@@ -7,6 +7,7 @@ local log = require("tirenvi.util.log")
 
 -- =============================================================================
 
+---@alias Cell string
 local M = {}
 
 M.MIN_WIDTH = 2

@@ -6,8 +6,19 @@ local log = require("tirenvi.util.log") -- Util
 
 -- =============================================================================
 
+---@alias Record Record_plain|Record_grid
 local M = {}
+
+---@class Record_plain
+---@field kind "plain"
+---@field line string
 M.plain = {}
+
+---@class Record_grid
+---@field kind "grid"
+---@field prefix string|nil
+---@field row Cell[]
+---@field _has_continuation? boolean    true if this record continues to the next row
 M.grid = {}
 
 -- =============================================================================
