@@ -48,7 +48,7 @@ local defaults = {
 	},
 	table = {
 		auto_reconcile = true,
-		wrap_mode = "wrap",
+		wrap_mode = "auto",
 	},
 	ui = {
 		manage_wrap = true,

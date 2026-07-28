@@ -106,12 +106,13 @@ Edit tables directly in Vim while preserving a structured internal model.
 
 * Render CSV/TSV/GFM into an aligned structured view
 * Edit tables embedded in any text file (Tir-embedded)
+* Multiline cell support with preserved line breaks
+* Column width control with wrapping support
+* Three width modes: nowrap, wrap, and auto
 * Preserve original file format on save
 * Toggle raw ↔ structured view
 * Immediate or deferred structural repair
 * Dirty line tracking and highlighting
-* Multiline cell support with preserved line breaks
-* Column width control with wrapping support
 * Automatic wrap management for plain and grid views
 * Grid-aware join that preserves column structure
 * Column text objects for structural editing
@@ -221,6 +222,7 @@ require("tirenvi").setup({
 | Command                  | Description                                                         |
 | ------------------------ | ------------------------------------------------------------------- |
 | `:Tir width{=+-}[count]` | Adjust column width by count (`=`: set, `+/-`: increment/decrement) |
+| `:Tir width?`            | Show the current table width settings.                              |
 | `:Tir fit{=+-}[count]`   | Adjust table span by count (`=`: set, `+/-`: increment/decrement)   |
 | `:Tir wrap`              | Toggle nowrap ↔ wrap width mode                                     |
 | `:Tir redraw`            | Redraw and reformat dirty tables                                    |
@@ -238,11 +240,36 @@ All native Vim editing works.
 
 No special editing mode.
 
+### Inspecting the current width settings
+
+Use:
+
+```vim
+:Tir width?
+```
+
+Example output:
+
+```text
+mode=nowrap span=23 col=1/3 header="Name" widths=[5*,3,11]
+```
+
+This displays the current width mode, table span, selected column,
+column widths, and other table information.
+
+### Width modes
+
+Tirenvi supports three width modes:
+
+* **nowrap** – Prevents wrapping inside cells. Best for editing cell contents.
+* **wrap** – Keeps the table within a fixed width by wrapping cell contents.
+* **auto** – Automatically switches between readable wide tables and compact wrapped tables depending on the available window width.
+
 ## Editing Tips
 
 * Inserting a line above the first row of a table creates a normal text line.
 * Inserting a line below the last row appends a new table row.
-* Press `D` (or `S`) at the beginning of a table row to split the table.
+* Press `D` at the beginning of a table row to split the table.
 * Press `D` at the beginning of the second column to clear the cell contents.
 
 ## Column Editing
