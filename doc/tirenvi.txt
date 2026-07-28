@@ -79,6 +79,29 @@ Commands:
         :Tir width+3       Increase width by 3
         :Tir width-        Decrease width by 1
 
+    :Tir width?
+        Show the current width settings.
+
+        Example output:
+
+        mode=nowrap span=23 col=1/3 header="Name" widths=[5*,3,11]
+        
+        mode
+            Current width mode. nowrap|wrap|auto
+
+        span
+            Target table width.
+
+        col
+            Current column index.
+
+        header
+            Current column title.
+
+        widths
+            Column widths.
+            '*' indicates the current column.
+
     :Tir fit{=+-}[count]
         Adjust table width
 
@@ -104,6 +127,33 @@ All normal Vim motions and operators work:
   dd, yy, p, cw, visual, :%s, etc.
 
 No special editing mode is required.
+
+============================================================================== 
+WIDTH MODES                                    *tirenvi-width-mode*
+
+nowrap
+    Cells are never wrapped.
+
+wrap
+    The table width is fixed.
+    Cell contents wrap as needed.
+
+auto
+    Uses nowrap when the table fits in the window.
+    Switches to wrap when necessary.
+
+Changing width mode
+
+:Tir fit=
+        Select auto mode.
+
+:Tir width...
+:Tir fit...
+        Select wrap mode.
+
+:Tir wrap
+        Toggle between nowrap and the previous
+        automatic mode (auto or wrap).
 
 ============================================================================== 
 STRUCTURAL MODEL                                    *tirenvi-structure*
@@ -220,24 +270,39 @@ Default configuration:
         },
         table = {
           auto_reconcile = true,
-          wrap_mode = "wrap",
+          wrap_mode = "auto",
         },
         ui = {
           manage_wrap = true,
         },
     })
 
-parser_map maps filetype → external parser.
+parser_map:
+    maps filetype → external parser.
 
-auto_reconcile :
+table.auto_reconcile:
     Enable automatic structural repair.
-    See |:Tir repair|.
+    See :Tir repair.
 
-wrap_mode:
-    "wrap" or "nowrap".
-    See |:Tir wrap|.
+table.wrap_mode:
+    Initial width mode.
 
-manage_wrap : Automatically enables wrapping for plain text and disables wrapping for grid tables.
+    "nowrap"
+        Start in nowrap mode.
+
+    "auto"
+        Start in auto mode.
+
+    Any other value
+        Defaults to auto mode.
+
+    See :Tir wrap.
+
+manage_wrap:
+    Automatically controls the window's 'wrap' option.
+
+    Wrapping is enabled for plain text and disabled
+    for grid tables.
 
 ============================================================================== 
 HOW IT WORKS                                        *tirenvi-architecture*
@@ -248,9 +313,15 @@ Core concept:
 
 Workflow:
 
-  flat format (CSV/TSV/Markdown/...) → TIR → tir-buf
-  edit in tir-buf
-  tir-buf → TIR → original flat format
+  flat format (CSV/TSV/Markdown/...)
+      ↓
+  TIR
+      ↓
+  tir-buf (editing)
+      ↓
+  TIR
+      ↓
+  original flat format
 
 Key properties:
 

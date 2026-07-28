@@ -1,6 +1,13 @@
+!_TAG_FILE_ENCODING	utf-8	//
 tirenvi	tirenvi.txt	/*tirenvi*
+tirenvi-architecture	tirenvi.txt	/*tirenvi-architecture*
+tirenvi-column	tirenvi.txt	/*tirenvi-column*
 tirenvi-config	tirenvi.txt	/*tirenvi-config*
 tirenvi-health	tirenvi.txt	/*tirenvi-health*
 tirenvi-install	tirenvi.txt	/*tirenvi-install*
+tirenvi-motion	tirenvi.txt	/*tirenvi-motion*
+tirenvi-multiline	tirenvi.txt	/*tirenvi-multiline*
+tirenvi-structure	tirenvi.txt	/*tirenvi-structure*
 tirenvi-usage	tirenvi.txt	/*tirenvi-usage*
+tirenvi-width-mode	tirenvi.txt	/*tirenvi-width-mode*
 tirenvi.txt	tirenvi.txt	/*tirenvi.txt*
