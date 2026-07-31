@@ -224,7 +224,7 @@ require("tirenvi").setup({
 | `:Tir width{=+-}[count]` | Adjust column width by count (`=`: set, `+/-`: increment/decrement) |
 | `:Tir width?`            | Show the current table width settings.                              |
 | `:Tir fit{=+-}[count]`   | Adjust table span by count (`=`: set, `+/-`: increment/decrement)   |
-| `:Tir wrap`              | Toggle nowrap ↔ wrap width mode                                     |
+| `:Tir wrap`              | Toggle nowrap ↔ wrap\|auto width mode                               |
 | `:Tir redraw`            | Redraw and reformat dirty tables                                    |
 | `:Tir toggle`            | Toggle raw ↔ structured table view                                  |
 | `:Tir repair enable`     | Enable automatic structural repair                                  |
@@ -342,9 +342,9 @@ It is a structured text editor layer.
 | No file format change     | ✅       | ❌       | ❌                 |
 | No custom buffer type     | ✅       | ❌       | ❌                 |
 | Toggle raw view           | ✅       | ❌       | ❌                 |
-| Markdown                  | ✅       | ❌       | ❌                 |
 | Automatic wrapping        | ✅       | ❌       | ⚠️                 |
 | Grid-aware join           | ✅       | ❌       | ❌                 |
+| Markdown                  | ✅       | ❌       | ❌                 |
 | Embedded table            | ✅       | ❌       | ❌                 |
 
 Tirenvi prioritizes **structural safety with Vim purity**.

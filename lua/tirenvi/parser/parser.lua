@@ -109,7 +109,6 @@ local function get_string_version(self)
 	self._installed_version =
 		normalize_version(fn.system({ self.executable, "--version" }))
 	if vim.v.shell_error ~= 0 then
-		-- TODO
 		self._installed_version =
 			normalize_version(fn.system({ self.executable, "version" }))
 		if vim.v.shell_error ~= 0 then
