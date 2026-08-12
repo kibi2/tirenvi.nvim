@@ -270,7 +270,7 @@ local function register_buffer_local_autocmds(bufnr)
 				return
 			end
 			local ctx = Context.from_buf(bufnr)
-			ui.special_apply(ctx.winid)
+			ui.special_apply(ctx)
 		end),
 	})
 end
