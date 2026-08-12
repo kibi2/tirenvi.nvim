@@ -137,8 +137,8 @@ local function cmd_toggle(ctx)
 	then
 		return
 	end
-	ui.special_apply(ctx.winid)
 	app.toggle(ctx)
+	ui.special_apply(ctx)
 	if buf_state.is_tirbuf(ctx.bufnr) then
 		autocmd.register_buf_autocmd(ctx.bufnr)
 	else

@@ -189,4 +189,10 @@ function M.is_old(require, target)
 	return require > target
 end
 
+---@param self Parser
+---@return boolean
+function M.is_embedded(self)
+	return self.executable == "tir-embedded"
+end
+
 return M

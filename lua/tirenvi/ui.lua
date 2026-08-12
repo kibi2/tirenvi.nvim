@@ -3,6 +3,10 @@ local fn = vim.fn
 
 local config = require("tirenvi.config") -- Root
 
+local Parser = require("tirenvi.parser.parser") -- Parser
+
+local buf_state = require("tirenvi.io.buf_state") -- IO
+
 local log = require("tirenvi.util.log") -- Util
 
 -- =============================================================================
@@ -51,11 +55,24 @@ local function special_setup()
 		"Special",
 	})
 	local special = api.nvim_get_hl(ns_id, { name = target })
+	local normal = api.nvim_get_hl(ns_id, { name = "Normal" })
 	api.nvim_set_hl(ns_id, "TirenviPipe", {
 		fg = special.fg,
 		bg = special.bg,
 	})
-	api.nvim_set_hl(ns_id, "TirenviInnerText", {
+	api.nvim_set_hl(ns_id, "TirenviTextNounder", {
+		sp = special.fg,
+	})
+	api.nvim_set_hl(ns_id, "TirenviTextUnder", {
+		underline = true,
+		sp = special.fg,
+	})
+	api.nvim_set_hl(ns_id, "TirenviTextNounderEmbedded", {
+		fg = normal.fg,
+		sp = special.fg,
+	})
+	api.nvim_set_hl(ns_id, "TirenviTextUnderEmbedded", {
+		fg = normal.fg,
 		underline = true,
 		sp = special.fg,
 	})
@@ -111,8 +128,9 @@ function M.special_clear(winid)
 	matches[winid] = nil
 end
 
----@param winid integer
-function M.special_apply(winid)
+---@param ctx Context
+function M.special_apply(ctx)
+	local winid = ctx.winid
 	local pipen = config.marks.pipe
 	local pipec = config.marks.pipec
 	M.special_clear(winid)
@@ -122,7 +140,19 @@ function M.special_apply(winid)
 	add_match(winid, "TirenviPipe", pat_v(pipec), 30)
 	add_match(winid, "TirenviPipe", pat_v(pipen), 30)
 	add_match(winid, "TirenviInnerPipe", pat_inner_pipe(pipen), 40)
-	add_match(winid, "TirenviInnerText", pat_inner_text(pipen), 50)
+	local parser = buf_state.get(ctx.bufnr, buf_state.IKEY.PARSER)
+	if Parser.is_embedded(parser) then
+		add_match(
+			winid,
+			"TirenviTextNounderEmbedded",
+			pat_inner_text(pipec),
+			50
+		)
+		add_match(winid, "TirenviTextUnderEmbedded", pat_inner_text(pipen), 50)
+	else
+		add_match(winid, "TirenviTextNounder", pat_inner_text(pipec), 50)
+		add_match(winid, "TirenviTextUnder", pat_inner_text(pipen), 50)
+	end
 	vim.opt_local.conceallevel = config.ui.conceal.level
 	vim.opt_local.concealcursor = config.ui.conceal.cursor
 	local pattern = fn.escape(pipec, [[/\]])

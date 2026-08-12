@@ -5,6 +5,7 @@
 out-actual.txt
 gen*
 diff-*
+work
 
 # Captured logs
 stdout.txt

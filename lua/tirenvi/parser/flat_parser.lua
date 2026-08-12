@@ -26,7 +26,7 @@ local M = {}
 ---@return string[] NDJSON lines
 local function flat_to_jslines(parser, fllines, cursor_buf)
 	local options = vim.deepcopy(parser.options) or {}
-	if parser.executable == "tir-embedded" then
+	if Parser.is_embedded(parser) then
 		options[#options + 1] = "--cursor-line=" .. cursor_buf.row_cur
 	end
 	local js_string = Parser.run(parser, "parse", options, fllines)
