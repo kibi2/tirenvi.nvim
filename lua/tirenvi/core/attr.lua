@@ -326,4 +326,8 @@ function M.get_fit_span(self)
 	return M.get_total_width(self) + #self.columns + 1
 end
 
+function M.boundary_row(attr, top)
+	return top and attr.range.first or attr.range.last
+end
+
 return M

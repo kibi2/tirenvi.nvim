@@ -55,3 +55,10 @@ CASE yank 2column and put
 			lua print(Debug.layout())
 
 call Snapshot({ 'desc': 'GFM' })
+
+" ===== JAVA =====
+CASE Java
+	edit $TIRENVI_ROOT/tests/data/sample.java
+    call feedkeys("vah", "x")
+
+call Snapshot({ 'desc': 'Java' })
