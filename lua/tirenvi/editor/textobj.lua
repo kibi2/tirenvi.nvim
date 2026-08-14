@@ -69,6 +69,9 @@ local function setup_vl(is_around)
 	local count = vim.v.count1
 	local cursor_buf = CursorNvim.capture(ctx)
 	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
+	if not attrs then
+		return
+	end
 	local rect = get_block_rect(
 		ctx,
 		attrs,
