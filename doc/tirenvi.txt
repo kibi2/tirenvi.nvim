@@ -220,7 +220,35 @@ When column width is smaller than content:
   - Wrapped vs non-wrapped cells are visually distinguishable
     using underline-based row separators
 
-============================================================================== 
+==============================================================================
+STRUCTURAL MOTIONS
+
+tirenvi provides motions for navigating the logical structure of a TIR buffer.
+
+Available Lua functions:
+
+    require("tirenvi").motion.cell_prev
+    require("tirenvi").motion.cell_next
+    require("tirenvi").motion.block_top
+    require("tirenvi").motion.block_bottom
+
+These motions navigate between cells and blocks.
+
+They support counts and Visual mode.
+
+Example mapping:
+
+    vim.keymap.set({ 'n', 'x' }, '<C-h>',
+        require('tirenvi').motion.cell_prev, { expr = true })
+    vim.keymap.set({ 'n', 'x' }, '<C-l>',
+        require('tirenvi').motion.cell_next, { expr = true })
+    vim.keymap.set({ 'n', 'x' }, '<C-k>',
+        require('tirenvi').motion.block_top, { expr = true })
+    vim.keymap.set({ 'n', 'x' }, '<C-j>',
+        require('tirenvi').motion.block_bottom, { expr = true })
+
+
+==============================================================================
 PIPE MOTIONS                                        *tirenvi-motion*
 
 tirenvi provides pipe-aware motions for fast horizontal navigation.

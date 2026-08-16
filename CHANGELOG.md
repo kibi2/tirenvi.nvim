@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.1] - 2026-08-16
+
+### Added
+
+- Added structural motions for TIR buffers:
+  - `block_top`
+  - `block_bottom`
+  - `cell_next`
+  - `cell_prev`
+- Structural motions support counts and Visual mode.
+- Added default key mappings using `Ctrl-h/j/k/l`:
+  - `Ctrl-h`: previous cell
+  - `Ctrl-l`: next cell
+  - `Ctrl-k`: top of block
+  - `Ctrl-j`: bottom of block
+
 ## [0.5.0] - 2026-07-28
 
 ### Added
