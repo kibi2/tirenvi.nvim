@@ -116,6 +116,7 @@ Edit tables directly in Vim while preserving a structured internal model.
 * Automatic wrap management for plain and grid views
 * Grid-aware join that preserves column structure
 * Column text objects for structural editing
+* Structural motions for navigating between cells and blocks
 * Works with native Vim motions and operators
 * External parser architecture (extensible)
 * Uses standard Vim editing
@@ -295,9 +296,31 @@ are automatically corrected.
 Column width operations support `.` repeat when
 [`vim-repeat`](https://github.com/tpope/vim-repeat) is installed.
 
-## Pipe Motions
+## Motions
 
-Fast horizontal navigation across cells.
+### Structural Motions
+
+Navigate through the logical structure of a TIR buffer.
+
+```lua
+vim.keymap.set({ 'n', 'o', 'x' }, '<C-h>', require('tirenvi').motion.cell_prev,
+  { expr = true, desc = 'TirEnvi: previous cell' })
+vim.keymap.set({ 'n', 'o', 'x' }, '<C-l>', require('tirenvi').motion.cell_next,
+  { expr = true, desc = 'TirEnvi: next cell' })
+vim.keymap.set({ 'n', 'o', 'x' }, '<C-k>', require('tirenvi').motion.block_top,
+  { expr = true, desc = 'TirEnvi: block top' })
+vim.keymap.set({ 'n', 'o', 'x' }, '<C-j>', require('tirenvi').motion.block_bottom,
+  { expr = true, desc = 'TirEnvi: block bottom' })
+````
+
+* `Ctrl-h` / `Ctrl-l`: previous / next cell
+* `Ctrl-k` / `Ctrl-j`: top / bottom of block
+
+These motions support counts and Visual mode.
+
+### Pipe Motions
+
+Navigate horizontally by table separators.
 
 ```lua
 vim.keymap.set({ 'n', 'o', 'x' }, '<leader>tf', require('tirenvi').motion.f, { expr = true })
@@ -306,7 +329,7 @@ vim.keymap.set({ 'n', 'o', 'x' }, '<leader>tt', require('tirenvi').motion.t, { e
 vim.keymap.set({ 'n', 'o', 'x' }, '<leader>tT', require('tirenvi').motion.T, { expr = true })
 ```
 
-They behave like Vim’s `f/F/t/T`,
+They behave like Vim's `f/F/t/T`,
 but target table separators.
 
 `;` and `,` continue to repeat as usual.
