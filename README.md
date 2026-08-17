@@ -311,7 +311,7 @@ vim.keymap.set({ 'n', 'o', 'x' }, '<C-k>', require('tirenvi').motion.block_top,
   { expr = true, desc = 'TirEnvi: block top' })
 vim.keymap.set({ 'n', 'o', 'x' }, '<C-j>', require('tirenvi').motion.block_bottom,
   { expr = true, desc = 'TirEnvi: block bottom' })
-````
+```
 
 * `Ctrl-h` / `Ctrl-l`: previous / next cell
 * `Ctrl-k` / `Ctrl-j`: top / bottom of block
