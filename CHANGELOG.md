@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.2] - 2026-08-17
+
+### Fixed
+
+- Fix compatibility with the updated `vim.str_byteindex` and `vim.str_utfindex` API in Neovim 0.11+ while retaining support for Neovim 0.10.
+- Remove the deprecation warning reported by `:checkhealth` on newer Neovim versions.
+
 ## [0.5.1] - 2026-08-16
 
 ### Added
