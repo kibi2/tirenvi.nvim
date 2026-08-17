@@ -12,11 +12,37 @@ local M = {}
 -- =============================================================================
 --#region Private
 
+---@param str string
+---@param encoding string
+---@param index integer|nil
+---@param strict_indexing boolean|nil
+---@return integer
+local function str_utfindex(str, encoding, index, strict_indexing)
+	if vim.fn.has("nvim-0.11") == 1 then
+		return vim.str_utfindex(str, encoding, index, strict_indexing == true)
+	else
+		return vim.str_utfindex(str, index)
+	end
+end
+
+---@param str string
+---@param encoding string
+---@param index integer
+---@param strict_indexing boolean|nil
+---@return integer
+local function str_byteindex(str, encoding, index, strict_indexing)
+	if vim.fn.has("nvim-0.11") == 1 then
+		return vim.str_byteindex(str, encoding, index, strict_indexing == true)
+	else
+		return vim.str_byteindex(str, index)
+	end
+end
+
 ---@param line string
 ---@param col_char integer
 ---@return integer -- byte index (1-based)
 local function char_to_byte(line, col_char)
-	local nchar = vim.str_utfindex(line) + 1
+	local nchar = str_utfindex(line, "utf-32") + 1
 	log.assert(
 		col_char <= nchar,
 		"col_char(%d) <= nchar(%d) : %s",
@@ -25,15 +51,19 @@ local function char_to_byte(line, col_char)
 		line
 	)
 	col_char = math.min(col_char, nchar)
-	-- str_byteindex(line, "utf-32", col_char - 1, false)
-	return vim.str_byteindex(line, col_char - 1) + 1
+	return str_byteindex(line, "utf-32", col_char - 1, false) + 1
 end
 
 ---@param cursor_buf CursorBuf
 ---@param line string
 local function complete(cursor_buf, line)
 	cursor_buf.line = line
-	cursor_buf.col_char = vim.str_utfindex(line, cursor_buf.col_byte - 1) + 1
+	cursor_buf.col_char = str_utfindex(
+		line,
+		"utf-32",
+		cursor_buf.col_byte - 1,
+		false
+	) + 1
 	cursor_buf.col_byte = char_to_byte(line, cursor_buf.col_char)
 	cursor_buf.char = fn.strcharpart(line, cursor_buf.col_char - 1, 1)
 	local prefix = fn.strcharpart(line, 0, cursor_buf.col_char - 1)
@@ -64,7 +94,7 @@ end
 ---@param line string
 ---@return integer
 local function disp_to_byte(line, col_disp)
-	local nchar = vim.str_utfindex(line)
+	local nchar = str_utfindex(line, "utf-32")
 	local disp = 1
 	for ichar = 1, nchar do
 		local char = fn.strcharpart(line, ichar - 1, 1)
