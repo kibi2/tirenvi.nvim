@@ -24,20 +24,23 @@ local M = {}
 -- =============================================================================
 --#region Private
 
+---@param ctx Context
 ---@param lines string[]
----@param attr Attr
----@param count integer
----@param row_cur integer
----@param col_byte integer
 ---@param is_around boolean
 ---@return Rect|nil
-local function get_block_rect(lines, attr, count, row_cur, col_byte, is_around)
-	local cline = lines[row_cur - attr.range.first + 1]
+local function get_block_rect(ctx, lines, is_around)
+	local count = vim.v.count1
+	local cursor_buf = CursorNvim.capture(ctx)
+	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
+	local attr = Attrs.get(attrs, cursor_buf.row_cur)
+	assert(attr ~= nil)
+	local cline = lines[cursor_buf.row_cur - attr.range.first + 1]
 	local cbyte_pos = tir_buf.get_pipe_byte_positions(cline)
 	if #cbyte_pos == 0 then
 		return nil
 	end
-	local icol_start = tir_buf.get_current_col_index(cbyte_pos, col_byte)
+	local icol_start =
+		tir_buf.get_current_col_index(cbyte_pos, cursor_buf.col_byte)
 	if not icol_start or icol_start == 0 then
 		return nil
 	end
@@ -62,28 +65,10 @@ end
 ---@param is_around boolean
 local function setup_vl(lines, is_around)
 	local ctx = Context.from_buf()
-	local count = vim.v.count1
-	local cursor_buf = CursorNvim.capture(ctx)
-	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
-	if not attrs then
-		return
-	end
-	local attr = Attrs.get(attrs, cursor_buf.row_cur)
-	if not attr then
-		return nil
-	end
-	local rect = get_block_rect(
-		lines,
-		attr,
-		count,
-		cursor_buf.row_cur,
-		cursor_buf.col_byte,
-		is_around
-	)
+	local rect = get_block_rect(ctx, lines, is_around)
 	if not rect then
 		return
 	end
-	local lines = buf_lines.get_lines(ctx.bufnr, rect.row.first, rect.row.last)
 	if not buf_parser.table_is_aligned(lines) then
 		notify.error(errors.ERR.TABLE_IS_NOT_ALIGNED)
 		return
@@ -95,15 +80,14 @@ local function setup_vl(lines, is_around)
 end
 
 ---@return string[]|nil
-local function get_lines()
+local function get_block_lines()
 	local ctx = Context.from_buf()
-	local cursor_buf = CursorNvim.capture(ctx)
-	local row_cur = cursor_buf.row_cur
 	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
 	if not attrs then
 		return
 	end
-	local attr = Attrs.get(attrs, row_cur)
+	local cursor_buf = CursorNvim.capture(ctx)
+	local attr = Attrs.get(attrs, cursor_buf.row_cur)
 	if not attr then
 		return nil
 	end
@@ -111,14 +95,14 @@ local function get_lines()
 end
 
 local function setup_vil()
-	local lines = get_lines()
+	local lines = get_block_lines()
 	if lines then
 		setup_vl(lines, false)
 	end
 end
 
 local function setup_val()
-	local lines = get_lines()
+	local lines = get_block_lines()
 	if lines then
 		setup_vl(lines, true)
 	end
