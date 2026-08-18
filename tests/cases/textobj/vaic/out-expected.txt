@@ -1,66 +1,42 @@
---- CSV ---
 === MESSAGE ===
  
 --- CASE 8: initial cached attrs ---
 CASE 8 // cur(1,5) b1:r1:c2+1<2>  g(1,7)n[2,3*,3]
  
---- CASE 12: yank column and put ---
-block of 7 lines yanked
-CASE 12 // cur(1,12) b1:r1:c4+0<│>  g(1,7)n[2,3,3,3*]
- 
---- CASE 19: yank 2column and put ---
-CASE 19 // cur(7,3) b1:r7:c1+2<⠀>  g(1,7)n[2*,3,3,3]
-block of 7 lines yanked
-CASE 19 // cur(1,1) b1:r1:c1+0<│>  g(1,7)n[2*,3,2,3,3,3]
- 
---- CASE 28: repair disable ---
-[Tirenvi] repair:disable 
-tirenvi: Cannot select column: table is not aligned.
+--- CASE 12: dlete column and put ---
+CASE 12 // cur(1,11) b1:r1:c3+2<│>  g(1,7)n[2,3,2*]
 
 === DISPLAY ===
-│1a│2 a│1a│2 a│３a│2 a│
-┊1↲┊２⠀┊1↲┊２⠀┊3↲⠀┊２⠀┊
-│⠀⠀│⠀⠀⠀│⠀⠀│⠀⠀⠀│b⇥⠀│⠀⠀⠀│
-┊↲⠀┊⠀⠀⠀┊↲⠀┊⠀⠀⠀┊⇥c⠀┊⠀⠀⠀┊
-┊insert↲⠀┊⠀⠀⠀┊↲⠀┊⠀⠀⠀┊⠀⠀⠀┊⠀⠀⠀┊
-┊↲⠀┊⠀⠀⠀┊↲⠀┊⠀⠀⠀┊⠀⠀⠀┊⠀⠀⠀┊
-│⠀⠀│⠀⠀⠀│⠀⠀│⠀⠀⠀│⠀⠀⠀│⠀⠀⠀│
---- GFM ---
+│1a│３a│ 2 a│
+┊1↲┊２⠀┊3↲⠀⠀┊
+│⠀⠀│⠀⠀⠀│b⇥⠀⠀│
+┊↲⠀┊⠀⠀⠀┊⇥c⠀⠀┊
+┊↲⠀┊⠀⠀⠀┊⠀⠀⠀⠀┊
+┊↲⠀┊⠀⠀⠀┊⠀⠀⠀⠀┊
+│⠀⠀│⠀⠀⠀│⠀⠀⠀⠀│
 === MESSAGE ===
  
---- CASE 39: initial cached attrs ---
-CASE 39 // cur(1,1) b1:r1:c0+0<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
- 
---- CASE 43: yank plain ---
-CASE 43 // cur(1,3) b1:r1:c0+0<g>  p(1,2)* g(3,8)n[5,3,11] p(9,11)
- 
---- CASE 50: yank 2column and put ---
-block of 6 lines yanked
-CASE 50 // cur(3,8) b2:r1:c2+1<│>  p(1,2) g(3,8)n[5,2*,3,11,3,11] p(9,11)
+--- CASE 21: yank cell and put ---
+CASE 21 // cur(5,10) b1:r5:c3+2<3>  g(1,7)n[2,3,4*]
 
 === DISPLAY ===
-gfgm
-----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
-│名前⠀│⠀⠀│Age│City⠀⠀⠀⠀⠀⠀⠀│Age│City⠀⠀⠀⠀⠀⠀⠀│
-│----⠀│⠀⠀│---│----⠀⠀⠀⠀⠀⠀⠀│---│----⠀⠀⠀⠀⠀⠀⠀│
-│Alice│⠀⠀│23⠀│Tokyo⠀⠀⠀⠀⠀⠀│23⠀│Tokyo⠀⠀⠀⠀⠀⠀│
-┊Bob⠀⠀┊⠀⠀┊31⠀┊大阪↲⠀⠀⠀⠀⠀⠀┊31⠀┊大阪↲⠀⠀⠀⠀⠀⠀┊
-│⠀⠀⠀⠀⠀│⠀⠀│⠀⠀⠀│nipponbashi│⠀⠀⠀│nipponbashi│
-│Carol│⠀⠀│27⠀│名古屋⠀⠀⠀⠀⠀│27⠀│名古屋⠀⠀⠀⠀⠀│
-----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0
-markdown
-
---- Java ---
+│1a│３a│ 2 a│
+┊1↲┊２⠀┊3↲⠀⠀┊
+│⠀⠀│⠀⠀⠀│b⇥⠀⠀│
+┊↲⠀┊⠀⠀⠀┊⇥c⠀⠀┊
+┊↲⠀┊⠀⠀⠀┊3↲⠀⠀┊
+┊↲⠀┊⠀⠀⠀┊b⇥⠀⠀┊
+│⠀⠀│⠀⠀⠀│⠀⠀⠀⠀│
 === MESSAGE ===
  
---- CASE 60: Java ---
+--- CASE 31: 2 column delete ---
+CASE 31 // cur(4,2) b1:r4:c1+1<⠀>  g(1,7)n[2*,3,4]
 
 === DISPLAY ===
-// |Key|Description|Example|
-// |name|||
-class Tir {
-  public static void main(String[] args){
-    System.out.println("Hello Tir");
-  }
-}
-
+│1a│３a│ 2 a│
+┊1↲┊２⠀┊3↲⠀⠀┊
+│⠀⠀│⠀⠀⠀│b⇥⠀⠀│
+┊⠀⠀┊⇥c⠀┊⠀⠀⠀⠀┊
+┊⠀⠀┊3↲⠀┊⠀⠀⠀⠀┊
+┊⠀⠀┊b⇥⠀┊⠀⠀⠀⠀┊
+│⠀⠀│⠀⠀⠀│⠀⠀⠀⠀│

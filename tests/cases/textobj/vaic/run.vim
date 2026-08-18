@@ -9,57 +9,29 @@ CASE initial cached attrs
 	call At(1, 1, 2)
       lua print(Debug.layout())
 
-CASE yank column and put
+CASE dlete column and put
     	call feedkeys("vah", "x")
-    	normal! y
+    	normal! d
+		sleep 1m
     	normal! $h
     	normal! p
 			lua print(Debug.layout())
 call Snapshot({})
 
-CASE yank 2column and put
-	call At(1, 7, 1)
-	normal! l
+CASE yank cell and put
+	call At(1, 2, 3)
+    	call feedkeys("vih", "x")
+    	normal! y
+		sleep 1m
+	call At(1, 5, 3)
+    	normal! p
 			lua print(Debug.layout())
-    call feedkeys("v2ah", "x")
-		normal! y
-		normal! P
-			lua print(Debug.layout())
-
-CASE repair disable
-Tir repair disable
-	call At(1, 5, 1)
-		normal! hainsert
-    	call feedkeys("vah", "x")
-
 call Snapshot({})
 
-" ===== GFM =====
-edit $TIRENVI_ROOT/tests/data/simple.md
-
-CASE initial cached attrs
-	call At(1, 1, 1)
+CASE 2 column delete
+	call At(1, 5, 1)
+    	call feedkeys("v2ih", "x")
+    	normal! x
+		sleep 1m
 			lua print(Debug.layout())
-
-CASE yank plain
-    call feedkeys("vah", "x")
-		normal! y
-		normal! $h
-		normal! p
-			lua print(Debug.layout())
-
-CASE yank 2column and put
-	call At(2, 4, 2)
-    call feedkeys("v2ah", "x")
-		normal! ly
-		normal! p
-			lua print(Debug.layout())
-
-call Snapshot({ 'desc': 'GFM' })
-
-" ===== JAVA =====
-CASE Java
-	edit $TIRENVI_ROOT/tests/data/sample.java
-    call feedkeys("vah", "x")
-
-call Snapshot({ 'desc': 'Java' })
+call Snapshot({})
