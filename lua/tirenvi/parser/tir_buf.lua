@@ -3,6 +3,7 @@ local config = require("tirenvi.config") -- Root
 local Cell = require("tirenvi.core.cell") -- Core
 
 local util = require("tirenvi.util.util") -- Util
+local Range = require("tirenvi.util.range")
 local log = require("tirenvi.util.log")
 
 -- =============================================================================
@@ -36,6 +37,16 @@ local function remove_end_pipe(line)
 		line = line:sub(1, -#pipec - 1)
 	end
 	return line
+end
+
+---@param line string|nil
+---@return boolean
+local function is_continue_line(line)
+	local pipec = config.marks.pipec
+	if not line then
+		return false
+	end
+	return M.get_pipe_char(line) == pipec
 end
 
 --#endregion
@@ -141,16 +152,6 @@ function M.has_pipe(lines)
 	return false
 end
 
----@param line string|nil
----@return boolean
-function M.is_continue_line(line)
-	local pipec = config.marks.pipec
-	if not line then
-		return false
-	end
-	return M.get_pipe_char(line) == pipec
-end
-
 ---@param line string
 ---@param embedded_key string|nil
 ---@return string
@@ -168,6 +169,29 @@ function M.split_prefix(line, embedded_key)
 		return "", line
 	end
 	return prefix, string.sub(line, byte_pos[1])
+end
+
+---@param line_provider LineProvider
+---@param range Range
+function M.get_continue_range(line_provider, range)
+	if Range.is_empty(range) then
+		return range
+	end
+	local first, last = Range.to_lua(range)
+	local prev = first - 1
+	local prev_line = line_provider.get_line(prev)
+	while is_continue_line(prev_line) do
+		prev = prev - 1
+		prev_line = line_provider.get_line(prev)
+	end
+	local next = last
+	---@type string|nil
+	local next_line = line_provider.get_line(next)
+	while is_continue_line(next_line) do
+		next = next + 1
+		next_line = line_provider.get_line(next)
+	end
+	return Range.from_lua(prev + 1, next)
 end
 
 return M

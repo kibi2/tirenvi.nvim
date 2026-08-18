@@ -16,37 +16,11 @@ local M = {}
 --#region Private
 
 ---@param line_provider LineProvider
----@param range Range
-local function expand_continue_lines(line_provider, range)
-	if Range.is_empty(range) then
-		return
-	end
-	local first, last = Range.to_lua(range)
-	local lines = line_provider.get_lines(first, last)
-	local prev = range.first - 1
-	local prev_line = line_provider.get_line(prev)
-	while tir_buf.is_continue_line(prev_line) do
-		prev = prev - 1
-		prev_line = line_provider.get_line(prev)
-	end
-	range.first = prev + 1
-	---@type string|nil
-	local last_line = lines[#lines]
-	local last = range.last
-	while tir_buf.is_continue_line(last_line) do
-		last = last + 1
-		last_line = line_provider.get_line(last)
-	end
-	range.last = last
-end
-
----@param line_provider LineProvider
 ---@param range3 Range3
 ---@return Range
 local function get_new_range(line_provider, range3)
-	local new_range = Range3.get_new_range(range3)
-	expand_continue_lines(line_provider, new_range)
-	return new_range
+	local range = Range3.get_new_range(range3)
+	return tir_buf.get_continue_range(line_provider, range)
 end
 
 ---@param line_provider LineProvider

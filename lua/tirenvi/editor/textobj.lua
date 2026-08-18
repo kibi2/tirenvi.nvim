@@ -28,23 +28,23 @@ local M = {}
 ---@param lines string[]
 ---@param is_around boolean
 ---@return Range|nil
-local function get_block_rect(ctx, lines, is_around)
+local function get_col_range(ctx, lines, is_around)
 	local count = vim.v.count1
 	local cursor_buf = CursorNvim.capture(ctx)
 	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
 	local attr = Attrs.get(attrs, cursor_buf.row_cur)
 	assert(attr ~= nil)
 	local cline = buf_lines.get_line(ctx.bufnr, cursor_buf.row_cur) or ""
-	local cbyte_pos = tir_buf.get_pipe_byte_positions(cline)
-	if #cbyte_pos == 0 then
+	local byte_pos = tir_buf.get_pipe_byte_positions(cline)
+	if #byte_pos == 0 then
 		return nil
 	end
 	local icol_start =
-		tir_buf.get_current_col_index(cbyte_pos, cursor_buf.col_byte)
+		tir_buf.get_current_col_index(byte_pos, cursor_buf.col_byte)
 	if not icol_start or icol_start == 0 then
 		return nil
 	end
-	icol_start = math.min(icol_start, #cbyte_pos - 1)
+	icol_start = math.min(icol_start, #byte_pos - 1)
 	local tline = lines[1]
 	local bline = lines[#lines]
 	local tbyte_pos = tir_buf.get_pipe_byte_positions(tline)
@@ -59,11 +59,11 @@ local function get_block_rect(ctx, lines, is_around)
 end
 
 ---@param is_around boolean
-local function setup_vl(row_range, is_around)
+local function setup_visual_block(row_range, is_around)
 	local ctx = Context.from_buf()
 	local lines =
 		buf_lines.get_lines(ctx.bufnr, row_range.first, row_range.last)
-	local col_range = get_block_rect(ctx, lines, is_around)
+	local col_range = get_col_range(ctx, lines, is_around)
 	if not col_range then
 		return
 	end
@@ -77,7 +77,7 @@ local function setup_vl(row_range, is_around)
 	CursorNvim.move_byte(ctx, row_range.last, col_range.last)
 end
 
----@return string[]|nil
+---@return Range|nil
 local function get_block_rows()
 	local ctx = Context.from_buf()
 	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
@@ -92,26 +92,44 @@ local function get_block_rows()
 	return attr.range
 end
 
-local function setup_vil()
+---@return Range|nil
+local function get_cell_rows()
+	local ctx = Context.from_buf()
+	local cursor_buf = CursorNvim.capture(ctx)
+	return tir_buf.get_continue_range(
+		ctx.line_provider,
+		Range.from_lua(cursor_buf.row_cur, cursor_buf.row_cur)
+	)
+end
+
+local function setup_vl(is_around)
 	local row_range = get_block_rows()
 	if row_range then
-		setup_vl(row_range, false)
+		setup_visual_block(row_range, is_around)
 	end
 end
 
+local function setup_vil()
+	setup_vl(false)
+end
+
 local function setup_val()
-	local row_range = get_block_rows()
+	setup_vl(true)
+end
+
+local function setup_vc(is_around)
+	local row_range = get_cell_rows()
 	if row_range then
-		setup_vl(row_range, true)
+		setup_visual_block(row_range, is_around)
 	end
 end
 
 local function setup_vic()
-	-- setup_vc(false)
+	setup_vc(false)
 end
 
 local function setup_vac()
-	-- setup_vc(true)
+	setup_vc(true)
 end
 
 --#endregion
