@@ -27,14 +27,14 @@ local M = {}
 ---@param ctx Context
 ---@param lines string[]
 ---@param is_around boolean
----@return Rect|nil
+---@return Range|nil
 local function get_block_rect(ctx, lines, is_around)
 	local count = vim.v.count1
 	local cursor_buf = CursorNvim.capture(ctx)
 	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
 	local attr = Attrs.get(attrs, cursor_buf.row_cur)
 	assert(attr ~= nil)
-	local cline = lines[cursor_buf.row_cur - attr.range.first + 1]
+	local cline = buf_lines.get_line(ctx.bufnr, cursor_buf.row_cur) or ""
 	local cbyte_pos = tir_buf.get_pipe_byte_positions(cline)
 	if #cbyte_pos == 0 then
 		return nil
@@ -52,35 +52,33 @@ local function get_block_rect(ctx, lines, is_around)
 	local icol_end = icol_start + count
 	icol_end = math.min(icol_end, #bbyte_pos)
 	local pipe = tir_buf.get_pipe_char(tline)
-	local rect = {
-		row = Range.copy(attr.range),
-		col = Range.from_lua(
-			tbyte_pos[icol_start] + (is_around and 0 or #pipe),
-			bbyte_pos[icol_end] - 1
-		),
-	}
-	return rect
+	return Range.from_lua(
+		tbyte_pos[icol_start] + (is_around and 0 or #pipe),
+		bbyte_pos[icol_end] - 1
+	)
 end
 
 ---@param is_around boolean
-local function setup_vl(lines, is_around)
+local function setup_vl(row_range, is_around)
 	local ctx = Context.from_buf()
-	local rect = get_block_rect(ctx, lines, is_around)
-	if not rect then
+	local lines =
+		buf_lines.get_lines(ctx.bufnr, row_range.first, row_range.last)
+	local col_range = get_block_rect(ctx, lines, is_around)
+	if not col_range then
 		return
 	end
 	if not buf_parser.table_is_aligned(lines) then
 		notify.error(errors.ERR.TABLE_IS_NOT_ALIGNED)
 		return
 	end
-	CursorNvim.move_byte(ctx, rect.row.first, rect.col.first)
+	CursorNvim.move_byte(ctx, row_range.first, col_range.first)
 	api.nvim_feedkeys(vim.keycode("<C-v>"), "n", false)
 	vim.cmd("normal! o")
-	CursorNvim.move_byte(ctx, rect.row.last, rect.col.last)
+	CursorNvim.move_byte(ctx, row_range.last, col_range.last)
 end
 
 ---@return string[]|nil
-local function get_block_lines()
+local function get_block_rows()
 	local ctx = Context.from_buf()
 	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
 	if not attrs then
@@ -91,20 +89,20 @@ local function get_block_lines()
 	if not attr then
 		return nil
 	end
-	return buf_lines.get_lines(ctx.bufnr, attr.range.first, attr.range.last)
+	return attr.range
 end
 
 local function setup_vil()
-	local lines = get_block_lines()
-	if lines then
-		setup_vl(lines, false)
+	local row_range = get_block_rows()
+	if row_range then
+		setup_vl(row_range, false)
 	end
 end
 
 local function setup_val()
-	local lines = get_block_lines()
-	if lines then
-		setup_vl(lines, true)
+	local row_range = get_block_rows()
+	if row_range then
+		setup_vl(row_range, true)
 	end
 end
 
