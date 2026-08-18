@@ -45,6 +45,7 @@ local defaults = {
 	},
 	textobj = {
 		column = "l",
+		cell = "c",
 	},
 	table = {
 		auto_reconcile = true,

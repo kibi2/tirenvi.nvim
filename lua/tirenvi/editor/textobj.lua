@@ -24,19 +24,15 @@ local M = {}
 -- =============================================================================
 --#region Private
 
----@param ctx Context
----@param attrs Attr[]
+---@param lines string[]
+---@param attr Attr
 ---@param count integer
 ---@param row_cur integer
 ---@param col_byte integer
 ---@param is_around boolean
 ---@return Rect|nil
-local function get_block_rect(ctx, attrs, count, row_cur, col_byte, is_around)
-	local attr = Attrs.get(attrs, row_cur)
-	if not attr then
-		return nil
-	end
-	local cline = ctx.line_provider.get_line(row_cur) or ""
+local function get_block_rect(lines, attr, count, row_cur, col_byte, is_around)
+	local cline = lines[row_cur - attr.range.first + 1]
 	local cbyte_pos = tir_buf.get_pipe_byte_positions(cline)
 	if #cbyte_pos == 0 then
 		return nil
@@ -46,8 +42,8 @@ local function get_block_rect(ctx, attrs, count, row_cur, col_byte, is_around)
 		return nil
 	end
 	icol_start = math.min(icol_start, #cbyte_pos - 1)
-	local tline = ctx.line_provider.get_line(attr.range.first) or ""
-	local bline = ctx.line_provider.get_line(attr.range.last) or ""
+	local tline = lines[1]
+	local bline = lines[#lines]
 	local tbyte_pos = tir_buf.get_pipe_byte_positions(tline)
 	local bbyte_pos = tir_buf.get_pipe_byte_positions(bline)
 	local icol_end = icol_start + count
@@ -64,7 +60,7 @@ local function get_block_rect(ctx, attrs, count, row_cur, col_byte, is_around)
 end
 
 ---@param is_around boolean
-local function setup_vl(is_around)
+local function setup_vl(lines, is_around)
 	local ctx = Context.from_buf()
 	local count = vim.v.count1
 	local cursor_buf = CursorNvim.capture(ctx)
@@ -72,9 +68,13 @@ local function setup_vl(is_around)
 	if not attrs then
 		return
 	end
+	local attr = Attrs.get(attrs, cursor_buf.row_cur)
+	if not attr then
+		return nil
+	end
 	local rect = get_block_rect(
-		ctx,
-		attrs,
+		lines,
+		attr,
 		count,
 		cursor_buf.row_cur,
 		cursor_buf.col_byte,
@@ -94,12 +94,42 @@ local function setup_vl(is_around)
 	CursorNvim.move_byte(ctx, rect.row.last, rect.col.last)
 end
 
+---@return string[]|nil
+local function get_lines()
+	local ctx = Context.from_buf()
+	local cursor_buf = CursorNvim.capture(ctx)
+	local row_cur = cursor_buf.row_cur
+	local attrs = buf_state.get(ctx.bufnr, buf_state.IKEY.ATTRS)
+	if not attrs then
+		return
+	end
+	local attr = Attrs.get(attrs, row_cur)
+	if not attr then
+		return nil
+	end
+	return buf_lines.get_lines(ctx.bufnr, attr.range.first, attr.range.last)
+end
+
 local function setup_vil()
-	setup_vl(false)
+	local lines = get_lines()
+	if lines then
+		setup_vl(lines, false)
+	end
 end
 
 local function setup_val()
-	setup_vl(true)
+	local lines = get_lines()
+	if lines then
+		setup_vl(lines, true)
+	end
+end
+
+local function setup_vic()
+	-- setup_vc(false)
+end
+
+local function setup_vac()
+	-- setup_vc(true)
 end
 
 --#endregion
@@ -112,6 +142,12 @@ function M.setup()
 	})
 	vim.keymap.set({ "x" }, "a" .. config.textobj.column, setup_val, {
 		desc = "Around column",
+	})
+	vim.keymap.set({ "x" }, "i" .. config.textobj.cell, setup_vic, {
+		desc = "Inner cell",
+	})
+	vim.keymap.set({ "x" }, "a" .. config.textobj.cell, setup_vac, {
+		desc = "Around cell",
 	})
 end
 
