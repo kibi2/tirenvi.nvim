@@ -2,6 +2,6 @@
 
 local M = {}
 
-M.VERSION = "0.5.2"
+M.VERSION = "0.5.3"
 
 return M

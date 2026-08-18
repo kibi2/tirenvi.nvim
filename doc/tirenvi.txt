@@ -206,6 +206,29 @@ are automatically corrected.
 
 Column and table width changes support '.' repeat when vim-repeat is installed.
 
+==============================================================================
+CELL EDITING                                        *tirenvi-cell*
+
+Cells are structural units within a table.
+
+To modify a cell:
+
+  1. Select a cell using text objects:
+       vic   inner cell
+       vac   around cell
+       v3ac  select 3 cells
+
+  2. Apply normal operators (d, c, y, p, etc.)
+
+  `vic` selects the cell content without the left border.
+  `vac` also includes the left border.
+
+When a cell is wrapped across multiple lines,
+the entire cell is selected.
+
+Operations that would break structural alignment
+are automatically corrected.
+
 ============================================================================== 
 MULTILINE CELLS                                     *tirenvi-multiline*
 

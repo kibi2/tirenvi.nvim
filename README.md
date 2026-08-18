@@ -233,7 +233,13 @@ require("tirenvi").setup({
 | `:Tir repair toggle`     | Toggle automatic structural repair                                  |
 | `:Tir repair`            | Deprecated. Will be removed in v0.6.<br>Use `:Tir redraw` instead   |
 
-All native Vim editing works.
+Operations that would break structure
+are automatically corrected.
+
+Column width operations support `.` repeat when
+[`vim-repeat`](https://github.com/tpope/vim-repeat) is installed.
+
+Native Vim editing commands work as usual.
 
 * `dd`, `yy`, `p`, `D`, `o`, `R`, `J`, and more
 * Command-line command
@@ -286,15 +292,24 @@ To modify a column:
 require("tirenvi").setup({
   textobj = {
     column = "l",
+    cell = "c",
   },
 })
 ```
 
-Operations that would break structure
-are automatically corrected.
+## Cell Editing
 
-Column width operations support `.` repeat when
-[`vim-repeat`](https://github.com/tpope/vim-repeat) is installed.
+Cells are structural units within a table.
+
+To modify a cell:
+
+1. Select a cell using text objects (`vic`, `vac`, `v3ac`)
+2. Apply standard operators (`d`, `y`, `p`, etc.)
+
+`vic` selects the cell content without the left border, while
+`vac` also includes the left border.
+
+Wrapped cells are selected across multiple lines.
 
 ## Motions
 
@@ -348,12 +363,13 @@ It is a structured text editor layer.
 
 ## Roadmap
 
-### In Progress
+### Ideas
 
-* Text objects (table, row, cell)
-
-### Planned
-
+* VS Code support
+* Copy and paste data with spreadsheets
+* Simple calculations (`sum`, `count`, `ave`, `max`, `min`, sequence numbers)
+* Sort rows and columns
+* Integration with `hydra.nvim`
 * Outline mode
 
 ## Comparison

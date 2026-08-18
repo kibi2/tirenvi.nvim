@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.3] - 2026-08-18
+
+### Added
+
+- Add cell text objects `vic` and `vac` for selecting cell content or cells including the left border.
+- Support multi-line selection for wrapped cells.
+
 ## [0.5.2] - 2026-08-17
 
 ### Fixed
