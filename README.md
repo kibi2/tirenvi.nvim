@@ -212,7 +212,7 @@ require("tirenvi").setup({
     csv = { executable = "tir-csv", required_version = "0.1.4" },
     tsv = { executable = "tir-csv", options = { "--delimiter", "\t" }, required_version = "0.1.4" },
     markdown = { executable = "tir-gfm-lite", allow_plain = true, required_version = "0.1.6" },
-    ["*"] = { executable = "tir-embedded", allow_plain = true },
+    ["*"] = { executable = "tir-embedded", allow_plain = true, embedded = true },
     pukiwiki = { executable = "tir-pukiwiki", allow_plain = true, required_version = "0.1.1" },
   }
 })
