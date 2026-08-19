@@ -3,6 +3,7 @@ local fn = vim.fn -- Neovim
 local config = require("tirenvi.config") -- Root
 
 local errors = require("tirenvi.util.errors") -- Util
+local util = require("tirenvi.util.util")
 local log = require("tirenvi.util.log")
 
 -- =============================================================================
@@ -12,6 +13,7 @@ local log = require("tirenvi.util.log")
 ---@field options? string[]             Command-line arguments passed to the parser
 ---@field required_version? string      Parser required version "major.minor.patch"
 ---@field allow_plain? boolean          Whether plain blocks are allowed (GFM). If false, only a single table is permitted.
+---@field embedded? boolean          	parser for embedded
 ---@field _required_version_int? integer required version
 ---@field _installed_version? string    installed version
 ---@field _err_code? string             error code
@@ -192,7 +194,7 @@ end
 ---@param self Parser
 ---@return boolean
 function M.is_embedded(self)
-	return self.executable == "tir-embedded"
+	return self.embedded == true
 end
 
 return M
