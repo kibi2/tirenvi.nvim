@@ -23,9 +23,9 @@ for name, value in pairs(levels) do
 	level_names[value] = name
 end
 
-local last_tick = 0
+local last_tick = {}
 local last_mem = 0
-local last_time = uv.now()
+local last_time = uv.hrtime()
 local monitoring = false
 
 -- =============================================================================
@@ -35,6 +35,28 @@ local monitoring = false
 local function get_tick()
 	local bufnr = api.nvim_get_current_buf()
 	return api.nvim_buf_get_changedtick(bufnr)
+end
+
+---@return integer
+local function get_delta_tick()
+	local bufnr = api.nvim_get_current_buf()
+	local curr_tick = api.nvim_buf_get_changedtick(bufnr)
+	local prev_tick = last_tick[bufnr]
+	last_tick[bufnr] = curr_tick
+	if not prev_tick then
+		return 0
+	end
+	-- local delta_tick = curr_tick - prev_tick
+	-- if delta_tick > 1 then
+	-- 	M.probe(
+	-- 		"TICK [%d] %d - %d = %d",
+	-- 		bufnr,
+	-- 		curr_tick,
+	-- 		prev_tick,
+	-- 		delta_tick
+	-- 	)
+	-- end
+	return curr_tick - prev_tick
 end
 
 ---@return integer
@@ -59,11 +81,11 @@ local function monitor()
 	monitoring = true
 
 	local mem = get_mem_mb()
-	local tick = get_tick()
-	local now = uv.now()
+	local now = uv.hrtime()
 
-	if now - last_time < 1000 then
-		if tick - last_tick > 100 then
+	local delta_tick = get_delta_tick()
+	if now - last_time < 1000 * 1e6 then
+		if delta_tick > 100 then
 			M.error("changedtick runaway detected")
 		end
 	end
@@ -72,7 +94,6 @@ local function monitor()
 		M.error("memory runaway: " .. mem .. "MB")
 	end
 
-	last_tick = tick
 	last_mem = mem
 	last_time = now
 
