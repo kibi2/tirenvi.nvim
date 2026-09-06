@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.4] - 2026-09-06
+
+### Fixed
+
+- Fix false-positive `changedtick runaway detected` errors caused by comparing `changedtick` values from different buffers.
+- Fix log monitoring by using a consistent clock for elapsed-time measurement.
+
 ## [0.5.3] - 2026-08-18
 
 ### Added
