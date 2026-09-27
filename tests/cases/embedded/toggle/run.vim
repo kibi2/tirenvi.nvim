@@ -1,8 +1,8 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 
 " ===== EMBEDDED =====
 CASE embedded -> //
-edit $TIRENVI_ROOT/tests/data/sample.py
+edit $KIBI2_REPO_ROOT/tests/data/sample.py
         Tir toggle
             sleep 1m | lua print(Debug.layout())
 call Snapshot({ 'desc': 'simple md -> tir' })

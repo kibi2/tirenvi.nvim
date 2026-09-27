@@ -1,6 +1,6 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 
-edit $TIRENVI_ROOT/tests/data/table2.md
+edit $KIBI2_REPO_ROOT/tests/data/table2.md
 
 lua require("tirenvi.config").log.level = vim.log.levels.DEBUG
 lua require("tirenvi.config").log.probe = true

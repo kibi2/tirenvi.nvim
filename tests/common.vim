@@ -6,7 +6,7 @@ set nowritebackup
 set noundofile
 set shortmess+=A
 
-let s:root = $TIRENVI_ROOT
+let s:root = $KIBI2_REPO_ROOT
 execute 'set rtp+=' . s:root
 let g:tirenvi_test_mode = 1
 filetype plugin indent on

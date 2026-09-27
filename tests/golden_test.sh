@@ -99,7 +99,7 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 ROOT_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
 # CASES_DIR="$SCRIPT_DIR/cases"
 
-export TIRENVI_ROOT="$ROOT_DIR"
+export KIBI2_REPO_ROOT="$ROOT_DIR"
 
 . "$BACKEND"
 backend_setup
@@ -174,7 +174,7 @@ while IFS= read -r -d '' CASES_DIR; do
 
     if (
       cd "$d"
-      export TIRENVI_TEST_CASE="$d"
+      export KIB2_TEST_CASE="$d"
       rm -fr work out-actual.txt diff-*.txt stdout.txt stderr.txt gen.*
 
       backend_case_setup

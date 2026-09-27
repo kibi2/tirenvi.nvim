@@ -1,4 +1,4 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 lua vim.keymap.set({ 'n', 'o', 'x' }, 'tf', require('tirenvi').motion.f, { expr = true, desc = '[T]irEnvi: f pipe' })
 lua vim.keymap.set({ 'n', 'o', 'x' }, 'tF', require('tirenvi').motion.F, { expr = true, desc = '[T]irEnvi: F pipe' })
 lua vim.keymap.set({ 'n', 'o', 'x' }, 'tt', require('tirenvi').motion.t, { expr = true, desc = '[T]irEnvi: t pipe' })
@@ -9,7 +9,7 @@ lua vim.keymap.set({ 'n', 'o', 'x' }, '<Left>',   require('tirenvi').motion.cell
 lua vim.keymap.set({ 'n', 'o', 'x' }, '<Right>', require('tirenvi').motion.cell_next,   { expr = true, desc = '[T]irEnvi: cell next' })
 
 " ===== GFM =====
-edit $TIRENVI_ROOT/tests/data/simple.md
+edit $KIBI2_REPO_ROOT/tests/data/simple.md
 
 CASE initial
 	call At(2, 1, 3)
@@ -57,7 +57,7 @@ CASE plain
 call Snapshot({})
 
 " ===== CSV =====
-edit $TIRENVI_ROOT/tests/data/simple.csv
+edit $KIBI2_REPO_ROOT/tests/data/simple.csv
 
 CASE CSV bottom
         execute "normal \<Down>"
@@ -72,7 +72,7 @@ CASE CSV top
 call Snapshot({ 'desc': 'motion f F t T g G' })
 
 " ===== GFM top & bottom =====
-edit $TIRENVI_ROOT/tests/data/simple.md
+edit $KIBI2_REPO_ROOT/tests/data/simple.md
 	call At(1, 1, 1)
 
 CASE block#1 bottom
@@ -188,7 +188,7 @@ call Snapshot({})
 
 " ===== JAVA =====
 CASE Java
-	edit $TIRENVI_ROOT/tests/data/sample.java
+	edit $KIBI2_REPO_ROOT/tests/data/sample.java
         execute "normal \<Down>"
         execute "normal \<Right>"
             lua print(Debug.layout())

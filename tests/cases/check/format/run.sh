@@ -1,4 +1,4 @@
 #!/bin/sh
 set -eu
 
-stylua --check $TIRENVI_ROOT/lua $TIRENVI_ROOT/tests > out-actual.txt
+stylua --check $KIBI2_REPO_ROOT/lua $KIBI2_REPO_ROOT/tests > out-actual.txt

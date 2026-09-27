@@ -1,4 +1,4 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 
 lua require("tirenvi.config").parser_map.csv.required_version = "0.1.4"
 lua require("tirenvi.config").parser_map.tsv.required_version = "0.1.1"
@@ -7,7 +7,7 @@ lua require("tirenvi.config").parser_map.pukiwiki.allow_plain = foo
 lua require("tirenvi.config").setup({})
 
 " ===== CSV =====
-edit $TIRENVI_ROOT/tests/data/simple.csv
+edit $KIBI2_REPO_ROOT/tests/data/simple.csv
 		checkhealth tirenvi
 
 call Snapshot({ 'nomessage': 'true', 'desc': 'checkhealth ok case' })
@@ -21,7 +21,7 @@ lua require("tirenvi.config").setup({})
 
 
 " ===== TXT =====
-edit $TIRENVI_ROOT/tests/data/empty.txt
+edit $KIBI2_REPO_ROOT/tests/data/empty.txt
         checkhealth tirenvi
 
 call Snapshot({ 'nomessage': 'true', 'desc': 'checkhealth ok case' })

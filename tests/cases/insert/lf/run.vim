@@ -1,4 +1,4 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 
 lua << EOF
 log = require("tirenvi.util.log")
@@ -16,7 +16,7 @@ end
 EOF
 
 " ===== CSV =====
-edit $TIRENVI_ROOT/tests/data/simple.csv
+edit $KIBI2_REPO_ROOT/tests/data/simple.csv
 
 CASE lf-at-start <lf>|2-1|2-2|2-3|
     normal! 2G0
