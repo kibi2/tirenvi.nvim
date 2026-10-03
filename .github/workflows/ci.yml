@@ -18,7 +18,7 @@ jobs:
       matrix:
         nvim:
           - stable
-          - nightly
+          # - nightly  # Temporarily disabled: Lua print() is not recorded in :messages on Nightly.
           - v0.10.0
 
     steps:
