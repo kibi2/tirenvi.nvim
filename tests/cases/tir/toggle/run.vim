@@ -1,7 +1,7 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 
 " ===== GFM =====
-edit $TIRENVI_ROOT/tests/data/table2.md
+edit $KIBI2_REPO_ROOT/tests/data/table2.md
 
 CASE nowrap mode : toggle -> toggle
             lua print(Debug.layout())
@@ -21,7 +21,7 @@ CASE wrap mode : toggle -> toggle
 	call At(1, 1, 1)
             sleep 1m | lua print(Debug.layout())
 
-edit $TIRENVI_ROOT/tests/data/simple.md
+edit $KIBI2_REPO_ROOT/tests/data/simple.md
 	call At(2, 2, 1)
         Tir width-1
 	call At(2, 3, 2)
@@ -44,7 +44,7 @@ call Snapshot({'desc': 'simple.md' })
 
 " ===== GFM table 0 =====
 CASE table 0
-edit $TIRENVI_ROOT/tests/data/table0.md
+edit $KIBI2_REPO_ROOT/tests/data/table0.md
         Tir toggle
             sleep 1m | lua print(Debug.layout())
 

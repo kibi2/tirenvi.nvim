@@ -1,6 +1,6 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 
-edit $TIRENVI_ROOT/tests/data/simple.md
+edit $KIBI2_REPO_ROOT/tests/data/simple.md
 
 lua << EOF
   local opts = {

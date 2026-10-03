@@ -330,20 +330,6 @@ local function register_autocmds()
 			Debug.ui_exit(args.buf, args.event)
 		end),
 	})
-
-	if vim.g.tirenvi_test_mode == 1 then
-		local ok, luacov = pcall(require, "luacov")
-		if ok then
-			api.nvim_create_autocmd("VimLeavePre", {
-				group = augroup,
-				callback = function(args)
-					Debug.ui_entry(args.buf, args.event)
-					luacov.save_stats()
-					Debug.ui_exit(args.buf, args.event)
-				end,
-			})
-		end
-	end
 end
 
 --#endregion

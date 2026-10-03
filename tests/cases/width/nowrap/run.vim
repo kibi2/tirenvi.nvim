@@ -1,7 +1,7 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 
 " ===== GFM =====
-edit $TIRENVI_ROOT/tests/data/table2.md
+edit $KIBI2_REPO_ROOT/tests/data/table2.md
 
 CASE initial cached attrs
             lua print(Debug.layout())
@@ -34,7 +34,7 @@ CASE wrap plain#2
 		call Tir("wrap")
 
 " ===== CSV =====
-edit $TIRENVI_ROOT/tests/data/simple.csv
+edit $KIBI2_REPO_ROOT/tests/data/simple.csv
 
 CASE CSV initial cached attrs
             lua print(Debug.layout())

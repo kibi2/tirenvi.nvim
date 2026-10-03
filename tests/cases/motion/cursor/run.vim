@@ -1,4 +1,4 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 
 lua << EOF
 function print_wrap(title)
@@ -10,7 +10,7 @@ end
 EOF
 
 " ===== GFM =====
-edit $TIRENVI_ROOT/tests/data/simple.md
+edit $KIBI2_REPO_ROOT/tests/data/simple.md
 
 CASE initial
 	call At(1, 2, 1)
@@ -31,7 +31,7 @@ CASE GFM plain, grid
 	call At(2, 1, 1) | lua print_wrap("grid-short")
 
 " ===== CSV =====
-edit! $TIRENVI_ROOT/tests/data/simple.csv
+edit! $KIBI2_REPO_ROOT/tests/data/simple.csv
 
 CASE CSV grid
 	call At(1, 2, 1)

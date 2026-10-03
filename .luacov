@@ -2,15 +2,14 @@ return {
   statsfile = "luacov.stats.out",
   reportfile = "luacov.report.out",
 
+  include = {
+    "lua/.*",
+  },
+
   exclude = {
-    "^vim/.*",
-    "^@vim/.*",
     ".*/nvim/runtime/.*",
     ".*/.luarocks/.*",
     ".*/site/pack/.*",
-  },
-  
-  include = {
-    "lua/.*",
+    "run$",
   },
 }

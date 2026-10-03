@@ -1,7 +1,7 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 
 " ===== CSV redraw=====
-edit $TIRENVI_ROOT/tests/data/simple.csv
+edit $KIBI2_REPO_ROOT/tests/data/simple.csv
 
 CASE delete(val) -> put
             lua print(Debug.layout())
@@ -27,7 +27,7 @@ CASE delete(val) -> redraw -> put
 call Snapshot({})
 
 " ===== GFM repair toggle =====
-edit $TIRENVI_ROOT/tests/data/simple.md
+edit $KIBI2_REPO_ROOT/tests/data/simple.md
 
 CASE repair off
         Tir repair toggle

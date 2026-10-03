@@ -1,4 +1,4 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 
 lua << EOF
   levels = vim.log.levels

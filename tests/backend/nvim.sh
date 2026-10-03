@@ -31,7 +31,9 @@ backend_run() {
             NVIM_APPNAME="${NVIM_APPNAME:-}" \
             NVIM_TIRENVI_DEV=1 \
             $TEST_BIN --headless -u NONE -n \
+                -c "lua require('luacov')" \
                 -c "source run.vim" \
+                -c "lua require('luacov').save_stats()" \
                 -c "qa!" \
             >> stdout.txt 2>> stderr.txt
     fi

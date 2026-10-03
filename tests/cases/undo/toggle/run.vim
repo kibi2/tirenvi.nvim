@@ -1,8 +1,8 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 let outfile = 'gen.csv'
 
 " ===== CSV =====
-edit $TIRENVI_ROOT/tests/data/simple.csv
+edit $KIBI2_REPO_ROOT/tests/data/simple.csv
 
 CASE Tir toggle + undo
         Tir toggle

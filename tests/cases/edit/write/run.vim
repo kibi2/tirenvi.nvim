@@ -1,4 +1,4 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 let outcsv = 'gen.csv'
 let outtsv = 'gen.tsv'
 let outxxx = 'gen.xxx'
@@ -7,7 +7,7 @@ lua require("tirenvi.config").table.wrap_mode = "wrap"
 
 " ===== SIMPLE CSV =====
 CASE simple csv
-edit $TIRENVI_ROOT/tests/data/simple.csv
+edit $KIBI2_REPO_ROOT/tests/data/simple.csv
         write
             sleep 1m | lua print(Debug.layout())
 	call At(1, 4, 2)
@@ -21,7 +21,7 @@ edit $TIRENVI_ROOT/tests/data/simple.csv
 
 " ===== COMPLEX CSV =====
 CASE complex csv
-edit $TIRENVI_ROOT/tests/data/complex.csv
+edit $KIBI2_REPO_ROOT/tests/data/complex.csv
         write
             sleep 1m | lua print(Debug.layout())
         wincmd s
@@ -30,13 +30,13 @@ edit $TIRENVI_ROOT/tests/data/complex.csv
 
 " ===== SIMPLE MD =====
 CASE simple md
-edit $TIRENVI_ROOT/tests/data/simple.md
+edit $KIBI2_REPO_ROOT/tests/data/simple.md
         write
             sleep 1m | lua print(Debug.layout())
 
 " ===== COMPLEX MD =====
 CASE complex md
-edit $TIRENVI_ROOT/tests/data/complex.md
+edit $KIBI2_REPO_ROOT/tests/data/complex.md
         write
             sleep 1m | lua print(Debug.layout())
         Tir toggle
@@ -44,12 +44,12 @@ edit $TIRENVI_ROOT/tests/data/complex.md
 
 " ===== EMPTY TXT =====
 CASE empty txt
-edit $TIRENVI_ROOT/tests/data/empty.txt
+edit $KIBI2_REPO_ROOT/tests/data/empty.txt
             lua print(Debug.layout())
 
 " ===== TIR_BUF MD =====
 CASE tir-buf md
-edit $TIRENVI_ROOT/tests/data/tir-buf.md
+edit $KIBI2_REPO_ROOT/tests/data/tir-buf.md
             lua print(Debug.layout())
         Tir toggle
             lua print(Debug.layout())

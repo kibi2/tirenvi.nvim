@@ -1,7 +1,7 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 
 " ===== WRITE_PRE/POST =====
-edit $TIRENVI_ROOT/tests/data/wide.csv
+edit $KIBI2_REPO_ROOT/tests/data/wide.csv
 
 CASE restore curser : write case : restore_mode = buffer
 	    Tir fit=2

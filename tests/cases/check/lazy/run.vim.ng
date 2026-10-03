@@ -1,4 +1,4 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 
 set rtp+=~/.local/share/lazy-test/site/pack/lazy/start/lazy.nvim
 

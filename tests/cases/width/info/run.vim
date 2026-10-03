@@ -1,7 +1,7 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 
 " ===== CSV =====
-edit $TIRENVI_ROOT/tests/data/wide.csv
+edit $KIBI2_REPO_ROOT/tests/data/wide.csv
 
 CASE initial cached attrs
             lua print(Debug.layout())
@@ -51,7 +51,7 @@ CASE width? CSV toggle
 		Tir width?
 
 " ===== GFM =====
-edit $TIRENVI_ROOT/tests/data/simple.md
+edit $KIBI2_REPO_ROOT/tests/data/simple.md
 
 CASE initial GFM cached attrs
             lua print(Debug.layout())

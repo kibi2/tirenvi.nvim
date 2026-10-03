@@ -1,9 +1,9 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 
 lua require("tirenvi").setup({ textobj = { column = "h" }, })
 
 " ===== CSV =====
-edit $TIRENVI_ROOT/tests/data/simple.csv
+edit $KIBI2_REPO_ROOT/tests/data/simple.csv
 
 CASE initial cached attrs
 	call At(1, 1, 2)
@@ -34,7 +34,7 @@ Tir repair disable
 call Snapshot({ 'desc': 'CSV' })
 
 " ===== GFM =====
-edit $TIRENVI_ROOT/tests/data/simple.md
+edit $KIBI2_REPO_ROOT/tests/data/simple.md
 
 CASE initial cached attrs
 	call At(1, 1, 1)
@@ -58,7 +58,7 @@ call Snapshot({ 'desc': 'GFM' })
 
 " ===== JAVA =====
 CASE Java
-	edit $TIRENVI_ROOT/tests/data/sample.java
+	edit $KIBI2_REPO_ROOT/tests/data/sample.java
     call feedkeys("vah", "x")
 
 call Snapshot({ 'desc': 'Java' })

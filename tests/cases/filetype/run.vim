@@ -1,7 +1,7 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 
 " ===== GFM =====
-edit $TIRENVI_ROOT/tests/data/simple.csv
+edit $KIBI2_REPO_ROOT/tests/data/simple.csv
 
 CASE filetype csv -> csv
         set filetype=csv
@@ -16,19 +16,19 @@ CASE filetype csv -> markdown ->csv
             sleep 1m | lua print(Debug.layout())
 
 CASE filetype csv -> tsv
-    e! $TIRENVI_ROOT/tests/data/simple.csv
+    e! $KIBI2_REPO_ROOT/tests/data/simple.csv
         set filetype=tsv
             sleep 1m | lua print(Debug.layout())
         Tir toggle
             sleep 1m | lua print(Debug.layout())
 
 CASE filetype python -> markdown
-    e! $TIRENVI_ROOT/tests/data/sample.py
+    e! $KIBI2_REPO_ROOT/tests/data/sample.py
         set filetype=markdown
             sleep 1m | lua print(Debug.layout())
 
 CASE filetype markdown -> bar
-    e! $TIRENVI_ROOT/tests/data/simple.md
+    e! $KIBI2_REPO_ROOT/tests/data/simple.md
     call At(2, 3, 1)
         normal! haADD 
             echomsg b:tirenvi.attached

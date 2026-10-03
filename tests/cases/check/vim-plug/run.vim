@@ -1,4 +1,4 @@
-source $TIRENVI_ROOT/tests/common.vim
+source $KIBI2_REPO_ROOT/tests/common.vim
 
 call plug#begin(stdpath('data') . '/plugged')
 
