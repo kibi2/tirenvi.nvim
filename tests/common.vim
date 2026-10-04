@@ -1,5 +1,5 @@
 " ===== common.vim =====
-
+lua print(" ")
 set noswapfile
 set nobackup
 set nowritebackup
@@ -51,7 +51,7 @@ function! Tir(cmd) abort
 endfunction
 
 function! CaseImpl(id, desc) abort
-  lua print(" ")
+  echomsg " "
   echomsg printf("--- CASE %d: %s ---", a:id, a:desc)
   let g:case_tag = printf("CASE %d", a:id)
 endfunction
