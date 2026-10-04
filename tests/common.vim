@@ -51,7 +51,7 @@ function! Tir(cmd) abort
 endfunction
 
 function! CaseImpl(id, desc) abort
-  echomsg " "
+  lua print(" ")
   echomsg printf("--- CASE %d: %s ---", a:id, a:desc)
   let g:case_tag = printf("CASE %d", a:id)
 endfunction
