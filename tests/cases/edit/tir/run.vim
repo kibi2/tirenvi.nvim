@@ -1,4 +1,6 @@
 source $KIBI2_REPO_ROOT/tests/common.vim
+lua print("test print")
+echomsg "test echomsg"
 let outtir = 'gen.tir'
 
 " ===== SIMPLE MD =====
