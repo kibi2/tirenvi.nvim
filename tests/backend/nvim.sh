@@ -29,7 +29,7 @@ backend_run() {
         [ -f run.env ] && . run.env
         env \
             NVIM_APPNAME="${NVIM_APPNAME:-}" \
-            NVIM_TIRENVI_DEV=1 \
+            NVIM_KIBI2_DEV=1 \
             $TEST_BIN --headless -u NONE -n \
                 -c "lua require('luacov')" \
                 -c "source run.vim" \
