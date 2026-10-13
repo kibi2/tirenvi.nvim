@@ -12,7 +12,7 @@ if [ ! -d "$LAZY_DIR" ]; then
 fi
 pip uninstall -y tir-csv
 
-NVIM_APPNAME=lazy-test NVIM_TIRENVI_DEV=1 $NVIM_BIN --headless -u NONE -n \
+NVIM_APPNAME=lazy-test NVIM_KIBI2_DEV=1 $NVIM_BIN --headless -u NONE -n \
     -c "source run.vim" \
     -c "qa!" \
     > stdout.txt 2> stderr.txt
