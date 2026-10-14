@@ -12,7 +12,7 @@ local names = {
 }
 
 if not ok then
-	local noop = function() end
+	local noop = function(...) end
 	logger = {}
 	for _, name in ipairs(names) do
 		logger[name] = noop
