@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.5] - TBD
+
+### Changed
+
+- Move logging to optional `logger.nvim`; logging is disabled by default.
+
 ## [0.5.4] - 2026-09-06
 
 ### Fixed
