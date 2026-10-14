@@ -1,12 +1,23 @@
+lua << EOF
+  local root = assert(os.getenv("KIBI2_REPO_ROOT"))
+  vim.opt.rtp:prepend(root)
+  vim.opt.rtp:prepend(root .. "/../logger.nvim")
+EOF
+
 source $KIBI2_REPO_ROOT/tests/common.vim
 
 edit $KIBI2_REPO_ROOT/tests/data/table2.md
 
-lua require("tirenvi.config").log.level = vim.log.levels.DEBUG
-lua require("tirenvi.config").log.probe = true
-lua require("tirenvi.config").log.output = "print"
 
 lua << EOF
+  log = require("tirenvi.util.log")
+  local opts = {
+    key = 'TIR',
+    level = vim.log.levels.DEBUG,
+    output = "print",
+    probe = true,
+  }
+  log.setup(opts)
   local Context = require("tirenvi.io.context")
   local Range = require("tirenvi.util.range")
   local reader = require("tirenvi.io.reader")
@@ -16,7 +27,6 @@ lua << EOF
   Attrs = require("tirenvi.core.attrs")
   Document = require("tirenvi.core.document")
   r_result = reader.read(ctx, Range.WHOLE)
-  log = require("tirenvi.util.log")
   bufdoc = buf_parser.parse(ctx, r_result, {range3 = range3} )
 EOF
 

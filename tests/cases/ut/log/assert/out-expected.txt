@@ -1,8 +1,0 @@
---- ERROR ---
-=== MESSAGE ===
- 
---- CASE 7: log ERROR ---
-[TIR][ERROR][log.lua] test case for log.assert ERROR
-
-=== DISPLAY ===
-

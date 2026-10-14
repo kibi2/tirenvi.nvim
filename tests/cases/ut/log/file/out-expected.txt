@@ -7,9 +7,9 @@
 --- log file ---
 === MESSAGE ===
  
---- CASE 22: log.xxx(...) ---
+--- CASE 28: log.xxx(...) ---
  
---- CASE 30: move cursor ---
+--- CASE 36: move cursor ---
 
 === DISPLAY ===
 gfm

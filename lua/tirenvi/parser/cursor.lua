@@ -40,7 +40,7 @@ function M.to_tir(attrs, cursor_buf)
 		return {}
 	end
 	local attr = attrs[iblock]
-	log.assert(attr, "invalid position %d", cursor_buf.row_cur)
+	log.assert(attr, string.format("invalid position %d", cursor_buf.row_cur))
 	local irow = cursor_buf.row_cur - attr.range.first + 1
 	local icol, offset = Attr.to_cell_col(attr, cursor_buf.col_disp)
 	return CursorTir.new(iblock, irow, icol or 0, offset)

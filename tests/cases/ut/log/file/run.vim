@@ -1,19 +1,25 @@
+lua << EOF
+  local root = assert(os.getenv("KIBI2_REPO_ROOT"))
+  vim.opt.rtp:prepend(root)
+  vim.opt.rtp:prepend(root .. "/../logger.nvim")
+EOF
+
 source $KIBI2_REPO_ROOT/tests/common.vim
 
 edit $KIBI2_REPO_ROOT/tests/data/simple.md
 
 lua << EOF
   local opts = {
-  	log = {
-		level = vim.log.levels.DEBUG,
-		single_line = false,
-		output = "file",
-		file_name = "./out-actual.txt",
-		use_timestamp = false,
-		probe = true,
-  	},
+	key = 'TIR',
+	level = vim.log.levels.DEBUG,
+	single_line = false,
+	output = "file",
+	file_name = "./out-actual.txt",
+	use_timestamp = false,
+	probe = true,
   }
-  require("tirenvi").setup(opts)
+  require("tirenvi.util.log").setup(opts)
+  require("tirenvi").setup({})
   Range = require("tirenvi.util.range")
   log = require("tirenvi.util.log")
   Context = require("tirenvi.io.context")
